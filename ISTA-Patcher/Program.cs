@@ -34,7 +34,8 @@ namespace ISTA_Patcher
             var LicenseManagerList = new List<string>();
             var AOSLicenseManagerList = new List<string>();
             var IstaIcsServiceClientList = new List<string>();
-            var ICSList = new List<string>();
+            var CommonServiceWrapperList = new List<string>();
+            var SecureAccessHelperList = new List<string>();
 
             Console.WriteLine("=== ISTA Patch Begin ===");
             foreach (var pendingPatchItem in pendingPatchList)
@@ -57,15 +58,88 @@ namespace ISTA_Patcher
                         continue;
                     }
 
-                    if (PatchUtils.PatchIntegrityManager(assembly)) { isPatched = true; IntegrityManagerList.Add(pendingPatchItem); }
-                    if (PatchUtils.PatchLicenseStatusChecker(assembly)) { isPatched = true; LicenseStatusCheckerList.Add(pendingPatchItem); }
-                    if (PatchUtils.PatchCheckSignature(assembly)) { isPatched = true; CheckSignatureList.Add(pendingPatchItem); }
-                    if (PatchUtils.PatchLicenseManager(assembly)) { isPatched = true; LicenseManagerList.Add(pendingPatchItem); }
-                    if (PatchUtils.PatchAOSLicenseManager(assembly)) { isPatched = true; AOSLicenseManagerList.Add(pendingPatchItem); }
-                    if (PatchUtils.PatchIstaIcsServiceClient(assembly)) { isPatched = true; IstaIcsServiceClientList.Add(pendingPatchItem); }
-                    if (PatchUtils.PatchICS(assembly)) { isPatched = true; ICSList.Add(pendingPatchItem); }
+                    if (PatchUtils.PatchIntegrityManager(assembly))
+                    {
+                        isPatched = true;
+                        Console.Write("+");
+                        IntegrityManagerList.Add(pendingPatchItem);
+                    }
+                    else
+                    {
+                        Console.Write("-");
+                    }
+                    if (PatchUtils.PatchLicenseStatusChecker(assembly))
+                    {
+                        isPatched = true;
+                        Console.Write("+");
+                        LicenseStatusCheckerList.Add(pendingPatchItem);
+                    }
+                    else
+                    {
+                        Console.Write("-");
+                    }
+                    if (PatchUtils.PatchCheckSignature(assembly))
+                    {
+                        isPatched = true;
+                        Console.Write("+");
+                        CheckSignatureList.Add(pendingPatchItem);
+                    }
+                    else
+                    {
+                        Console.Write("-");
+                    }
+                    if (PatchUtils.PatchLicenseManager(assembly))
+                    {
+                        isPatched = true;
+                        Console.Write("+");
+                        LicenseManagerList.Add(pendingPatchItem);
+                    }
+                    else
+                    {
+                        Console.Write("-");
+                    }
+                    if (PatchUtils.PatchAOSLicenseManager(assembly))
+                    {
+                        isPatched = true;
+                        Console.Write("+");
+                        AOSLicenseManagerList.Add(pendingPatchItem);
+                    }
+                    else
+                    {
+                        Console.Write("-");
+                    }
+                    if (PatchUtils.PatchIstaIcsServiceClient(assembly))
+                    {
+                        isPatched = true;
+                        Console.Write("+");
+                        IstaIcsServiceClientList.Add(pendingPatchItem);
+                    }
+                    else
+                    {
+                        Console.Write("-");
+                    }
+                    if (PatchUtils.PatchCommonServiceWrapper(assembly))
+                    {
+                        isPatched = true;
+                        Console.Write("+");
+                        CommonServiceWrapperList.Add(pendingPatchItem);
+                    }
+                    else
+                    {
+                        Console.Write("-");
+                    }
+                    if (PatchUtils.PatchSecureAccessHelper(assembly))
+                    {
+                        isPatched = true;
+                        Console.Write("+");
+                        SecureAccessHelperList.Add(pendingPatchItem);
+                    }
+                    else
+                    {
+                        Console.Write("-");
+                    }
 
-
+                    Console.Write(" ");
                     if (isPatched)
                     {
                         Console.WriteLine("[patched]");
@@ -109,7 +183,7 @@ namespace ISTA_Patcher
                 Dictionary<string, string[]>? patchConfig = JsonSerializer.Deserialize<Dictionary<string, string[]>>(stream);
                 includeList = patchConfig?.GetValueOrDefault("include");
             }
-            catch(Exception ex) when (
+            catch (Exception ex) when (
                 ex is FileNotFoundException ||
                 ex is IOException ||
                 ex is JsonException
@@ -124,7 +198,7 @@ namespace ISTA_Patcher
             }
             else
             {
-                Console.WriteLine("list not found");
+                Console.WriteLine("config not found");
             }
         }
     }

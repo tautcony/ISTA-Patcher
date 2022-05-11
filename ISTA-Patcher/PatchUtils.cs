@@ -120,7 +120,7 @@ namespace ISTA_Patcher
             return true;
         }
 
-        public static bool PatchICS(AssemblyDefinition assembly)
+        public static bool PatchCommonServiceWrapper(AssemblyDefinition assembly)
         {
             var VerifyLicense = assembly.GetMethod(
                 "BMW.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
@@ -133,6 +133,22 @@ namespace ISTA_Patcher
                 return false;
             }
             VerifyLicense.EmptyingMethod();
+            return true;
+        }
+
+        public static bool PatchSecureAccessHelper(AssemblyDefinition assembly)
+        {
+            var IsCodeAccessPermitted = assembly.GetMethod(
+                "BMW.iLean.CommonServices.Helper.SecureAccessHelper",
+                "IsCodeAccessPermitted",
+                "(System.Reflection.Assembly,System.Reflection.Assembly)System.Boolean"
+            );
+            if (IsCodeAccessPermitted == null)
+            {
+                // Console.WriteLine($"{nameof(IsCodeAccessPermitted)} not found, skiping this...");
+                return false;
+            }
+            IsCodeAccessPermitted.EmptyingMethod();
             return true;
         }
 
