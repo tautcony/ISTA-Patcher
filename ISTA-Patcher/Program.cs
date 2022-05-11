@@ -36,6 +36,7 @@ namespace ISTA_Patcher
             var IstaIcsServiceClientList = new List<string>();
             var CommonServiceWrapperList = new List<string>();
             var SecureAccessHelperList = new List<string>();
+            var LicenseWizardHelperList = new List<string>();
 
             Console.WriteLine("=== ISTA Patch Begin ===");
             foreach (var pendingPatchItem in pendingPatchList)
@@ -133,6 +134,16 @@ namespace ISTA_Patcher
                         isPatched = true;
                         Console.Write("+");
                         SecureAccessHelperList.Add(pendingPatchItem);
+                    }
+                    else
+                    {
+                        Console.Write("-");
+                    }
+                    if (PatchUtils.PatchLicenseWizardHelper(assembly))
+                    {
+                        isPatched = true;
+                        Console.Write("+");
+                        LicenseWizardHelperList.Add(pendingPatchItem);
                     }
                     else
                     {

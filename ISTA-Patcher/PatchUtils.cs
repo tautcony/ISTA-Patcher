@@ -152,6 +152,22 @@ namespace ISTA_Patcher
             return true;
         }
 
+        public static bool PatchLicenseWizardHelper(AssemblyDefinition assembly)
+        {
+            var DoLicenseCheck = assembly.GetMethod(
+                "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
+                "DoLicenseCheck",
+                "(System.String)System.Boolean"
+            );
+            if (DoLicenseCheck == null)
+            {
+                // Console.WriteLine($"{nameof(IsCodeAccessPermitted)} not found, skiping this...");
+                return false;
+            }
+            DoLicenseCheck.ReturnOneMethod();
+            return true;
+        }
+
         public static bool CheckPatchedMark(AssemblyDefinition assembly)
         {
             var patchedType = assembly.MainModule.GetType("Patched.By.TC");
@@ -171,6 +187,26 @@ namespace ISTA_Patcher
 
             patchedType.Fields.Add(dateField);
             assembly.MainModule.Types.Add(patchedType);
+        }
+
+        public static string DecryptString(string value, int seed)
+        {
+            char[] charArray = value.ToCharArray();
+            int key = 825083450 + seed;
+            for (var i = 0; i < charArray.Length; i++)
+            {
+                char ch = charArray[i];
+                byte ch_lo_byte = (byte)(ch & 0xff);
+                byte ch_hi_byte = (byte)(ch >> 8);
+
+                byte real_hi_byte = (byte)(ch_lo_byte ^ key);
+                byte real_lo_byte = (byte)(ch_hi_byte ^ (key + 1));
+                char real_ch = (char)(((uint)real_hi_byte << 8) | real_lo_byte);
+                charArray[i] = real_ch;
+
+                key += 2;
+            }
+            return string.Intern(new string(charArray));
         }
     }
 }

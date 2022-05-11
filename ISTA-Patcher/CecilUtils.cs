@@ -129,5 +129,23 @@ namespace ISTA_Patcher
                 throw new Exception($"{method.FullName}.Body null!");
             }
         }
+
+        public static void ReturnOneMethod(this MethodDefinition method)
+        {
+            var body = method.Body;
+            if (body != null)
+            {
+                body.Variables.Clear();
+                body.ExceptionHandlers.Clear();
+                var ilProcessor = body.GetILProcessor();
+                ilProcessor.Clear();
+                ilProcessor.Append(Instruction.Create(OpCodes.Ldc_I4_1));
+                ilProcessor.Append(Instruction.Create(OpCodes.Ret));
+            }
+            else
+            {
+                throw new Exception($"{method.FullName}.Body null!");
+            }
+        }
     }
 }
