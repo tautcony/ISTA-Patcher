@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace ISTA_Patcher
 {
-    class Patcher
+    internal static class Patcher
     {
         static void PatchISTA(string basePath, string[] pendingPatchList, string outputDir = "modded")
         {
@@ -153,6 +153,7 @@ namespace ISTA_Patcher
                     Console.Write(" ");
                     if (isPatched)
                     {
+                        // PatchUtils.DecryptParameter(assembly);
                         Console.WriteLine("[patched]");
                         PatchUtils.SetPatchedMark(assembly);
                         var moddedDir = Path.Join(basePath, outputDir);
@@ -183,21 +184,19 @@ namespace ISTA_Patcher
                 Console.WriteLine("no path provided");
                 return;
             }
-            string path = args[0];
-            string cwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+            var path = args[0];
+            var cwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 
             string[]? includeList = null;
 
             try
             {
                 using FileStream stream = new(Path.Join(cwd, "patchConfig.json"), FileMode.Open, FileAccess.Read);
-                Dictionary<string, string[]>? patchConfig = JsonSerializer.Deserialize<Dictionary<string, string[]>>(stream);
+                var patchConfig = JsonSerializer.Deserialize<Dictionary<string, string[]>>(stream);
                 includeList = patchConfig?.GetValueOrDefault("include");
             }
             catch (Exception ex) when (
-                ex is FileNotFoundException ||
-                ex is IOException ||
-                ex is JsonException
+                ex is FileNotFoundException or IOException or JsonException
             )
             {
                 Console.WriteLine($"Failed to load config file: {ex.Message}");

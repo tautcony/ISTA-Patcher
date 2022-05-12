@@ -66,12 +66,12 @@ namespace ISTA_Patcher
 
         public static MethodDefinition? GetMethod(this AssemblyDefinition asm, string type, string name, string desc)
         {
-            var tds = asm.Modules.Where(m => m.GetType(type) != null).Select(m => m.GetType(type));
+            var tds = asm.Modules.Where(m => m.GetType(type) != null).Select(m => m.GetType(type)).ToList();
             if (!tds.Any())
             {
                 return null;
             }
-            if (tds.Count() != 1)
+            if (tds.Count != 1)
             {
                 throw new Exception();
             }
@@ -81,12 +81,12 @@ namespace ISTA_Patcher
 
         public static FieldDefinition? GetField(this AssemblyDefinition asm, string type, string name, string fieldType)
         {
-            var tds = asm.Modules.Where(m => m.GetType(type) != null).Select(m => m.GetType(type));
+            var tds = asm.Modules.Where(m => m.GetType(type) != null).Select(m => m.GetType(type)).ToList();
             if (!tds.Any())
             {
                 return null;
             }
-            if (tds.Count() > 1)
+            if (tds.Count > 1)
             {
                 throw new Exception();
             }

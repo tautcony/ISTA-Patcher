@@ -1,4 +1,7 @@
-﻿using Mono.Cecil;
+﻿using System.Reflection.Emit;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using OpCodes = Mono.Cecil.Cil.OpCodes;
 
 namespace ISTA_Patcher
 {
@@ -8,8 +11,7 @@ namespace ISTA_Patcher
         {
             var assemblyResolver = new DefaultAssemblyResolver();
             assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(fileName));
-            assemblyResolver.AddSearchDirectory("C:/Windows/Microsoft.NET/Framework64/v4.0.30319");
-            var assembly = AssemblyDefinition.ReadAssembly(fileName, new ReaderParameters() { AssemblyResolver = assemblyResolver, InMemory = true });
+            var assembly = AssemblyDefinition.ReadAssembly(fileName, new ReaderParameters { AssemblyResolver = assemblyResolver, InMemory = true });
             return assembly;
         }
 
@@ -180,7 +182,10 @@ namespace ISTA_Patcher
                             "Patched.By", "TC",
                             TypeAttributes.NestedPrivate,
                             assembly.MainModule.ImportReference(typeof(object)));
-            var dateField = new FieldDefinition("date", FieldAttributes.Private | FieldAttributes.Static, assembly.MainModule.ImportReference(typeof(string)))
+            var dateField = new FieldDefinition(
+                "date",
+                FieldAttributes.Private | FieldAttributes.Static,
+                assembly.MainModule.ImportReference(typeof(string)))
             {
                 Constant = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
             };
@@ -189,10 +194,10 @@ namespace ISTA_Patcher
             assembly.MainModule.Types.Add(patchedType);
         }
 
-        public static string DecryptString(string value, int seed)
+        public static string DecryptString(string value, int baseSeed, int seed)
         {
             char[] charArray = value.ToCharArray();
-            int key = 825083450 + seed;
+            int key = baseSeed + seed;
             for (var i = 0; i < charArray.Length; i++)
             {
                 char ch = charArray[i];
@@ -207,6 +212,79 @@ namespace ISTA_Patcher
                 key += 2;
             }
             return string.Intern(new string(charArray));
+        }
+
+        public static bool DecryptParameter(AssemblyDefinition assembly)
+        {
+            var b = assembly.GetMethod(
+                "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
+                "b", 
+                "(System.String,System.Int32)System.String");
+            if (b == null)
+            {
+                return false;
+            }
+
+            var baseSeed = 0;
+            foreach (var instruction in b.Body.Instructions)
+            {
+                if (instruction.OpCode == OpCodes.Stloc_1)
+                {
+                    break;
+                }
+                if (instruction.OpCode == OpCodes.Ldc_I4)
+                {
+                    baseSeed += (int) instruction.Operand;
+                }
+            }
+            
+            foreach (var type in assembly.MainModule.Types)
+            {
+                foreach (var method in type.Methods)
+                {
+                    if (method.Body == null)
+                    {
+                        continue;
+                    }
+                    var decodedStrings = new List<KeyValuePair<int, string>>();
+                    for (var i = 0; i < method.Body.Instructions.Count; ++i)
+                    {
+                        var instruction = method.Body.Instructions[i];
+                        if (instruction.OpCode != OpCodes.Call || instruction.Operand != b) continue;
+                        if (instruction.Previous.OpCode != OpCodes.Ldloc ||
+                            instruction.Previous.Previous.OpCode != OpCodes.Ldstr)
+                        {
+                            continue;
+                        }
+                        var seed = (VariableDefinition) instruction.Previous.Operand;
+                        var seedValue = int.MaxValue;
+                        var instruction2 = method.Body.Instructions.FirstOrDefault(inst =>
+                            inst.OpCode == OpCodes.Stloc && inst.Operand == seed);
+                        if (instruction2 != null)
+                        {
+                            seedValue = (int) instruction2.Previous.Operand;
+                        }
+                        if (seedValue == int.MaxValue) continue;
+                        var str = (string) instruction.Previous.Previous.Operand;
+                        decodedStrings.Add(new KeyValuePair<int, string>(i, PatchUtils.DecryptString(str, baseSeed, seedValue)));
+                    }
+
+                    var processor = method.Body.GetILProcessor();
+                    decodedStrings.Reverse();
+                    foreach (var pair in decodedStrings)
+                    {
+                        // ldstr
+                        // ldloc
+                        // call  -> ldstr
+                        // 7 8 9
+                        processor.Replace(pair.Key, Instruction.Create(OpCodes.Ldstr, pair.Value));
+                        processor.RemoveAt(pair.Key - 1);
+                        processor.RemoveAt(pair.Key - 2);
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }
