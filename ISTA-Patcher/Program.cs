@@ -1,18 +1,20 @@
 ﻿using System.Reflection;
 using System.Text.Json;
+using Mono.Cecil;
 
 
 namespace ISTA_Patcher
 {
     internal static class Patcher
     {
-        static void PatchISTA(string basePath, string[] pendingPatchList, string outputDir = "modded")
+        static void PatchISTA(string basePath, IEnumerable<string> pendingPatchList, string outputDir = "modded")
         {
             if (!Directory.Exists(basePath))
             {
                 Console.WriteLine($"{basePath} not found");
                 return;
             }
+
             var requiredLibraryList = new[]
             {
                 "RheingoldCoreContracts.dll",
@@ -37,16 +39,26 @@ namespace ISTA_Patcher
             var CommonServiceWrapperList = new List<string>();
             var SecureAccessHelperList = new List<string>();
             var LicenseWizardHelperList = new List<string>();
+            var VerifyAssemblyHelperList = new List<string>();
+            var FscValidationClientList = new List<string>();
 
             Console.WriteLine("=== ISTA Patch Begin ===");
             foreach (var pendingPatchItem in pendingPatchList)
             {
                 var path = Path.Join(basePath, pendingPatchItem);
+                var moddedDir = Path.Join(basePath, outputDir);
+                var targetPath = Path.Join(moddedDir, pendingPatchItem);
                 if (!File.Exists(path))
                 {
                     Console.WriteLine($"{pendingPatchItem} [not found]");
                     continue;
                 }
+
+                if (!Directory.Exists(moddedDir))
+                {
+                    Directory.CreateDirectory(moddedDir);
+                }
+
                 Console.Write($"{pendingPatchItem} ");
 
                 try
@@ -55,113 +67,47 @@ namespace ISTA_Patcher
                     var isPatched = PatchUtils.CheckPatchedMark(assembly);
                     if (isPatched)
                     {
-                        Console.WriteLine($"[already patched]");
+                        Console.WriteLine("[already patched]");
                         continue;
                     }
 
-                    if (PatchUtils.PatchIntegrityManager(assembly))
+                    var patches = new List<KeyValuePair<Func<AssemblyDefinition, bool>, List<string>>>
                     {
-                        isPatched = true;
-                        Console.Write("+");
-                        IntegrityManagerList.Add(pendingPatchItem);
-                    }
-                    else
+                        new(PatchUtils.PatchIntegrityManager, IntegrityManagerList),
+                        new(PatchUtils.PatchLicenseStatusChecker, LicenseStatusCheckerList),
+                        new(PatchUtils.PatchCheckSignature, CheckSignatureList),
+                        new(PatchUtils.PatchLicenseManager, LicenseManagerList),
+                        new(PatchUtils.PatchAOSLicenseManager, AOSLicenseManagerList),
+                        new(PatchUtils.PatchIstaIcsServiceClient, IstaIcsServiceClientList),
+                        new(PatchUtils.PatchCommonServiceWrapper, CommonServiceWrapperList),
+                        new(PatchUtils.PatchSecureAccessHelper, SecureAccessHelperList),
+                        new(PatchUtils.PatchLicenseWizardHelper, LicenseWizardHelperList),
+                        new(PatchUtils.PatchVerifyAssemblyHelper, VerifyAssemblyHelperList),
+                        new(PatchUtils.PatchFscValidationClient, FscValidationClientList)
+                    };
+
+                    foreach (var pair in patches)
                     {
-                        Console.Write("-");
-                    }
-                    if (PatchUtils.PatchLicenseStatusChecker(assembly))
-                    {
-                        isPatched = true;
-                        Console.Write("+");
-                        LicenseStatusCheckerList.Add(pendingPatchItem);
-                    }
-                    else
-                    {
-                        Console.Write("-");
-                    }
-                    if (PatchUtils.PatchCheckSignature(assembly))
-                    {
-                        isPatched = true;
-                        Console.Write("+");
-                        CheckSignatureList.Add(pendingPatchItem);
-                    }
-                    else
-                    {
-                        Console.Write("-");
-                    }
-                    if (PatchUtils.PatchLicenseManager(assembly))
-                    {
-                        isPatched = true;
-                        Console.Write("+");
-                        LicenseManagerList.Add(pendingPatchItem);
-                    }
-                    else
-                    {
-                        Console.Write("-");
-                    }
-                    if (PatchUtils.PatchAOSLicenseManager(assembly))
-                    {
-                        isPatched = true;
-                        Console.Write("+");
-                        AOSLicenseManagerList.Add(pendingPatchItem);
-                    }
-                    else
-                    {
-                        Console.Write("-");
-                    }
-                    if (PatchUtils.PatchIstaIcsServiceClient(assembly))
-                    {
-                        isPatched = true;
-                        Console.Write("+");
-                        IstaIcsServiceClientList.Add(pendingPatchItem);
-                    }
-                    else
-                    {
-                        Console.Write("-");
-                    }
-                    if (PatchUtils.PatchCommonServiceWrapper(assembly))
-                    {
-                        isPatched = true;
-                        Console.Write("+");
-                        CommonServiceWrapperList.Add(pendingPatchItem);
-                    }
-                    else
-                    {
-                        Console.Write("-");
-                    }
-                    if (PatchUtils.PatchSecureAccessHelper(assembly))
-                    {
-                        isPatched = true;
-                        Console.Write("+");
-                        SecureAccessHelperList.Add(pendingPatchItem);
-                    }
-                    else
-                    {
-                        Console.Write("-");
-                    }
-                    if (PatchUtils.PatchLicenseWizardHelper(assembly))
-                    {
-                        isPatched = true;
-                        Console.Write("+");
-                        LicenseWizardHelperList.Add(pendingPatchItem);
-                    }
-                    else
-                    {
-                        Console.Write("-");
+                        if (pair.Key(assembly))
+                        {
+                            isPatched = true;
+                            Console.Write("+");
+                            pair.Value.Add(pendingPatchItem);
+                        }
+                        else
+                        {
+                            Console.Write("-");
+                        }
                     }
 
                     Console.Write(" ");
                     if (isPatched)
                     {
                         // PatchUtils.DecryptParameter(assembly);
-                        Console.WriteLine("[patched]");
+                        Console.Write("[patched]");
                         PatchUtils.SetPatchedMark(assembly);
-                        var moddedDir = Path.Join(basePath, outputDir);
-                        if (!Directory.Exists(moddedDir))
-                        {
-                            Directory.CreateDirectory(moddedDir);
-                        }
-                        assembly.Write(Path.Join(moddedDir, pendingPatchItem));
+                        assembly.Write(targetPath);
+                        Console.WriteLine();
                     }
                     else
                     {
@@ -171,9 +117,14 @@ namespace ISTA_Patcher
                 catch (Exception ex)
                 {
                     Console.WriteLine($"[failed]: {ex.Message}");
-                }
 
+                    if (File.Exists(targetPath))
+                    {
+                        File.Delete(targetPath);
+                    }
+                }
             }
+
             Console.WriteLine("=== ISTA Patch Done ===");
         }
 
@@ -184,6 +135,7 @@ namespace ISTA_Patcher
                 Console.WriteLine("no path provided");
                 return;
             }
+
             var path = args[0];
             var cwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 

@@ -11,7 +11,8 @@ namespace ISTA_Patcher
         {
             var assemblyResolver = new DefaultAssemblyResolver();
             assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(fileName));
-            var assembly = AssemblyDefinition.ReadAssembly(fileName, new ReaderParameters { AssemblyResolver = assemblyResolver, InMemory = true });
+            var assembly = AssemblyDefinition.ReadAssembly(fileName,
+                new ReaderParameters { AssemblyResolver = assemblyResolver, InMemory = true });
             return assembly;
         }
 
@@ -24,9 +25,9 @@ namespace ISTA_Patcher
             );
             if (integrityManagerConstructor == null)
             {
-                // Console.WriteLine($"{nameof(integrityManagerConstructor)} not found, skiping this...");
                 return false;
             }
+
             integrityManagerConstructor.EmptyingMethod();
             return true;
         }
@@ -40,9 +41,9 @@ namespace ISTA_Patcher
             );
             if (isLicenseValid == null)
             {
-                // Console.WriteLine($"{nameof(isLicenseValid)} not found, skiping this...");
                 return false;
             }
+
             isLicenseValid.ReturnZeroMethod();
             return true;
         }
@@ -56,9 +57,9 @@ namespace ISTA_Patcher
             );
             if (CheckSignature == null)
             {
-                // Console.WriteLine($"{nameof(CheckSignature)} not found, skiping this...");
                 return false;
             }
+
             CheckSignature.EmptyingMethod();
             return true;
         }
@@ -72,9 +73,9 @@ namespace ISTA_Patcher
             );
             if (VerifyLicense == null)
             {
-                // Console.WriteLine($"{nameof(VerifyLicense)} not found, skiping this...");
                 return false;
             }
+
             VerifyLicense.EmptyingMethod();
             return true;
         }
@@ -88,9 +89,9 @@ namespace ISTA_Patcher
             );
             if (VerifyLicense == null)
             {
-                // Console.WriteLine($"{nameof(VerifyLicense)} not found, skiping this...");
                 return false;
             }
+
             VerifyLicense.EmptyingMethod();
             return true;
         }
@@ -104,9 +105,9 @@ namespace ISTA_Patcher
             );
             if (ValidateHost == null)
             {
-                // Console.WriteLine($"{nameof(ValidateHost)} not found, skiping this...");
                 return false;
             }
+
             ValidateHost.EmptyingMethod();
             var VerifyLicense = assembly.GetMethod(
                 "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
@@ -115,9 +116,9 @@ namespace ISTA_Patcher
             );
             if (VerifyLicense == null)
             {
-                // Console.WriteLine($"{nameof(VerifyLicense)} not found, skiping this...");
                 return false;
             }
+
             VerifyLicense.EmptyingMethod();
             return true;
         }
@@ -131,9 +132,9 @@ namespace ISTA_Patcher
             );
             if (VerifyLicense == null)
             {
-                // Console.WriteLine($"{nameof(VerifyLicense)} not found, skiping this...");
                 return false;
             }
+
             VerifyLicense.EmptyingMethod();
             return true;
         }
@@ -147,9 +148,9 @@ namespace ISTA_Patcher
             );
             if (IsCodeAccessPermitted == null)
             {
-                // Console.WriteLine($"{nameof(IsCodeAccessPermitted)} not found, skiping this...");
                 return false;
             }
+
             IsCodeAccessPermitted.EmptyingMethod();
             return true;
         }
@@ -163,12 +164,45 @@ namespace ISTA_Patcher
             );
             if (DoLicenseCheck == null)
             {
-                // Console.WriteLine($"{nameof(IsCodeAccessPermitted)} not found, skiping this...");
                 return false;
             }
+
             DoLicenseCheck.ReturnOneMethod();
             return true;
         }
+
+        public static bool PatchVerifyAssemblyHelper(AssemblyDefinition assembly)
+        {
+            var VerifyStrongName = assembly.GetMethod(
+                "BMW.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
+                "VerifyStrongName",
+                "(System.String,System.Boolean)System.Boolean"
+            );
+            if (VerifyStrongName == null)
+            {
+                return false;
+            }
+
+            VerifyStrongName.ReturnOneMethod();
+            return true;
+        }
+
+        public static bool PatchFscValidationClient(AssemblyDefinition assembly)
+        {
+            var IsValid = assembly.GetMethod(
+                "BMW.TricTools.FscValidation.FscValidationClient",
+                "IsValid",
+                "(System.Byte[],System.Byte[])System.Boolean"
+            );
+            if (IsValid == null)
+            {
+                return false;
+            }
+
+            IsValid.ReturnOneMethod();
+            return true;
+        }
+
 
         public static bool CheckPatchedMark(AssemblyDefinition assembly)
         {
@@ -179,9 +213,9 @@ namespace ISTA_Patcher
         public static void SetPatchedMark(AssemblyDefinition assembly)
         {
             var patchedType = new TypeDefinition(
-                            "Patched.By", "TC",
-                            TypeAttributes.NestedPrivate,
-                            assembly.MainModule.ImportReference(typeof(object)));
+                "Patched.By", "TC",
+                TypeAttributes.NestedPrivate,
+                assembly.MainModule.ImportReference(typeof(object)));
             var dateField = new FieldDefinition(
                 "date",
                 FieldAttributes.Private | FieldAttributes.Static,
@@ -211,6 +245,7 @@ namespace ISTA_Patcher
 
                 key += 2;
             }
+
             return string.Intern(new string(charArray));
         }
 
@@ -218,26 +253,18 @@ namespace ISTA_Patcher
         {
             var b = assembly.GetMethod(
                 "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
-                "b", 
+                "b",
                 "(System.String,System.Int32)System.String");
             if (b == null)
             {
                 return false;
             }
 
-            var baseSeed = 0;
-            foreach (var instruction in b.Body.Instructions)
-            {
-                if (instruction.OpCode == OpCodes.Stloc_1)
-                {
-                    break;
-                }
-                if (instruction.OpCode == OpCodes.Ldc_I4)
-                {
-                    baseSeed += (int) instruction.Operand;
-                }
-            }
-            
+            var baseSeed = b.Body.Instructions
+                .TakeWhile(instruction => instruction.OpCode != OpCodes.Stloc_1)
+                .Where(instruction => instruction.OpCode == OpCodes.Ldc_I4)
+                .Sum(instruction => (int)instruction.Operand);
+
             foreach (var type in assembly.MainModule.Types)
             {
                 foreach (var method in type.Methods)
@@ -246,6 +273,7 @@ namespace ISTA_Patcher
                     {
                         continue;
                     }
+
                     var decodedStrings = new List<KeyValuePair<int, string>>();
                     for (var i = 0; i < method.Body.Instructions.Count; ++i)
                     {
@@ -256,27 +284,26 @@ namespace ISTA_Patcher
                         {
                             continue;
                         }
-                        var seed = (VariableDefinition) instruction.Previous.Operand;
+
+                        var seed = (VariableDefinition)instruction.Previous.Operand;
                         var seedValue = int.MaxValue;
                         var instruction2 = method.Body.Instructions.FirstOrDefault(inst =>
                             inst.OpCode == OpCodes.Stloc && inst.Operand == seed);
                         if (instruction2 != null)
                         {
-                            seedValue = (int) instruction2.Previous.Operand;
+                            seedValue = (int)instruction2.Previous.Operand;
                         }
+
                         if (seedValue == int.MaxValue) continue;
-                        var str = (string) instruction.Previous.Previous.Operand;
-                        decodedStrings.Add(new KeyValuePair<int, string>(i, PatchUtils.DecryptString(str, baseSeed, seedValue)));
+                        var str = (string)instruction.Previous.Previous.Operand;
+                        decodedStrings.Add(new KeyValuePair<int, string>(i,
+                            PatchUtils.DecryptString(str, baseSeed, seedValue)));
                     }
 
                     var processor = method.Body.GetILProcessor();
                     decodedStrings.Reverse();
                     foreach (var pair in decodedStrings)
                     {
-                        // ldstr
-                        // ldloc
-                        // call  -> ldstr
-                        // 7 8 9
                         processor.Replace(pair.Key, Instruction.Create(OpCodes.Ldstr, pair.Value));
                         processor.RemoveAt(pair.Key - 1);
                         processor.RemoveAt(pair.Key - 2);
