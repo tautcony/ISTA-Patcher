@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Mono.Cecil;
 
 
@@ -11,7 +10,7 @@ namespace ISTA_Patcher
         {
             if (!Directory.Exists(basePath))
             {
-                Console.WriteLine($"{basePath} not found");
+                Console.WriteLine($"Folder '{basePath}' not found, exiting...");
                 return;
             }
 
@@ -23,11 +22,9 @@ namespace ISTA_Patcher
 
             foreach (var library in requiredLibraryList)
             {
-                if (!File.Exists(Path.Join(basePath, library)))
-                {
-                    Console.WriteLine($"{library} not found");
-                    return;
-                }
+                if (File.Exists(Path.Join(basePath, library))) continue;
+                Console.WriteLine($"Required {library} not found, exiting...");
+                return;
             }
 
             var IntegrityManagerList = new List<string>();
@@ -137,7 +134,7 @@ namespace ISTA_Patcher
             }
 
             var path = args[0];
-            var cwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+            var cwd = Path.GetDirectoryName(AppContext.BaseDirectory)!;
 
             string[]? includeList = null;
 

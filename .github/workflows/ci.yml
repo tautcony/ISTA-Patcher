@@ -1,0 +1,39 @@
+name: Build and Upload
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '6.0.x' ]
+        runtime-identifier: [ 'win-x64' ]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET ${{ matrix.dotnet-version }}
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+
+    - name: Restore dependencies
+      run: dotnet restore --runtime ${{ matrix.runtime-identifier }}
+
+    - name: Build
+      run: dotnet build ISTA-Patcher --configuration Release --no-restore --runtime ${{ matrix.runtime-identifier }} --self-contained false
+
+    - name: Publish
+      run: dotnet publish ISTA-Patcher --configuration Release --no-restore --runtime ${{ matrix.runtime-identifier }} --self-contained false
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: ISTA-Patcher
+        path: ISTA-Patcher/bin/Release/net6.0/win-x64/publish/*
