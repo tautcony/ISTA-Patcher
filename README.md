@@ -5,11 +5,27 @@ Tested under 4.34.40.26161
 
 ## Usage
 
-⚠️ Please backup folder `Release` before patch.
+The folder structure should look like this:
+
+```
+C:\EC-APPS\ISTA
+├── Ecu
+│   ├── enc_cne_1.prg
+│   ├── ...
+├── TesterGUI
+│   ├── bin
+│   │   └── Release
+│   │       ├── AirCallServices.dll
+│   │       ├── ...
+```
+
+⚠️ Please backup folder `ISTA\TesterGUI\bin\Release` before patch.
 
 Execute the following command in terminal.
 
-`ISTA-Patcher.exe "C:\EC-APPS\ISTA\TesterGUI\bin\Release"`
+`ISTA-Patcher.exe patch "C:\EC-APPS\ISTA"`
+
+For more information on usage, please use the help command.
 
 Sample output
 ```
