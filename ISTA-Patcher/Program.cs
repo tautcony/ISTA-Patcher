@@ -156,6 +156,7 @@ namespace ISTA_Patcher
                 var targetFilename = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
                 if (!Directory.Exists(guiBasePath) || !File.Exists(targetFilename)) return 0;
 
+                // load exclude list that do not need to be processed
                 string[]? excludeList = null;
                 try
                 {
@@ -171,18 +172,20 @@ namespace ISTA_Patcher
                 }
                 excludeList ??= Array.Empty<string>();
                 
-                var fileList = (IntegrityManager.DecryptFile(targetFilename) ?? new List<HashFileInfo>())
-                    .Select(f => Path.GetFileName(f.FilePath.Replace("\\", "/"))).ToArray();
+                // load file list from enc_cne_1.prg
+                string?[] fileList = (IntegrityManager.DecryptFile(targetFilename) ?? new List<HashFileInfo>())
+                    .Select(f => f.FileName).ToArray();
+                // or from directory ./TesterGUI/bin/Release
                 if (fileList.Length == 0)
                 {
                     fileList = Directory.GetFiles(Path.Join(guiBasePath, "bin", "Release"))
                         .Where(f => f.EndsWith(".exe") || f.EndsWith("dll"))
-                        .Select(f => Path.GetFileName(f)).ToArray();
+                        .Select(Path.GetFileName).ToArray();
                 }
                 var includeList = fileList.Where(f => !excludeList.Contains(f));
 
                 var basePath = Path.Join(guiBasePath, "bin", "Release");
-                PatchISTA(basePath, includeList);
+                PatchISTA(basePath, includeList!);
 
                 return 0;
             }

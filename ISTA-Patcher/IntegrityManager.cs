@@ -10,14 +10,12 @@ public class IntegrityManager
     private const int _iterations = 1100;
 
     private const string _password = "3/3HexbKKFs4LqpiCSgKAXGUYCtqjoFchfPitAmI8wE=";
-    
-    private const string pk_xml = "<RSAKeyValue><Modulus>xW33nQA29jyJSYn24fVcSIU3gQmzQArcT0lrPAj94PS8wuZZBpPZsLEWo4pkq2/w9ne4V9PTOkB2frVBvA/bmGF/gyHivqkzi7znX/TwcTM6GbX/MN4isNeXqgFZzjmxOh9EYPt8pnJ/j02Djbg8LceG98grBCehBe/2wFxxYQQa+YoJ0a1ymzs/3geBTeqtwYgayZeLEWOxckoDuDu0RWF8zvVcWxUNpwqHNH/4Boo+xLqByfEv2wDS1zchGtjCL+g2qdDWlHgASEgGZ6Z8hbirrxxWYZ7zaZxjSADQM8nweKn4t4+p44uD1Aoktq3Mm+jZtTsgk8i1YjbCQN8J1Q==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
 
     public static List<HashFileInfo>? DecryptFile(string sourceFilename)
     {
         try
         {
-            var aesManaged = new AesManaged();
+            var aesManaged = Aes.Create();
             aesManaged.BlockSize = aesManaged.LegalBlockSizes[0].MaxSize;
             aesManaged.KeySize = aesManaged.LegalKeySizes[0].MaxSize;
             var rfc2898DeriveBytes = new Rfc2898DeriveBytes(_password, _salt, _iterations);
@@ -45,16 +43,16 @@ public class IntegrityManager
 
 public class HashFileInfo
 {
-    public string FileName { get; private set; }
+    public string FileName { get; }
 
-    public string FilePath { get; private set; }
+    public string FilePath { get; }
 
-    public string Hash { get; set; }
+    public string Hash { get; }
 
-    protected internal HashFileInfo(string[] fileInfos)
+    protected internal HashFileInfo(IReadOnlyList<string> fileInfos)
     {
         FilePath = fileInfos[0];
-        FileName = Path.GetFileName(FilePath);
+        FileName = Path.GetFileName(FilePath.Replace("\\", "/"));
         Hash = fileInfos[1];
     }
 }
