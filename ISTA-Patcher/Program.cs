@@ -1,9 +1,24 @@
 ﻿using System.Text.Json;
+using CommandLine;
 using Mono.Cecil;
 
 
 namespace ISTA_Patcher
 {
+    [Verb("patch", HelpText = "Patch application and library.")]
+    class PatchOptions {
+        [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
+        public string? TargetPath { get; set; }
+    }
+
+    [Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
+    class DecryptOptions
+    {
+        [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
+        public string? TargetPath { get; set; }
+    }
+
+
     internal static class Patcher
     {
         static void PatchISTA(string basePath, IEnumerable<string> pendingPatchList, string outputDir = "modded")
@@ -16,8 +31,8 @@ namespace ISTA_Patcher
 
             var requiredLibraryList = new[]
             {
-                "RheingoldCoreContracts.dll",
-                "RheingoldCoreFramework.dll"
+                 "RheingoldCoreContracts.dll",
+                 "RheingoldCoreFramework.dll"
             };
 
             foreach (var library in requiredLibraryList)
@@ -125,39 +140,68 @@ namespace ISTA_Patcher
             Console.WriteLine("=== ISTA Patch Done ===");
         }
 
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
-            if (args.Length == 0)
-            {
-                Console.WriteLine("no path provided");
-                return;
-            }
+            return CommandLine.Parser.Default.ParseArguments<PatchOptions, DecryptOptions>(args)
+                .MapResult(
+                    (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
+                    (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
+                    errs => 1);
 
-            var path = args[0];
-            var cwd = Path.GetDirectoryName(AppContext.BaseDirectory)!;
 
-            string[]? includeList = null;
+            static int RunPatchAndReturnExitCode(PatchOptions opts)
+            {
+                var cwd = Path.GetDirectoryName(AppContext.BaseDirectory)!;
+                var guiBasePath = Path.Join(opts.TargetPath, "TesterGUI");
+                var targetFilename = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
+                if (!Directory.Exists(guiBasePath) || !File.Exists(targetFilename)) return 0;
 
-            try
-            {
-                using FileStream stream = new(Path.Join(cwd, "patchConfig.json"), FileMode.Open, FileAccess.Read);
-                var patchConfig = JsonSerializer.Deserialize<Dictionary<string, string[]>>(stream);
-                includeList = patchConfig?.GetValueOrDefault("include");
-            }
-            catch (Exception ex) when (
-                ex is FileNotFoundException or IOException or JsonException
-            )
-            {
-                Console.WriteLine($"Failed to load config file: {ex.Message}");
-            }
+                string[]? excludeList = null;
+                try
+                {
+                    using FileStream stream = new(Path.Join(cwd, "patchConfig.json"), FileMode.Open, FileAccess.Read);
+                    var patchConfig = JsonSerializer.Deserialize<Dictionary<string, string[]>>(stream);
+                    excludeList = patchConfig?.GetValueOrDefault("exclude");
+                }
+                catch (Exception ex) when (
+                    ex is FileNotFoundException or IOException or JsonException
+                )
+                {
+                    Console.WriteLine($"Failed to load config file: {ex.Message}");
+                }
+                excludeList ??= Array.Empty<string>();
+                
+                var fileList = (IntegrityManager.DecryptFile(targetFilename) ?? new List<HashFileInfo>())
+                    .Select(f => Path.GetFileName(f.FilePath.Replace("\\", "/"))).ToArray();
+                if (fileList.Length == 0)
+                {
+                    fileList = Directory.GetFiles(Path.Join(guiBasePath, "bin", "Release"))
+                        .Where(f => f.EndsWith(".exe") || f.EndsWith("dll"))
+                        .Select(f => Path.GetFileName(f)).ToArray();
+                }
+                var includeList = fileList.Where(f => !excludeList.Contains(f));
 
-            if (includeList != null)
-            {
-                PatchISTA(path, includeList);
+                var basePath = Path.Join(guiBasePath, "bin", "Release");
+                PatchISTA(basePath, includeList);
+
+                return 0;
             }
-            else
+            
+            static int RunDecryptAndReturnExitCode(DecryptOptions opts)
             {
-                Console.WriteLine("config not found");
+                var targetFilename = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
+                if (!File.Exists(targetFilename)) return -1;
+                var fileList = IntegrityManager.DecryptFile(targetFilename);
+                if (fileList == null) return -1;
+                var filePathMaxLength = fileList.Select(f => f.FilePath.Length).Max();
+                var hashMaxLength = fileList.Select(f => f.Hash.Length).Max();
+                Console.WriteLine($"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash".PadRight(hashMaxLength)} |");
+                Console.WriteLine($"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} |");
+                foreach (var fileInfo in fileList)
+                {
+                    Console.WriteLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} |");
+                }
+                return 0;
             }
         }
     }
