@@ -92,6 +92,6 @@ WsiDataProvider.dll -+-++---+-- [patched]
 === ISTA Patch Done ===
 ```
 
-You can find the patched files in folder `C:\EC-APPS\ISTA\TesterGUI\bin\Release\modded`.
+You can find the patched files in folder `C:\EC-APPS\ISTA\TesterGUI\bin\Release\patched`.
 Overwrite the files in this folder to the parent folder and start the program, it should work fine.
 

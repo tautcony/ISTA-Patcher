@@ -18,10 +18,31 @@ namespace ISTA_Patcher
         public string? TargetPath { get; set; }
     }
 
+    
 
     internal static class Patcher
     {
-        static void PatchISTA(string basePath, IEnumerable<string> pendingPatchList, string outputDir = "modded")
+        private static readonly Func<AssemblyDefinition, bool>[] Patches =
+        {
+            PatchUtils.PatchIntegrityManager,
+            PatchUtils.PatchLicenseStatusChecker,
+            PatchUtils.PatchCheckSignature, 
+            PatchUtils.PatchLicenseManager,
+            PatchUtils.PatchAOSLicenseManager,
+            PatchUtils.PatchIstaIcsServiceClient,
+            PatchUtils.PatchCommonServiceWrapper,
+            PatchUtils.PatchSecureAccessHelper,
+            PatchUtils.PatchLicenseWizardHelper,
+            PatchUtils.PatchVerifyAssemblyHelper,
+            PatchUtils.PatchFscValidationClient
+        };
+            
+        private static readonly string[] RequiredLibraries = {
+            "RheingoldCoreContracts.dll",
+            "RheingoldCoreFramework.dll"
+        };
+        
+        static void PatchISTA(string basePath, IEnumerable<string> pendingPatchList, string outputDir = "patched")
         {
             if (!Directory.Exists(basePath))
             {
@@ -29,30 +50,12 @@ namespace ISTA_Patcher
                 return;
             }
 
-            var requiredLibraryList = new[]
-            {
-                 "RheingoldCoreContracts.dll",
-                 "RheingoldCoreFramework.dll"
-            };
-
-            foreach (var library in requiredLibraryList)
+            foreach (var library in RequiredLibraries)
             {
                 if (File.Exists(Path.Join(basePath, library))) continue;
-                Console.WriteLine($"Required {library} not found, exiting...");
+                Console.WriteLine($"Required library '{library}' not found, exiting...");
                 return;
             }
-
-            var IntegrityManagerList = new List<string>();
-            var LicenseStatusCheckerList = new List<string>();
-            var CheckSignatureList = new List<string>();
-            var LicenseManagerList = new List<string>();
-            var AOSLicenseManagerList = new List<string>();
-            var IstaIcsServiceClientList = new List<string>();
-            var CommonServiceWrapperList = new List<string>();
-            var SecureAccessHelperList = new List<string>();
-            var LicenseWizardHelperList = new List<string>();
-            var VerifyAssemblyHelperList = new List<string>();
-            var FscValidationClientList = new List<string>();
 
             Console.WriteLine("=== ISTA Patch Begin ===");
             foreach (var pendingPatchItem in pendingPatchList)
@@ -60,18 +63,14 @@ namespace ISTA_Patcher
                 var path = Path.Join(basePath, pendingPatchItem);
                 var moddedDir = Path.Join(basePath, outputDir);
                 var targetPath = Path.Join(moddedDir, pendingPatchItem);
+                Console.Write($"{pendingPatchItem} ");
                 if (!File.Exists(path))
                 {
-                    Console.WriteLine($"{pendingPatchItem} [not found]");
+                    Console.WriteLine(" [not found]");
                     continue;
                 }
 
-                if (!Directory.Exists(moddedDir))
-                {
-                    Directory.CreateDirectory(moddedDir);
-                }
-
-                Console.Write($"{pendingPatchItem} ");
+                Directory.CreateDirectory(moddedDir);
 
                 try
                 {
@@ -83,36 +82,12 @@ namespace ISTA_Patcher
                         continue;
                     }
 
-                    var patches = new List<KeyValuePair<Func<AssemblyDefinition, bool>, List<string>>>
-                    {
-                        new(PatchUtils.PatchIntegrityManager, IntegrityManagerList),
-                        new(PatchUtils.PatchLicenseStatusChecker, LicenseStatusCheckerList),
-                        new(PatchUtils.PatchCheckSignature, CheckSignatureList),
-                        new(PatchUtils.PatchLicenseManager, LicenseManagerList),
-                        new(PatchUtils.PatchAOSLicenseManager, AOSLicenseManagerList),
-                        new(PatchUtils.PatchIstaIcsServiceClient, IstaIcsServiceClientList),
-                        new(PatchUtils.PatchCommonServiceWrapper, CommonServiceWrapperList),
-                        new(PatchUtils.PatchSecureAccessHelper, SecureAccessHelperList),
-                        new(PatchUtils.PatchLicenseWizardHelper, LicenseWizardHelperList),
-                        new(PatchUtils.PatchVerifyAssemblyHelper, VerifyAssemblyHelperList),
-                        new(PatchUtils.PatchFscValidationClient, FscValidationClientList)
-                    };
+                    // Patch and print result
+                    var result = Patches.Select(patch => patch(assembly)).ToList();
+                    isPatched = result.Any(i => i);
+                    Console.Write(result.Aggregate("", (c, i) => c + (i ? "+" : "-")) + " ");
+                    
 
-                    foreach (var pair in patches)
-                    {
-                        if (pair.Key(assembly))
-                        {
-                            isPatched = true;
-                            Console.Write("+");
-                            pair.Value.Add(pendingPatchItem);
-                        }
-                        else
-                        {
-                            Console.Write("-");
-                        }
-                    }
-
-                    Console.Write(" ");
                     if (isPatched)
                     {
                         // PatchUtils.DecryptParameter(assembly);
@@ -154,7 +129,11 @@ namespace ISTA_Patcher
                 var cwd = Path.GetDirectoryName(AppContext.BaseDirectory)!;
                 var guiBasePath = Path.Join(opts.TargetPath, "TesterGUI");
                 var targetFilename = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
-                if (!Directory.Exists(guiBasePath) || !File.Exists(targetFilename)) return 0;
+                if (!Directory.Exists(guiBasePath) || !File.Exists(targetFilename))
+                {
+                    Console.WriteLine("Folder structure not match, please check input path");
+                    return -1;
+                }
 
                 // load exclude list that do not need to be processed
                 string[]? excludeList = null;

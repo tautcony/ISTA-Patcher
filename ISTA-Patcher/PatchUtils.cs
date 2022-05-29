@@ -7,6 +7,8 @@ namespace ISTA_Patcher
 {
     internal class PatchUtils
     {
+        private static string _timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+        
         public static AssemblyDefinition LoadAssembly(string fileName)
         {
             var assemblyResolver = new DefaultAssemblyResolver();
@@ -221,7 +223,7 @@ namespace ISTA_Patcher
                 FieldAttributes.Private | FieldAttributes.Static,
                 assembly.MainModule.ImportReference(typeof(string)))
             {
-                Constant = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                Constant = _timestamp
             };
 
             patchedType.Fields.Add(dateField);
@@ -230,20 +232,18 @@ namespace ISTA_Patcher
 
         public static string DecryptString(string value, int baseSeed, int seed)
         {
-            char[] charArray = value.ToCharArray();
-            int key = baseSeed + seed;
+            var charArray = value.ToCharArray();
+            var key = baseSeed + seed;
             for (var i = 0; i < charArray.Length; i++)
             {
-                char ch = charArray[i];
-                byte ch_lo_byte = (byte)(ch & 0xff);
-                byte ch_hi_byte = (byte)(ch >> 8);
+                var ch = charArray[i];
+                var chLoByte = (byte)(ch & 0xff);
+                var chHiByte = (byte)(ch >> 8);
 
-                byte real_hi_byte = (byte)(ch_lo_byte ^ key);
-                byte real_lo_byte = (byte)(ch_hi_byte ^ (key + 1));
-                char real_ch = (char)(((uint)real_hi_byte << 8) | real_lo_byte);
-                charArray[i] = real_ch;
-
-                key += 2;
+                var orgHiByte = (byte)(chLoByte ^ key++);
+                var orgLoByte = (byte)(chHiByte ^ key++);
+                var orgCh = (char)(((uint)orgHiByte << 8) | orgLoByte);
+                charArray[i] = orgCh;
             }
 
             return string.Intern(new string(charArray));
