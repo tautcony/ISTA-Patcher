@@ -17,6 +17,13 @@ namespace ISTA_Patcher
         [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
         public string? TargetPath { get; set; }
     }
+    
+    [Verb("decode", HelpText = "Decode inline string.")]
+    class DecodeOptions
+    {
+        [Value(0, MetaName = "Application path", Required = true, HelpText = "Path for Application")]
+        public string? TargetPath { get; set; }
+    }
 
     
 
@@ -34,7 +41,8 @@ namespace ISTA_Patcher
             PatchUtils.PatchSecureAccessHelper,
             PatchUtils.PatchLicenseWizardHelper,
             PatchUtils.PatchVerifyAssemblyHelper,
-            PatchUtils.PatchFscValidationClient
+            PatchUtils.PatchFscValidationClient,
+            PatchUtils.PatchMainWindowViewModel,
         };
             
         private static readonly string[] RequiredLibraries = {
@@ -117,10 +125,11 @@ namespace ISTA_Patcher
 
         public static int Main(string[] args)
         {
-            return CommandLine.Parser.Default.ParseArguments<PatchOptions, DecryptOptions>(args)
+            return CommandLine.Parser.Default.ParseArguments<PatchOptions, DecryptOptions, DecodeOptions>(args)
                 .MapResult(
                     (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
                     (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
+                    (DecodeOptions opts) => RunDecodeAndReturnExitCode(opts),
                     errs => 1);
 
 
@@ -183,6 +192,18 @@ namespace ISTA_Patcher
                 {
                     Console.WriteLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} |");
                 }
+                return 0;
+            }
+
+            static int RunDecodeAndReturnExitCode(DecodeOptions opts)
+            {
+                if (!File.Exists(opts.TargetPath))
+                {
+                    return -1;
+                }
+                var assembly = PatchUtils.LoadAssembly(opts.TargetPath);
+                PatchUtils.DecryptParameter(assembly);
+                assembly.Write(opts.TargetPath + ".result");
                 return 0;
             }
         }

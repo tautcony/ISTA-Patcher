@@ -204,6 +204,22 @@ namespace ISTA_Patcher
             IsValid.ReturnOneMethod();
             return true;
         }
+        
+        public static bool PatchMainWindowViewModel(AssemblyDefinition assembly)
+        {
+            var IsValid = assembly.GetMethod(
+                "BMW.Rheingold.ISTAGUI.ViewModels.MainWindowViewModel",
+                "CheckExpirationDate",
+                "()System.Void"
+            );
+            if (IsValid == null)
+            {
+                return false;
+            }
+
+            IsValid.EmptyingMethod();
+            return true;
+        }
 
 
         public static bool CheckPatchedMark(AssemblyDefinition assembly)
