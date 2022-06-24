@@ -1,7 +1,9 @@
 # ISTA Patcher [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 An IL patcher for ISTA-P
 
-Tested under 4.34.40.26161
+Tested under
+- `4.34.40.26161`
+- `4.35.18.26579`
 
 ## Usage
 
