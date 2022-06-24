@@ -1,4 +1,7 @@
 {
+    "include": [
+        "IstaOperation.exe"
+    ],
     "exclude": [
         "IDESKernel.dll",
         "log4net.dll",

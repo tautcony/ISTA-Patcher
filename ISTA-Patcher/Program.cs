@@ -146,11 +146,13 @@ namespace ISTA_Patcher
 
                 // load exclude list that do not need to be processed
                 string[]? excludeList = null;
+                string[]? includeList = null;
                 try
                 {
                     using FileStream stream = new(Path.Join(cwd, "patchConfig.json"), FileMode.Open, FileAccess.Read);
                     var patchConfig = JsonSerializer.Deserialize<Dictionary<string, string[]>>(stream);
                     excludeList = patchConfig?.GetValueOrDefault("exclude");
+                    includeList = patchConfig?.GetValueOrDefault("include");
                 }
                 catch (Exception ex) when (
                     ex is FileNotFoundException or IOException or JsonException
@@ -159,6 +161,7 @@ namespace ISTA_Patcher
                     Console.WriteLine($"Failed to load config file: {ex.Message}");
                 }
                 excludeList ??= Array.Empty<string>();
+                includeList ??= Array.Empty<string>();
                 
                 // load file list from enc_cne_1.prg
                 string?[] fileList = (IntegrityManager.DecryptFile(targetFilename) ?? new List<HashFileInfo>())
@@ -170,10 +173,11 @@ namespace ISTA_Patcher
                         .Where(f => f.EndsWith(".exe") || f.EndsWith("dll"))
                         .Select(Path.GetFileName).ToArray();
                 }
-                var includeList = fileList.Where(f => !excludeList.Contains(f));
+
+                var patchList = includeList.Union(fileList.Where(f => !excludeList.Contains(f))).Distinct();
 
                 var basePath = Path.Join(guiBasePath, "bin", "Release");
-                PatchISTA(basePath, includeList!);
+                PatchISTA(basePath, patchList!);
 
                 return 0;
             }
