@@ -174,7 +174,10 @@ namespace ISTA_Patcher
                         .Select(Path.GetFileName).ToArray();
                 }
 
-                var patchList = includeList.Union(fileList.Where(f => !excludeList.Contains(f))).Distinct();
+                var patchList = includeList
+                                .Union(fileList.Where(f => !excludeList.Contains(f)))
+                                .Distinct()
+                                .OrderBy(i=>i);
 
                 var basePath = Path.Join(guiBasePath, "bin", "Release");
                 PatchISTA(basePath, patchList!);

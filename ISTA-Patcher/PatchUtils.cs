@@ -241,8 +241,16 @@ namespace ISTA_Patcher
             {
                 Constant = _timestamp
             };
+            var urlField = new FieldDefinition(
+                "repo",
+                FieldAttributes.Private | FieldAttributes.Static,
+                assembly.MainModule.ImportReference(typeof(string)))
+            {
+                Constant = "https://github.com/tautcony/ISTA-Patcher"
+            };
 
             patchedType.Fields.Add(dateField);
+            patchedType.Fields.Add(urlField);
             assembly.MainModule.Types.Add(patchedType);
         }
 
@@ -265,11 +273,13 @@ namespace ISTA_Patcher
             return string.Intern(new string(charArray));
         }
 
-        public static bool DecryptParameter(AssemblyDefinition assembly)
+        public static bool DecryptParameter(AssemblyDefinition assembly,
+            string typeName = "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
+            string functionName = "b")
         {
             var b = assembly.GetMethod(
-                "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
-                "b",
+                typeName,
+                functionName,
                 "(System.String,System.Int32)System.String");
             if (b == null)
             {
