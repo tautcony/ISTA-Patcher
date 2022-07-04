@@ -1,5 +1,4 @@
-﻿using System.Reflection.Emit;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 using OpCodes = Mono.Cecil.Cil.OpCodes;
 
@@ -207,17 +206,49 @@ namespace ISTA_Patcher
         
         public static bool PatchMainWindowViewModel(AssemblyDefinition assembly)
         {
-            var IsValid = assembly.GetMethod(
+            var CheckExpirationDate = assembly.GetMethod(
                 "BMW.Rheingold.ISTAGUI.ViewModels.MainWindowViewModel",
                 "CheckExpirationDate",
                 "()System.Void"
             );
-            if (IsValid == null)
+            if (CheckExpirationDate == null)
             {
                 return false;
             }
 
-            IsValid.EmptyingMethod();
+            CheckExpirationDate.EmptyingMethod();
+            return true;
+        }
+
+        public static bool PatchCommonFuncForIsta(AssemblyDefinition assembly)
+        {
+            var GetLicenseStatus = assembly.GetMethod(
+                "Toyota.GTS.ForIsta.CommonFuncForIsta",
+                "GetLicenseStatus",
+                "()BMW.Rheingold.ToyotaLicenseHelper.ToyotaLicenseStatus"
+            );
+            if (GetLicenseStatus == null)
+            {
+                return false;
+            }
+
+            GetLicenseStatus.ReturnZeroMethod();
+            return true;
+        }
+
+        public static bool PatchPackageValidityService(AssemblyDefinition assembly)
+        {
+            var CyclicExpirationDateCheck = assembly.GetMethod(
+                "BMW.Rheingold.ISTAGUI.Controller.PackageValidityService",
+                "CyclicExpirationDateCheck",
+                "()System.Void"
+            );
+            if (CyclicExpirationDateCheck == null)
+            {
+                return false;
+            }
+
+            CyclicExpirationDateCheck.EmptyingMethod();
             return true;
         }
 
@@ -254,90 +285,21 @@ namespace ISTA_Patcher
             assembly.MainModule.Types.Add(patchedType);
         }
 
-        public static string DecryptString(string value, int baseSeed, int seed)
+        public static string DecryptString(string encrypted, int magic, int value)
         {
-            var charArray = value.ToCharArray();
-            var key = baseSeed + seed;
+            var charArray = encrypted.ToCharArray();
+            var key = magic + value;
             for (var i = 0; i < charArray.Length; i++)
             {
                 var ch = charArray[i];
-                var chLoByte = (byte)(ch & 0xff);
-                var chHiByte = (byte)(ch >> 8);
 
-                var orgHiByte = (byte)(chLoByte ^ key++);
-                var orgLoByte = (byte)(chHiByte ^ key++);
-                var orgCh = (char)(((uint)orgHiByte << 8) | orgLoByte);
+                var b1 = (byte)((ch & 0xff) ^ key++);
+                var b2 = (byte)((ch >> 8) ^ key++);
+                var orgCh = (char)(((uint)b1 << 8) | b2);
                 charArray[i] = orgCh;
             }
 
             return string.Intern(new string(charArray));
-        }
-
-        public static bool DecryptParameter(AssemblyDefinition assembly,
-            string typeName = "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
-            string functionName = "b")
-        {
-            var b = assembly.GetMethod(
-                typeName,
-                functionName,
-                "(System.String,System.Int32)System.String");
-            if (b == null)
-            {
-                return false;
-            }
-
-            var baseSeed = b.Body.Instructions
-                .TakeWhile(instruction => instruction.OpCode != OpCodes.Stloc_1)
-                .Where(instruction => instruction.OpCode == OpCodes.Ldc_I4)
-                .Sum(instruction => (int)instruction.Operand);
-
-            foreach (var type in assembly.MainModule.Types)
-            {
-                foreach (var method in type.Methods)
-                {
-                    if (method.Body == null)
-                    {
-                        continue;
-                    }
-
-                    var decodedStrings = new List<KeyValuePair<int, string>>();
-                    for (var i = 0; i < method.Body.Instructions.Count; ++i)
-                    {
-                        var instruction = method.Body.Instructions[i];
-                        if (instruction.OpCode != OpCodes.Call || instruction.Operand != b) continue;
-                        if (instruction.Previous.OpCode != OpCodes.Ldloc ||
-                            instruction.Previous.Previous.OpCode != OpCodes.Ldstr)
-                        {
-                            continue;
-                        }
-
-                        var seed = (VariableDefinition)instruction.Previous.Operand;
-                        var seedValue = int.MaxValue;
-                        var instruction2 = method.Body.Instructions.FirstOrDefault(inst =>
-                            inst.OpCode == OpCodes.Stloc && inst.Operand == seed);
-                        if (instruction2 != null)
-                        {
-                            seedValue = (int)instruction2.Previous.Operand;
-                        }
-
-                        if (seedValue == int.MaxValue) continue;
-                        var str = (string)instruction.Previous.Previous.Operand;
-                        decodedStrings.Add(new KeyValuePair<int, string>(i,
-                            PatchUtils.DecryptString(str, baseSeed, seedValue)));
-                    }
-
-                    var processor = method.Body.GetILProcessor();
-                    decodedStrings.Reverse();
-                    foreach (var pair in decodedStrings)
-                    {
-                        processor.Replace(pair.Key, Instruction.Create(OpCodes.Ldstr, pair.Value));
-                        processor.RemoveAt(pair.Key - 1);
-                        processor.RemoveAt(pair.Key - 2);
-                    }
-                }
-            }
-
-            return true;
         }
     }
 }

@@ -5,9 +5,17 @@ using Mono.Cecil;
 
 namespace ISTA_Patcher
 {
+    internal enum PatchTypeEnum {
+        BMW = 0,
+        TOYOTA = 1
+    }
+
     [Verb("patch", HelpText = "Patch application and library.")]
     class PatchOptions {
-        [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
+        [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Patch type, valid option: BMW, TOYOTA")]
+        public PatchTypeEnum PatchType { get; set; }
+
+        [Value(1, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
         public string? TargetPath { get; set; }
     }
 
@@ -17,15 +25,6 @@ namespace ISTA_Patcher
         [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
         public string? TargetPath { get; set; }
     }
-    
-    [Verb("decode", HelpText = "Decode inline string.")]
-    class DecodeOptions
-    {
-        [Value(0, MetaName = "Application path", Required = true, HelpText = "Path for Application")]
-        public string? TargetPath { get; set; }
-    }
-
-    
 
     internal static class Patcher
     {
@@ -43,11 +42,16 @@ namespace ISTA_Patcher
             PatchUtils.PatchVerifyAssemblyHelper,
             PatchUtils.PatchFscValidationClient,
             PatchUtils.PatchMainWindowViewModel,
+            // For Toyota
+            PatchUtils.PatchCommonFuncForIsta,
+            PatchUtils.PatchPackageValidityService
         };
             
         private static readonly string[] RequiredLibraries = {
+            /*
             "RheingoldCoreContracts.dll",
             "RheingoldCoreFramework.dll"
+            */
         };
         
         static void PatchISTA(string basePath, IEnumerable<string> pendingPatchList, string outputDir = "patched")
@@ -123,25 +127,52 @@ namespace ISTA_Patcher
             Console.WriteLine("=== ISTA Patch Done ===");
         }
 
+        private static string?[] LoadISTAList(string targetFilename, string guiBasePath)
+        {
+            // load file list from enc_cne_1.prg
+            string?[] fileList = (IntegrityManager.DecryptFile(targetFilename) ?? new List<HashFileInfo>())
+                                  .Select(f => f.FileName).ToArray();
+
+            // or from directory ./TesterGUI/bin/Release
+            if (fileList.Length == 0)
+            {
+                fileList = Directory.GetFiles(Path.Join(guiBasePath, "bin", "Release"))
+                                    .Where(f => f.EndsWith(".exe") || f.EndsWith("dll"))
+                                    .Select(Path.GetFileName).ToArray();
+            }
+            return fileList;
+        }
+
+        private static string?[] LoadISTAToyotaList(string guiBasePath)
+        {
+            var fileList = Directory.GetFiles(Path.Join(guiBasePath, "bin", "Release"))
+                                                    .Where(f => f.EndsWith(".exe") || f.EndsWith("dll"))
+                                                    .Select(Path.GetFileName).ToArray();
+            return fileList;
+        }
+
+
         public static int Main(string[] args)
         {
-            return CommandLine.Parser.Default.ParseArguments<PatchOptions, DecryptOptions, DecodeOptions>(args)
+            return CommandLine.Parser.Default.ParseArguments<PatchOptions, DecryptOptions>(args)
                 .MapResult(
                     (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
                     (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
-                    (DecodeOptions opts) => RunDecodeAndReturnExitCode(opts),
                     errs => 1);
-
 
             static int RunPatchAndReturnExitCode(PatchOptions opts)
             {
                 var cwd = Path.GetDirectoryName(AppContext.BaseDirectory)!;
                 var guiBasePath = Path.Join(opts.TargetPath, "TesterGUI");
                 var targetFilename = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
-                if (!Directory.Exists(guiBasePath) || !File.Exists(targetFilename))
+
+                if (!Directory.Exists(guiBasePath))
                 {
-                    Console.WriteLine("Folder structure not match, please check input path");
-                    return -1;
+                    if (opts.PatchType == PatchTypeEnum.BMW && !File.Exists(targetFilename))
+                    {
+                        Console.WriteLine("Folder structure not match, please check input path");
+                        return -1;
+                    }
                 }
 
                 // load exclude list that do not need to be processed
@@ -152,7 +183,12 @@ namespace ISTA_Patcher
                     using FileStream stream = new(Path.Join(cwd, "patchConfig.json"), FileMode.Open, FileAccess.Read);
                     var patchConfig = JsonSerializer.Deserialize<Dictionary<string, string[]>>(stream);
                     excludeList = patchConfig?.GetValueOrDefault("exclude");
-                    includeList = patchConfig?.GetValueOrDefault("include");
+                    includeList = opts.PatchType switch
+                    {
+                        PatchTypeEnum.BMW => patchConfig?.GetValueOrDefault("include"),
+                        PatchTypeEnum.TOYOTA => patchConfig?.GetValueOrDefault("include.toyota"),
+                        _ => Array.Empty<string>()
+                    };
                 }
                 catch (Exception ex) when (
                     ex is FileNotFoundException or IOException or JsonException
@@ -162,17 +198,13 @@ namespace ISTA_Patcher
                 }
                 excludeList ??= Array.Empty<string>();
                 includeList ??= Array.Empty<string>();
-                
-                // load file list from enc_cne_1.prg
-                string?[] fileList = (IntegrityManager.DecryptFile(targetFilename) ?? new List<HashFileInfo>())
-                    .Select(f => f.FileName).ToArray();
-                // or from directory ./TesterGUI/bin/Release
-                if (fileList.Length == 0)
+
+                var fileList = opts.PatchType switch
                 {
-                    fileList = Directory.GetFiles(Path.Join(guiBasePath, "bin", "Release"))
-                        .Where(f => f.EndsWith(".exe") || f.EndsWith("dll"))
-                        .Select(Path.GetFileName).ToArray();
-                }
+                    PatchTypeEnum.BMW => LoadISTAList(targetFilename, guiBasePath),
+                    PatchTypeEnum.TOYOTA => LoadISTAToyotaList(guiBasePath),
+                    _ => Array.Empty<string>()
+                };
 
                 var patchList = includeList
                                 .Union(fileList.Where(f => !excludeList.Contains(f)))
@@ -199,18 +231,6 @@ namespace ISTA_Patcher
                 {
                     Console.WriteLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} |");
                 }
-                return 0;
-            }
-
-            static int RunDecodeAndReturnExitCode(DecodeOptions opts)
-            {
-                if (!File.Exists(opts.TargetPath))
-                {
-                    return -1;
-                }
-                var assembly = PatchUtils.LoadAssembly(opts.TargetPath);
-                PatchUtils.DecryptParameter(assembly);
-                assembly.Write(opts.TargetPath + ".result");
                 return 0;
             }
         }
