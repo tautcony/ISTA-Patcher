@@ -1,19 +1,18 @@
-﻿using Mono.Cecil;
-using Mono.Cecil.Cil;
-using OpCodes = Mono.Cecil.Cil.OpCodes;
+﻿using dnlib.DotNet;
+
+using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
 namespace ISTA_Patcher
 {
-    internal class PatchUtils
+    internal static class PatchUtils
     {
         private static string _timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
         
         public static AssemblyDefinition LoadAssembly(string fileName)
         {
-            var assemblyResolver = new DefaultAssemblyResolver();
-            assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(fileName));
-            var assembly = AssemblyDefinition.ReadAssembly(fileName,
-                new ReaderParameters { AssemblyResolver = assemblyResolver, InMemory = true });
+            var modCtx = ModuleDef.CreateModuleContext();
+            var module = ModuleDefMD.Load(fileName, modCtx);
+            var assembly = module.Assembly;
             return assembly;
         }
 
@@ -255,51 +254,44 @@ namespace ISTA_Patcher
 
         public static bool CheckPatchedMark(AssemblyDefinition assembly)
         {
-            var patchedType = assembly.MainModule.GetType("Patched.By.TC");
+            var patchedType = assembly.Modules.First().GetType("Patched.By.TC");
             return patchedType != null;
         }
 
         public static void SetPatchedMark(AssemblyDefinition assembly)
         {
-            var patchedType = new TypeDefinition(
+            var module = assembly.Modules.FirstOrDefault();
+            if (module == null)
+            {
+                return;
+            }
+            
+            var patchedType = new TypeDefUser(
                 "Patched.By", "TC",
-                TypeAttributes.NestedPrivate,
-                assembly.MainModule.ImportReference(typeof(object)));
-            var dateField = new FieldDefinition(
-                "date",
-                FieldAttributes.Private | FieldAttributes.Static,
-                assembly.MainModule.ImportReference(typeof(string)))
+                module.CorLibTypes.Object.TypeDefOrRef)
             {
-                Constant = _timestamp
+                Attributes = TypeAttributes.Class | TypeAttributes.NestedPrivate
             };
-            var urlField = new FieldDefinition(
-                "repo",
-                FieldAttributes.Private | FieldAttributes.Static,
-                assembly.MainModule.ImportReference(typeof(string)))
+            var dateField = new FieldDefUser(
+                "date",
+                new FieldSig(module.CorLibTypes.String),
+                FieldAttributes.Private | FieldAttributes.Static
+            )
             {
-                Constant = "https://github.com/tautcony/ISTA-Patcher"
+                Constant = new ConstantUser(_timestamp)
+            };
+            var urlField = new FieldDefUser(
+                "repo",
+                new FieldSig(module.CorLibTypes.String),
+                FieldAttributes.Private | FieldAttributes.Static
+                )
+            {
+                Constant = new ConstantUser("https://github.com/tautcony/ISTA-Patcher")
             };
 
             patchedType.Fields.Add(dateField);
             patchedType.Fields.Add(urlField);
-            assembly.MainModule.Types.Add(patchedType);
-        }
-
-        public static string DecryptString(string encrypted, int magic, int value)
-        {
-            var charArray = encrypted.ToCharArray();
-            var key = magic + value;
-            for (var i = 0; i < charArray.Length; i++)
-            {
-                var ch = charArray[i];
-
-                var b1 = (byte)((ch & 0xff) ^ key++);
-                var b2 = (byte)((ch >> 8) ^ key++);
-                var orgCh = (char)(((uint)b1 << 8) | b2);
-                charArray[i] = orgCh;
-            }
-
-            return string.Intern(new string(charArray));
+            module.Types.Add(patchedType);
         }
     }
 }

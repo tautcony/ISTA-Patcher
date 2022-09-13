@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using CommandLine;
-using Mono.Cecil;
 
+using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
 namespace ISTA_Patcher
 {
@@ -154,11 +154,11 @@ namespace ISTA_Patcher
 
         public static int Main(string[] args)
         {
-            return CommandLine.Parser.Default.ParseArguments<PatchOptions, DecryptOptions>(args)
-                .MapResult(
-                    (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
-                    (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
-                    errs => 1);
+            return Parser.Default.ParseArguments<PatchOptions, DecryptOptions>(args)
+                         .MapResult(
+                             (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
+                             (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
+                             errs => 1);
 
             static int RunPatchAndReturnExitCode(PatchOptions opts)
             {
