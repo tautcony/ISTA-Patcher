@@ -74,7 +74,7 @@ namespace de4dot.code.deobfuscators {
 			if (module.Assembly != null)
 				writer.Write(module.Assembly.FullName);
 			writer.Write((module.Mvid ?? Guid.Empty).ToByteArray());
-			var hash = new SHA1Managed().ComputeHash(memoryStream.GetBuffer());
+			var hash = SHA1.HashData(memoryStream.GetBuffer());
 			var guid = new Guid(BitConverter.ToInt32(hash, 0),
 								BitConverter.ToInt16(hash, 4),
 								BitConverter.ToInt16(hash, 6),

@@ -56,7 +56,6 @@ namespace AssemblyData {
 		public void DoNothing() { }
 		public virtual void Exit() => exitEvent.Set();
 		public void WaitExit() => exitEvent.WaitOne();
-		public override object InitializeLifetimeService() => null;
 
 		protected void CheckAssembly() {
 			if (assembly == null)

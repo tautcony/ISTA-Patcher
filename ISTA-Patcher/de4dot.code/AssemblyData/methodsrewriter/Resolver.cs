@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using dnlib.DotNet;
 
@@ -27,7 +28,8 @@ namespace AssemblyData.methodsrewriter {
 		static Dictionary<string, AssemblyResolver> assemblyResolvers = new Dictionary<string, AssemblyResolver>(StringComparer.Ordinal);
 		static Dictionary<Module, MModule> modules = new Dictionary<Module, MModule>();
 
-		public static MModule LoadAssembly(Module module) {
+        [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = "<Pending>")]
+        public static MModule LoadAssembly(Module module) {
 			if (modules.TryGetValue(module, out var info))
 				return info;
 

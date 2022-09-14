@@ -137,15 +137,6 @@ namespace de4dot.code {
 
 		public static string GetDirName(string name) => Path.GetDirectoryName(name);
 
-		static string ourBaseDir = null;
-		public static string GetOurBaseDir() {
-			if (ourBaseDir != null)
-				return ourBaseDir;
-			return ourBaseDir = GetDirName(typeof(Utils).Assembly.Location);
-		}
-
-		public static string GetPathOfOurFile(string filename) => Path.Combine(GetOurBaseDir(), filename);
-
 		// This fixes a mono (tested 2.10.5) String.StartsWith() bug. NB: stringComparison must be
 		// Ordinal or OrdinalIgnoreCase!
 		public static bool StartsWith(string left, string right, StringComparison stringComparison) {

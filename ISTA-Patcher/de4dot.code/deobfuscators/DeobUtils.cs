@@ -70,12 +70,11 @@ namespace de4dot.code.deobfuscators {
 		public static byte[] Sha1Sum(byte[] data) => SHA1.Create().ComputeHash(data);
 		public static byte[] Sha256Sum(byte[] data) => SHA256.Create().ComputeHash(data);
 
-		public static byte[] AesDecrypt(byte[] data, byte[] key, byte[] iv) {
-			using (var aes = new RijndaelManaged { Mode = CipherMode.CBC }) {
-				using (var transform = aes.CreateDecryptor(key, iv)) {
-					return transform.TransformFinalBlock(data, 0, data.Length);
-				}
-			}
+		public static byte[] AesDecrypt(byte[] data, byte[] key, byte[] iv)
+		{
+			using var aes = Aes.Create("AesManaged");
+			using var transform = aes.CreateDecryptor(key, iv);
+			return transform.TransformFinalBlock(data, 0, data.Length);
 		}
 
 		public static byte[] Des3Decrypt(byte[] data, byte[] key, byte[] iv) {
@@ -86,12 +85,11 @@ namespace de4dot.code.deobfuscators {
 			}
 		}
 
-		public static byte[] DesDecrypt(byte[] data, int start, int len, byte[] key, byte[] iv) {
-			using (var des = new DESCryptoServiceProvider()) {
-				using (var transform = des.CreateDecryptor(key, iv)) {
-					return transform.TransformFinalBlock(data, start, len);
-				}
-			}
+		public static byte[] DesDecrypt(byte[] data, int start, int len, byte[] key, byte[] iv)
+		{
+			using var des = DES.Create();
+			using var transform = des.CreateDecryptor(key, iv);
+			return transform.TransformFinalBlock(data, start, len);
 		}
 
 		// Code converted from C implementation @ http://en.wikipedia.org/wiki/XXTEA (btea() func)
