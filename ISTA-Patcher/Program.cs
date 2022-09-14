@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using CommandLine;
 
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
@@ -14,6 +15,9 @@ namespace ISTA_Patcher
     class PatchOptions {
         [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Patch type, valid option: BMW, TOYOTA")]
         public PatchTypeEnum PatchType { get; set; }
+        
+        [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
+        public bool Deobfuscate { get; set; }
 
         [Value(1, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
         public string? TargetPath { get; set; }
@@ -54,7 +58,7 @@ namespace ISTA_Patcher
             */
         };
         
-        static void PatchISTA(string basePath, IEnumerable<string> pendingPatchList, string outputDir = "patched")
+        static void PatchISTA(string basePath, IEnumerable<string> pendingPatchList, bool deobfuscate = false, string outputDir = "patched")
         {
             if (!Directory.Exists(basePath))
             {
@@ -86,7 +90,8 @@ namespace ISTA_Patcher
 
                 try
                 {
-                    var assembly = PatchUtils.LoadAssembly(path);
+                    var module = PatchUtils.LoadModule(path);
+                    var assembly = module.Assembly;
                     var isPatched = PatchUtils.CheckPatchedMark(assembly);
                     if (isPatched)
                     {
@@ -102,10 +107,33 @@ namespace ISTA_Patcher
 
                     if (isPatched)
                     {
-                        // PatchUtils.DecryptParameter(assembly);
                         Console.Write("[patched]");
                         PatchUtils.SetPatchedMark(assembly);
                         assembly.Write(targetPath);
+                        if (deobfuscate)
+                        {
+                            try
+                            {
+                                var watch = new Stopwatch();
+                                watch.Start();
+                                
+                                var deobfPath = targetPath + ".deobf";
+                                PatchUtils.DeObfuscation(targetPath, deobfPath);
+                                if (File.Exists(targetPath))
+                                {
+                                    File.Delete(targetPath);
+                                }
+                                File.Move(deobfPath, targetPath);
+                                
+                                watch.Stop();
+                                var timeStr = watch.ElapsedTicks > TimeSpan.TicksPerSecond ? $" in {watch.ElapsedMilliseconds/1000.0:0.00}s" : "";
+                                Console.Write("[deobfuscate success" + timeStr  + "]");
+                            }
+                            catch (ApplicationException ex)
+                            {
+                                Console.Write($"[deobfuscate skiped]: {ex.Message}");
+                            }
+                        }
                         Console.WriteLine();
                     }
                     else
@@ -212,7 +240,7 @@ namespace ISTA_Patcher
                                 .OrderBy(i=>i);
 
                 var basePath = Path.Join(guiBasePath, "bin", "Release");
-                PatchISTA(basePath, patchList!);
+                PatchISTA(basePath, patchList!, opts.Deobfuscate);
 
                 return 0;
             }

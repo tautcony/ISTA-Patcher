@@ -1,4 +1,8 @@
-﻿using dnlib.DotNet;
+﻿using de4dot.code;
+using de4dot.code.AssemblyClient;
+using de4dot.code.deobfuscators;
+using de4dot.code.deobfuscators.Dotfuscator;
+using dnlib.DotNet;
 
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
@@ -6,14 +10,14 @@ namespace ISTA_Patcher
 {
     internal static class PatchUtils
     {
-        private static string _timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+        private static readonly string _timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+        private static readonly ModuleContext _modCtx = ModuleDef.CreateModuleContext();
+        private static readonly NewProcessAssemblyClientFactory _processAssemblyClientFactory = new ();
         
-        public static AssemblyDefinition LoadAssembly(string fileName)
+        public static ModuleDefMD LoadModule(string fileName)
         {
-            var modCtx = ModuleDef.CreateModuleContext();
-            var module = ModuleDefMD.Load(fileName, modCtx);
-            var assembly = module.Assembly;
-            return assembly;
+            var module = ModuleDefMD.Load(fileName, _modCtx);
+            return module;
         }
 
         public static bool PatchIntegrityManager(AssemblyDefinition assembly)
@@ -292,6 +296,24 @@ namespace ISTA_Patcher
             patchedType.Fields.Add(dateField);
             patchedType.Fields.Add(urlField);
             module.Types.Add(patchedType);
+        }
+
+        public static void DeObfuscation(string fileName, string newFileName)
+        {
+            var deobfuscatorInfo = new DeobfuscatorInfo();
+            var file = new ObfuscatedFile(new ObfuscatedFile.Options()
+            {
+                ControlFlowDeobfuscation = true,
+                Filename = fileName,
+                NewFilename = newFileName,
+                StringDecrypterType = DecrypterType.Static
+            }, _modCtx, _processAssemblyClientFactory);
+
+            file.Load(new List<IDeobfuscator> { deobfuscatorInfo.CreateDeobfuscator() });
+            file.DeobfuscateBegin();
+            file.Deobfuscate();
+            file.DeobfuscateEnd();
+            file.Save();
         }
     }
 }
