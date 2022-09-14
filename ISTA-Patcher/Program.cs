@@ -48,7 +48,8 @@ namespace ISTA_Patcher
             PatchUtils.PatchMainWindowViewModel,
             // For Toyota
             PatchUtils.PatchCommonFuncForIsta,
-            PatchUtils.PatchPackageValidityService
+            PatchUtils.PatchPackageValidityService,
+            PatchUtils.PatchToyotaWorker,
         };
             
         private static readonly string[] RequiredLibraries = {

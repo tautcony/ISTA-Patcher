@@ -254,6 +254,22 @@ namespace ISTA_Patcher
             CyclicExpirationDateCheck.EmptyingMethod();
             return true;
         }
+        
+        public static bool PatchToyotaWorker(AssemblyDefinition assembly)
+        {
+            var VehicleIsValid = assembly.GetMethod(
+                "BMW.Rheingold.Toyota.Worker.ToyotaWorker",
+                "VehicleIsValid",
+                "(System.String)System.Boolean"
+            );
+            if (VehicleIsValid == null)
+            {
+                return false;
+            }
+
+            VehicleIsValid.ReturnOneMethod();
+            return true;
+        }
 
 
         public static bool CheckPatchedMark(AssemblyDefinition assembly)
