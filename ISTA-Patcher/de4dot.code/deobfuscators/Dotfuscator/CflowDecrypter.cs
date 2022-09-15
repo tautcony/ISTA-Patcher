@@ -65,7 +65,10 @@ namespace de4dot.code.deobfuscators.Dotfuscator {
 
 		void GetFixIndexs(IList<Instruction> instructions, out List<int> nopIdxs, out List<int> ldlocIdxs) {
 			var insNoNops = new List<Instruction>();
+			var indexMapping = new Dictionary<Instruction, int>();
+			var index = 0;
 			foreach (var ins in instructions) {
+				indexMapping[ins] = index++;
 				if (ins.OpCode != OpCodes.Nop)
 					insNoNops.Add(ins);
 			}
@@ -84,14 +87,14 @@ namespace de4dot.code.deobfuscators.Dotfuscator {
 				var ldci4 = insNoNops[i - 3];
 				if (!ldci4.IsLdcI4())
 					continue;
-				ldlocIdxs.Add(instructions.IndexOf(ldlocX));
-				nopIdxs.Add(instructions.IndexOf(ldind));
+				ldlocIdxs.Add(indexMapping[ldlocX]);
+				nopIdxs.Add(indexMapping[ldind]);
 				var convi2 = insNoNops[i + 1];
 				if (ldind.OpCode == OpCodes.Ldind_I2 && convi2.OpCode == OpCodes.Conv_I2)
-					nopIdxs.Add(instructions.IndexOf(convi2));
+					nopIdxs.Add(indexMapping[convi2]);
 				var convi = insNoNops[i + 2];
 				if (ldind.OpCode == OpCodes.Ldind_I2 && convi.OpCode == OpCodes.Conv_I)
-					nopIdxs.Add(instructions.IndexOf(convi));
+					nopIdxs.Add(indexMapping[convi]);
 			}
 		}
 

@@ -360,9 +360,14 @@ namespace de4dot.code {
 
 		void InlineReturnValues() {
 			callResults = RemoveNulls(callResults);
+			var indexMapping = new Dictionary<Block, int>();
+			for (var i = 0; i < allBlocks.Count; ++i)
+			{
+				indexMapping[allBlocks[i]] = i;
+			}
 			callResults.Sort((a, b) => {
-				int i1 = allBlocks.FindIndex((x) => a.block == x);
-				int i2 = allBlocks.FindIndex((x) => b.block == x);
+				int i1 = indexMapping[a.block];
+				int i2 = indexMapping[b.block];
 				if (i1 != i2)
 					return i1.CompareTo(i2);
 
