@@ -33,7 +33,8 @@ public static class DnlibUtils
     public static MethodDef? GetMethod(this AssemblyDef asm, string type, string name, string desc)
     {
         var td = asm.Modules.SelectMany(m => m.GetTypes()).FirstOrDefault(tp => tp.FullName == type);
-        return td?.Methods.FirstOrDefault(m => m.Name.Equals(name) && DescriptionOf(m).Equals(desc.Replace(" ", string.Empty)));
+        desc = desc.Replace(" ", string.Empty);
+        return td?.Methods.FirstOrDefault(m => m.Name.Equals(name) && DescriptionOf(m).Equals(desc));
     }
 
     public static void EmptyingMethod(this MethodDef method)
@@ -84,5 +85,15 @@ public static class DnlibUtils
         {
             throw new Exception($"{method.FullName}.Body null!");
         }
+    }
+
+    public static void ReturnFalseMethod(this MethodDef method)
+    { 
+        ReturnZeroMethod(method);
+    }
+
+    public static void ReturnTrueMethod(this MethodDef method)
+    { 
+        ReturnOneMethod(method);
     }
 }

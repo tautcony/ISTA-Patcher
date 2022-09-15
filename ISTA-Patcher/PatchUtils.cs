@@ -21,293 +21,196 @@ namespace ISTA_Patcher
             return module;
         }
 
-        public static bool PatchIntegrityManager(AssemblyDefinition assembly)
+        private static bool PatchFunction(AssemblyDefinition assembly, string type, string name, string desc,
+            Action<MethodDef> operation)
         {
-            var integrityManagerConstructor = assembly.GetMethod(
-                "BMW.Rheingold.SecurityAndLicense.IntegrityManager",
-                ".ctor",
-                "()System.Void"
-            );
-            if (integrityManagerConstructor == null)
+            var function = assembly.GetMethod(type, name, desc);
+            if (function == null)
             {
                 return false;
             }
-
-            integrityManagerConstructor.EmptyingMethod();
+            operation(function);
             return true;
+        }
+
+        public static bool PatchIntegrityManager(AssemblyDefinition assembly)
+        {
+            return PatchFunction(assembly,
+                "BMW.Rheingold.SecurityAndLicense.IntegrityManager",
+                ".ctor",
+                "()System.Void",
+                DnlibUtils.EmptyingMethod
+            );
         }
 
         public static bool PatchLicenseStatusChecker(AssemblyDefinition assembly)
         {
-            var isLicenseValid = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
                 "IsLicenseValid",
-                "(BMW.Rheingold.CoreFramework.LicenseInfo,System.Boolean)BMW.Rheingold.CoreFramework.LicenseStatus"
+                "(BMW.Rheingold.CoreFramework.LicenseInfo,System.Boolean)BMW.Rheingold.CoreFramework.LicenseStatus",
+                DnlibUtils.ReturnZeroMethod
             );
-            if (isLicenseValid == null)
-            {
-                return false;
-            }
-
-            isLicenseValid.ReturnZeroMethod();
-            return true;
         }
 
         public static bool PatchCheckSignature(AssemblyDefinition assembly)
         {
-            var CheckSignature = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
                 "CheckSignature",
-                "(System.String)System.Void"
+                "(System.String)System.Void",
+                DnlibUtils.EmptyingMethod
             );
-            if (CheckSignature == null)
-            {
-                return false;
-            }
-
-            CheckSignature.EmptyingMethod();
-            return true;
         }
 
         public static bool PatchLicenseManager(AssemblyDefinition assembly)
         {
-            var VerifyLicense = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.Rheingold.CoreFramework.LicenseManager",
                 "VerifyLicense",
-                "(System.Boolean)System.Void"
+                "(System.Boolean)System.Void",
+                DnlibUtils.EmptyingMethod
             );
-            if (VerifyLicense == null)
-            {
-                return false;
-            }
-
-            VerifyLicense.EmptyingMethod();
-            return true;
         }
 
         public static bool PatchAOSLicenseManager(AssemblyDefinition assembly)
         {
-            var VerifyLicense = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.Rheingold.CoreFramework.LicenseAOSManager",
                 "VerifyLicense",
-                "()System.Void"
+                "()System.Void",
+                DnlibUtils.EmptyingMethod
             );
-            if (VerifyLicense == null)
-            {
-                return false;
-            }
-
-            VerifyLicense.EmptyingMethod();
-            return true;
         }
 
         public static bool PatchIstaIcsServiceClient(AssemblyDefinition assembly)
         {
-            var ValidateHost = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
                 "ValidateHost",
-                "()System.Void"
-            );
-            if (ValidateHost == null)
-            {
-                return false;
-            }
-
-            ValidateHost.EmptyingMethod();
-            var VerifyLicense = assembly.GetMethod(
+                "()System.Void",
+                DnlibUtils.EmptyingMethod
+            ) && PatchFunction(assembly,
                 "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
                 "VerifyLicense",
-                "()System.Void"
+                "()System.Void",
+                DnlibUtils.EmptyingMethod
             );
-            if (VerifyLicense == null)
-            {
-                return false;
-            }
-
-            VerifyLicense.EmptyingMethod();
-            return true;
         }
 
         public static bool PatchCommonServiceWrapper(AssemblyDefinition assembly)
         {
-            var VerifyLicense = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
                 "VerifyLicense",
-                "()System.Void"
+                "()System.Void",
+                DnlibUtils.EmptyingMethod
             );
-            if (VerifyLicense == null)
-            {
-                return false;
-            }
-
-            VerifyLicense.EmptyingMethod();
-            return true;
         }
 
         public static bool PatchSecureAccessHelper(AssemblyDefinition assembly)
         {
-            var IsCodeAccessPermitted = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.iLean.CommonServices.Helper.SecureAccessHelper",
                 "IsCodeAccessPermitted",
-                "(System.Reflection.Assembly,System.Reflection.Assembly)System.Boolean"
+                "(System.Reflection.Assembly,System.Reflection.Assembly)System.Boolean",
+                DnlibUtils.ReturnTrueMethod
             );
-            if (IsCodeAccessPermitted == null)
-            {
-                return false;
-            }
-
-            IsCodeAccessPermitted.ReturnOneMethod();
-            return true;
         }
 
         public static bool PatchLicenseWizardHelper(AssemblyDefinition assembly)
         {
-            var DoLicenseCheck = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
                 "DoLicenseCheck",
-                "(System.String)System.Boolean"
+                "(System.String)System.Boolean",
+                DnlibUtils.ReturnTrueMethod
             );
-            if (DoLicenseCheck == null)
-            {
-                return false;
-            }
-
-            DoLicenseCheck.ReturnOneMethod();
-            return true;
         }
 
         public static bool PatchVerifyAssemblyHelper(AssemblyDefinition assembly)
         {
-            var VerifyStrongName = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
                 "VerifyStrongName",
-                "(System.String,System.Boolean)System.Boolean"
+                "(System.String,System.Boolean)System.Boolean",
+                DnlibUtils.ReturnTrueMethod
             );
-            if (VerifyStrongName == null)
-            {
-                return false;
-            }
-
-            VerifyStrongName.ReturnOneMethod();
-            return true;
         }
 
         public static bool PatchFscValidationClient(AssemblyDefinition assembly)
         {
-            var IsValid = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.TricTools.FscValidation.FscValidationClient",
                 "IsValid",
-                "(System.Byte[],System.Byte[])System.Boolean"
+                "(System.Byte[],System.Byte[])System.Boolean",
+                DnlibUtils.ReturnTrueMethod
             );
-            if (IsValid == null)
-            {
-                return false;
-            }
-
-            IsValid.ReturnOneMethod();
-            return true;
         }
 
         public static bool PatchMainWindowViewModel(AssemblyDefinition assembly)
         {
-            var CheckExpirationDate = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.Rheingold.ISTAGUI.ViewModels.MainWindowViewModel",
                 "CheckExpirationDate",
-                "()System.Void"
+                "()System.Void",
+                DnlibUtils.EmptyingMethod
             );
-            if (CheckExpirationDate == null)
-            {
-                return false;
-            }
-
-            CheckExpirationDate.EmptyingMethod();
-            return true;
         }
 
         public static bool PatchActivationCertificateHelper(AssemblyDefinition assembly)
         {
-            var IsInWhiteList = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
                 "IsInWhiteList",
-                "(System.String,System.String,System.String)System.Boolean"
-            );
-            var IsWhiteListSignatureValid = assembly.GetMethod(
+                "(System.String,System.String,System.String)System.Boolean",
+                DnlibUtils.ReturnTrueMethod
+            ) && PatchFunction(assembly,
                 "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
                 "IsWhiteListSignatureValid",
-                "(System.String,System.String)System.Boolean"
+                "(System.String,System.String)System.Boolean",
+                DnlibUtils.ReturnTrueMethod
             );
-
-            if (IsInWhiteList == null && IsWhiteListSignatureValid == null)
-            {
-                return false;
-            }
-            IsInWhiteList.ReturnOneMethod();
-            IsWhiteListSignatureValid.ReturnOneMethod();
-            return true;
         }
 
         public static bool PatchCertificateHelper(AssemblyDefinition assembly)
         {
-            var ValidateCertificate = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.iLean.CommonServices.Helper.CertificateHelper",
                 "ValidateCertificate",
-                "(System.String)System.Boolean"
+                "(System.String)System.Boolean",
+                DnlibUtils.ReturnTrueMethod
             );
-
-            if (ValidateCertificate == null)
-            {
-                return false;
-            }
-            ValidateCertificate.ReturnOneMethod();
-            return true;
         }
 
         public static bool PatchCommonFuncForIsta(AssemblyDefinition assembly)
         {
-            var GetLicenseStatus = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "Toyota.GTS.ForIsta.CommonFuncForIsta",
                 "GetLicenseStatus",
-                "()BMW.Rheingold.ToyotaLicenseHelper.ToyotaLicenseStatus"
+                "()BMW.Rheingold.ToyotaLicenseHelper.ToyotaLicenseStatus",
+                DnlibUtils.ReturnZeroMethod
             );
-            if (GetLicenseStatus == null)
-            {
-                return false;
-            }
-
-            GetLicenseStatus.ReturnZeroMethod();
-            return true;
         }
 
         public static bool PatchPackageValidityService(AssemblyDefinition assembly)
         {
-            var CyclicExpirationDateCheck = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.Rheingold.ISTAGUI.Controller.PackageValidityService",
                 "CyclicExpirationDateCheck",
-                "()System.Void"
+                "()System.Void",
+                DnlibUtils.EmptyingMethod
             );
-            if (CyclicExpirationDateCheck == null)
-            {
-                return false;
-            }
-
-            CyclicExpirationDateCheck.EmptyingMethod();
-            return true;
         }
 
         public static bool PatchToyotaWorker(AssemblyDefinition assembly)
         {
-            var VehicleIsValid = assembly.GetMethod(
+            return PatchFunction(assembly,
                 "BMW.Rheingold.Toyota.Worker.ToyotaWorker",
                 "VehicleIsValid",
-                "(System.String)System.Boolean"
+                "(System.String)System.Boolean",
+                DnlibUtils.ReturnTrueMethod
             );
-            if (VehicleIsValid == null)
-            {
-                return false;
-            }
-
-            VehicleIsValid.ReturnOneMethod();
-            return true;
         }
 
 
