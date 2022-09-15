@@ -22,7 +22,6 @@ public static class DnlibUtils
 
         sb.Append(')');
         sb.Append(md.ReturnType.FullName);
-        //Console.WriteLine(sb.ToString());
         return sb.ToString();
     }
 

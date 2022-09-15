@@ -12,6 +12,7 @@ namespace ISTA_Patcher
     {
         private static readonly string _timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
         private static readonly ModuleContext _modCtx = ModuleDef.CreateModuleContext();
+        private static readonly IDeobfuscatorContext _deobfuscatorContext = new DeobfuscatorContext();
         private static readonly NewProcessAssemblyClientFactory _processAssemblyClientFactory = new ();
         
         public static ModuleDefMD LoadModule(string fileName)
@@ -317,13 +318,17 @@ namespace ISTA_Patcher
         public static void DeObfuscation(string fileName, string newFileName)
         {
             var deobfuscatorInfo = new DeobfuscatorInfo();
-            var file = new ObfuscatedFile(new ObfuscatedFile.Options()
+
+            using var file = new ObfuscatedFile(new ObfuscatedFile.Options
             {
                 ControlFlowDeobfuscation = true,
                 Filename = fileName,
                 NewFilename = newFileName,
                 StringDecrypterType = DecrypterType.Static
-            }, _modCtx, _processAssemblyClientFactory);
+            }, _modCtx, _processAssemblyClientFactory)
+            {
+                DeobfuscatorContext = _deobfuscatorContext
+            };
 
             file.Load(new List<IDeobfuscator> { deobfuscatorInfo.CreateDeobfuscator() });
             file.DeobfuscateBegin();

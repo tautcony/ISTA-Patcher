@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
 using CommandLine;
-
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
 namespace ISTA_Patcher
@@ -46,12 +45,21 @@ namespace ISTA_Patcher
             PatchUtils.PatchVerifyAssemblyHelper,
             PatchUtils.PatchFscValidationClient,
             PatchUtils.PatchMainWindowViewModel,
-            // For Toyota
+        };
+
+        private static readonly Func<AssemblyDefinition, bool>[] ToyotaPatches =
+        {
             PatchUtils.PatchCommonFuncForIsta,
             PatchUtils.PatchPackageValidityService,
             PatchUtils.PatchToyotaWorker,
         };
-            
+
+        private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, bool>> patches)
+        {
+            return patches.Select(i => i.Method.Name[5..]).Reverse().ToList().Select((t, i) =>
+                new string('│', patches.Count - 1 - i) + "└" + new string('─', i + 1) + t);
+        }
+
         private static readonly string[] RequiredLibraries = {
             /*
             "RheingoldCoreContracts.dll",
@@ -59,7 +67,7 @@ namespace ISTA_Patcher
             */
         };
         
-        static void PatchISTA(string basePath, IEnumerable<string> pendingPatchList, bool deobfuscate = false, string outputDir = "patched")
+        static void PatchISTA(string basePath, List<string> pendingPatchList, PatchOptions options, string outputDir = "patched")
         {
             if (!Directory.Exists(basePath))
             {
@@ -74,13 +82,16 @@ namespace ISTA_Patcher
                 return;
             }
 
+            var validPatches = options.PatchType == PatchTypeEnum.BMW ? Patches : Patches.Concat(ToyotaPatches).ToArray();
             Console.WriteLine("=== ISTA Patch Begin ===");
+            var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
             foreach (var pendingPatchItem in pendingPatchList)
             {
                 var path = Path.Join(basePath, pendingPatchItem);
                 var moddedDir = Path.Join(basePath, outputDir);
                 var targetPath = Path.Join(moddedDir, pendingPatchItem);
-                Console.Write($"{pendingPatchItem} ");
+                Console.Write($"{pendingPatchItem}");
+                Console.Write(new string(' ', indentLength - pendingPatchItem.Length));
                 if (!File.Exists(path))
                 {
                     Console.WriteLine(" [not found]");
@@ -101,7 +112,7 @@ namespace ISTA_Patcher
                     }
 
                     // Patch and print result
-                    var result = Patches.Select(patch => patch(assembly)).ToList();
+                    var result = validPatches.Select(patch => patch(assembly)).ToList();
                     isPatched = result.Any(i => i);
                     Console.Write(result.Aggregate("", (c, i) => c + (i ? "+" : "-")) + " ");
                     
@@ -111,7 +122,7 @@ namespace ISTA_Patcher
                         Console.Write("[patched]");
                         PatchUtils.SetPatchedMark(assembly);
                         assembly.Write(targetPath);
-                        if (deobfuscate)
+                        if (options.Deobfuscate)
                         {
                             try
                             {
@@ -127,7 +138,7 @@ namespace ISTA_Patcher
                                 File.Move(deobfPath, targetPath);
                                 
                                 watch.Stop();
-                                var timeStr = watch.ElapsedTicks > TimeSpan.TicksPerSecond ? $" in {watch.ElapsedMilliseconds/1000.0:0.00}s" : "";
+                                var timeStr = watch.ElapsedTicks > Stopwatch.Frequency ? $" in {watch.Elapsed:mm\\:ss}" : "";
                                 Console.Write("[deobfuscate success" + timeStr  + "]");
                             }
                             catch (ApplicationException ex)
@@ -151,6 +162,12 @@ namespace ISTA_Patcher
                         File.Delete(targetPath);
                     }
                 }
+            }
+            
+            
+            foreach (var line in BuildIndicator(validPatches))
+            {
+                Console.WriteLine(new string(' ', indentLength) + line);
             }
 
             Console.WriteLine("=== ISTA Patch Done ===");
@@ -179,7 +196,6 @@ namespace ISTA_Patcher
                                                     .Select(Path.GetFileName).ToArray();
             return fileList;
         }
-
 
         public static int Main(string[] args)
         {
@@ -238,10 +254,10 @@ namespace ISTA_Patcher
                 var patchList = includeList
                                 .Union(fileList.Where(f => !excludeList.Contains(f)))
                                 .Distinct()
-                                .OrderBy(i=>i);
+                                .OrderBy(i=>i).ToList();
 
                 var basePath = Path.Join(guiBasePath, "bin", "Release");
-                PatchISTA(basePath, patchList!, opts.Deobfuscate);
+                PatchISTA(basePath, patchList!, opts);
 
                 return 0;
             }
