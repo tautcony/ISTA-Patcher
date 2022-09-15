@@ -45,6 +45,8 @@ namespace ISTA_Patcher
             PatchUtils.PatchVerifyAssemblyHelper,
             PatchUtils.PatchFscValidationClient,
             PatchUtils.PatchMainWindowViewModel,
+            PatchUtils.PatchActivationCertificateHelper,
+            PatchUtils.PatchCertificateHelper,
         };
 
         private static readonly Func<AssemblyDefinition, bool>[] ToyotaPatches =
@@ -115,7 +117,7 @@ namespace ISTA_Patcher
                     var result = validPatches.Select(patch => patch(assembly)).ToList();
                     isPatched = result.Any(i => i);
                     Console.Write(result.Aggregate("", (c, i) => c + (i ? "+" : "-")) + " ");
-                    
+
 
                     if (isPatched)
                     {
@@ -128,7 +130,7 @@ namespace ISTA_Patcher
                             {
                                 var watch = new Stopwatch();
                                 watch.Start();
-                                
+
                                 var deobfPath = targetPath + ".deobf";
                                 PatchUtils.DeObfuscation(targetPath, deobfPath);
                                 if (File.Exists(targetPath))
@@ -136,7 +138,7 @@ namespace ISTA_Patcher
                                     File.Delete(targetPath);
                                 }
                                 File.Move(deobfPath, targetPath);
-                                
+
                                 watch.Stop();
                                 var timeStr = watch.ElapsedTicks > Stopwatch.Frequency ? $" in {watch.Elapsed:mm\\:ss}" : "";
                                 Console.Write("[deobfuscate success" + timeStr  + "]");
@@ -163,8 +165,8 @@ namespace ISTA_Patcher
                     }
                 }
             }
-            
-            
+
+
             foreach (var line in BuildIndicator(validPatches))
             {
                 Console.WriteLine(new string(' ', indentLength) + line);
@@ -261,7 +263,7 @@ namespace ISTA_Patcher
 
                 return 0;
             }
-            
+
             static int RunDecryptAndReturnExitCode(DecryptOptions opts)
             {
                 var targetFilename = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");

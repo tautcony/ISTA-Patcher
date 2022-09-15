@@ -156,7 +156,7 @@ namespace ISTA_Patcher
                 return false;
             }
 
-            IsCodeAccessPermitted.EmptyingMethod();
+            IsCodeAccessPermitted.ReturnOneMethod();
             return true;
         }
 
@@ -207,7 +207,7 @@ namespace ISTA_Patcher
             IsValid.ReturnOneMethod();
             return true;
         }
-        
+
         public static bool PatchMainWindowViewModel(AssemblyDefinition assembly)
         {
             var CheckExpirationDate = assembly.GetMethod(
@@ -221,6 +221,44 @@ namespace ISTA_Patcher
             }
 
             CheckExpirationDate.EmptyingMethod();
+            return true;
+        }
+
+        public static bool PatchActivationCertificateHelper(AssemblyDefinition assembly)
+        {
+            var IsInWhiteList = assembly.GetMethod(
+                "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
+                "IsInWhiteList",
+                "(System.String,System.String,System.String)System.Boolean"
+            );
+            var IsWhiteListSignatureValid = assembly.GetMethod(
+                "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
+                "IsWhiteListSignatureValid",
+                "(System.String,System.String)System.Boolean"
+            );
+
+            if (IsInWhiteList == null && IsWhiteListSignatureValid == null)
+            {
+                return false;
+            }
+            IsInWhiteList.ReturnOneMethod();
+            IsWhiteListSignatureValid.ReturnOneMethod();
+            return true;
+        }
+
+        public static bool PatchCertificateHelper(AssemblyDefinition assembly)
+        {
+            var ValidateCertificate = assembly.GetMethod(
+                "BMW.iLean.CommonServices.Helper.CertificateHelper",
+                "ValidateCertificate",
+                "(System.String)System.Boolean"
+            );
+
+            if (ValidateCertificate == null)
+            {
+                return false;
+            }
+            ValidateCertificate.ReturnOneMethod();
             return true;
         }
 
@@ -255,7 +293,7 @@ namespace ISTA_Patcher
             CyclicExpirationDateCheck.EmptyingMethod();
             return true;
         }
-        
+
         public static bool PatchToyotaWorker(AssemblyDefinition assembly)
         {
             var VehicleIsValid = assembly.GetMethod(
@@ -286,7 +324,7 @@ namespace ISTA_Patcher
             {
                 return;
             }
-            
+
             var patchedType = new TypeDefUser(
                 "Patched.By", "TC",
                 module.CorLibTypes.Object.TypeDefOrRef)
