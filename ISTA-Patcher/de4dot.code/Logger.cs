@@ -17,12 +17,11 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
-using System.Collections.Generic;
+using Serilog;
 using dnlib.DotNet;
 
 namespace de4dot.code {
-	public class Logger : ILogger {
+	public class Logger : dnlib.DotNet.ILogger {
 		public readonly static Logger Instance = new Logger();
 
 		int indentLevel = 0;
@@ -90,17 +89,17 @@ namespace de4dot.code {
 			switch (loggerEvent) {
 			case LoggerEvent.Error:
 				foreach (var l in string.Format(format, args).Split('\n'))
-					LogMessage(string.Empty, $"ERROR: {l}");
+					Serilog.Log.Error(l);
 				break;
 
 			case LoggerEvent.Warning:
 				foreach (var l in string.Format(format, args).Split('\n'))
-					LogMessage(string.Empty, $"WARNING: {l}");
+					Serilog.Log.Warning(l);
 				break;
 
 			default:
 				var indent = loggerEvent <= LoggerEvent.Warning ? "" : indentString;
-				LogMessage(indent, format, args);
+				Serilog.Log.Information("{Indent}{Message}", indent, string.Format(format, args));
 				break;
 			}
 		}

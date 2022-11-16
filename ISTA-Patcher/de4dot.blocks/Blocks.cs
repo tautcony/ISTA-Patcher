@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using de4dot.code;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 
@@ -206,8 +207,7 @@ namespace de4dot.blocks {
 					scopeBlock.RepartitionBlocks();
 				}
 				catch (NullReferenceException) {
-					//TODO: Send this message to the log
-					Console.WriteLine("Null ref exception! Invalid metadata token in code? Method: {0:X8}: {1}", method.MDToken.Raw, method.FullName);
+					Logger.e("Null ref exception! Invalid metadata token in code? Method: {0:X8}: {1}", method.MDToken.Raw, method.FullName);
 					return;
 				}
 			}

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Serilog;
 
 namespace ISTA_Patcher;
 
@@ -35,7 +36,7 @@ public class IntegrityManager
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to decrypt file: {ex.Message}");
+            Log.Warning("Failed to decrypt file: {Reason}", ex.Message);
         }
         return null;
     }
@@ -53,6 +54,8 @@ public class HashFileInfo
     {
         FilePath = fileInfos[0];
         FileName = Path.GetFileName(FilePath.Replace("\\", "/"));
-        Hash = fileInfos[1];
+        var bytes = Convert.FromBase64String(fileInfos[1]);
+        var hex = BitConverter.ToString(bytes).Replace("-", "").ToLower();
+        Hash = hex;
     }
 }

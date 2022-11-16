@@ -1,6 +1,10 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using CommandLine;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
 namespace ISTA_Patcher
@@ -73,30 +77,32 @@ namespace ISTA_Patcher
         {
             if (!Directory.Exists(basePath))
             {
-                Console.WriteLine($"Folder '{basePath}' not found, exiting...");
+                Log.Fatal("Folder '{BasePath}' not found, exiting...", basePath);
                 return;
             }
 
             foreach (var library in RequiredLibraries)
             {
                 if (File.Exists(Path.Join(basePath, library))) continue;
-                Console.WriteLine($"Required library '{library}' not found, exiting...");
+                Log.Fatal("Required library '{Library}' not found, exiting...", library);
                 return;
             }
 
             var validPatches = options.PatchType == PatchTypeEnum.BMW ? Patches : Patches.Concat(ToyotaPatches).ToArray();
-            Console.WriteLine("=== ISTA Patch Begin ===");
+            Log.Information("=== ISTA Patch Begin ===");
+            var timer = Stopwatch.StartNew();
             var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
+
             foreach (var pendingPatchItem in pendingPatchList)
             {
                 var path = Path.Join(basePath, pendingPatchItem);
                 var moddedDir = Path.Join(basePath, outputDir);
                 var targetPath = Path.Join(moddedDir, pendingPatchItem);
-                Console.Write($"{pendingPatchItem}");
-                Console.Write(new string(' ', indentLength - pendingPatchItem.Length));
+
+                var indent = new string(' ', indentLength - pendingPatchItem.Length);
                 if (!File.Exists(path))
                 {
-                    Console.WriteLine(" [not found]");
+                    Log.Information("{Item}{Indent} [not found]", pendingPatchItem, indent);
                     continue;
                 }
 
@@ -109,27 +115,25 @@ namespace ISTA_Patcher
                     var isPatched = PatchUtils.CheckPatchedMark(assembly);
                     if (isPatched)
                     {
-                        Console.WriteLine("[already patched]");
+                        Log.Information("{Item}{Indent} [already patched]", pendingPatchItem, indent);
                         continue;
                     }
 
                     // Patch and print result
                     var result = validPatches.Select(patch => patch(assembly)).ToList();
                     isPatched = result.Any(i => i);
-                    Console.Write(result.Aggregate("", (c, i) => c + (i ? "+" : "-")) + " ");
+                    var resultStr = result.Aggregate("", (c, i) => c + (i ? "+" : "-"));
 
 
                     if (isPatched)
                     {
-                        Console.Write("[patched]");
                         PatchUtils.SetPatchedMark(assembly);
                         assembly.Write(targetPath);
                         if (options.Deobfuscate)
                         {
                             try
                             {
-                                var watch = new Stopwatch();
-                                watch.Start();
+                                var deobfTimer = Stopwatch.StartNew();
 
                                 var deobfPath = targetPath + ".deobf";
                                 PatchUtils.DeObfuscation(targetPath, deobfPath);
@@ -139,25 +143,30 @@ namespace ISTA_Patcher
                                 }
                                 File.Move(deobfPath, targetPath);
 
-                                watch.Stop();
-                                var timeStr = watch.ElapsedTicks > Stopwatch.Frequency ? $" in {watch.Elapsed:mm\\:ss}" : "";
-                                Console.Write("[deobfuscate success" + timeStr  + "]");
+                                deobfTimer.Stop();
+                                var timeStr = deobfTimer.ElapsedTicks > Stopwatch.Frequency
+                                    ? $" in {deobfTimer.Elapsed:mm\\:ss}"
+                                    : "";
+                                Log.Information("{Item}{Indent}{Result} [patched][deobfuscate success{Time}]", pendingPatchItem, indent, resultStr, timeStr);
                             }
                             catch (ApplicationException ex)
                             {
-                                Console.Write($"[deobfuscate skiped]: {ex.Message}");
+                                Log.Information("{Item}{Indent}{Result} [patched][deobfuscate skipped]: {Reason}", pendingPatchItem, indent, resultStr, ex.Message);
                             }
                         }
-                        Console.WriteLine();
+                        else
+                        {
+                            Log.Information("{Item}{Indent}{Result} [patched]", pendingPatchItem, indent, resultStr);
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("[skip]");
+                        Log.Information("{Item}{Indent}{Result} [skip]", pendingPatchItem, indent, resultStr);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[failed]: {ex.Message}");
+                    Log.Information("{Item}{Indent} [failed]: {Reason}", pendingPatchItem, indent, ex.Message);
 
                     if (File.Exists(targetPath))
                     {
@@ -169,10 +178,11 @@ namespace ISTA_Patcher
 
             foreach (var line in BuildIndicator(validPatches))
             {
-                Console.WriteLine(new string(' ', indentLength) + line);
+                Log.Information("{Indent}{Line}", new string(' ', indentLength), line);
             }
 
-            Console.WriteLine("=== ISTA Patch Done ===");
+            timer.Stop();
+            Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
         }
 
         private static string?[] LoadISTAList(string targetFilename, string guiBasePath)
@@ -201,6 +211,15 @@ namespace ISTA_Patcher
 
         public static int Main(string[] args)
         {
+            var levelSwitch = new LoggingLevelSwitch
+            {
+                MinimumLevel = LogEventLevel.Debug,
+            };
+            Log.Logger = new LoggerConfiguration()
+                         .MinimumLevel.ControlledBy(levelSwitch)
+                         .WriteTo.Console()
+                         .CreateLogger();
+
             return Parser.Default.ParseArguments<PatchOptions, DecryptOptions>(args)
                          .MapResult(
                              (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
@@ -217,7 +236,7 @@ namespace ISTA_Patcher
                 {
                     if (opts.PatchType == PatchTypeEnum.BMW && !File.Exists(targetFilename))
                     {
-                        Console.WriteLine("Folder structure not match, please check input path");
+                        Log.Fatal("Folder structure not match, please check input path");
                         return -1;
                     }
                 }
@@ -241,7 +260,7 @@ namespace ISTA_Patcher
                     ex is FileNotFoundException or IOException or JsonException
                 )
                 {
-                    Console.WriteLine($"Failed to load config file: {ex.Message}");
+                    Log.Fatal("Failed to load config file: {Reason}", ex.Message);
                 }
                 excludeList ??= Array.Empty<string>();
                 includeList ??= Array.Empty<string>();
@@ -272,12 +291,14 @@ namespace ISTA_Patcher
                 if (fileList == null) return -1;
                 var filePathMaxLength = fileList.Select(f => f.FilePath.Length).Max();
                 var hashMaxLength = fileList.Select(f => f.Hash.Length).Max();
-                Console.WriteLine($"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash".PadRight(hashMaxLength)} |");
-                Console.WriteLine($"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} |");
+                var markdownBuilder = new StringBuilder();
+                markdownBuilder.AppendLine($"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash(SHA256)".PadRight(hashMaxLength)} |");
+                markdownBuilder.AppendLine($"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} |");
                 foreach (var fileInfo in fileList)
                 {
-                    Console.WriteLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} |");
+                    markdownBuilder.AppendLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} |");
                 }
+                Log.Information("Markdown result:\n{Markdown}", markdownBuilder.ToString());
                 return 0;
             }
         }
