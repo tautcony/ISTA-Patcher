@@ -3,7 +3,8 @@ using de4dot.code.AssemblyClient;
 using de4dot.code.deobfuscators;
 using de4dot.code.deobfuscators.Dotfuscator;
 using dnlib.DotNet;
-
+using dnlib.DotNet.Emit;
+using Serilog;
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
 namespace ISTA_Patcher
@@ -213,6 +214,82 @@ namespace ISTA_Patcher
             );
         }
 
+        public static bool PatchConfigurationService(AssemblyDefinition assembly)
+        {
+            void RewriteProperties(MethodDef method)
+            {
+                var instructions = method.Body.Instructions;
+
+                var baseService = instructions.FindInstruction(OpCodes.Call, "com.bmw.psdz.api.Configuration BMW.Rheingold.Psdz.Services.ServiceBase`1<com.bmw.psdz.api.Configuration>::get_BaseService()");
+                var getPSdZProperties = instructions.FindInstruction(OpCodes.Callvirt, "java.util.Properties com.bmw.psdz.api.Configuration::getPSdZProperties()");
+                var setPSdZProperties = instructions.FindInstruction(OpCodes.Callvirt, "System.Void com.bmw.psdz.api.Configuration::setPSdZProperties(java.util.Properties)");
+                var putProperty = instructions.FindInstruction(OpCodes.Call, "System.Void BMW.Rheingold.Psdz.Services.ConfigurationService::PutProperty(java.util.Properties,java.lang.String,java.lang.String)");
+                var stringImplicit = instructions.FindInstruction(OpCodes.Call, "java.lang.String java.lang.String::op_Implicit(System.String)");
+
+                if (baseService == null || getPSdZProperties == null || setPSdZProperties == null || putProperty == null ||
+                    stringImplicit == null)
+                {
+                    Log.Warning("Can not patch ConfigurationService");
+                    return;
+                }
+                var patchedMethod = new List<Instruction>
+                {
+                    // Properties pSdZProperties = base.BaseService.getPSdZProperties();
+                    Instruction.Create(OpCodes.Ldarg_0),
+                    Instruction.Create(OpCodes.Call, baseService.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Callvirt, getPSdZProperties.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Stloc_0),
+                    // PutProperty(pSdZProperties, String.op_Implicit("DealerID"), String.op_Implicit("1234"));
+                    Instruction.Create(OpCodes.Ldarg_0),
+                    Instruction.Create(OpCodes.Ldloc_0),
+                    Instruction.Create(OpCodes.Ldstr, "DealerID"),
+                    Instruction.Create(OpCodes.Call, stringImplicit.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Ldstr, "1234"),
+                    Instruction.Create(OpCodes.Call, stringImplicit.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Call, putProperty.Operand as MethodDef),
+                    // PutProperty(pSdZProperties, String.op_Implicit("PlantID"), String.op_Implicit("0"));
+                    Instruction.Create(OpCodes.Ldarg_0),
+                    Instruction.Create(OpCodes.Ldloc_0),
+                    Instruction.Create(OpCodes.Ldstr, "PlantID"),
+                    Instruction.Create(OpCodes.Call, stringImplicit.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Ldstr, "0"),
+                    Instruction.Create(OpCodes.Call, stringImplicit.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Call, putProperty.Operand as MethodDef),
+                    // PutProperty(pSdZProperties, String.op_Implicit("ProgrammierGeraeteSeriennummer"), String.op_Implicit(programmierGeraeteSeriennummer));
+                    Instruction.Create(OpCodes.Ldarg_0),
+                    Instruction.Create(OpCodes.Ldloc_0),
+                    Instruction.Create(OpCodes.Ldstr, "ProgrammierGeraeteSeriennummer"),
+                    Instruction.Create(OpCodes.Call, stringImplicit.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Ldarg_3),
+                    Instruction.Create(OpCodes.Call, stringImplicit.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Call, putProperty.Operand as MethodDef),
+                    // PutProperty(pSdZProperties, String.op_Implicit("Testereinsatzkennung"), String.op_Implicit(testerEinsatzKennung));
+                    Instruction.Create(OpCodes.Ldarg_0),
+                    Instruction.Create(OpCodes.Ldloc_0),
+                    Instruction.Create(OpCodes.Ldstr, "Testereinsatzkennung"),
+                    Instruction.Create(OpCodes.Call, stringImplicit.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Ldarg_S, method.Parameters[4]),
+                    Instruction.Create(OpCodes.Call, stringImplicit.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Call, putProperty.Operand as MethodDef),
+                    // base.BaseService.setPSdZProperties(pSdZProperties);
+                    Instruction.Create(OpCodes.Ldarg_0),
+                    Instruction.Create(OpCodes.Call, baseService.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Ldloc_0),
+                    Instruction.Create(OpCodes.Callvirt, setPSdZProperties.Operand as MemberRef),
+                    Instruction.Create(OpCodes.Ret)
+                };
+
+                method.Body.Instructions.Clear();
+                patchedMethod.ForEach(instruction => method.Body.Instructions.Add(instruction));
+            }
+
+            return PatchFunction(assembly,
+                "BMW.Rheingold.Psdz.Services.ConfigurationService",
+                "SetPsdzProperties",
+                "(System.String,System.String,System.String,System.String)System.Void",
+                RewriteProperties
+            );
+        }
 
         public static bool CheckPatchedMark(AssemblyDefinition assembly)
         {
@@ -276,6 +353,23 @@ namespace ISTA_Patcher
             file.Deobfuscate();
             file.DeobfuscateEnd();
             file.Save();
+        }
+
+        public static Instruction? FindInstruction(this IEnumerable<Instruction> list, OpCode opCode, string operandName)
+        {
+            foreach (var instruction in list)
+            {
+                if (instruction.OpCode != opCode)
+                    continue;
+                switch (instruction.Operand)
+                {
+                    case MemberRef memberRef when memberRef.FullName == operandName:
+                        return instruction;
+                    case MethodDef methodDef when methodDef.FullName == operandName:
+                        return instruction;
+                }
+            }
+            return null;
         }
     }
 }

@@ -51,6 +51,7 @@ namespace ISTA_Patcher
             PatchUtils.PatchMainWindowViewModel,
             PatchUtils.PatchActivationCertificateHelper,
             PatchUtils.PatchCertificateHelper,
+            PatchUtils.PatchConfigurationService,
         };
 
         private static readonly Func<AssemblyDefinition, bool>[] ToyotaPatches =
@@ -73,20 +74,15 @@ namespace ISTA_Patcher
             */
         };
         
-        static void PatchISTA(string basePath, List<string> pendingPatchList, PatchOptions options, string outputDir = "patched")
+        static void PatchISTA(string targetPath, List<string> pendingPatchList, PatchOptions options, string outputDirName = "patched")
         {
-            if (!Directory.Exists(basePath))
+            if (!Directory.Exists(targetPath))
             {
-                Log.Fatal("Folder '{BasePath}' not found, exiting...", basePath);
+                Log.Fatal("Folder '{TargetPath}' not found, exiting...", targetPath);
                 return;
             }
 
-            foreach (var library in RequiredLibraries)
-            {
-                if (File.Exists(Path.Join(basePath, library))) continue;
-                Log.Fatal("Required library '{Library}' not found, exiting...", library);
-                return;
-            }
+            var guiBasePath = Path.Join(targetPath, "TesterGUI", "bin", "Release");
 
             var validPatches = options.PatchType == PatchTypeEnum.BMW ? Patches : Patches.Concat(ToyotaPatches).ToArray();
             Log.Information("=== ISTA Patch Begin ===");
@@ -95,27 +91,29 @@ namespace ISTA_Patcher
 
             foreach (var pendingPatchItem in pendingPatchList)
             {
-                var path = Path.Join(basePath, pendingPatchItem);
-                var moddedDir = Path.Join(basePath, outputDir);
-                var targetPath = Path.Join(moddedDir, pendingPatchItem);
+                var pendingPatchItemFullPath = pendingPatchItem.StartsWith("!") ? Path.Join(targetPath, pendingPatchItem.Trim('!')) : Path.Join(guiBasePath, pendingPatchItem);
+
+                var originalDir = Path.GetDirectoryName(pendingPatchItemFullPath);
+                var patchedDir = Path.Join(originalDir, outputDirName);
+                var patchedFileFullPath = Path.Join(patchedDir, Path.GetFileName(pendingPatchItem));
 
                 var indent = new string(' ', indentLength - pendingPatchItem.Length);
-                if (!File.Exists(path))
+                if (!File.Exists(pendingPatchItemFullPath))
                 {
-                    Log.Information("{Item}{Indent} [not found]", pendingPatchItem, indent);
+                    Log.Information("{Item}{Indent}{Result} [not found]", pendingPatchItem, indent, string.Concat(Enumerable.Repeat("*", validPatches.Length)));
                     continue;
                 }
 
-                Directory.CreateDirectory(moddedDir);
+                Directory.CreateDirectory(patchedDir);
 
                 try
                 {
-                    var module = PatchUtils.LoadModule(path);
+                    var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
                     var assembly = module.Assembly;
                     var isPatched = PatchUtils.CheckPatchedMark(assembly);
                     if (isPatched)
                     {
-                        Log.Information("{Item}{Indent} [already patched]", pendingPatchItem, indent);
+                        Log.Information("{Item}{Indent}{Result} [already patched]", pendingPatchItem, indent, string.Concat(Enumerable.Repeat("*", validPatches.Length)));
                         continue;
                     }
 
@@ -128,20 +126,20 @@ namespace ISTA_Patcher
                     if (isPatched)
                     {
                         PatchUtils.SetPatchedMark(assembly);
-                        assembly.Write(targetPath);
+                        assembly.Write(patchedFileFullPath);
                         if (options.Deobfuscate)
                         {
                             try
                             {
                                 var deobfTimer = Stopwatch.StartNew();
 
-                                var deobfPath = targetPath + ".deobf";
-                                PatchUtils.DeObfuscation(targetPath, deobfPath);
-                                if (File.Exists(targetPath))
+                                var deobfPath = patchedFileFullPath + ".deobf";
+                                PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
+                                if (File.Exists(patchedFileFullPath))
                                 {
-                                    File.Delete(targetPath);
+                                    File.Delete(patchedFileFullPath);
                                 }
-                                File.Move(deobfPath, targetPath);
+                                File.Move(deobfPath, patchedFileFullPath);
 
                                 deobfTimer.Stop();
                                 var timeStr = deobfTimer.ElapsedTicks > Stopwatch.Frequency
@@ -166,11 +164,11 @@ namespace ISTA_Patcher
                 }
                 catch (Exception ex)
                 {
-                    Log.Information("{Item}{Indent} [failed]: {Reason}", pendingPatchItem, indent, ex.Message);
+                    Log.Information("{Item}{Indent}{Result} [failed]: {Reason}", pendingPatchItem, indent, string.Concat(Enumerable.Repeat("*", validPatches.Length)), ex.Message);
 
-                    if (File.Exists(targetPath))
+                    if (File.Exists(patchedFileFullPath))
                     {
-                        File.Delete(targetPath);
+                        File.Delete(patchedFileFullPath);
                     }
                 }
             }
@@ -277,8 +275,7 @@ namespace ISTA_Patcher
                                 .Distinct()
                                 .OrderBy(i=>i).ToList();
 
-                var basePath = Path.Join(guiBasePath, "bin", "Release");
-                PatchISTA(basePath, patchList!, opts);
+                PatchISTA(opts.TargetPath!, patchList!, opts);
 
                 return 0;
             }

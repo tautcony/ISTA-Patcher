@@ -1,5 +1,7 @@
 {
     "include": [
+        "!PSdZ/host/PsdzServiceImpl.dll",
+        "!PSdZ/hostx64/PsdzServiceImpl.dll",
         "Authoring.dll",
         "CommonServices.dll",
         "FscValidationClient.dll",
@@ -10,6 +12,7 @@
         "IstaServicesClient.dll",
         "IstaServicesHost.exe",
         "IstaServicesImpl.dll",
+        "PsdzServiceImpl.dll",
         "RGSPC.exe",
         "RheingoldCoreFramework.dll",
         "RheingoldDatabaseOracleConnector.dll",
