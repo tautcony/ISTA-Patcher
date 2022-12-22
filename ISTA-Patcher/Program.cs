@@ -1,303 +1,205 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using System.Text.Json;
 using CommandLine;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
-namespace ISTA_Patcher
+namespace ISTA_Patcher;
+
+internal enum PatchTypeEnum {
+    BMW = 0,
+    TOYOTA = 1
+}
+
+[Verb("patch", HelpText = "Patch application and library.")]
+class PatchOptions {
+    [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Patch type, valid option: BMW, TOYOTA")]
+    public PatchTypeEnum PatchType { get; set; }
+        
+    [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
+    public bool Deobfuscate { get; set; }
+
+    [Value(1, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
+    public string TargetPath { get; set; }
+}
+
+[Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
+class DecryptOptions
 {
-    internal enum PatchTypeEnum {
-        BMW = 0,
-        TOYOTA = 1
-    }
+    [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
+    public string? TargetPath { get; set; }
+}
 
-    [Verb("patch", HelpText = "Patch application and library.")]
-    class PatchOptions {
-        [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Patch type, valid option: BMW, TOYOTA")]
-        public PatchTypeEnum PatchType { get; set; }
-        
-        [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
-        public bool Deobfuscate { get; set; }
-
-        [Value(1, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
-        public string? TargetPath { get; set; }
-    }
-
-    [Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
-    class DecryptOptions
+internal static class ISTAPatcher
+{
+    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, bool>> patches)
     {
-        [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
-        public string? TargetPath { get; set; }
+        return patches.Select(i => i.Method.Name[5..]).Reverse().ToList().Select((t, i) =>
+            new string('│', patches.Count - 1 - i) + "└" + new string('─', i + 1) + t);
     }
 
-    internal static class Patcher
+    static void PatchISTA(IPatcher patcher, PatchOptions options, string outputDirName = "patched")
     {
-        private static readonly Func<AssemblyDefinition, bool>[] Patches =
-        {
-            PatchUtils.PatchIntegrityManager,
-            PatchUtils.PatchLicenseStatusChecker,
-            PatchUtils.PatchCheckSignature, 
-            PatchUtils.PatchLicenseManager,
-            PatchUtils.PatchAOSLicenseManager,
-            PatchUtils.PatchIstaIcsServiceClient,
-            PatchUtils.PatchCommonServiceWrapper,
-            PatchUtils.PatchSecureAccessHelper,
-            PatchUtils.PatchLicenseWizardHelper,
-            PatchUtils.PatchVerifyAssemblyHelper,
-            PatchUtils.PatchFscValidationClient,
-            PatchUtils.PatchMainWindowViewModel,
-            PatchUtils.PatchActivationCertificateHelper,
-            PatchUtils.PatchCertificateHelper,
-            PatchUtils.PatchConfigurationService,
-        };
+        var guiBasePath = Path.Join(options.TargetPath, "TesterGUI", "bin", "Release");
 
-        private static readonly Func<AssemblyDefinition, bool>[] ToyotaPatches =
-        {
-            PatchUtils.PatchCommonFuncForIsta,
-            PatchUtils.PatchPackageValidityService,
-            PatchUtils.PatchToyotaWorker,
-        };
+        var validPatches = patcher.Patches;
+        var pendingPatchList = patcher.GeneratePatchList(options.TargetPath);
 
-        private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, bool>> patches)
-        {
-            return patches.Select(i => i.Method.Name[5..]).Reverse().ToList().Select((t, i) =>
-                new string('│', patches.Count - 1 - i) + "└" + new string('─', i + 1) + t);
-        }
+        Log.Information("=== ISTA Patch Begin ===");
+        var timer = Stopwatch.StartNew();
+        var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
 
-        private static readonly string[] RequiredLibraries = {
-            /*
-            "RheingoldCoreContracts.dll",
-            "RheingoldCoreFramework.dll"
-            */
-        };
-        
-        static void PatchISTA(string targetPath, List<string> pendingPatchList, PatchOptions options, string outputDirName = "patched")
+        foreach (var pendingPatchItem in pendingPatchList)
         {
-            if (!Directory.Exists(targetPath))
+            var pendingPatchItemFullPath = pendingPatchItem.StartsWith("!") ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!')) : Path.Join(guiBasePath, pendingPatchItem);
+
+            var originalDirPath = Path.GetDirectoryName(pendingPatchItemFullPath);
+            var patchedDirPath = Path.Join(originalDirPath, outputDirName);
+            var patchedFileFullPath = Path.Join(patchedDirPath, Path.GetFileName(pendingPatchItem));
+
+            var indent = new string(' ', indentLength - pendingPatchItem.Length);
+            if (!File.Exists(pendingPatchItemFullPath))
             {
-                Log.Fatal("Folder '{TargetPath}' not found, exiting...", targetPath);
-                return;
+                Log.Information("{Item}{Indent}{Result} [not found]", pendingPatchItem, indent, string.Concat(Enumerable.Repeat("*", validPatches.Length)));
+                continue;
             }
 
-            var guiBasePath = Path.Join(targetPath, "TesterGUI", "bin", "Release");
+            Directory.CreateDirectory(patchedDirPath);
 
-            var validPatches = options.PatchType == PatchTypeEnum.BMW ? Patches : Patches.Concat(ToyotaPatches).ToArray();
-            Log.Information("=== ISTA Patch Begin ===");
-            var timer = Stopwatch.StartNew();
-            var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
-
-            foreach (var pendingPatchItem in pendingPatchList)
+            try
             {
-                var pendingPatchItemFullPath = pendingPatchItem.StartsWith("!") ? Path.Join(targetPath, pendingPatchItem.Trim('!')) : Path.Join(guiBasePath, pendingPatchItem);
-
-                var originalDir = Path.GetDirectoryName(pendingPatchItemFullPath);
-                var patchedDir = Path.Join(originalDir, outputDirName);
-                var patchedFileFullPath = Path.Join(patchedDir, Path.GetFileName(pendingPatchItem));
-
-                var indent = new string(' ', indentLength - pendingPatchItem.Length);
-                if (!File.Exists(pendingPatchItemFullPath))
+                var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
+                var assembly = module.Assembly;
+                var isPatched = PatchUtils.CheckPatchedMark(assembly);
+                if (isPatched)
                 {
-                    Log.Information("{Item}{Indent}{Result} [not found]", pendingPatchItem, indent, string.Concat(Enumerable.Repeat("*", validPatches.Length)));
+                    Log.Information("{Item}{Indent}{Result} [already patched]", pendingPatchItem, indent, string.Concat(Enumerable.Repeat("*", validPatches.Length)));
                     continue;
                 }
 
-                Directory.CreateDirectory(patchedDir);
+                // Patch and print result
+                var result = validPatches.Select(patch => patch(assembly)).ToList();
+                isPatched = result.Any(i => i);
+                var resultStr = result.Aggregate("", (c, i) => c + (i ? "+" : "-"));
 
+                // Check if patched
+                if (!isPatched)
+                {
+                    Log.Information("{Item}{Indent}{Result} [skip]", pendingPatchItem, indent, resultStr);
+                    continue;
+                }
+                PatchUtils.SetPatchedMark(assembly);
+                assembly.Write(patchedFileFullPath);
+                
+                // Check if need to deobfuscate
+                if (!options.Deobfuscate)
+                {
+                    Log.Information("{Item}{Indent}{Result} [patched]", pendingPatchItem, indent, resultStr);
+                    continue;
+                }
                 try
                 {
-                    var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
-                    var assembly = module.Assembly;
-                    var isPatched = PatchUtils.CheckPatchedMark(assembly);
-                    if (isPatched)
-                    {
-                        Log.Information("{Item}{Indent}{Result} [already patched]", pendingPatchItem, indent, string.Concat(Enumerable.Repeat("*", validPatches.Length)));
-                        continue;
-                    }
+                    var deobfTimer = Stopwatch.StartNew();
 
-                    // Patch and print result
-                    var result = validPatches.Select(patch => patch(assembly)).ToList();
-                    isPatched = result.Any(i => i);
-                    var resultStr = result.Aggregate("", (c, i) => c + (i ? "+" : "-"));
-
-
-                    if (isPatched)
-                    {
-                        PatchUtils.SetPatchedMark(assembly);
-                        assembly.Write(patchedFileFullPath);
-                        if (options.Deobfuscate)
-                        {
-                            try
-                            {
-                                var deobfTimer = Stopwatch.StartNew();
-
-                                var deobfPath = patchedFileFullPath + ".deobf";
-                                PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
-                                if (File.Exists(patchedFileFullPath))
-                                {
-                                    File.Delete(patchedFileFullPath);
-                                }
-                                File.Move(deobfPath, patchedFileFullPath);
-
-                                deobfTimer.Stop();
-                                var timeStr = deobfTimer.ElapsedTicks > Stopwatch.Frequency
-                                    ? $" in {deobfTimer.Elapsed:mm\\:ss}"
-                                    : "";
-                                Log.Information("{Item}{Indent}{Result} [patched][deobfuscate success{Time}]", pendingPatchItem, indent, resultStr, timeStr);
-                            }
-                            catch (ApplicationException ex)
-                            {
-                                Log.Information("{Item}{Indent}{Result} [patched][deobfuscate skipped]: {Reason}", pendingPatchItem, indent, resultStr, ex.Message);
-                            }
-                        }
-                        else
-                        {
-                            Log.Information("{Item}{Indent}{Result} [patched]", pendingPatchItem, indent, resultStr);
-                        }
-                    }
-                    else
-                    {
-                        Log.Information("{Item}{Indent}{Result} [skip]", pendingPatchItem, indent, resultStr);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Information("{Item}{Indent}{Result} [failed]: {Reason}", pendingPatchItem, indent, string.Concat(Enumerable.Repeat("*", validPatches.Length)), ex.Message);
-
+                    var deobfPath = patchedFileFullPath + ".deobf";
+                    PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
                     if (File.Exists(patchedFileFullPath))
                     {
                         File.Delete(patchedFileFullPath);
                     }
+                    File.Move(deobfPath, patchedFileFullPath);
+
+                    deobfTimer.Stop();
+                    var timeStr = deobfTimer.ElapsedTicks > Stopwatch.Frequency
+                        ? $" in {deobfTimer.Elapsed:mm\\:ss}"
+                        : "";
+                    Log.Information("{Item}{Indent}{Result} [patched][deobfuscate success{Time}]", pendingPatchItem,
+                        indent, resultStr, timeStr);
+                }
+                catch (ApplicationException ex)
+                {
+                    Log.Information("{Item}{Indent}{Result} [patched][deobfuscate skipped]: {Reason}",
+                        pendingPatchItem, indent, resultStr, ex.Message);
                 }
             }
-
-
-            foreach (var line in BuildIndicator(validPatches))
+            catch (Exception ex)
             {
-                Log.Information("{Indent}{Line}", new string(' ', indentLength), line);
+                Log.Information("{Item}{Indent}{Result} [failed]: {Reason}", pendingPatchItem, indent, string.Concat(Enumerable.Repeat("*", validPatches.Length)), ex.Message);
+
+                if (File.Exists(patchedFileFullPath))
+                {
+                    File.Delete(patchedFileFullPath);
+                }
+            }
+        }
+
+        foreach (var line in BuildIndicator(validPatches))
+        {
+            Log.Information("{Indent}{Line}", new string(' ', indentLength), line);
+        }
+
+        timer.Stop();
+        Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
+    }
+
+    public static int Main(string[] args)
+    {
+        var levelSwitch = new LoggingLevelSwitch
+        {
+            MinimumLevel = LogEventLevel.Debug,
+        };
+        Log.Logger = new LoggerConfiguration()
+                     .MinimumLevel.ControlledBy(levelSwitch)
+                     .WriteTo.Console()
+                     .CreateLogger();
+
+        return Parser.Default.ParseArguments<PatchOptions, DecryptOptions>(args)
+                     .MapResult(
+                         (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
+                         (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
+                         errs => 1);
+
+        static int RunPatchAndReturnExitCode(PatchOptions opts)
+        {
+            var guiBasePath = Path.Join(opts.TargetPath, "TesterGUI", "bin", "Release");
+            var psdzBasePath = Path.Join(opts.TargetPath, "PSdZ", "host");
+
+            if (!Directory.Exists(guiBasePath) || !Directory.Exists(psdzBasePath))
+            {
+                Log.Fatal("Folder structure not match, please check parameter");
+                return -1;
             }
 
-            timer.Stop();
-            Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
-        }
-
-        private static string?[] LoadISTAList(string targetFilename, string guiBasePath)
-        {
-            // load file list from enc_cne_1.prg
-            string?[] fileList = (IntegrityManager.DecryptFile(targetFilename) ?? new List<HashFileInfo>())
-                                  .Select(f => f.FileName).ToArray();
-
-            // or from directory ./TesterGUI/bin/Release
-            if (fileList.Length == 0)
+            IPatcher patcher = opts.PatchType switch
             {
-                fileList = Directory.GetFiles(Path.Join(guiBasePath, "bin", "Release"))
-                                    .Where(f => f.EndsWith(".exe") || f.EndsWith("dll"))
-                                    .Select(Path.GetFileName).ToArray();
-            }
-            return fileList;
-        }
-
-        private static string?[] LoadISTAToyotaList(string guiBasePath)
-        {
-            var fileList = Directory.GetFiles(Path.Join(guiBasePath, "bin", "Release"))
-                                                    .Where(f => f.EndsWith(".exe") || f.EndsWith("dll"))
-                                                    .Select(Path.GetFileName).ToArray();
-            return fileList;
-        }
-
-        public static int Main(string[] args)
-        {
-            var levelSwitch = new LoggingLevelSwitch
-            {
-                MinimumLevel = LogEventLevel.Debug,
+                PatchTypeEnum.BMW => new BMWPatcher(),
+                PatchTypeEnum.TOYOTA => new ToyotaPatcher(),
+                _ => throw new NotImplementedException(),
             };
-            Log.Logger = new LoggerConfiguration()
-                         .MinimumLevel.ControlledBy(levelSwitch)
-                         .WriteTo.Console()
-                         .CreateLogger();
 
-            return Parser.Default.ParseArguments<PatchOptions, DecryptOptions>(args)
-                         .MapResult(
-                             (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
-                             (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
-                             errs => 1);
+            PatchISTA(patcher, opts);
+            return 0;
+        }
 
-            static int RunPatchAndReturnExitCode(PatchOptions opts)
+        static int RunDecryptAndReturnExitCode(DecryptOptions opts)
+        {
+            var encryptedFileList = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
+            if (!File.Exists(encryptedFileList)) return -1;
+            var fileList = IntegrityManager.DecryptFile(encryptedFileList);
+            if (fileList == null) return -1;
+            var filePathMaxLength = fileList.Select(f => f.FilePath.Length).Max();
+            var hashMaxLength = fileList.Select(f => f.Hash.Length).Max();
+            var markdownBuilder = new StringBuilder();
+            markdownBuilder.AppendLine($"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash(SHA256)".PadRight(hashMaxLength)} |");
+            markdownBuilder.AppendLine($"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} |");
+            foreach (var fileInfo in fileList)
             {
-                var cwd = Path.GetDirectoryName(AppContext.BaseDirectory)!;
-                var guiBasePath = Path.Join(opts.TargetPath, "TesterGUI");
-                var targetFilename = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
-
-                if (!Directory.Exists(guiBasePath))
-                {
-                    if (opts.PatchType == PatchTypeEnum.BMW && !File.Exists(targetFilename))
-                    {
-                        Log.Fatal("Folder structure not match, please check input path");
-                        return -1;
-                    }
-                }
-
-                // load exclude list that do not need to be processed
-                string[]? excludeList = null;
-                string[]? includeList = null;
-                try
-                {
-                    using FileStream stream = new(Path.Join(cwd, "patchConfig.json"), FileMode.Open, FileAccess.Read);
-                    var patchConfig = JsonSerializer.Deserialize<Dictionary<string, string[]>>(stream);
-                    excludeList = patchConfig?.GetValueOrDefault("exclude");
-                    includeList = opts.PatchType switch
-                    {
-                        PatchTypeEnum.BMW => patchConfig?.GetValueOrDefault("include"),
-                        PatchTypeEnum.TOYOTA => patchConfig?.GetValueOrDefault("include.toyota"),
-                        _ => Array.Empty<string>()
-                    };
-                }
-                catch (Exception ex) when (
-                    ex is FileNotFoundException or IOException or JsonException
-                )
-                {
-                    Log.Fatal("Failed to load config file: {Reason}", ex.Message);
-                }
-                excludeList ??= Array.Empty<string>();
-                includeList ??= Array.Empty<string>();
-
-                var fileList = opts.PatchType switch
-                {
-                    PatchTypeEnum.BMW => LoadISTAList(targetFilename, guiBasePath),
-                    PatchTypeEnum.TOYOTA => LoadISTAToyotaList(guiBasePath),
-                    _ => Array.Empty<string>()
-                };
-
-                var patchList = includeList
-                                .Union(fileList.Where(f => !excludeList.Contains(f)))
-                                .Distinct()
-                                .OrderBy(i=>i).ToList();
-
-                PatchISTA(opts.TargetPath!, patchList!, opts);
-
-                return 0;
+                markdownBuilder.AppendLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} |");
             }
-
-            static int RunDecryptAndReturnExitCode(DecryptOptions opts)
-            {
-                var targetFilename = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
-                if (!File.Exists(targetFilename)) return -1;
-                var fileList = IntegrityManager.DecryptFile(targetFilename);
-                if (fileList == null) return -1;
-                var filePathMaxLength = fileList.Select(f => f.FilePath.Length).Max();
-                var hashMaxLength = fileList.Select(f => f.Hash.Length).Max();
-                var markdownBuilder = new StringBuilder();
-                markdownBuilder.AppendLine($"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash(SHA256)".PadRight(hashMaxLength)} |");
-                markdownBuilder.AppendLine($"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} |");
-                foreach (var fileInfo in fileList)
-                {
-                    markdownBuilder.AppendLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} |");
-                }
-                Log.Information("Markdown result:\n{Markdown}", markdownBuilder.ToString());
-                return 0;
-            }
+            Log.Information("Markdown result:\n{Markdown}", markdownBuilder.ToString());
+            return 0;
         }
     }
 }
