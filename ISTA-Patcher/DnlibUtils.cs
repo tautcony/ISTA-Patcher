@@ -96,4 +96,19 @@ public static class DnlibUtils
     { 
         ReturnOneMethod(method);
     }
+    
+    public static Instruction? FindInstruction(this MethodDef method, OpCode opCode, string operandName)
+    {
+        return method.Body.Instructions.FirstOrDefault(instruction => 
+            instruction.OpCode == opCode && (instruction.Operand as IMethodDefOrRef)?.FullName == operandName);
+    }
+
+    public static void ReplaceWith(this MethodDef method, IEnumerable<Instruction> instructions)
+    {
+        method.Body.Instructions.Clear();
+        foreach (var instruction in instructions)
+        {
+            method.Body.Instructions.Add(instruction);
+        }
+    }
 }
