@@ -43,4 +43,6 @@ Distributed under the GPLv3+ License. See LICENSE for more information.
 
 ## Disclaimer
 
+credit of icon: [comboo](https://twitter.com/comboo28).
+
 This repository was created for educational purposes only. Use it at your own risk.

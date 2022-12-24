@@ -10,6 +10,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>annotations</Nullable>
     <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+    <ApplicationIcon>patcher-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
