@@ -1,6 +1,11 @@
-# ISTA Patcher [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0) [![build](https://img.shields.io/github/actions/workflow/status/tautcony/ISTA-Patcher/ci.yml?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/actions) [![](https://img.shields.io/github/downloads/tautcony/ISTA-Patcher/total.svg?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/releases) 
+<div align="center">
+<img alt="LOGO" src="images/patcher-icon.png" width="256" height="256" />
+
+# ISTA Patcher <br/> [![License: GPL v3](https://img.shields.io/github/license/tautcony/ISTA-Patcher?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0) [![build](https://img.shields.io/github/actions/workflow/status/tautcony/ISTA-Patcher/build.yml?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/actions) [![](https://img.shields.io/github/downloads/tautcony/ISTA-Patcher/total.svg?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/releases)
 
 An IL patcher for ISTA-P
+
+</div>
 
 ## Usage
 
@@ -10,6 +15,10 @@ Before using it, make sure the file structure looks like bellow:
 C:\EC-APPS\ISTA
 ├── Ecu
 │   ├── enc_cne_1.prg
+│   ├── ...
+├── PSdZ
+│   ├── host
+│   ├── hostx64
 │   ├── ...
 ├── TesterGUI
 │   ├── bin
@@ -43,6 +52,6 @@ Distributed under the GPLv3+ License. See LICENSE for more information.
 
 ## Disclaimer
 
-credit of icon: [comboo](https://twitter.com/comboo28).
+Credit of icon: [comboo](https://twitter.com/comboo28).
 
 This repository was created for educational purposes only. Use it at your own risk.
