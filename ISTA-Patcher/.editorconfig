@@ -1,0 +1,27 @@
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Code files
+[*.{cs,vb}]
+dotnet_diagnostic.CS0169.severity = none # The private field 'class member' is never used
+dotnet_diagnostic.SA1009.severity = none # SA1009ClosingParenthesisMustBeSpacedCorrectly
+dotnet_diagnostic.SA1111.severity = none # SA1111ClosingParenthesisMustBeOnLineOfLastParameter
+dotnet_diagnostic.SA1201.severity = suggestion # SA1201ElementsMustAppearInTheCorrectOrder
+dotnet_diagnostic.SA1202.severity = suggestion # SA1202ElementsMustBeOrderedByAccess
+dotnet_diagnostic.SA1203.severity = suggestion # SA1203ConstantsMustAppearBeforeFields
+dotnet_diagnostic.SA1204.severity = suggestion # SA1204StaticElementsMustAppearBeforeInstanceElements
+dotnet_diagnostic.SA1309.severity = suggestion # SA1309FieldNamesMustNotBeginWithUnderscore
+dotnet_diagnostic.SA1402.severity = none # SA1402FileMayOnlyContainASingleType
+dotnet_diagnostic.SA1600.severity = suggestion # SA1600ElementsMustBeDocumented
+dotnet_diagnostic.SA1633.severity = none # SA1633FileMustHaveHeader
+dotnet_diagnostic.SA1649.severity = none # SA1649FileNameMustMatchTypeName
+
+[/de4dot.blocks/**]
+generated_code = true
+
+[/de4dot.code/**]
+generated_code = true

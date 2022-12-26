@@ -1,4 +1,8 @@
-﻿using de4dot.code;
+﻿// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright 2022 TautCony
+namespace ISTA_Patcher;
+
+using de4dot.code;
 using de4dot.code.AssemblyClient;
 using de4dot.code.deobfuscators;
 using de4dot.code.deobfuscators.Dotfuscator;
@@ -7,22 +11,24 @@ using dnlib.DotNet.Emit;
 using Serilog;
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
-namespace ISTA_Patcher;
-
 internal static class PatchUtils
 {
     private static readonly string _timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
     private static readonly ModuleContext _modCtx = ModuleDef.CreateModuleContext();
     private static readonly IDeobfuscatorContext _deobfuscatorContext = new DeobfuscatorContext();
-    private static readonly NewProcessAssemblyClientFactory _processAssemblyClientFactory = new ();
-        
+    private static readonly NewProcessAssemblyClientFactory _processAssemblyClientFactory = new();
+
     public static ModuleDefMD LoadModule(string fileName)
     {
         var module = ModuleDefMD.Load(fileName, _modCtx);
         return module;
     }
 
-    private static bool PatchFunction(AssemblyDefinition assembly, string type, string name, string desc,
+    private static bool PatchFunction(
+        AssemblyDefinition assembly,
+        string type,
+        string name,
+        string desc,
         Action<MethodDef> operation)
     {
         var function = assembly.GetMethod(type, name, desc);
@@ -30,13 +36,15 @@ internal static class PatchUtils
         {
             return false;
         }
+
         operation(function);
         return true;
     }
 
     public static bool PatchIntegrityManager(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.SecurityAndLicense.IntegrityManager",
             ".ctor",
             "()System.Void",
@@ -46,7 +54,8 @@ internal static class PatchUtils
 
     public static bool PatchLicenseStatusChecker(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
             "IsLicenseValid",
             "(BMW.Rheingold.CoreFramework.LicenseInfo,System.Boolean)BMW.Rheingold.CoreFramework.LicenseStatus",
@@ -56,7 +65,8 @@ internal static class PatchUtils
 
     public static bool PatchCheckSignature(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
             "CheckSignature",
             "(System.String)System.Void",
@@ -66,7 +76,8 @@ internal static class PatchUtils
 
     public static bool PatchLicenseManager(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.CoreFramework.LicenseManager",
             "VerifyLicense",
             "(System.Boolean)System.Void",
@@ -76,7 +87,8 @@ internal static class PatchUtils
 
     public static bool PatchAOSLicenseManager(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.CoreFramework.LicenseAOSManager",
             "VerifyLicense",
             "()System.Void",
@@ -86,12 +98,14 @@ internal static class PatchUtils
 
     public static bool PatchIstaIcsServiceClient(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
             "ValidateHost",
             "()System.Void",
             DnlibUtils.EmptyingMethod
-        ) && PatchFunction(assembly,
+        ) && PatchFunction(
+            assembly,
             "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
             "VerifyLicense",
             "()System.Void",
@@ -101,7 +115,8 @@ internal static class PatchUtils
 
     public static bool PatchCommonServiceWrapper(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
             "VerifyLicense",
             "()System.Void",
@@ -111,7 +126,8 @@ internal static class PatchUtils
 
     public static bool PatchSecureAccessHelper(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.iLean.CommonServices.Helper.SecureAccessHelper",
             "IsCodeAccessPermitted",
             "(System.Reflection.Assembly,System.Reflection.Assembly)System.Boolean",
@@ -121,7 +137,8 @@ internal static class PatchUtils
 
     public static bool PatchLicenseWizardHelper(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
             "DoLicenseCheck",
             "(System.String)System.Boolean",
@@ -131,7 +148,8 @@ internal static class PatchUtils
 
     public static bool PatchVerifyAssemblyHelper(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
             "VerifyStrongName",
             "(System.String,System.Boolean)System.Boolean",
@@ -141,7 +159,8 @@ internal static class PatchUtils
 
     public static bool PatchFscValidationClient(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.TricTools.FscValidation.FscValidationClient",
             "IsValid",
             "(System.Byte[],System.Byte[])System.Boolean",
@@ -151,7 +170,8 @@ internal static class PatchUtils
 
     public static bool PatchMainWindowViewModel(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.ISTAGUI.ViewModels.MainWindowViewModel",
             "CheckExpirationDate",
             "()System.Void",
@@ -161,12 +181,14 @@ internal static class PatchUtils
 
     public static bool PatchActivationCertificateHelper(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
             "IsInWhiteList",
             "(System.String,System.String,System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod
-        ) && PatchFunction(assembly,
+        ) && PatchFunction(
+            assembly,
             "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
             "IsWhiteListSignatureValid",
             "(System.String,System.String)System.Boolean",
@@ -176,7 +198,8 @@ internal static class PatchUtils
 
     public static bool PatchCertificateHelper(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.iLean.CommonServices.Helper.CertificateHelper",
             "ValidateCertificate",
             "(System.String)System.Boolean",
@@ -186,7 +209,8 @@ internal static class PatchUtils
 
     public static bool PatchCommonFuncForIsta(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "Toyota.GTS.ForIsta.CommonFuncForIsta",
             "GetLicenseStatus",
             "()BMW.Rheingold.ToyotaLicenseHelper.ToyotaLicenseStatus",
@@ -196,7 +220,8 @@ internal static class PatchUtils
 
     public static bool PatchPackageValidityService(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.ISTAGUI.Controller.PackageValidityService",
             "CyclicExpirationDateCheck",
             "()System.Void",
@@ -206,7 +231,8 @@ internal static class PatchUtils
 
     public static bool PatchToyotaWorker(AssemblyDefinition assembly)
     {
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.Toyota.Worker.ToyotaWorker",
             "VehicleIsValid",
             "(System.String)System.Boolean",
@@ -230,6 +256,7 @@ internal static class PatchUtils
                 Log.Warning("instructions not found, can not patch ConfigurationService");
                 return;
             }
+
             var patchedMethod = new[]
             {
                 // Properties pSdZProperties = base.BaseService.getPSdZProperties();
@@ -237,6 +264,7 @@ internal static class PatchUtils
                 OpCodes.Call.ToInstruction(getBaseService.Operand as MemberRef),
                 OpCodes.Callvirt.ToInstruction(getPSdZProperties.Operand as MemberRef),
                 OpCodes.Stloc_0.ToInstruction(),
+
                 // PutProperty(pSdZProperties, String.op_Implicit("DealerID"), String.op_Implicit("1234"));
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldloc_0.ToInstruction(),
@@ -245,6 +273,7 @@ internal static class PatchUtils
                 OpCodes.Ldstr.ToInstruction("1234"),
                 OpCodes.Call.ToInstruction(stringImplicit.Operand as MemberRef),
                 OpCodes.Call.ToInstruction(putProperty.Operand as MethodDef),
+
                 // PutProperty(pSdZProperties, String.op_Implicit("PlantID"), String.op_Implicit("0"));
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldloc_0.ToInstruction(),
@@ -253,6 +282,7 @@ internal static class PatchUtils
                 OpCodes.Ldstr.ToInstruction("0"),
                 OpCodes.Call.ToInstruction(stringImplicit.Operand as MemberRef),
                 OpCodes.Call.ToInstruction(putProperty.Operand as MethodDef),
+
                 // PutProperty(pSdZProperties, String.op_Implicit("ProgrammierGeraeteSeriennummer"), String.op_Implicit(programmierGeraeteSeriennummer));
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldloc_0.ToInstruction(),
@@ -261,6 +291,7 @@ internal static class PatchUtils
                 OpCodes.Ldarg_3.ToInstruction(),
                 OpCodes.Call.ToInstruction(stringImplicit.Operand as MemberRef),
                 OpCodes.Call.ToInstruction(putProperty.Operand as MethodDef),
+
                 // PutProperty(pSdZProperties, String.op_Implicit("Testereinsatzkennung"), String.op_Implicit(testerEinsatzKennung));
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldloc_0.ToInstruction(),
@@ -269,12 +300,13 @@ internal static class PatchUtils
                 OpCodes.Ldarg_S.ToInstruction(method.Parameters[4]),
                 OpCodes.Call.ToInstruction(stringImplicit.Operand as MemberRef),
                 OpCodes.Call.ToInstruction(putProperty.Operand as MethodDef),
+
                 // base.BaseService.setPSdZProperties(pSdZProperties);
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Call.ToInstruction(getBaseService.Operand as MemberRef),
                 OpCodes.Ldloc_0.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(setPSdZProperties.Operand as MemberRef),
-                OpCodes.Ret.ToInstruction()
+                OpCodes.Ret.ToInstruction(),
             };
 
             method.ReplaceWith(patchedMethod);
@@ -285,11 +317,13 @@ internal static class PatchUtils
                 Log.Warning("Properties not found, patch for ConfigurationService may not workable");
                 return;
             }
+
             method.Body.Variables.Clear();
             method.Body.Variables.Add(property);
         }
 
-        return PatchFunction(assembly,
+        return PatchFunction(
+            assembly,
             "BMW.Rheingold.Psdz.Services.ConfigurationService",
             "SetPsdzProperties",
             "(System.String,System.String,System.String,System.String)System.Void",
@@ -312,10 +346,11 @@ internal static class PatchUtils
         }
 
         var patchedType = new TypeDefUser(
-            "Patched.By", "TC",
+            "Patched.By",
+            "TC",
             module.CorLibTypes.Object.TypeDefOrRef)
         {
-            Attributes = TypeAttributes.Class | TypeAttributes.NestedPrivate
+            Attributes = TypeAttributes.Class | TypeAttributes.NestedPrivate,
         };
         var dateField = new FieldDefUser(
             "date",
@@ -323,7 +358,7 @@ internal static class PatchUtils
             FieldAttributes.Private | FieldAttributes.Static
         )
         {
-            Constant = new ConstantUser(_timestamp)
+            Constant = new ConstantUser(_timestamp),
         };
         var urlField = new FieldDefUser(
             "repo",
@@ -331,7 +366,7 @@ internal static class PatchUtils
             FieldAttributes.Private | FieldAttributes.Static
         )
         {
-            Constant = new ConstantUser("https://github.com/tautcony/ISTA-Patcher")
+            Constant = new ConstantUser("https://github.com/tautcony/ISTA-Patcher"),
         };
 
         patchedType.Fields.Add(dateField);
@@ -343,15 +378,18 @@ internal static class PatchUtils
     {
         var deobfuscatorInfo = new DeobfuscatorInfo();
 
-        using var file = new ObfuscatedFile(new ObfuscatedFile.Options
+        using var file = new ObfuscatedFile(
+            new ObfuscatedFile.Options
         {
             ControlFlowDeobfuscation = true,
             Filename = fileName,
             NewFilename = newFileName,
-            StringDecrypterType = DecrypterType.Static
-        }, _modCtx, _processAssemblyClientFactory)
+            StringDecrypterType = DecrypterType.Static,
+        },
+            _modCtx,
+            _processAssemblyClientFactory)
         {
-            DeobfuscatorContext = _deobfuscatorContext
+            DeobfuscatorContext = _deobfuscatorContext,
         };
 
         file.Load(new List<IDeobfuscator> { deobfuscatorInfo.CreateDeobfuscator() });

@@ -1,15 +1,17 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright 2022 TautCony
+namespace ISTA_Patcher;
+
 using System.Text.Json;
 using Serilog;
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
-
-namespace ISTA_Patcher;
 
 public interface IPatcher
 {
     public Func<AssemblyDefinition, bool>[] Patches { get; set; }
 
     public string[] GeneratePatchList(string basePath);
-    
+
     public static string?[] LoadFileList(string basePath)
     {
         var fileList = Directory.GetFiles(Path.Join(basePath, "TesterGUI", "bin", "Release"))
@@ -33,16 +35,18 @@ public interface IPatcher
         {
             Log.Fatal("Failed to load config file: {Reason}", ex.Message);
         }
+
         return null;
     }
 }
 
 public class BMWPatcher : IPatcher
 {
-    public Func<AssemblyDefinition, bool>[] Patches { get; set; } = {
+    public Func<AssemblyDefinition, bool>[] Patches { get; set; } =
+    {
         PatchUtils.PatchIntegrityManager,
         PatchUtils.PatchLicenseStatusChecker,
-        PatchUtils.PatchCheckSignature, 
+        PatchUtils.PatchCheckSignature,
         PatchUtils.PatchLicenseManager,
         PatchUtils.PatchAOSLicenseManager,
         PatchUtils.PatchIstaIcsServiceClient,
@@ -60,7 +64,7 @@ public class BMWPatcher : IPatcher
     public static string?[] LoadFileList(string basePath)
     {
         var encryptedFileList = Path.Join(basePath, "Ecu", "enc_cne_1.prg");
-        
+
         // load file list from enc_cne_1.prg
         var fileList = (IntegrityManager.DecryptFile(encryptedFileList!) ?? new List<HashFileInfo>())
                        .Select(f => f.FileName).ToArray();
@@ -70,9 +74,10 @@ public class BMWPatcher : IPatcher
         {
             fileList = IPatcher.LoadFileList(basePath);
         }
+
         return fileList;
     }
-    
+
     public string[] GeneratePatchList(string basePath)
     {
         var fileList = LoadFileList(basePath);
@@ -83,17 +88,18 @@ public class BMWPatcher : IPatcher
         var patchList = includeList
                         .Union(fileList.Where(f => !excludeList.Contains(f)))
                         .Distinct()
-                        .OrderBy(i=>i).ToArray();
+                        .OrderBy(i => i).ToArray();
         return patchList;
     }
 }
 
 public class ToyotaPatcher : IPatcher
 {
-    public Func<AssemblyDefinition, bool>[] Patches { get; set; } = {
+    public Func<AssemblyDefinition, bool>[] Patches { get; set; } =
+    {
         PatchUtils.PatchIntegrityManager,
         PatchUtils.PatchLicenseStatusChecker,
-        PatchUtils.PatchCheckSignature, 
+        PatchUtils.PatchCheckSignature,
         PatchUtils.PatchLicenseManager,
         PatchUtils.PatchAOSLicenseManager,
         PatchUtils.PatchIstaIcsServiceClient,
@@ -110,7 +116,7 @@ public class ToyotaPatcher : IPatcher
         PatchUtils.PatchPackageValidityService,
         PatchUtils.PatchToyotaWorker,
     };
-    
+
     public string[] GeneratePatchList(string basePath)
     {
         var fileList = IPatcher.LoadFileList(basePath);
@@ -121,7 +127,7 @@ public class ToyotaPatcher : IPatcher
         var patchList = includeList
                         .Union(fileList.Where(f => !excludeList.Contains(f)))
                         .Distinct()
-                        .OrderBy(i=>i).ToArray();
+                        .OrderBy(i => i).ToArray();
         return patchList;
     }
 }

@@ -1,12 +1,14 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright 2022 TautCony
+namespace ISTA_Patcher;
+
 using System.Security.Cryptography;
 using System.Text;
 using Serilog;
 
-namespace ISTA_Patcher;
-
 public class IntegrityManager
 {
-    private static readonly byte[] _salt = {0xd, 0xca, 0x32, 0xe0, 0x7f, 0xa4, 0xdf, 0xf1};
+    private static readonly byte[] _salt = { 0xd, 0xca, 0x32, 0xe0, 0x7f, 0xa4, 0xdf, 0xf1 };
 
     private const int _iterations = 1100;
 
@@ -14,7 +16,7 @@ public class IntegrityManager
     {
         0x33, 0x2f, 0x33, 0x48, 0x65, 0x78, 0x62, 0x4b, 0x4b, 0x46, 0x73, 0x34, 0x4c, 0x71, 0x70, 0x69,
         0x43, 0x53, 0x67, 0x4b, 0x41, 0x58, 0x47, 0x55, 0x59, 0x43, 0x74, 0x71, 0x6a, 0x6f, 0x46, 0x63,
-        0x68, 0x66, 0x50, 0x69, 0x74, 0x41, 0x6d, 0x49, 0x38, 0x77, 0x45, 0x3d
+        0x68, 0x66, 0x50, 0x69, 0x74, 0x41, 0x6d, 0x49, 0x38, 0x77, 0x45, 0x3d,
     };
 
     public static List<HashFileInfo>? DecryptFile(string sourceFilename)
@@ -35,6 +37,7 @@ public class IntegrityManager
             {
                 fileStream.CopyTo(cryptoStream);
             }
+
             var bytes = memoryStream.ToArray();
             return (from row in Encoding.UTF8.GetString(bytes).Split(";;\r\n", StringSplitOptions.RemoveEmptyEntries)
                 select new HashFileInfo(row.Split(";;", StringSplitOptions.RemoveEmptyEntries))).ToList();
@@ -43,6 +46,7 @@ public class IntegrityManager
         {
             Log.Warning("Failed to decrypt file: {Reason}", ex.Message);
         }
+
         return null;
     }
 }
@@ -57,10 +61,10 @@ public class HashFileInfo
 
     protected internal HashFileInfo(IReadOnlyList<string> fileInfos)
     {
-        FilePath = fileInfos[0];
-        FileName = Path.GetFileName(FilePath.Replace("\\", "/"));
+        this.FilePath = fileInfos[0];
+        this.FileName = Path.GetFileName(this.FilePath.Replace("\\", "/"));
         var bytes = Convert.FromBase64String(fileInfos[1]);
-        var hex = BitConverter.ToString(bytes).Replace("-", "").ToLower();
-        Hash = hex;
+        var hex = BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
+        this.Hash = hex;
     }
 }

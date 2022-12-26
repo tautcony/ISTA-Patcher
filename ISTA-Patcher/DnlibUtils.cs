@@ -1,8 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright 2022 TautCony
+namespace ISTA_Patcher;
+
 using System.Text;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
-
-namespace ISTA_Patcher;
 
 public static class DnlibUtils
 {
@@ -18,7 +20,11 @@ public static class DnlibUtils
             sb.Append(',');
             set = true;
         }
-        if (set) sb.Length -= 1;
+
+        if (set)
+        {
+            sb.Length -= 1;
+        }
 
         sb.Append(')');
         sb.Append(md.ReturnType.FullName);
@@ -29,7 +35,7 @@ public static class DnlibUtils
     {
         return module.GetTypes().FirstOrDefault(tp => tp.FullName == fullName);
     }
-    
+
     public static MethodDef? GetMethod(this AssemblyDef asm, string type, string name, string desc)
     {
         var td = asm.Modules.SelectMany(m => m.GetTypes()).FirstOrDefault(tp => tp.FullName == type);
@@ -52,7 +58,7 @@ public static class DnlibUtils
             throw new Exception($"{method.FullName}.Body null!");
         }
     }
-    
+
     public static void ReturnZeroMethod(this MethodDef method)
     {
         var body = method.Body;
@@ -69,7 +75,7 @@ public static class DnlibUtils
             throw new Exception($"{method.FullName}.Body null!");
         }
     }
-    
+
     public static void ReturnOneMethod(this MethodDef method)
     {
         var body = method.Body;
@@ -88,18 +94,18 @@ public static class DnlibUtils
     }
 
     public static void ReturnFalseMethod(this MethodDef method)
-    { 
+    {
         ReturnZeroMethod(method);
     }
 
     public static void ReturnTrueMethod(this MethodDef method)
-    { 
+    {
         ReturnOneMethod(method);
     }
-    
+
     public static Instruction? FindInstruction(this MethodDef method, OpCode opCode, string operandName)
     {
-        return method.Body.Instructions.FirstOrDefault(instruction => 
+        return method.Body.Instructions.FirstOrDefault(instruction =>
             instruction.OpCode == opCode && (instruction.Operand as IMethodDefOrRef)?.FullName == operandName);
     }
 
