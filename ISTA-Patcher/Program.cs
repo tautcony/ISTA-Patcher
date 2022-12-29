@@ -9,32 +9,10 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
-
-internal enum PatchTypeEnum
-{
-    BMW = 0,
-    TOYOTA = 1,
-}
-
-[Verb("patch", HelpText = "Patch application and library.")]
-internal class PatchOptions
-{
-    [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Patch type, valid option: BMW, TOYOTA")]
-    public PatchTypeEnum PatchType { get; set; }
-
-    [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
-    public bool Deobfuscate { get; set; }
-
-    [Value(1, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
-    public string TargetPath { get; set; }
-}
-
-[Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
-internal class DecryptOptions
-{
-    [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
-    public string? TargetPath { get; set; }
-}
+using DecryptOptions = ProgramArgs.DecryptOptions;
+using LicenseOptions = ProgramArgs.LicenseOptions;
+using PatchOptions = ProgramArgs.PatchOptions;
+using PatchTypeEnum = ProgramArgs.PatchTypeEnum;
 
 internal static class ISTAPatcher
 {
@@ -49,10 +27,11 @@ internal static class ISTAPatcher
                      .WriteTo.Console()
                      .CreateLogger();
 
-        return Parser.Default.ParseArguments<PatchOptions, DecryptOptions>(args)
+        return Parser.Default.ParseArguments<PatchOptions, DecryptOptions, LicenseOptions>(args)
                      .MapResult(
                          (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
                          (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
+                         (LicenseOptions opts) => RunLicenseOperationAndReturnExitCode(opts),
                          errs => 1);
 
         static int RunPatchAndReturnExitCode(PatchOptions opts)
@@ -103,6 +82,34 @@ internal static class ISTAPatcher
 
             Log.Information("Markdown result:\n{Markdown}", markdownBuilder.ToString());
             return 0;
+        }
+
+        static int RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
+        {
+            if (opts.KeyPairPath != null && opts.LicenseRequestPath != null)
+            {
+                // Generate license
+                return 0;
+            }
+
+            if (opts.KeyPairPath != null && opts.LicensePath != null)
+            {
+                // Verify license
+            }
+
+            if (opts.GenerateKeyPair)
+            {
+                // Generate key pair
+                return 0;
+            }
+
+            if (opts.KeyPairPath != null && opts.TargetPath != null)
+            {
+                // Patch program
+                return 0;
+            }
+
+            return 1;
         }
     }
 
