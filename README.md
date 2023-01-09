@@ -38,7 +38,7 @@ ISTA-Patcher.exe patch "C:\EC-APPS\ISTA"
 You can find the patched files in the following directory:
 - `C:\EC-APPS\ISTA\TesterGUI\bin\Release\patched`
 - `C:\EC-APPS\ISTA\PSdZ\host\patched`
-- `C:\EC-APPS\ISTA\PSdZ\host\patched`
+- `C:\EC-APPS\ISTA\PSdZ\hostx64\patched`
 
 Overwrite the patched file to its parent directory, then start the program, and dang, it's ready to use.
 
