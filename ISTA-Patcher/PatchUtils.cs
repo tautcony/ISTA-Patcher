@@ -331,6 +331,36 @@ internal static class PatchUtils
         );
     }
 
+    public static Func<AssemblyDefinition, bool> GeneratePatchGetRSAPKCS1SignatureDeformatter(string modulus, string exponent)
+    {
+        return Patch;
+
+        bool Patch(AssemblyDefinition assembly)
+        {
+            return PatchFunction(
+                assembly,
+                "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
+                "GetRSAPKCS1SignatureDeformatter",
+                "()System.Security.Cryptography.RSAPKCS1SignatureDeformatter",
+                ReplaceParameters
+            );
+
+            void ReplaceParameters(MethodDef method)
+            {
+                var ldstr = method.Body.Instructions.Where(inst => inst.OpCode == OpCodes.Ldstr).ToList();
+                if (ldstr.Count == 3)
+                {
+                    ldstr[0].Operand = modulus;
+                    ldstr[1].Operand = exponent;
+                }
+                else
+                {
+                    Log.Warning("instruction ldstr count not match, can not patch LicenseStatusChecker");
+                }
+            }
+        }
+    }
+
     public static bool CheckPatchedMark(AssemblyDefinition assembly)
     {
         var patchedType = assembly.Modules.First().GetType("Patched.By.TC");

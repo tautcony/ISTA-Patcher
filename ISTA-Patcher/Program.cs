@@ -1,10 +1,13 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022 TautCony
+
 namespace ISTA_Patcher;
 
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using CommandLine;
+using ISTA_Patcher.LicenseManagement;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -86,26 +89,103 @@ internal static class ISTAPatcher
 
         static int RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
         {
-            if (opts.KeyPairPath != null && opts.LicenseRequestPath != null)
+            string keyPairXml = null;
+            if (opts.KeyPairPath != null)
             {
-                // Generate license
-                return 0;
+                if (opts.Base64)
+                {
+                    var data = Convert.FromBase64String(opts.KeyPairPath);
+                    keyPairXml = Encoding.UTF8.GetString(data);
+                }
+                else
+                {
+                    using var fs = File.OpenRead(opts.KeyPairPath);
+                    using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                    keyPairXml = sr.ReadToEnd();
+                }
             }
 
-            if (opts.KeyPairPath != null && opts.LicensePath != null)
+            string licenseXml = null;
+            if (opts.LicensePath != null)
             {
-                // Verify license
+                if (opts.Base64)
+                {
+                    var data = Convert.FromBase64String(opts.LicensePath);
+                    licenseXml = Encoding.UTF8.GetString(data);
+                }
+                else
+                {
+                    using var fs = File.OpenRead(opts.LicensePath);
+                    using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                    licenseXml = sr.ReadToEnd();
+                }
+            }
+
+            if (keyPairXml != null && licenseXml != null)
+            {
+                // generate license
+                using var fs = File.OpenRead(opts.LicensePath);
+                using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                var license = LicenseInfoSerializer.DeserializeFromString(sr.ReadToEnd());
+                LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
+                if (opts.OutputPath != null)
+                {
+                    LicenseInfoSerializer.SerializeRequest(opts.OutputPath, license);
+                }
+                else
+                {
+                    var signedLicense = LicenseInfoSerializer.SerializeRequestToByteArray(license);
+                    Log.Information(
+                        "License: \n{License}",
+                        opts.Base64 ? Convert.ToBase64String(signedLicense) : Encoding.UTF8.GetString(signedLicense));
+                }
+
+                // verify license
+                var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(keyPairXml);
+                var result = LicenseStatusChecker.IsLicenseValid(license, deformatter);
+                Log.Information("License is valid: {IsValid}", result);
+
+                return 0;
             }
 
             if (opts.GenerateKeyPair)
             {
                 // Generate key pair
+                using var rsa = new RSACryptoServiceProvider(2048);
+                try
+                {
+                    var privateKey = rsa.ToXmlString(true);
+
+                    using var fs = new FileStream("privateKey.xml", FileMode.Create);
+                    using var sw = new StreamWriter(fs);
+                    sw.Write(privateKey);
+                    Log.Information("Generated private key to privateKey.xml");
+                }
+                finally
+                {
+                    rsa.PersistKeyInCsp = false;
+                    rsa.Clear();
+                }
+
                 return 0;
             }
 
-            if (opts.KeyPairPath != null && opts.TargetPath != null)
+            if (keyPairXml != null && opts.TargetPath != null)
             {
                 // Patch program
+                var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                rsaCryptoServiceProvider.FromXmlString(keyPairXml);
+
+                var parameters = rsaCryptoServiceProvider.ExportParameters(true);
+
+                var modulus = Convert.ToBase64String(parameters.Modulus);
+                var exponent = Convert.ToBase64String(parameters.Exponent);
+
+                PatchISTA(new BMWLicensePatcher(modulus, exponent), new PatchOptions()
+                {
+                    TargetPath = opts.TargetPath,
+                });
+
                 return 0;
             }
 

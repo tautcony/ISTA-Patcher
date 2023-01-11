@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022 TautCony
+
 namespace ISTA_Patcher;
 
 using System.Text.Json;
@@ -129,5 +130,17 @@ public class ToyotaPatcher : IPatcher
                         .Distinct()
                         .OrderBy(i => i).ToArray();
         return patchList;
+    }
+}
+
+public class BMWLicensePatcher : BMWPatcher
+{
+    public BMWLicensePatcher(string modulus, string exponent)
+    {
+        this.Patches = new[]
+        {
+            PatchUtils.PatchIntegrityManager,
+            PatchUtils.GeneratePatchGetRSAPKCS1SignatureDeformatter(modulus, exponent),
+        };
     }
 }

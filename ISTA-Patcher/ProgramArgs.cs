@@ -35,14 +35,17 @@ public static class ProgramArgs
     [Verb("license", HelpText = "License related operations.")]
     internal class LicenseOptions
     {
-        [Option('l', HelpText = "Path for license file")]
+        [Option('l', HelpText = "Path for license (request) file")]
         public string? LicensePath { get; set; }
-
-        [Option('r', HelpText = "Path for license request file")]
-        public string? LicenseRequestPath { get; set; }
 
         [Option('k', HelpText = "Path for key pair file")]
         public string? KeyPairPath { get; set; }
+
+        [Option('b', HelpText = "Base64 encoded")]
+        public bool Base64 { get; set; }
+
+        [Option('o', HelpText = "Path for signed license")]
+        public string? OutputPath { get; set; }
 
         [Option('g', HelpText = "Generate key pair")]
         public bool GenerateKeyPair { get; set; }
