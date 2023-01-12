@@ -1,40 +1,21 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
+
 namespace ISTA_Patcher;
 
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using CommandLine;
+using ISTA_Patcher.LicenseManagement;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
-
-internal enum PatchTypeEnum
-{
-    BMW = 0,
-    TOYOTA = 1,
-}
-
-[Verb("patch", HelpText = "Patch application and library.")]
-internal class PatchOptions
-{
-    [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Patch type, valid option: BMW, TOYOTA")]
-    public PatchTypeEnum PatchType { get; set; }
-
-    [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
-    public bool Deobfuscate { get; set; }
-
-    [Value(1, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
-    public string TargetPath { get; set; }
-}
-
-[Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
-internal class DecryptOptions
-{
-    [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
-    public string? TargetPath { get; set; }
-}
+using DecryptOptions = ProgramArgs.DecryptOptions;
+using LicenseOptions = ProgramArgs.LicenseOptions;
+using PatchOptions = ProgramArgs.PatchOptions;
+using PatchTypeEnum = ProgramArgs.PatchTypeEnum;
 
 internal static class ISTAPatcher
 {
@@ -49,10 +30,11 @@ internal static class ISTAPatcher
                      .WriteTo.Console()
                      .CreateLogger();
 
-        return Parser.Default.ParseArguments<PatchOptions, DecryptOptions>(args)
+        return Parser.Default.ParseArguments<PatchOptions, DecryptOptions, LicenseOptions>(args)
                      .MapResult(
                          (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
                          (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
+                         (LicenseOptions opts) => RunLicenseOperationAndReturnExitCode(opts),
                          errs => 1);
 
         static int RunPatchAndReturnExitCode(PatchOptions opts)
@@ -104,6 +86,128 @@ internal static class ISTAPatcher
             Log.Information("Markdown result:\n{Markdown}", markdownBuilder.ToString());
             return 0;
         }
+
+        static int RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
+        {
+            if (opts.GenerateKeyPair)
+            {
+                // Generate key pair
+                using var rsa = new RSACryptoServiceProvider(2048);
+                try
+                {
+                    var privateKey = rsa.ToXmlString(true);
+
+                    using var fs = new FileStream("privateKey.xml", FileMode.Create);
+                    using var sw = new StreamWriter(fs);
+                    sw.Write(privateKey);
+                    Log.Information("Generated private key to privateKey.xml");
+                }
+                finally
+                {
+                    rsa.PersistKeyInCsp = false;
+                    rsa.Clear();
+                }
+
+                return 0;
+            }
+
+            string keyPairXml = null;
+            if (opts.KeyPairPath != null)
+            {
+                using var fs = File.OpenRead(opts.KeyPairPath);
+                using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                keyPairXml = sr.ReadToEnd();
+            }
+
+            string licenseXml = null;
+            if (opts.LicensePath != null)
+            {
+                if (opts.Base64)
+                {
+                    try
+                    {
+                        var data = Convert.FromBase64String(opts.LicensePath);
+                        licenseXml = Encoding.UTF8.GetString(data);
+                    }
+                    catch (FormatException ex)
+                    {
+                        Log.Error("License input is not a valid base64 string");
+                    }
+                }
+                else
+                {
+                    using var fs = File.OpenRead(opts.LicensePath);
+                    using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                    licenseXml = sr.ReadToEnd();
+                }
+            }
+
+            if (keyPairXml != null && licenseXml != null)
+            {
+                var license = LicenseInfoSerializer.DeserializeFromString(licenseXml);
+
+                var isValid = false;
+                if (license?.LicenseKey is { Length: > 0 })
+                {
+                    // verify license
+                    var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(keyPairXml);
+                    isValid = LicenseStatusChecker.IsLicenseValid(license, deformatter);
+                    Log.Information("License is valid: {IsValid}", isValid);
+                }
+
+                if (isValid || license == null)
+                {
+                    return 0;
+                }
+
+                // update license info
+                license.Expiration = DateTime.MaxValue;
+                foreach (var subLicense in license.SubLicenses)
+                {
+                    subLicense.PackageRule = "true";
+                    subLicense.PackageExpire = DateTime.MaxValue;
+                }
+
+                // generate license key
+                LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
+                var signedLicense = LicenseInfoSerializer.SerializeLicenseToByteArray(license);
+                if (opts.OutputPath != null)
+                {
+                    using var fileStream = File.Create(opts.OutputPath);
+                    fileStream.Write(signedLicense);
+                }
+                else
+                {
+                    Log.Information("License:\n{License}", Convert.ToBase64String(signedLicense));
+                }
+
+                return 0;
+            }
+
+            if (keyPairXml != null && opts.TargetPath != null)
+            {
+                // Patch program
+                var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+                rsaCryptoServiceProvider.FromXmlString(keyPairXml);
+
+                var parameters = rsaCryptoServiceProvider.ExportParameters(true);
+
+                var modulus = Convert.ToBase64String(parameters.Modulus);
+                var exponent = Convert.ToBase64String(parameters.Exponent);
+
+                PatchISTA(new BMWLicensePatcher(modulus, exponent), new PatchOptions
+                {
+                    TargetPath = opts.TargetPath,
+                    Force = opts.Force,
+                    Deobfuscate = opts.Deobfuscate,
+                });
+
+                return 0;
+            }
+
+            Log.Warning("No operation matched, exiting...");
+            return 1;
+        }
     }
 
     private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, bool>> patches)
@@ -149,7 +253,7 @@ internal static class ISTAPatcher
                 var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
                 var assembly = module.Assembly;
                 var isPatched = PatchUtils.CheckPatchedMark(assembly);
-                if (isPatched)
+                if (isPatched && !options.Force)
                 {
                     Log.Information(
                         "{Item}{Indent}{Result} [already patched]",
