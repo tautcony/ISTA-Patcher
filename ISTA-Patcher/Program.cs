@@ -89,65 +89,6 @@ internal static class ISTAPatcher
 
         static int RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
         {
-            string keyPairXml = null;
-            if (opts.KeyPairPath != null)
-            {
-                if (opts.Base64)
-                {
-                    var data = Convert.FromBase64String(opts.KeyPairPath);
-                    keyPairXml = Encoding.UTF8.GetString(data);
-                }
-                else
-                {
-                    using var fs = File.OpenRead(opts.KeyPairPath);
-                    using var sr = new StreamReader(fs, new UTF8Encoding(false));
-                    keyPairXml = sr.ReadToEnd();
-                }
-            }
-
-            string licenseXml = null;
-            if (opts.LicensePath != null)
-            {
-                if (opts.Base64)
-                {
-                    var data = Convert.FromBase64String(opts.LicensePath);
-                    licenseXml = Encoding.UTF8.GetString(data);
-                }
-                else
-                {
-                    using var fs = File.OpenRead(opts.LicensePath);
-                    using var sr = new StreamReader(fs, new UTF8Encoding(false));
-                    licenseXml = sr.ReadToEnd();
-                }
-            }
-
-            if (keyPairXml != null && licenseXml != null)
-            {
-                // generate license
-                using var fs = File.OpenRead(opts.LicensePath);
-                using var sr = new StreamReader(fs, new UTF8Encoding(false));
-                var license = LicenseInfoSerializer.DeserializeFromString(sr.ReadToEnd());
-                LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
-                if (opts.OutputPath != null)
-                {
-                    LicenseInfoSerializer.SerializeRequest(opts.OutputPath, license);
-                }
-                else
-                {
-                    var signedLicense = LicenseInfoSerializer.SerializeRequestToByteArray(license);
-                    Log.Information(
-                        "License: \n{License}",
-                        opts.Base64 ? Convert.ToBase64String(signedLicense) : Encoding.UTF8.GetString(signedLicense));
-                }
-
-                // verify license
-                var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(keyPairXml);
-                var result = LicenseStatusChecker.IsLicenseValid(license, deformatter);
-                Log.Information("License is valid: {IsValid}", result);
-
-                return 0;
-            }
-
             if (opts.GenerateKeyPair)
             {
                 // Generate key pair
@@ -170,6 +111,79 @@ internal static class ISTAPatcher
                 return 0;
             }
 
+            string keyPairXml = null;
+            if (opts.KeyPairPath != null)
+            {
+                using var fs = File.OpenRead(opts.KeyPairPath);
+                using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                keyPairXml = sr.ReadToEnd();
+            }
+
+            string licenseXml = null;
+            if (opts.LicensePath != null)
+            {
+                if (opts.Base64)
+                {
+                    try
+                    {
+                        var data = Convert.FromBase64String(opts.LicensePath);
+                        licenseXml = Encoding.UTF8.GetString(data);
+                    }
+                    catch (FormatException ex)
+                    {
+                        Log.Error("License input is not a valid base64 string");
+                    }
+                }
+                else
+                {
+                    using var fs = File.OpenRead(opts.LicensePath);
+                    using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                    licenseXml = sr.ReadToEnd();
+                }
+            }
+
+            if (keyPairXml != null && licenseXml != null)
+            {
+                using var fs = File.OpenRead(opts.LicensePath);
+                using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                var license = LicenseInfoSerializer.DeserializeFromString(sr.ReadToEnd());
+
+                var isValid = false;
+                if (license?.LicenseKey is { Length: > 0 })
+                {
+                    // verify license
+                    var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(keyPairXml);
+                    isValid = LicenseStatusChecker.IsLicenseValid(license, deformatter);
+                    Log.Information("License is valid: {IsValid}", isValid);
+                }
+
+                if (isValid || license == null)
+                {
+                    return 0;
+                }
+
+                // generate license
+                LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
+                if (opts.OutputPath != null)
+                {
+                    LicenseInfoSerializer.SerializeRequest(opts.OutputPath, license);
+                }
+                else
+                {
+                    var signedLicense = LicenseInfoSerializer.SerializeRequestToByteArray(license);
+                    if (signedLicense == null)
+                    {
+                        return 1;
+                    }
+
+                    Log.Information(
+                        "License: \n{License}",
+                        opts.Base64 ? Convert.ToBase64String(signedLicense) : Encoding.UTF8.GetString(signedLicense));
+                }
+
+                return 0;
+            }
+
             if (keyPairXml != null && opts.TargetPath != null)
             {
                 // Patch program
@@ -181,7 +195,7 @@ internal static class ISTAPatcher
                 var modulus = Convert.ToBase64String(parameters.Modulus);
                 var exponent = Convert.ToBase64String(parameters.Exponent);
 
-                PatchISTA(new BMWLicensePatcher(modulus, exponent), new PatchOptions()
+                PatchISTA(new BMWLicensePatcher(modulus, exponent), new PatchOptions
                 {
                     TargetPath = opts.TargetPath,
                 });

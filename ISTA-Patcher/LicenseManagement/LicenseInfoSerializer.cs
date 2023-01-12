@@ -68,7 +68,7 @@ public static class LicenseInfoSerializer
 
         try
         {
-            var stream = new MemoryStream(Encoding.UTF8.GetBytes(licString));
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(licString));
             return (LicenseInfo)new XmlSerializer(typeof(LicenseInfo)).Deserialize(stream);
         }
         catch (Exception ex)
