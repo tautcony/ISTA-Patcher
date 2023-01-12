@@ -144,9 +144,7 @@ internal static class ISTAPatcher
 
             if (keyPairXml != null && licenseXml != null)
             {
-                using var fs = File.OpenRead(opts.LicensePath);
-                using var sr = new StreamReader(fs, new UTF8Encoding(false));
-                var license = LicenseInfoSerializer.DeserializeFromString(sr.ReadToEnd());
+                var license = LicenseInfoSerializer.DeserializeFromString(licenseXml);
 
                 var isValid = false;
                 if (license?.LicenseKey is { Length: > 0 })
@@ -162,23 +160,25 @@ internal static class ISTAPatcher
                     return 0;
                 }
 
-                // generate license
+                // update license info
+                license.Expiration = DateTime.MaxValue;
+                foreach (var subLicense in license.SubLicenses)
+                {
+                    subLicense.PackageRule = "true";
+                    subLicense.PackageExpire = DateTime.MaxValue;
+                }
+
+                // generate license key
                 LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
+                var signedLicense = LicenseInfoSerializer.SerializedLicenseToByteArray(license);
                 if (opts.OutputPath != null)
                 {
-                    LicenseInfoSerializer.SerializeRequest(opts.OutputPath, license);
+                    using var fileStream = File.Create(opts.OutputPath);
+                    fileStream.Write(signedLicense);
                 }
                 else
                 {
-                    var signedLicense = LicenseInfoSerializer.SerializeRequestToByteArray(license);
-                    if (signedLicense == null)
-                    {
-                        return 1;
-                    }
-
-                    Log.Information(
-                        "License: \n{License}",
-                        opts.Base64 ? Convert.ToBase64String(signedLicense) : Encoding.UTF8.GetString(signedLicense));
+                    Log.Information("License: \n{License}", Convert.ToBase64String(signedLicense));
                 }
 
                 return 0;

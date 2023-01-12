@@ -1,6 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright 2022 TautCony
 namespace ISTA_Patcher.LicenseManagement;
 
 using System.Security.Cryptography;
+using System.Text;
+using System.Xml;
 using System.Xml.Serialization;
 using ISTA_Patcher.LicenseManagement.CoreFramework;
 using Serilog;
@@ -18,6 +22,8 @@ public class LicenseStatusChecker
 
         licenseInfo.LicenseKey = Array.Empty<byte>();
         var hashValue = GetHashValueFrom(licenseInfo);
+
+        Log.Debug("hash stream: {ByteArray}", FormatConverter.ByteArray2String(hashValue, (uint)hashValue.Length));
 
         if (signatureDeformatter.VerifySignature(hashValue, licenseKey))
         {
@@ -42,11 +48,26 @@ public class LicenseStatusChecker
 
     private static byte[] GetHashValueFrom(LicenseInfo licInfo)
     {
-        var memoryStream = new MemoryStream();
-        new XmlSerializer(typeof(LicenseInfo)).Serialize(memoryStream, licInfo);
-        var buffer = memoryStream.GetBuffer();
+        using var ms = new MemoryStream();
+        var serializer = new XmlSerializer(typeof(LicenseInfo));
+        var ws = new XmlWriterSettings
+        {
+            Encoding = new UTF8Encoding(false),
+            Indent = true,
+            IndentChars = "  ",
+            OmitXmlDeclaration = true,
+        };
 
-        // Log.Debug("licInfo stream: {ByteArray}", FormatConverter.ByteArray2String(buffer, (uint)buffer.Length));
+        using var xmlWriter = XmlWriter.Create(ms, ws);
+        serializer.Serialize(xmlWriter, licInfo);
+        var serializedXml = "<?xml version=\"1.0\"?>\n" + Encoding.UTF8.GetString(ms.GetBuffer());
+        serializedXml = serializedXml.ReplaceLineEndings("\r\n");
+        var serializedXmlByte = Encoding.UTF8.GetBytes(serializedXml);
+        var bufferLength = (uint)Math.Pow(2, Math.Ceiling(Math.Log2(serializedXmlByte.Length)));
+        var buffer = new byte[bufferLength];
+        Array.Copy(serializedXmlByte, buffer, serializedXmlByte.Length);
+
+        Log.Debug("licInfo stream: {ByteArray}", FormatConverter.ByteArray2String(buffer, (uint)buffer.Length));
         return SHA1.Create().ComputeHash(buffer);
     }
 

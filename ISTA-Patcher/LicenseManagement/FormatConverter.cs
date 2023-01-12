@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright 2022 TautCony
 namespace ISTA_Patcher.LicenseManagement;
 
 using System.Globalization;
@@ -6,12 +8,12 @@ using Serilog;
 
 public static class FormatConverter
 {
-    public static string ByteArray2String(byte[] param, uint paramlen)
+    public static string ByteArray2String(byte[] param, uint paramLen)
     {
         try
         {
             var stringBuilder = new StringBuilder();
-            for (var i = 0; i < paramlen; i++)
+            for (var i = 0; i < paramLen; i++)
             {
                 stringBuilder.Append(string.Format(CultureInfo.InvariantCulture, "{0:X2}", param[i]));
             }

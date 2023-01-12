@@ -1,6 +1,7 @@
 namespace ISTA_Patcher.LicenseManagement;
 
 using System.Text;
+using System.Xml;
 using System.Xml.Serialization;
 using ISTA_Patcher.LicenseManagement.CoreFramework;
 using Serilog;
@@ -30,33 +31,24 @@ public static class LicenseInfoSerializer
         }
     }
 
-    public static bool SerializeRequest(string fileName, LicenseInfo? licInfo)
+    public static byte[] SerializedLicenseToByteArray(LicenseInfo? licInfo)
     {
-        try
+        using var ms = new MemoryStream();
+        var serializer = new XmlSerializer(typeof(LicenseInfo));
+        var ws = new XmlWriterSettings()
         {
-            if (string.IsNullOrEmpty(fileName))
-            {
-                Log.Warning("fileName empty");
-                return false;
-            }
+            Encoding = new UTF8Encoding(false),
+            Indent = true,
+            IndentChars = "  ",
+            OmitXmlDeclaration = true,
+        };
 
-            if (licInfo == null)
-            {
-                Log.Warning("license info empty");
-                return false;
-            }
-
-            using var fileStream = File.Create(fileName);
-            new XmlSerializer(typeof(LicenseInfo)).Serialize(fileStream, licInfo);
-            fileStream.Close();
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "SerializeRequest failed");
-        }
-
-        return false;
+        using var xmlWriter = XmlWriter.Create(ms, ws);
+        serializer.Serialize(xmlWriter, licInfo);
+        var serializedXml = "<?xml version=\"1.0\"?>\n" + Encoding.UTF8.GetString(ms.GetBuffer());
+        serializedXml = serializedXml.ReplaceLineEndings("\r\n");
+        var buffer = Encoding.UTF8.GetBytes(serializedXml);
+        return buffer;
     }
 
     public static LicenseInfo? DeserializeFromString(string licString)
