@@ -48,22 +48,8 @@ public class LicenseStatusChecker
 
     private static byte[] GetHashValueFrom(LicenseInfo licInfo)
     {
-        using var ms = new MemoryStream();
-        var serializer = new XmlSerializer(typeof(LicenseInfo));
-        var ws = new XmlWriterSettings
-        {
-            Encoding = new UTF8Encoding(false),
-            Indent = true,
-            IndentChars = "  ",
-            OmitXmlDeclaration = true,
-        };
-
-        using var xmlWriter = XmlWriter.Create(ms, ws);
-        serializer.Serialize(xmlWriter, licInfo);
-        var serializedXml = "<?xml version=\"1.0\"?>\n" + Encoding.UTF8.GetString(ms.GetBuffer());
-        serializedXml = serializedXml.ReplaceLineEndings("\r\n");
-        var serializedXmlByte = Encoding.UTF8.GetBytes(serializedXml);
-        var bufferLength = (uint)Math.Pow(2, Math.Ceiling(Math.Log2(serializedXmlByte.Length)));
+        var serializedXmlByte = LicenseInfoSerializer.SerializeLicenseToByteArray(licInfo);
+        var bufferLength = Math.Max(256, (uint)Math.Pow(2, Math.Ceiling(Math.Log2(serializedXmlByte.Length))));
         var buffer = new byte[bufferLength];
         Array.Copy(serializedXmlByte, buffer, serializedXmlByte.Length);
 

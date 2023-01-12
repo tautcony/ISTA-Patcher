@@ -21,6 +21,9 @@ public static class ProgramArgs
         [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
         public bool Deobfuscate { get; set; }
 
+        [Option('f', "force", Default = false, HelpText = "Force patch application and library.")]
+        public bool Force { get; set; }
+
         [Value(1, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
         public string TargetPath { get; set; }
     }
@@ -52,5 +55,11 @@ public static class ProgramArgs
 
         [Option('p', HelpText = "Patch target program")]
         public string? TargetPath { get; set; }
+
+        [Option('f', "force", Default = false, HelpText = "Force patch application and library.")]
+        public bool Force { get; set; }
+
+        [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
+        public bool Deobfuscate { get; set; }
     }
 }

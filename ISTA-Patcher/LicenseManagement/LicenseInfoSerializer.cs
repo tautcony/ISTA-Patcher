@@ -31,11 +31,11 @@ public static class LicenseInfoSerializer
         }
     }
 
-    public static byte[] SerializedLicenseToByteArray(LicenseInfo? licInfo)
+    public static byte[] SerializeLicenseToByteArray(LicenseInfo? licInfo)
     {
         using var ms = new MemoryStream();
         var serializer = new XmlSerializer(typeof(LicenseInfo));
-        var ws = new XmlWriterSettings()
+        var ws = new XmlWriterSettings
         {
             Encoding = new UTF8Encoding(false),
             Indent = true,
@@ -45,7 +45,7 @@ public static class LicenseInfoSerializer
 
         using var xmlWriter = XmlWriter.Create(ms, ws);
         serializer.Serialize(xmlWriter, licInfo);
-        var serializedXml = "<?xml version=\"1.0\"?>\n" + Encoding.UTF8.GetString(ms.GetBuffer());
+        var serializedXml = "<?xml version=\"1.0\"?>\n" + Encoding.UTF8.GetString(ms.ToArray());
         serializedXml = serializedXml.ReplaceLineEndings("\r\n");
         var buffer = Encoding.UTF8.GetBytes(serializedXml);
         return buffer;

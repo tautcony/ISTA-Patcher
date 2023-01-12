@@ -170,7 +170,7 @@ internal static class ISTAPatcher
 
                 // generate license key
                 LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
-                var signedLicense = LicenseInfoSerializer.SerializedLicenseToByteArray(license);
+                var signedLicense = LicenseInfoSerializer.SerializeLicenseToByteArray(license);
                 if (opts.OutputPath != null)
                 {
                     using var fileStream = File.Create(opts.OutputPath);
@@ -178,7 +178,7 @@ internal static class ISTAPatcher
                 }
                 else
                 {
-                    Log.Information("License: \n{License}", Convert.ToBase64String(signedLicense));
+                    Log.Information("License:\n{License}", Convert.ToBase64String(signedLicense));
                 }
 
                 return 0;
@@ -198,11 +198,14 @@ internal static class ISTAPatcher
                 PatchISTA(new BMWLicensePatcher(modulus, exponent), new PatchOptions
                 {
                     TargetPath = opts.TargetPath,
+                    Force = opts.Force,
+                    Deobfuscate = opts.Deobfuscate,
                 });
 
                 return 0;
             }
 
+            Log.Warning("No operation matched, exiting...");
             return 1;
         }
     }
@@ -250,7 +253,7 @@ internal static class ISTAPatcher
                 var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
                 var assembly = module.Assembly;
                 var isPatched = PatchUtils.CheckPatchedMark(assembly);
-                if (isPatched)
+                if (isPatched && !options.Force)
                 {
                     Log.Information(
                         "{Item}{Indent}{Result} [already patched]",
