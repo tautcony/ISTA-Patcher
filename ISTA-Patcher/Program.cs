@@ -164,7 +164,10 @@ internal static class ISTAPatcher
                 license.Expiration = DateTime.MaxValue;
                 foreach (var subLicense in license.SubLicenses)
                 {
-                    subLicense.PackageRule = "true";
+                    if (subLicense.PackageRule == null)
+                    {
+                        subLicense.PackageRule = "true";
+                    }
                     subLicense.PackageExpire = DateTime.MaxValue;
                 }
 
