@@ -9,7 +9,7 @@ An IL patcher for ISTA-P
 
 ## Usage
 
-Before using it, make sure the file structure looks like bellow:
+Before using it, make sure the file structure looks like the following:
 
 ```
 C:\EC-APPS\ISTA
@@ -27,24 +27,24 @@ C:\EC-APPS\ISTA
 │   │       ├── ...
 ```
 
-> ⚠️ Please backup folder `ISTA\TesterGUI` & `ISTA\PSdZ` before patch.
+> ⚠️ Please backup the ISTA\TesterGUI & ISTA\PSdZ folders before patching.
 
-Execute the following command in terminal.
+Execute the following command in a terminal:
 
-```batch
+```shell
 ISTA-Patcher.exe patch "C:\EC-APPS\ISTA"
 ```
 
-You can find the patched files in the following directory:
+The patched files can be found in the following directory:
 - `C:\EC-APPS\ISTA\TesterGUI\bin\Release\patched`
 - `C:\EC-APPS\ISTA\PSdZ\host\patched`
 - `C:\EC-APPS\ISTA\PSdZ\hostx64\patched`
 
-Overwrite the patched file to its parent directory, then start the program, and dang, it's ready to use.
+Overwrite the patched file to its parent directory, then run the program and, dang, it's ready to use.
 
 ## Other options
 
-Start `ISTA-Patcher` without any arguments and it will show all options.
+Run `ISTA-Patcher` without any arguments and it will show all options.
 
 ## License
 
@@ -52,6 +52,6 @@ Distributed under the GPLv3+ License. See LICENSE for more information.
 
 ## Disclaimer
 
-Credit of icon: [comboo](https://twitter.com/comboo28).
+Icon credit: [comboo](https://twitter.com/comboo28).
 
-This repository was created for educational purposes only. Use it at your own risk.
+This repository has been created for educational purposes only. Use it at your own risk.

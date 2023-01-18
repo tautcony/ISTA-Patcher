@@ -44,7 +44,7 @@ public class IntegrityManager
         }
         catch (Exception ex)
         {
-            Log.Warning("Failed to decrypt file: {Reason}", ex.Message);
+            Log.Warning(ex, "Failed to decrypt file: {Reason}", ex.Message);
         }
 
         return null;

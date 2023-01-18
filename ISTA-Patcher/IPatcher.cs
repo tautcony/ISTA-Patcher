@@ -34,7 +34,7 @@ public interface IPatcher
             ex is FileNotFoundException or IOException or JsonException
         )
         {
-            Log.Fatal("Failed to load config file: {Reason}", ex.Message);
+            Log.Fatal(ex, "Failed to load config file: {Reason}", ex.Message);
         }
 
         return null;

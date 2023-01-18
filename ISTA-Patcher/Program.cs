@@ -131,7 +131,7 @@ internal static class ISTAPatcher
                     }
                     catch (FormatException ex)
                     {
-                        Log.Error("License input is not a valid base64 string");
+                        Log.Error(ex, "License input is not a valid base64 string");
                     }
                 }
                 else
@@ -168,6 +168,7 @@ internal static class ISTAPatcher
                     {
                         subLicense.PackageRule = "true";
                     }
+
                     subLicense.PackageExpire = DateTime.MaxValue;
                 }
 
@@ -237,6 +238,10 @@ internal static class ISTAPatcher
             var originalDirPath = Path.GetDirectoryName(pendingPatchItemFullPath);
             var patchedDirPath = Path.Join(originalDirPath, outputDirName);
             var patchedFileFullPath = Path.Join(patchedDirPath, Path.GetFileName(pendingPatchItem));
+            if (File.Exists(patchedFileFullPath))
+            {
+                File.Delete(patchedFileFullPath);
+            }
 
             var indent = new string(' ', indentLength - pendingPatchItem.Length);
             if (!File.Exists(pendingPatchItemFullPath))

@@ -26,9 +26,13 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}
 
     - name: Restore dependencies
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: true
       run: dotnet restore --runtime ${{ matrix.runtime-identifier }}
 
     - name: Publish the application
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: true
       run: dotnet publish ISTA-Patcher --configuration ${{ matrix.configuration }} --no-restore --runtime ${{ matrix.runtime-identifier }} --self-contained false
 
     - name: Upload build artifacts
