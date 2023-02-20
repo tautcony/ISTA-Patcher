@@ -7,13 +7,12 @@ on:
 
 jobs:
   build:
-
     runs-on: windows-latest
     strategy:
       matrix:
         dotnet-version: [ '6.x' ]
         configuration: [ 'Release' ]
-        runtime-identifier: [ 'win-x64' ]
+        runtime-identifier: [ 'win-x64', 'linux-x64' ]
 
     steps:
     - uses: actions/checkout@v3
@@ -25,20 +24,47 @@ jobs:
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
 
-    - name: Restore dependencies
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: true
-      run: dotnet restore --runtime ${{ matrix.runtime-identifier }}
-
     - name: Publish the application
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: true
-      run: dotnet publish ISTA-Patcher --configuration ${{ matrix.configuration }} --no-restore --runtime ${{ matrix.runtime-identifier }} --self-contained false
+      run: dotnet publish ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --self-contained false
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: ISTA-Patcher-${{ matrix.runtime-identifier }}-${{ matrix.configuration }}
         path: |
-          ISTA-Patcher/bin/Release/net6.0/win-x64/publish/*
-          !ISTA-Patcher/bin/Release/net6.0/win-x64/publish/*.pdb
+          ISTA-Patcher/bin/${{ matrix.configuration }}/net6.0/${{ matrix.runtime-identifier }}/publish/*
+          !ISTA-Patcher/bin/${{ matrix.configuration }}/net6.0/${{ matrix.runtime-identifier }}/publish/*.pdb
+
+  build-for-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET 6.x
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.x
+
+    - name: Publish the application
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: true
+      run: dotnet publish ISTA-Patcher --configuration Release --runtime osx-x64 --self-contained false
+      run: dotnet publish ISTA-Patcher --configuration Release --runtime osx-arm64 --self-contained false
+
+    - name: Glue the binary
+    run: |
+      mkdir -p ISTA-Patcher/bin/Release/net6.0/osx-universal/publish
+      lipo -create ISTA-Patcher/bin/Release/net6.0/osx-x64/publish/ISTA-Patcher ISTA-Patcher/bin/Release/net6.0/osx-arm64/publish/ISTA-Patcher -output ISTA-Patcher/bin/Release/net6.0/osx-universal/publish/ISTA-Patcher
+      cp -f ISTA-Patcher/bin/Release/net6.0/osx-x64/publish/patchConfig.json ISTA-Patcher/bin/Release/net6.0/osx-universal/publish/patchConfig.json
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ISTA-Patcher-osx-universal-Release
+        path: |
+          ISTA-Patcher/bin/Release/net6.0/osx-universal/publish/*
+          !ISTA-Patcher/bin/Release/net6.0/osx-universal/publish/*.pdb
