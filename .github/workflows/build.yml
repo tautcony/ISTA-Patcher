@@ -7,10 +7,10 @@ on:
 
 jobs:
   build:
+    name: 'Build'
     runs-on: windows-latest
     strategy:
       matrix:
-        dotnet-version: [ '6.x' ]
         configuration: [ 'Release' ]
         runtime-identifier: [ 'win-x64', 'linux-x64' ]
 
@@ -19,10 +19,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET ${{ matrix.dotnet-version }}
+    - name: Setup .NET 6.x
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-version: 6.x
 
     - name: Publish the application
       env:
@@ -38,6 +38,7 @@ jobs:
           !ISTA-Patcher/bin/${{ matrix.configuration }}/net6.0/${{ matrix.runtime-identifier }}/publish/*.pdb
 
   build-for-macos:
+    name: 'Build (MacOS-universal)'
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
