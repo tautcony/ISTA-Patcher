@@ -38,7 +38,7 @@ jobs:
           !ISTA-Patcher/bin/${{ matrix.configuration }}/net6.0/${{ matrix.runtime-identifier }}/publish/*.pdb
 
   build-for-macos:
-    name: 'Build (MacOS-universal)'
+    name: 'Build (Release, osx-universal)'
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
