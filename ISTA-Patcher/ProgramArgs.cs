@@ -28,38 +28,38 @@ public static class ProgramArgs
         public string TargetPath { get; set; }
     }
 
-    [Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
-    internal class DecryptOptions
-    {
-        [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
-        public string? TargetPath { get; set; }
-    }
-
     [Verb("license", HelpText = "License related operations.")]
     internal class LicenseOptions
     {
-        [Option('l', HelpText = "Path for license (request) file")]
-        public string? LicensePath { get; set; }
-
-        [Option('k', HelpText = "Path for key pair file")]
-        public string? KeyPairPath { get; set; }
-
-        [Option('b', HelpText = "Base64 encoded")]
-        public bool Base64 { get; set; }
-
-        [Option('o', HelpText = "Path for signed license")]
-        public string? OutputPath { get; set; }
-
-        [Option('g', HelpText = "Generate key pair")]
+        [Option('g', "generate", HelpText = "Generate key pair", Group = "operation")]
         public bool GenerateKeyPair { get; set; }
 
-        [Option('p', HelpText = "Patch target program")]
+        [Option('p', "patch", HelpText = "Patch target program", Group = "operation")]
         public string? TargetPath { get; set; }
+
+        [Option('k', "key-pair", HelpText = "Path for key pair file")]
+        public string? KeyPairPath { get; set; }
+
+        [Option('l', "license", HelpText = "Path for license request file or base64 encoded content")]
+        public string? LicensePath { get; set; }
+
+        [Option('o', "output", HelpText = "Target path for signed license file")]
+        public string? OutputPath { get; set; }
+
+        [Option('b', "base64", HelpText = "Base64 encoded")]
+        public bool Base64 { get; set; }
 
         [Option('f', "force", Default = false, HelpText = "Force patch application and library.")]
         public bool Force { get; set; }
 
         [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
         public bool Deobfuscate { get; set; }
+    }
+
+    [Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
+    internal class DecryptOptions
+    {
+        [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
+        public string? TargetPath { get; set; }
     }
 }

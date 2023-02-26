@@ -161,6 +161,7 @@ internal static class ISTAPatcher
                 }
 
                 // update license info
+                license.Comment = "Patched by ISTA Patcher (https://github.com/tautcony/ISTA-Patcher)";
                 license.Expiration = DateTime.MaxValue;
                 foreach (var subLicense in license.SubLicenses)
                 {

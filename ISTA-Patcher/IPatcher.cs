@@ -141,6 +141,7 @@ public class BMWLicensePatcher : BMWPatcher
         {
             PatchUtils.PatchIntegrityManager,
             PatchUtils.PatchVerifyAssemblyHelper,
+            PatchUtils.PatchConfigurationService,
             PatchUtils.GeneratePatchGetRSAPKCS1SignatureDeformatter(modulus, exponent),
         };
     }
