@@ -1,5 +1,5 @@
 <div align="center">
-<img alt="LOGO" src="images/patcher-icon.png" width="256" height="256" />
+<img alt="LOGO" src="assets/patcher-icon.png" width="256" height="256" />
 
 # ISTA Patcher <br/> [![License: GPL v3](https://img.shields.io/github/license/tautcony/ISTA-Patcher?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0) [![build](https://img.shields.io/github/actions/workflow/status/tautcony/ISTA-Patcher/build.yml?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/actions) [![](https://img.shields.io/github/downloads/tautcony/ISTA-Patcher/total.svg?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/releases)
 
@@ -27,7 +27,7 @@ C:\EC-APPS\ISTA
 │   │       ├── ...
 ```
 
-> ⚠️ Please backup the ISTA\TesterGUI & ISTA\PSdZ folders before patching.
+> ⚠️ Please backup the `ISTA\TesterGUI` & `ISTA\PSdZ` folders before patching.
 
 Execute the following command in a terminal:
 
@@ -40,7 +40,9 @@ The patched files can be found in the following directory:
 - `C:\EC-APPS\ISTA\PSdZ\host\patched`
 - `C:\EC-APPS\ISTA\PSdZ\hostx64\patched`
 
-Overwrite the patched file to its parent directory, then run the program and, dang, it's ready to use.
+Import [registry file](assets/license.reg) to resolve exception while loading license.
+
+Overwrite patched files to its parent directory, then run the program and, dang, it's ready to use.
 
 ## Other options
 
