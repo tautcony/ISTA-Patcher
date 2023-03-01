@@ -60,6 +60,7 @@ public class BMWPatcher : IPatcher
         PatchUtils.PatchActivationCertificateHelper,
         PatchUtils.PatchCertificateHelper,
         PatchUtils.PatchConfigurationService,
+        PatchUtils.PatchInteractionAdministrationModel,
     };
 
     public static string?[] LoadFileList(string basePath)
@@ -142,6 +143,7 @@ public class BMWLicensePatcher : BMWPatcher
             PatchUtils.PatchIntegrityManager,
             PatchUtils.PatchVerifyAssemblyHelper,
             PatchUtils.PatchConfigurationService,
+            PatchUtils.PatchInteractionAdministrationModel,
             PatchUtils.GeneratePatchGetRSAPKCS1SignatureDeformatter(modulus, exponent),
         };
     }

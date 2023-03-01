@@ -261,7 +261,7 @@ internal static class ISTAPatcher
             {
                 var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
                 var assembly = module.Assembly;
-                var isPatched = PatchUtils.CheckPatchedMark(assembly);
+                var isPatched = PatchUtils.HavePatchedMark(assembly);
                 if (isPatched && !options.Force)
                 {
                     Log.Information(

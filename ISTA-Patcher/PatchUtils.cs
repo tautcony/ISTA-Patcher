@@ -361,7 +361,45 @@ internal static class PatchUtils
         }
     }
 
-    public static bool CheckPatchedMark(AssemblyDefinition assembly)
+    public static bool PatchInteractionAdministrationModel(AssemblyDefinition assembly)
+    {
+        void RewriteTitle(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+            var setTitle = instructions.FirstOrDefault(inst => inst.OpCode == OpCodes.Call && inst.Operand is MethodDef methodDef && methodDef.Name == "set_Title");
+            if (setTitle == null)
+            {
+                return;
+            }
+
+            var setTitleIndex = instructions.IndexOf(setTitle);
+            if (setTitleIndex < 0)
+            {
+                return;
+            }
+
+            var mod = method.Module;
+            TypeRef stringRef = new TypeRefUser(mod, "System", "String", mod.CorLibTypes.AssemblyRef);
+            MemberRef concatRef = new MemberRefUser(
+                mod,
+                "Concat",
+                MethodSig.CreateStatic(mod.CorLibTypes.String, mod.CorLibTypes.String, mod.CorLibTypes.String),
+                stringRef);
+
+            instructions.Insert(setTitleIndex, OpCodes.Call.ToInstruction(concatRef));
+            instructions.Insert(setTitleIndex, OpCodes.Ldstr.ToInstruction("(Patched By ISTA-Patcher)"));
+        }
+
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.CoreFramework.Interaction.Models.InteractionAdministrationModel",
+            ".ctor",
+            "()System.Void",
+            RewriteTitle
+        );
+    }
+
+    public static bool HavePatchedMark(AssemblyDefinition assembly)
     {
         var patchedType = assembly.Modules.First().GetType("Patched.By.TC");
         return patchedType != null;
@@ -370,7 +408,7 @@ internal static class PatchUtils
     public static void SetPatchedMark(AssemblyDefinition assembly)
     {
         var module = assembly.Modules.FirstOrDefault();
-        if (module == null)
+        if (module == null || HavePatchedMark(assembly))
         {
             return;
         }
