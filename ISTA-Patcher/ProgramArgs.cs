@@ -12,8 +12,14 @@ public static class ProgramArgs
         TOYOTA = 1,
     }
 
+    internal class BaseOption
+    {
+        [Option('v', "verbosity", Default = Serilog.Events.LogEventLevel.Information, HelpText = "Set output verbosity.")]
+        public Serilog.Events.LogEventLevel Verbosity { get; set; }
+    }
+
     [Verb("patch", HelpText = "Patch application and library.")]
-    internal class PatchOptions
+    internal class PatchOptions : BaseOption
     {
         [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Patch type, valid option: BMW, TOYOTA")]
         public PatchTypeEnum PatchType { get; set; }
@@ -29,13 +35,16 @@ public static class ProgramArgs
     }
 
     [Verb("license", HelpText = "License related operations.")]
-    internal class LicenseOptions
+    internal class LicenseOptions : BaseOption
     {
         [Option('g', "generate", HelpText = "Generate key pair", Group = "operation")]
         public bool GenerateKeyPair { get; set; }
 
         [Option('p', "patch", HelpText = "Patch target program", Group = "operation")]
         public string? TargetPath { get; set; }
+
+        [Option('a', "auto", Default = false, HelpText = "Auto generate key pair and patch target program")]
+        public bool AutoMode { get; set; }
 
         [Option('k', "key-pair", HelpText = "Path for key pair file")]
         public string? KeyPairPath { get; set; }
@@ -57,7 +66,7 @@ public static class ProgramArgs
     }
 
     [Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
-    internal class DecryptOptions
+    internal class DecryptOptions : BaseOption
     {
         [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
         public string? TargetPath { get; set; }
