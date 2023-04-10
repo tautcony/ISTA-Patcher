@@ -122,6 +122,6 @@ namespace de4dot.code.renamer.asmmodules {
 				methodGroups[methodDef] = a;
 		}
 
-		public IEnumerable<MethodNameGroup> GetAllGroups() => Utils.Unique(methodGroups.Values);
+		public IEnumerable<MethodNameGroup> GetAllGroups() => methodGroups.Values.Distinct();
 	}
 }

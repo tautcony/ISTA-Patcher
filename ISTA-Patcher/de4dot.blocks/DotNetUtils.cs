@@ -125,7 +125,7 @@ namespace de4dot.blocks {
 		public static bool DerivesFromDelegate(TypeDef type) => type != null && IsDelegate(type.BaseType);
 
 		public static bool IsMethod(IMethod method, string returnType, string parameters) =>
-			method != null && method.FullName == returnType + " " + method.DeclaringType.FullName + "::" + method.Name + parameters;
+			method != null && method.FullName == $"{returnType} {method.DeclaringType.FullName}::{method.Name}{parameters}";
 
 		public static string GetDllName(string dll) {
 			if (dll.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
