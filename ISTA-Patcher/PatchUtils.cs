@@ -399,6 +399,23 @@ internal static class PatchUtils
         );
     }
 
+    public static bool PatchCompileTime(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.CoreFramework.LicenseManager",
+            "LastCompileTimeIsInvalid",
+            "()System.Boolean",
+            DnlibUtils.ReturnFalseMethod
+        ) && PatchFunction(
+            assembly,
+            "BMW.Rheingold.ExternalToolLicense.ServiceProgramCompilerLicense",
+            "CheckLicenseExpiration",
+            "()System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
     public static bool HavePatchedMark(AssemblyDefinition assembly)
     {
         var patchedType = assembly.Modules.First().GetType("Patched.By.TC");

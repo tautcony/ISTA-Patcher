@@ -61,6 +61,7 @@ public class BMWPatcher : IPatcher
         PatchUtils.PatchCertificateHelper,
         PatchUtils.PatchConfigurationService,
         PatchUtils.PatchInteractionAdministrationModel,
+        PatchUtils.PatchCompileTime,
     };
 
     public static string?[] LoadFileList(string basePath)
@@ -145,6 +146,7 @@ public class BMWLicensePatcher : BMWPatcher
             PatchUtils.PatchConfigurationService,
             PatchUtils.PatchInteractionAdministrationModel,
             PatchUtils.GeneratePatchGetRSAPKCS1SignatureDeformatter(modulus, exponent),
+            PatchUtils.PatchCompileTime,
         };
     }
 }
