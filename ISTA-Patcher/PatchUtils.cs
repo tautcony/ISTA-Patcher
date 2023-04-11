@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
+
 namespace ISTA_Patcher;
 
 using de4dot.code;
@@ -453,9 +454,24 @@ internal static class PatchUtils
         {
             Constant = new ConstantUser("https://github.com/tautcony/ISTA-Patcher"),
         };
+        var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        if (version == null)
+        {
+            version = new Version("0.0.0.0");
+        }
+
+        var versionField = new FieldDefUser(
+            "version",
+            new FieldSig(module.CorLibTypes.String),
+            FieldAttributes.Private | FieldAttributes.Static
+        )
+        {
+            Constant = new ConstantUser(version.ToString()),
+        };
 
         patchedType.Fields.Add(dateField);
         patchedType.Fields.Add(urlField);
+        patchedType.Fields.Add(versionField);
         module.Types.Add(patchedType);
     }
 
