@@ -271,10 +271,13 @@ internal static class ISTAPatcher
         }
     }
 
-    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, bool>> patches)
+    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, int>> patches)
     {
-        return patches.Select(i => i.Method.Name[5..]).Reverse().ToList().Select((t, i) =>
-            new string('│', patches.Count - 1 - i) + "└" + new string('─', i + 1) + t);
+        return patches
+               .Select(i => i.Method.Name.StartsWith("Patch") ? i.Method.Name[5..] : i.Method.Name)
+               .Reverse()
+               .ToList()
+               .Select((name, idx) => $"{new string('│', patches.Count - 1 - idx)}└{new string('─', idx)}>[{name}]");
     }
 
     private static void PatchISTA(IPatcher patcher, PatchOptions options, string outputDirName = "patched")
@@ -330,8 +333,8 @@ internal static class ISTAPatcher
 
                 // Patch and print result
                 var result = validPatches.Select(patch => patch(assembly)).ToList();
-                isPatched = result.Any(i => i);
-                var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i ? "+" : "-"));
+                isPatched = result.Any(i => i > 0);
+                var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i > 0 ? i.ToString("X") : "-"));
 
                 // Check if patched
                 if (!isPatched)
@@ -346,7 +349,8 @@ internal static class ISTAPatcher
                 // Check if need to deobfuscate
                 if (!options.Deobfuscate)
                 {
-                    Log.Information("{Item}{Indent}{Result} [patched]", pendingPatchItem, indent, resultStr);
+                    var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
+                    Log.Information("{Item}{Indent}{Result} [{PatchedFunctionCount} func patched]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
                     continue;
                 }
 

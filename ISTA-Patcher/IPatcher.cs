@@ -9,7 +9,7 @@ using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
 public interface IPatcher
 {
-    public Func<AssemblyDefinition, bool>[] Patches { get; set; }
+    public Func<AssemblyDefinition, int>[] Patches { get; set; }
 
     public string[] GeneratePatchList(string basePath);
 
@@ -39,30 +39,21 @@ public interface IPatcher
 
         return null;
     }
+
+    public static Func<AssemblyDefinition, int>[] GetPatches(params Type[] attributes)
+    {
+        return typeof(PatchUtils)
+            .GetMethods()
+            .Where(m => attributes.Any(attribute => m.GetCustomAttributes(attribute, false).Length > 0))
+            .Select(m => (Func<AssemblyDefinition, int>)Delegate.CreateDelegate(typeof(Func<AssemblyDefinition, int>), m))
+            .ToArray();
+    }
 }
 
 public class BMWPatcher : IPatcher
 {
-    public Func<AssemblyDefinition, bool>[] Patches { get; set; } =
-    {
-        PatchUtils.PatchIntegrityManager,
-        PatchUtils.PatchLicenseStatusChecker,
-        PatchUtils.PatchCheckSignature,
-        PatchUtils.PatchLicenseManager,
-        PatchUtils.PatchAOSLicenseManager,
-        PatchUtils.PatchIstaIcsServiceClient,
-        PatchUtils.PatchCommonServiceWrapper,
-        PatchUtils.PatchSecureAccessHelper,
-        PatchUtils.PatchLicenseWizardHelper,
-        PatchUtils.PatchVerifyAssemblyHelper,
-        PatchUtils.PatchFscValidationClient,
-        PatchUtils.PatchMainWindowViewModel,
-        PatchUtils.PatchActivationCertificateHelper,
-        PatchUtils.PatchCertificateHelper,
-        PatchUtils.PatchConfigurationService,
-        PatchUtils.PatchInteractionAdministrationModel,
-        PatchUtils.PatchCompileTime,
-    };
+    public Func<AssemblyDefinition, int>[] Patches { get; set; } =
+        IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch));
 
     public static string?[] LoadFileList(string basePath)
     {
@@ -98,27 +89,8 @@ public class BMWPatcher : IPatcher
 
 public class ToyotaPatcher : IPatcher
 {
-    public Func<AssemblyDefinition, bool>[] Patches { get; set; } =
-    {
-        PatchUtils.PatchIntegrityManager,
-        PatchUtils.PatchLicenseStatusChecker,
-        PatchUtils.PatchCheckSignature,
-        PatchUtils.PatchLicenseManager,
-        PatchUtils.PatchAOSLicenseManager,
-        PatchUtils.PatchIstaIcsServiceClient,
-        PatchUtils.PatchCommonServiceWrapper,
-        PatchUtils.PatchSecureAccessHelper,
-        PatchUtils.PatchLicenseWizardHelper,
-        PatchUtils.PatchVerifyAssemblyHelper,
-        PatchUtils.PatchFscValidationClient,
-        PatchUtils.PatchMainWindowViewModel,
-        PatchUtils.PatchActivationCertificateHelper,
-        PatchUtils.PatchCertificateHelper,
-        PatchUtils.PatchConfigurationService,
-        PatchUtils.PatchCommonFuncForIsta,
-        PatchUtils.PatchPackageValidityService,
-        PatchUtils.PatchToyotaWorker,
-    };
+    public Func<AssemblyDefinition, int>[] Patches { get; set; } =
+        IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch), typeof(ToyotaPatcher));
 
     public string[] GeneratePatchList(string basePath)
     {
@@ -139,14 +111,8 @@ public class BMWLicensePatcher : BMWPatcher
 {
     public BMWLicensePatcher(string modulus, string exponent)
     {
-        this.Patches = new[]
-        {
-            PatchUtils.PatchIntegrityManager,
-            PatchUtils.PatchVerifyAssemblyHelper,
-            PatchUtils.PatchConfigurationService,
-            PatchUtils.PatchInteractionAdministrationModel,
-            PatchUtils.GeneratePatchGetRSAPKCS1SignatureDeformatter(modulus, exponent),
-            PatchUtils.PatchCompileTime,
-        };
+        this.Patches = IPatcher.GetPatches(typeof(EssentialPatch)).Append(
+            PatchUtils.PatchGetRSAPKCS1SignatureDeformatter(modulus, exponent)
+        ).ToArray();
     }
 }

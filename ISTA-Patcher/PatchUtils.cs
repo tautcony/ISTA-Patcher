@@ -14,18 +14,27 @@ using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
 internal static class PatchUtils
 {
-    private static readonly string _timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-    private static readonly ModuleContext _modCtx = ModuleDef.CreateModuleContext();
-    private static readonly IDeobfuscatorContext _deobfuscatorContext = new DeobfuscatorContext();
-    private static readonly NewProcessAssemblyClientFactory _processAssemblyClientFactory = new();
+    private static readonly string Timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+    private static readonly ModuleContext ModCtx = ModuleDef.CreateModuleContext();
+    private static readonly IDeobfuscatorContext DeobfuscatorContext = new DeobfuscatorContext();
+    private static readonly NewProcessAssemblyClientFactory ProcessAssemblyClientFactory = new();
 
     public static ModuleDefMD LoadModule(string fileName)
     {
-        var module = ModuleDefMD.Load(fileName, _modCtx);
+        var module = ModuleDefMD.Load(fileName, ModCtx);
         return module;
     }
 
-    private static bool PatchFunction(
+    /// <summary>
+    /// Patch the assembly with the given patcher.
+    /// </summary>
+    /// <param name="assembly">The assembly to patch.</param>
+    /// <param name="type">The type of the function.</param>
+    /// <param name="name">The name of the function.</param>
+    /// <param name="desc">The description of the function.</param>
+    /// <param name="operation">The patcher to use.</param>
+    /// <returns>The number of functions patched.</returns>
+    private static int PatchFunction(
         AssemblyDefinition assembly,
         string type,
         string name,
@@ -35,25 +44,15 @@ internal static class PatchUtils
         var function = assembly.GetMethod(type, name, desc);
         if (function == null)
         {
-            return false;
+            return 0;
         }
 
         operation(function);
-        return true;
+        return 1;
     }
 
-    public static bool PatchIntegrityManager(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.Rheingold.SecurityAndLicense.IntegrityManager",
-            ".ctor",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    public static bool PatchLicenseStatusChecker(AssemblyDefinition assembly)
+    [ValidationPatch]
+    public static int PatchLicenseStatusChecker(AssemblyDefinition assembly)
     {
         return PatchFunction(
             assembly,
@@ -64,79 +63,8 @@ internal static class PatchUtils
         );
     }
 
-    public static bool PatchCheckSignature(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
-            "CheckSignature",
-            "(System.String)System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    public static bool PatchLicenseManager(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.Rheingold.CoreFramework.LicenseManager",
-            "VerifyLicense",
-            "(System.Boolean)System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    public static bool PatchAOSLicenseManager(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.Rheingold.CoreFramework.LicenseAOSManager",
-            "VerifyLicense",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    public static bool PatchIstaIcsServiceClient(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
-            "ValidateHost",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
-        ) && PatchFunction(
-            assembly,
-            "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
-            "VerifyLicense",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    public static bool PatchCommonServiceWrapper(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
-            "VerifyLicense",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    public static bool PatchSecureAccessHelper(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.iLean.CommonServices.Helper.SecureAccessHelper",
-            "IsCodeAccessPermitted",
-            "(System.Reflection.Assembly,System.Reflection.Assembly)System.Boolean",
-            DnlibUtils.ReturnTrueMethod
-        );
-    }
-
-    public static bool PatchLicenseWizardHelper(AssemblyDefinition assembly)
+    [ValidationPatch]
+    public static int PatchLicenseWizardHelper(AssemblyDefinition assembly)
     {
         return PatchFunction(
             assembly,
@@ -147,18 +75,98 @@ internal static class PatchUtils
         );
     }
 
-    public static bool PatchVerifyAssemblyHelper(AssemblyDefinition assembly)
+    [ValidationPatch]
+    public static int PatchLicenseManager(AssemblyDefinition assembly)
     {
         return PatchFunction(
             assembly,
-            "BMW.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
-            "VerifyStrongName",
-            "(System.String,System.Boolean)System.Boolean",
+            "BMW.Rheingold.CoreFramework.LicenseManager",
+            "VerifyLicense",
+            "(System.Boolean)System.Void",
+            DnlibUtils.EmptyingMethod
+        ) + PatchFunction(
+            assembly,
+            "BMW.Rheingold.CoreFramework.LicenseManager",
+            "CheckRITALicense",
+            "()System.Void",
+            DnlibUtils.EmptyingMethod
+        ) + PatchFunction(
+            assembly,
+            "BMW.Rheingold.CoreFramework.LicenseManager",
+            "LastCompileTimeIsInvalid",
+            "()System.Boolean",
+            DnlibUtils.ReturnFalseMethod
+        );
+    }
+
+    [ValidationPatch]
+    public static int PatchLicenseAOSManager(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.CoreFramework.LicenseAOSManager",
+            "VerifyLicense",
+            "()System.Void",
+            DnlibUtils.EmptyingMethod
+        );
+    }
+
+    [ValidationPatch]
+    public static int PatchIstaProcessStarter(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
+            "CheckSignature",
+            "(System.String)System.Void",
+            DnlibUtils.EmptyingMethod
+        );
+    }
+
+    [ValidationPatch]
+    public static int PatchIstaIcsServiceClient(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
+            "ValidateHost",
+            "()System.Void",
+            DnlibUtils.EmptyingMethod
+        ) + PatchFunction(
+            assembly,
+            "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
+            "VerifyLicense",
+            "()System.Void",
+            DnlibUtils.EmptyingMethod
+        );
+    }
+
+    [ValidationPatch]
+    public static int PatchCommonServiceWrapper(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
+            "VerifyLicense",
+            "()System.Void",
+            DnlibUtils.EmptyingMethod
+        );
+    }
+
+    [ValidationPatch]
+    public static int PatchSecureAccessHelper(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.iLean.CommonServices.Helper.SecureAccessHelper",
+            "IsCodeAccessPermitted",
+            "(System.Reflection.Assembly,System.Reflection.Assembly)System.Boolean",
             DnlibUtils.ReturnTrueMethod
         );
     }
 
-    public static bool PatchFscValidationClient(AssemblyDefinition assembly)
+    [ValidationPatch]
+    public static int PatchFscValidationClient(AssemblyDefinition assembly)
     {
         return PatchFunction(
             assembly,
@@ -169,7 +177,8 @@ internal static class PatchUtils
         );
     }
 
-    public static bool PatchMainWindowViewModel(AssemblyDefinition assembly)
+    [ValidationPatch]
+    public static int PatchMainWindowViewModel(AssemblyDefinition assembly)
     {
         return PatchFunction(
             assembly,
@@ -180,7 +189,8 @@ internal static class PatchUtils
         );
     }
 
-    public static bool PatchActivationCertificateHelper(AssemblyDefinition assembly)
+    [ValidationPatch]
+    public static int PatchActivationCertificateHelper(AssemblyDefinition assembly)
     {
         return PatchFunction(
             assembly,
@@ -188,7 +198,7 @@ internal static class PatchUtils
             "IsInWhiteList",
             "(System.String,System.String,System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod
-        ) && PatchFunction(
+        ) + PatchFunction(
             assembly,
             "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
             "IsWhiteListSignatureValid",
@@ -197,7 +207,8 @@ internal static class PatchUtils
         );
     }
 
-    public static bool PatchCertificateHelper(AssemblyDefinition assembly)
+    [ValidationPatch]
+    public static int PatchCertificateHelper(AssemblyDefinition assembly)
     {
         return PatchFunction(
             assembly,
@@ -208,18 +219,8 @@ internal static class PatchUtils
         );
     }
 
-    public static bool PatchCommonFuncForIsta(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "Toyota.GTS.ForIsta.CommonFuncForIsta",
-            "GetLicenseStatus",
-            "()BMW.Rheingold.ToyotaLicenseHelper.ToyotaLicenseStatus",
-            DnlibUtils.ReturnZeroMethod
-        );
-    }
-
-    public static bool PatchPackageValidityService(AssemblyDefinition assembly)
+    [ValidationPatch]
+    public static int PatchPackageValidityService(AssemblyDefinition assembly)
     {
         return PatchFunction(
             assembly,
@@ -230,7 +231,20 @@ internal static class PatchUtils
         );
     }
 
-    public static bool PatchToyotaWorker(AssemblyDefinition assembly)
+    [ToyotaPatch]
+    public static int PatchCommonFuncForIsta(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "Toyota.GTS.ForIsta.CommonFuncForIsta",
+            "GetLicenseStatus",
+            "()BMW.Rheingold.ToyotaLicenseHelper.ToyotaLicenseStatus",
+            DnlibUtils.ReturnZeroMethod
+        );
+    }
+
+    [ToyotaPatch]
+    public static int PatchToyotaWorker(AssemblyDefinition assembly)
     {
         return PatchFunction(
             assembly,
@@ -241,7 +255,44 @@ internal static class PatchUtils
         );
     }
 
-    public static bool PatchConfigurationService(AssemblyDefinition assembly)
+    [EssentialPatch]
+    public static int PatchIntegrityManager(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.SecurityAndLicense.IntegrityManager",
+            ".ctor",
+            "()System.Void",
+            DnlibUtils.EmptyingMethod
+        );
+    }
+
+    [EssentialPatch]
+    public static int PatchVerifyAssemblyHelper(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
+            "VerifyStrongName",
+            "(System.String,System.Boolean)System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EssentialPatch]
+    public static int PatchServiceProgramCompilerLicense(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.ExternalToolLicense.ServiceProgramCompilerLicense",
+            "CheckLicenseExpiration",
+            "()System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EssentialPatch]
+    public static int PatchConfigurationService(AssemblyDefinition assembly)
     {
         void RewriteProperties(MethodDef method)
         {
@@ -332,37 +383,8 @@ internal static class PatchUtils
         );
     }
 
-    public static Func<AssemblyDefinition, bool> GeneratePatchGetRSAPKCS1SignatureDeformatter(string modulus, string exponent)
-    {
-        return Patch;
-
-        bool Patch(AssemblyDefinition assembly)
-        {
-            return PatchFunction(
-                assembly,
-                "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
-                "GetRSAPKCS1SignatureDeformatter",
-                "()System.Security.Cryptography.RSAPKCS1SignatureDeformatter",
-                ReplaceParameters
-            );
-
-            void ReplaceParameters(MethodDef method)
-            {
-                var ldstr = method.Body.Instructions.Where(inst => inst.OpCode == OpCodes.Ldstr).ToList();
-                if (ldstr.Count == 3)
-                {
-                    ldstr[0].Operand = modulus;
-                    ldstr[1].Operand = exponent;
-                }
-                else
-                {
-                    Log.Warning("instruction ldstr count not match, can not patch LicenseStatusChecker");
-                }
-            }
-        }
-    }
-
-    public static bool PatchInteractionAdministrationModel(AssemblyDefinition assembly)
+    [EssentialPatch]
+    public static int PatchInteractionAdministrationModel(AssemblyDefinition assembly)
     {
         void RewriteTitle(MethodDef method)
         {
@@ -400,29 +422,50 @@ internal static class PatchUtils
         );
     }
 
-    public static bool PatchCompileTime(AssemblyDefinition assembly)
+    [SignaturePatch]
+    public static Func<AssemblyDefinition, int> PatchGetRSAPKCS1SignatureDeformatter(string modulus, string exponent)
     {
-        return PatchFunction(
-            assembly,
-            "BMW.Rheingold.CoreFramework.LicenseManager",
-            "LastCompileTimeIsInvalid",
-            "()System.Boolean",
-            DnlibUtils.ReturnFalseMethod
-        ) && PatchFunction(
-            assembly,
-            "BMW.Rheingold.ExternalToolLicense.ServiceProgramCompilerLicense",
-            "CheckLicenseExpiration",
-            "()System.Boolean",
-            DnlibUtils.ReturnTrueMethod
-        );
+        return assembly =>
+        {
+            return PatchFunction(
+                assembly,
+                "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
+                "GetRSAPKCS1SignatureDeformatter",
+                "()System.Security.Cryptography.RSAPKCS1SignatureDeformatter",
+                ReplaceParameters
+            );
+
+            void ReplaceParameters(MethodDef method)
+            {
+                var lsStrInstructions = method.Body.Instructions.Where(inst => inst.OpCode == OpCodes.Ldstr).ToList();
+                if (lsStrInstructions.Count == 3)
+                {
+                    lsStrInstructions[0].Operand = modulus;
+                    lsStrInstructions[1].Operand = exponent;
+                }
+                else
+                {
+                    Log.Warning("instruction ldstr count not match, can not patch LicenseStatusChecker");
+                }
+            }
+        };
     }
 
+    /// <summary>
+    /// Check if the assembly is patched by this patcher.
+    /// </summary>
+    /// <param name="assembly">assembly to check.</param>
+    /// <returns>ture for assembly has been patched.</returns>
     public static bool HavePatchedMark(AssemblyDefinition assembly)
     {
         var patchedType = assembly.Modules.First().GetType("Patched.By.TC");
         return patchedType != null;
     }
 
+    /// <summary>
+    /// Set the patched mark to the assembly.
+    /// </summary>
+    /// <param name="assembly">assembly to set.</param>
     public static void SetPatchedMark(AssemblyDefinition assembly)
     {
         var module = assembly.Modules.FirstOrDefault();
@@ -444,7 +487,7 @@ internal static class PatchUtils
             FieldAttributes.Private | FieldAttributes.Static
         )
         {
-            Constant = new ConstantUser(_timestamp),
+            Constant = new ConstantUser(Timestamp),
         };
         var urlField = new FieldDefUser(
             "repo",
@@ -475,6 +518,11 @@ internal static class PatchUtils
         module.Types.Add(patchedType);
     }
 
+    /// <summary>
+    /// Deobfuscate the assembly.
+    /// </summary>
+    /// <param name="fileName">file for deobfuscate.</param>
+    /// <param name="newFileName">Deobfuscated file.</param>
     public static void DeObfuscation(string fileName, string newFileName)
     {
         var deobfuscatorInfo = new DeobfuscatorInfo();
@@ -487,10 +535,10 @@ internal static class PatchUtils
             NewFilename = newFileName,
             StringDecrypterType = DecrypterType.Static,
         },
-            _modCtx,
-            _processAssemblyClientFactory)
+            ModCtx,
+            ProcessAssemblyClientFactory)
         {
-            DeobfuscatorContext = _deobfuscatorContext,
+            DeobfuscatorContext = DeobfuscatorContext,
         };
 
         file.Load(new List<IDeobfuscator> { deobfuscatorInfo.CreateDeobfuscator() });
