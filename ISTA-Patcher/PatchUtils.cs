@@ -112,36 +112,6 @@ internal static class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchIstaProcessStarter(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
-            "CheckSignature",
-            "(System.String)System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    [ValidationPatch]
-    public static int PatchIstaIcsServiceClient(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
-            "ValidateHost",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
-        ) + PatchFunction(
-            assembly,
-            "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
-            "VerifyLicense",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    [ValidationPatch]
     public static int PatchCommonServiceWrapper(AssemblyDefinition assembly)
     {
         return PatchFunction(
@@ -207,30 +177,6 @@ internal static class PatchUtils
         );
     }
 
-    [ValidationPatch]
-    public static int PatchCertificateHelper(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.iLean.CommonServices.Helper.CertificateHelper",
-            "ValidateCertificate",
-            "(System.String)System.Boolean",
-            DnlibUtils.ReturnTrueMethod
-        );
-    }
-
-    [ValidationPatch]
-    public static int PatchPackageValidityService(AssemblyDefinition assembly)
-    {
-        return PatchFunction(
-            assembly,
-            "BMW.Rheingold.ISTAGUI.Controller.PackageValidityService",
-            "CyclicExpirationDateCheck",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
     [ToyotaPatch]
     public static int PatchCommonFuncForIsta(AssemblyDefinition assembly)
     {
@@ -276,6 +222,44 @@ internal static class PatchUtils
             "VerifyStrongName",
             "(System.String,System.Boolean)System.Boolean",
             DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EssentialPatch]
+    public static int PatchIstaIcsServiceClient(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
+            "ValidateHost",
+            "()System.Void",
+            DnlibUtils.EmptyingMethod
+        );
+
+        // TODO: keep process check but remove public key token check.
+    }
+
+    [EssentialPatch]
+    public static int PatchIstaProcessStarter(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
+            "CheckSignature",
+            "(System.String)System.Void",
+            DnlibUtils.EmptyingMethod
+        );
+    }
+
+    [EssentialPatch]
+    public static int PatchPackageValidityService(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.ISTAGUI.Controller.PackageValidityService",
+            "CyclicExpirationDateCheck",
+            "()System.Void",
+            DnlibUtils.EmptyingMethod
         );
     }
 
