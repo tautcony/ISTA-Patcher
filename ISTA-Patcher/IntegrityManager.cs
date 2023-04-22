@@ -61,8 +61,8 @@ public class HashFileInfo
 
     protected internal HashFileInfo(IReadOnlyList<string> fileInfos)
     {
-        this.FilePath = fileInfos[0];
-        this.FileName = Path.GetFileName(this.FilePath.Replace("\\", "/"));
+        this.FilePath = fileInfos[0].Trim('\uFEFF');
+        this.FileName = Path.GetFileName(this.FilePath.Replace("\\", "/")).Trim('\uFEFF');
         var bytes = Convert.FromBase64String(fileInfos[1]);
         var hex = BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
         this.Hash = hex;
