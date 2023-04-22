@@ -100,6 +100,18 @@ internal static class PatchUtils
     }
 
     [ValidationPatch]
+    public static int PatchLicenseHelper(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.CoreFramework.LicenseHelper",
+            "IsVehicleLockedDown",
+            "(BMW.Rheingold.CoreFramework.DatabaseProvider.Vehicle)System.Boolean",
+            DnlibUtils.ReturnFalseMethod
+        );
+    }
+
+    [ValidationPatch]
     public static int PatchLicenseAOSManager(AssemblyDefinition assembly)
     {
         return PatchFunction(
@@ -175,6 +187,44 @@ internal static class PatchUtils
             "(System.String,System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod
         );
+    }
+
+    [ValidationPatch]
+    public static int PatchTherapyPlanCalculated(AssemblyDefinition assembly)
+    {
+        void EnableENET(MethodDef method)
+        {
+            var getProgrammingSession = method.FindInstruction(OpCodes.Call, "BMW.Rheingold.Programming.ProgrammingEngine.ProgrammingSession BMW.Rheingold.Programming.States.TherapyPlanApplicationStateBase::get_ProgrammingSession()");
+            var getVehicle = method.FindInstruction(OpCodes.Callvirt, "BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle BMW.Rheingold.Programming.ProgrammingEngine.ProgrammingSession::get_Vehicle()");
+            var getVCI = method.FindInstruction(OpCodes.Callvirt, "BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle::get_VCI()");
+            var getVCIType = method.FindInstruction(OpCodes.Callvirt, "BMW.Rheingold.CoreFramework.DatabaseProvider.VCIDeviceType BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice::get_VCIType()");
+
+            var patchedMethod = new[]
+            {
+                // return base.ProgrammingSession.Vehicle.VCI.VCIType == VCIDeviceType.ENET;
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Call.ToInstruction(getProgrammingSession.Operand as MethodDef),
+                OpCodes.Callvirt.ToInstruction(getVehicle.Operand as MethodDef),
+                OpCodes.Callvirt.ToInstruction(getVCI.Operand as MemberRef),
+                OpCodes.Callvirt.ToInstruction(getVCIType.Operand as MemberRef),
+
+                OpCodes.Ldc_I4_0.ToInstruction(),
+
+                OpCodes.Ceq.ToInstruction(),
+
+                OpCodes.Ret.ToInstruction(),
+            };
+
+            method.ReplaceWith(patchedMethod);
+        }
+
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.Programming.States.TherapyPlanCalculated",
+            "IsConnectedViaENETAndBrandIsToyota",
+            "()System.Boolean",
+            EnableENET
+         );
     }
 
     [ToyotaPatch]
