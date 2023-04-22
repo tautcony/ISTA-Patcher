@@ -6,6 +6,7 @@ namespace ISTA_Patcher;
 using System.Text.Json;
 using Serilog;
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
+using PatchOptions = ProgramArgs.PatchOptions;
 
 public interface IPatcher
 {
@@ -54,6 +55,18 @@ public class BMWPatcher : IPatcher
 {
     public Func<AssemblyDefinition, int>[] Patches { get; set; } =
         IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch));
+
+    public BMWPatcher()
+    {
+    }
+
+    public BMWPatcher(PatchOptions opts)
+    {
+        if (opts.EnableENET)
+        {
+            this.Patches = IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch), typeof(ENETPatch));
+        }
+    }
 
     public static string?[] LoadFileList(string basePath)
     {

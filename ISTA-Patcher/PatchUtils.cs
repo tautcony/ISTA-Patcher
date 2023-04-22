@@ -189,7 +189,7 @@ internal static class PatchUtils
         );
     }
 
-    [ValidationPatch]
+    [ENETPatch]
     public static int PatchTherapyPlanCalculated(AssemblyDefinition assembly)
     {
         void EnableENET(MethodDef method)

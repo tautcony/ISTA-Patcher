@@ -62,7 +62,7 @@ internal static class ISTAPatcher
 
             IPatcher patcher = opts.PatchType switch
             {
-                PatchTypeEnum.BMW => new BMWPatcher(),
+                PatchTypeEnum.BMW => new BMWPatcher(opts),
                 PatchTypeEnum.TOYOTA => new ToyotaPatcher(),
                 _ => throw new NotImplementedException(),
             };

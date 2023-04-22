@@ -6,26 +6,29 @@ using CommandLine;
 
 public static class ProgramArgs
 {
-    internal enum PatchTypeEnum
+    public enum PatchTypeEnum
     {
         BMW = 0,
         TOYOTA = 1,
     }
 
-    internal class BaseOption
+    public class BaseOption
     {
         [Option('v', "verbosity", Default = Serilog.Events.LogEventLevel.Information, HelpText = "Set output verbosity.")]
         public Serilog.Events.LogEventLevel Verbosity { get; set; }
     }
 
     [Verb("patch", HelpText = "Patch application and library.")]
-    internal class PatchOptions : BaseOption
+    public class PatchOptions : BaseOption
     {
         [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Patch type, valid option: BMW, TOYOTA")]
         public PatchTypeEnum PatchType { get; set; }
 
         [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
         public bool Deobfuscate { get; set; }
+
+        [Option('e', "enable-enet", Default = false, HelpText = "Enable ENET programming")]
+        public bool EnableENET { get; set; }
 
         [Option('f', "force", Default = false, HelpText = "Force patch application and library.")]
         public bool Force { get; set; }
@@ -35,7 +38,7 @@ public static class ProgramArgs
     }
 
     [Verb("license", HelpText = "License related operations.")]
-    internal class LicenseOptions : BaseOption
+    public class LicenseOptions : BaseOption
     {
         [Option('g', "generate", HelpText = "Generate key pair", Group = "operation")]
         public bool GenerateKeyPair { get; set; }
@@ -66,7 +69,7 @@ public static class ProgramArgs
     }
 
     [Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
-    internal class DecryptOptions : BaseOption
+    public class DecryptOptions : BaseOption
     {
         [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
         public string? TargetPath { get; set; }

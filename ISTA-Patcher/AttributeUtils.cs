@@ -19,3 +19,7 @@ internal class SignaturePatch : ISTAPatch
 internal class ToyotaPatch : ISTAPatch
 {
 }
+
+internal class ENETPatch : ISTAPatch
+{
+}
