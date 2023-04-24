@@ -3,6 +3,8 @@ name: Build and Upload
 on:
   push:
     branches: [ master, feat/**, release/** ]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   pull_request:
 
 jobs:
@@ -23,6 +25,14 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.x
+
+    - name: Update version info
+      if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+      run: |
+        $proj_file = "ISTA-Patcher/ISTA-Patcher.csproj"
+        $version = "<InformationalVersion>$(git rev-parse --short HEAD)</InformationalVersion>"
+        $content = [System.Text.RegularExpressions.Regex]::Replace([System.IO.File]::ReadAllText($proj_file), "<InformationalVersion>[^<]+<\/InformationalVersion>", $version)
+        [System.IO.File]::WriteAllText($proj_file, $content)
 
     - name: Publish the application
       env:
@@ -49,6 +59,13 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.x
+
+    - name: Update version info
+      if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+      run: |
+        proj_file="ISTA-Patcher/ISTA-Patcher.csproj"
+        version="<InformationalVersion>$(git rev-parse --short HEAD)</InformationalVersion>"
+        sed -i '' "s#<InformationalVersion>[^<]*<\/InformationalVersion>#$version#g" $proj_file
 
     - name: Publish the application
       env:
