@@ -17,45 +17,13 @@ using System.Xml.Serialization;
 [XmlType(AnonymousType = true, Namespace = "http://tempuri.org/LicenseInfo.xsd")]
 public class LicenseInfo : ICloneable
 {
-	private string nameField;
-
-	private string emailField;
-
-	private DateTime expirationField;
-
-	private string commentField;
-
-	private string computerNameField;
-
-	private string userNameField;
-
-	private string availableBrandTypesField;
-
-	private string availableLanguagesField;
-
-	private string availableOperationModesField;
-
-	private string distributionPartnerNumberField;
-
-	private byte[] computerCharacteristicsField;
-
-	private byte[]? licenseKeyField;
-
-	private string licenseServerURLField;
-
-	private LicenseType licenseTypeField;
-
-	private List<LicensePackage> subLicensesField;
-
-	private static XmlSerializer? serializer;
-
 	[XmlElement(IsNullable = true, Order = 0)]
 	[DataMember]
-	public string Name { get; set; }
+	public string? Name { get; set; }
 
 	[DataMember]
 	[XmlElement(IsNullable = true, Order = 1)]
-	public string Email { get; set; }
+	public string? Email { get; set; }
 
 	[DataMember]
 	[XmlElement(Order = 2)]
@@ -63,39 +31,39 @@ public class LicenseInfo : ICloneable
 
 	[XmlElement(IsNullable = true, Order = 3)]
 	[DataMember]
-	public string Comment { get; set; }
+	public string? Comment { get; set; }
 
 	[DataMember]
 	[XmlElement(IsNullable = true, Order = 4)]
-	public string ComputerName { get; set; }
+	public string? ComputerName { get; set; }
 
 	[DataMember]
 	[XmlElement(IsNullable = true, Order = 5)]
-	public string UserName { get; set; }
+	public string? UserName { get; set; }
 
 	[DataMember]
 	[XmlElement(IsNullable = true, Order = 6)]
-	public string AvailableBrandTypes { get; set; }
+	public string? AvailableBrandTypes { get; set; }
 
 	[DataMember]
 	[XmlElement(IsNullable = true, Order = 7)]
-	public string AvailableLanguages { get; set; }
+	public string? AvailableLanguages { get; set; }
 
 	[XmlElement(IsNullable = true, Order = 8)]
 	[DataMember]
-	public string AvailableOperationModes { get; set; }
+	public string? AvailableOperationModes { get; set; }
 
 	[XmlElement(IsNullable = true, Order = 9)]
 	[DataMember]
-	public string DistributionPartnerNumber { get; set; }
+	public string? DistributionPartnerNumber { get; set; }
 
 	[DataMember]
 	[XmlElement(IsNullable = true, Order = 12)]
-	public string LicenseServerURL { get; set; }
+	public string? LicenseServerURL { get; set; }
 
 	[DataMember]
 	[XmlElement(DataType = "base64Binary", IsNullable = true, Order = 10)]
-	public byte[] ComputerCharacteristics
+	public byte[]? ComputerCharacteristics
 	{
 		get => computerCharacteristicsField;
 		set => computerCharacteristicsField = value;
@@ -141,7 +109,7 @@ public class LicenseInfo : ICloneable
 		return streamReader.ReadToEnd();
 	}
 
-	public static bool Deserialize(string licenseXmlContent, out LicenseInfo licenseInfo, out Exception exception)
+	public static bool Deserialize(string licenseXmlContent, out LicenseInfo licenseInfo, out Exception? exception)
 	{
 		exception = null;
 		licenseInfo = null;
@@ -159,8 +127,7 @@ public class LicenseInfo : ICloneable
 
 	public static bool Deserialize(string licenseXmlContent, out LicenseInfo licenseInfo)
 	{
-		Exception exception = null;
-		return Deserialize(licenseXmlContent, out licenseInfo, out exception);
+		return Deserialize(licenseXmlContent, out licenseInfo, out _);
 	}
 
 	public static LicenseInfo Deserialize(string licenseXmlContent)
@@ -169,7 +136,7 @@ public class LicenseInfo : ICloneable
 		try
 		{
 			stringReader = new StringReader(licenseXmlContent);
-			return (LicenseInfo)Serializer.Deserialize(XmlReader.Create(stringReader));
+			return (LicenseInfo)Serializer.Deserialize(XmlReader.Create(stringReader)) ?? throw new InvalidOperationException();
 		}
 		finally
 		{
@@ -177,7 +144,7 @@ public class LicenseInfo : ICloneable
 		}
 	}
 
-	public virtual bool SaveToFile(string fileName, out Exception exception)
+	public virtual bool SaveToFile(string fileName, out Exception? exception)
 	{
 		exception = null;
 		try
@@ -200,7 +167,7 @@ public class LicenseInfo : ICloneable
 		streamWriter.Close();
 	}
 
-	public static bool LoadFromFile(string fileName, out LicenseInfo licenseInfo, out Exception exception)
+	public static bool LoadFromFile(string fileName, out LicenseInfo licenseInfo, out Exception? exception)
 	{
 		exception = null;
 		licenseInfo = null;
@@ -218,8 +185,7 @@ public class LicenseInfo : ICloneable
 
 	public static bool LoadFromFile(string fileName, out LicenseInfo licenseInfo)
 	{
-		Exception exception = null;
-		return LoadFromFile(fileName, out licenseInfo, out exception);
+		return LoadFromFile(fileName, out licenseInfo, out _);
 	}
 
 	public static LicenseInfo LoadFromFile(string fileName)
@@ -236,4 +202,14 @@ public class LicenseInfo : ICloneable
 	{
 		return MemberwiseClone();
 	}
+
+	private byte[]? computerCharacteristicsField;
+
+	private byte[]? licenseKeyField;
+
+	private LicenseType licenseTypeField;
+
+	private List<LicensePackage> subLicensesField;
+
+	private static XmlSerializer? serializer;
 }

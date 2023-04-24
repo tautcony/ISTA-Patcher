@@ -105,39 +105,15 @@ internal static class ISTAPatcher
             var privateKeyPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "privateKey.xml");
             if (opts.AutoMode)
             {
-                if (opts.TargetPath == null || opts.LicensePath == null)
+                if (opts.TargetPath == null || opts.LicenseRequestPath == null)
                 {
-                    Log.Fatal("The --patch and --license options must be specified");
+                    Log.Fatal("You must specify --patch and --license options");
                     return -1;
                 }
 
                 opts.GenerateKeyPair = true;
                 opts.KeyPairPath = privateKeyPath;
-            }
-
-            if (opts.GenerateKeyPair)
-            {
-                // Generate key pair
-                using var rsa = new RSACryptoServiceProvider(2048);
-                try
-                {
-                    var privateKey = rsa.ToXmlString(true);
-
-                    using var fs = new FileStream(privateKeyPath, FileMode.Create);
-                    using var sw = new StreamWriter(fs);
-                    sw.Write(privateKey);
-                    Log.Information("Generated private key to privateKey.xml");
-                }
-                finally
-                {
-                    rsa.PersistKeyInCsp = false;
-                    rsa.Clear();
-                }
-
-                if (!opts.AutoMode)
-                {
-                    return 0;
-                }
+                opts.SignLicense = true;
             }
 
             string keyPairXml = null;
@@ -156,13 +132,13 @@ internal static class ISTAPatcher
             }
 
             string licenseXml = null;
-            if (opts.LicensePath != null)
+            if (opts.LicenseRequestPath != null)
             {
                 if (opts.Base64)
                 {
                     try
                     {
-                        var data = Convert.FromBase64String(opts.LicensePath);
+                        var data = Convert.FromBase64String(opts.LicenseRequestPath);
                         licenseXml = Encoding.UTF8.GetString(data);
                         Log.Debug("Loaded license request from parameter");
                     }
@@ -174,20 +150,47 @@ internal static class ISTAPatcher
                 }
                 else
                 {
-                    if (!File.Exists(opts.LicensePath))
+                    if (!File.Exists(opts.LicenseRequestPath))
                     {
-                        Log.Error("License request file {LicensePath} does not exist", opts.LicensePath);
+                        Log.Error("License request file {LicensePath} does not exist", opts.LicenseRequestPath);
                         return -1;
                     }
 
-                    using var fs = File.OpenRead(opts.LicensePath);
+                    using var fs = File.OpenRead(opts.LicenseRequestPath);
                     using var sr = new StreamReader(fs, new UTF8Encoding(false));
                     licenseXml = sr.ReadToEnd();
-                    Log.Debug("Loaded license request from {LicensePath}", opts.LicensePath);
+                    Log.Debug("Loaded license request from {LicensePath}", opts.LicenseRequestPath);
                 }
             }
 
-            if (keyPairXml != null && licenseXml != null)
+            // --generate
+            if (opts.GenerateKeyPair)
+            {
+                // Generate key pair
+                using var rsa = new RSACryptoServiceProvider(2048);
+                try
+                {
+                    var privateKey = rsa.ToXmlString(true);
+
+                    using var fs = new FileStream(privateKeyPath, FileMode.Create);
+                    using var sw = new StreamWriter(fs);
+                    sw.Write(privateKey);
+                    Log.Information("Generated key pair located at {PrivateKeyPath}", privateKeyPath);
+                }
+                finally
+                {
+                    rsa.PersistKeyInCsp = false;
+                    rsa.Clear();
+                }
+
+                if (!opts.AutoMode)
+                {
+                    return 0;
+                }
+            }
+
+            // --sign
+            if (opts.SignLicense && keyPairXml != null && licenseXml != null)
             {
                 var license = LicenseInfoSerializer.DeserializeFromString(licenseXml);
                 if (license == null)
@@ -223,9 +226,9 @@ internal static class ISTAPatcher
                 // generate license key
                 LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
                 var signedLicense = LicenseInfoSerializer.SerializeLicenseToByteArray(license);
-                if (opts.OutputPath != null)
+                if (opts.SignedLicensePath != null)
                 {
-                    using var fileStream = File.Create(opts.OutputPath);
+                    using var fileStream = File.Create(opts.SignedLicensePath);
                     fileStream.Write(signedLicense);
                 }
                 else
@@ -239,6 +242,7 @@ internal static class ISTAPatcher
                 }
             }
 
+            // --patch
             if (keyPairXml != null && opts.TargetPath != null)
             {
                 if (!Directory.Exists(opts.TargetPath))

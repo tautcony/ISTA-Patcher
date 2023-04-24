@@ -199,6 +199,12 @@ internal static class PatchUtils
             var getVCI = method.FindInstruction(OpCodes.Callvirt, "BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle::get_VCI()");
             var getVCIType = method.FindInstruction(OpCodes.Callvirt, "BMW.Rheingold.CoreFramework.DatabaseProvider.VCIDeviceType BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice::get_VCIType()");
 
+            if (getProgrammingSession == null || getVehicle == null || getVCI == null || getVCIType == null)
+            {
+                Log.Warning("instructions not found, can not patch TherapyPlanCalculated");
+                return;
+            }
+
             var patchedMethod = new[]
             {
                 // return base.ProgrammingSession.Vehicle.VCI.VCIType == VCIDeviceType.ENET;

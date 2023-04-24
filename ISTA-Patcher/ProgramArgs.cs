@@ -46,6 +46,9 @@ public static class ProgramArgs
         [Option('p', "patch", HelpText = "Patch target program", Group = "operation")]
         public string? TargetPath { get; set; }
 
+        [Option('s', "sign", HelpText = "Sign license request", Group = "operation")]
+        public bool SignLicense { get; set; }
+
         [Option('a', "auto", Default = false, HelpText = "Auto generate key pair and patch target program")]
         public bool AutoMode { get; set; }
 
@@ -53,10 +56,10 @@ public static class ProgramArgs
         public string? KeyPairPath { get; set; }
 
         [Option('l', "license", HelpText = "Path for license request file or base64 encoded content")]
-        public string? LicensePath { get; set; }
+        public string? LicenseRequestPath { get; set; }
 
         [Option('o', "output", HelpText = "Target path for signed license file")]
-        public string? OutputPath { get; set; }
+        public string? SignedLicensePath { get; set; }
 
         [Option('b', "base64", HelpText = "Base64 encoded")]
         public bool Base64 { get; set; }

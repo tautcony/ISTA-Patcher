@@ -16,23 +16,15 @@ using System.Xml.Serialization;
 [XmlRoot(Namespace = "http://tempuri.org/LicenseInfo.xsd", IsNullable = true)]
 public class LicensePackage
 {
-	private string packageNameField;
-
-	private string packageVersionField;
-
-	private DateTime packageExpireField;
-
-	private string packageRuleField;
-
 	private static XmlSerializer? serializer;
 
 	[XmlElement(Order = 0)]
 	[DataMember]
-	public string PackageName { get; set; }
+	public string? PackageName { get; set; }
 
 	[XmlElement(Order = 1)]
 	[DataMember]
-	public string PackageVersion { get; set; }
+	public string? PackageVersion { get; set; }
 
 	[XmlElement(Order = 2)]
 	[DataMember]
@@ -40,19 +32,9 @@ public class LicensePackage
 
 	[XmlAttribute]
 	[DataMember]
-	public string PackageRule { get; set; }
+	public string? PackageRule { get; set; }
 
-	private static XmlSerializer Serializer
-	{
-		get
-		{
-			if (serializer == null)
-			{
-				serializer = new XmlSerializer(typeof(LicensePackage));
-			}
-			return serializer;
-		}
-	}
+	private static XmlSerializer Serializer => serializer ??= new XmlSerializer(typeof(LicensePackage));
 
 	public virtual string Serialize()
 	{
@@ -63,7 +45,7 @@ public class LicensePackage
 		return streamReader.ReadToEnd();
 	}
 
-	public static bool Deserialize(string licenseXmlContent, out LicensePackage licensePackage, out Exception exception)
+	public static bool Deserialize(string licenseXmlContent, out LicensePackage? licensePackage, out Exception? exception)
 	{
 		exception = null;
 		licensePackage = null;
@@ -79,19 +61,18 @@ public class LicensePackage
 		}
 	}
 
-	public static bool Deserialize(string licenseXmlContent, out LicensePackage licensePackage)
+	public static bool Deserialize(string licenseXmlContent, out LicensePackage? licensePackage)
 	{
-		Exception exception = null;
-		return Deserialize(licenseXmlContent, out licensePackage, out exception);
+		return Deserialize(licenseXmlContent, out licensePackage, out _);
 	}
 
-	public static LicensePackage Deserialize(string licenseXmlContent)
+	public static LicensePackage? Deserialize(string licenseXmlContent)
 	{
 		using var stringReader = new StringReader(licenseXmlContent);
-		return (LicensePackage) Serializer.Deserialize(XmlReader.Create(stringReader));
+		return (LicensePackage?) Serializer.Deserialize(XmlReader.Create(stringReader));
 	}
 
-	public virtual bool SaveToFile(string fileName, out Exception exception)
+	public virtual bool SaveToFile(string fileName, out Exception? exception)
 	{
 		exception = null;
 		try
@@ -101,7 +82,7 @@ public class LicensePackage
 		}
 		catch (Exception ex)
 		{
-			Exception ex2 = (exception = ex);
+			exception = ex;
 			return false;
 		}
 	}
@@ -113,7 +94,7 @@ public class LicensePackage
 		streamWriter.WriteLine(value);
 	}
 
-	public static bool LoadFromFile(string fileName, out LicensePackage licensePackage, out Exception exception)
+	public static bool LoadFromFile(string fileName, out LicensePackage? licensePackage, out Exception? exception)
 	{
 		exception = null;
 		licensePackage = null;
@@ -124,18 +105,17 @@ public class LicensePackage
 		}
 		catch (Exception ex)
 		{
-			Exception ex2 = (exception = ex);
+			exception = ex;
 			return false;
 		}
 	}
 
 	public static bool LoadFromFile(string fileName, out LicensePackage licensePackage)
 	{
-		Exception exception = null;
-		return LoadFromFile(fileName, out licensePackage, out exception);
+		return LoadFromFile(fileName, out licensePackage, out _);
 	}
 
-	public static LicensePackage LoadFromFile(string fileName)
+	public static LicensePackage? LoadFromFile(string fileName)
 	{
 		using var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
 		using var streamReader = new StreamReader(fileStream);
