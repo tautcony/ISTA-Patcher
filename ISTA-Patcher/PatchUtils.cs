@@ -251,6 +251,18 @@ internal static class PatchUtils
         );
     }
 
+    [ToyotaPatch]
+    public static int PatchIndustrialCustomerManager(AssemblyDefinition assembly)
+    {
+        return PatchFunction(
+            assembly,
+            "BMW.Rheingold.CoreFramework.IndustrialCustomer.Manager.IndustrialCustomerManager",
+            "IsIndustrialCustomerBrand",
+            "(System.String)System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
     [EssentialPatch]
     public static int PatchIntegrityManager(AssemblyDefinition assembly)
     {
