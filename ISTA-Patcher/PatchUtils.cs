@@ -215,7 +215,6 @@ internal static class PatchUtils
                 OpCodes.Callvirt.ToInstruction(getVCIType.Operand as MemberRef),
 
                 OpCodes.Ldc_I4_0.ToInstruction(),
-
                 OpCodes.Ceq.ToInstruction(),
 
                 OpCodes.Ret.ToInstruction(),
@@ -296,15 +295,47 @@ internal static class PatchUtils
     [EssentialPatch]
     public static int PatchIstaIcsServiceClient(AssemblyDefinition assembly)
     {
+        void RemovePublicKeyCheck(MethodDef method)
+        {
+            var getProcessesByName = method.FindInstruction(OpCodes.Call, "System.Diagnostics.Process[] System.Diagnostics.Process::GetProcessesByName(System.String)");
+            var firstOrDefault = method.FindInstruction(OpCodes.Call, "System.Diagnostics.Process System.Linq.Enumerable::FirstOrDefault<System.Diagnostics.Process>(System.Collections.Generic.IEnumerable`1<System.Diagnostics.Process>)");
+            var invalidOperationException = method.FindInstruction(OpCodes.Newobj, "System.Void System.InvalidOperationException::.ctor(System.String)");
+
+            if (getProcessesByName == null || firstOrDefault == null || invalidOperationException == null)
+            {
+                Log.Warning("instructions not found, can not patch ValidateHost");
+                return;
+            }
+
+            var ret = OpCodes.Ret.ToInstruction();
+            var patchedMethod = new[]
+            {
+                // if (Process.GetProcessesByName("IstaServicesHost").FirstOrDefault() == null)
+                OpCodes.Ldstr.ToInstruction("IstaServicesHost"),
+                OpCodes.Call.ToInstruction(getProcessesByName.Operand as MemberRef),
+                OpCodes.Call.ToInstruction(firstOrDefault.Operand as MethodSpec),
+                OpCodes.Brtrue_S.ToInstruction(ret),
+
+                // throw new InvalidOperationException("Host not found.");
+                OpCodes.Ldstr.ToInstruction("Host not found."),
+                OpCodes.Newobj.ToInstruction(invalidOperationException.Operand as MemberRef),
+                OpCodes.Throw.ToInstruction(),
+
+                ret,
+            };
+
+            method.ReplaceWith(patchedMethod);
+            method.Body.Variables.Clear();
+            method.Body.ExceptionHandlers.Clear();
+        }
+
         return PatchFunction(
             assembly,
             "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
             "ValidateHost",
             "()System.Void",
-            DnlibUtils.EmptyingMethod
+            RemovePublicKeyCheck
         );
-
-        // TODO: keep process check but remove public key token check.
     }
 
     [EssentialPatch]

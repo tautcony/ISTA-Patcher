@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
+
+using System.Reflection;
+
 namespace ISTA_Patcher;
 
 using System.Text;
@@ -155,7 +158,7 @@ public static class DnlibUtils
     public static Instruction? FindInstruction(this MethodDef method, OpCode opCode, string operandName)
     {
         return method.Body.Instructions.FirstOrDefault(instruction =>
-            instruction.OpCode == opCode && (instruction.Operand as IMethodDefOrRef)?.FullName == operandName);
+            instruction.OpCode == opCode && (instruction.Operand as IMethod)?.FullName == operandName);
     }
 
     /// <summary>
@@ -170,5 +173,34 @@ public static class DnlibUtils
         {
             method.Body.Instructions.Add(instruction);
         }
+    }
+
+    public static IMethod? BuildCall(ModuleDef module, Type type, string method, Type returnType, Type[]? parameters)
+    {
+        var importer = new Importer(module);
+        foreach (var m in type.GetMethods())
+        {
+            if (m.Name != method || m.ReturnType != returnType)
+            {
+                continue;
+            }
+
+            if (m.GetParameters().Length == 0 && parameters == null)
+            {
+                return importer.Import(m);
+            }
+
+            if (m.GetParameters().Length == parameters?.Length && CheckParametersByType(m.GetParameters(), parameters))
+            {
+                return importer.Import(m);
+            }
+        }
+
+        return null;
+    }
+
+    private static bool CheckParametersByType(ParameterInfo[] parameters, Type[] types)
+    {
+        return !parameters.Where((t, i) => types[i] != t.ParameterType).Any();
     }
 }
