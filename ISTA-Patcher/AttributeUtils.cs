@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
+
 namespace ISTA_Patcher;
 
 internal class ISTAPatch : Attribute

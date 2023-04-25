@@ -297,7 +297,7 @@ internal static class PatchUtils
     {
         void RemovePublicKeyCheck(MethodDef method)
         {
-            var getProcessesByName = method.FindInstruction(OpCodes.Call, "System.Diagnostics.Process[] System.Diagnostics.Process::GetProcessesByName(System.String)");
+            var getProcessesByName = DnlibUtils.BuildCall(assembly.ManifestModule, typeof(System.Diagnostics.Process), "GetProcessesByName", typeof(System.Diagnostics.Process[]), new[] { typeof(string) });
             var firstOrDefault = method.FindInstruction(OpCodes.Call, "System.Diagnostics.Process System.Linq.Enumerable::FirstOrDefault<System.Diagnostics.Process>(System.Collections.Generic.IEnumerable`1<System.Diagnostics.Process>)");
             var invalidOperationException = method.FindInstruction(OpCodes.Newobj, "System.Void System.InvalidOperationException::.ctor(System.String)");
 
@@ -312,7 +312,7 @@ internal static class PatchUtils
             {
                 // if (Process.GetProcessesByName("IstaServicesHost").FirstOrDefault() == null)
                 OpCodes.Ldstr.ToInstruction("IstaServicesHost"),
-                OpCodes.Call.ToInstruction(getProcessesByName.Operand as MemberRef),
+                OpCodes.Call.ToInstruction(getProcessesByName),
                 OpCodes.Call.ToInstruction(firstOrDefault.Operand as MethodSpec),
                 OpCodes.Brtrue_S.ToInstruction(ret),
 
