@@ -3,8 +3,8 @@
 
 namespace ISTA_Patcher;
 
-using System.Text;
 using System.Reflection;
+using System.Text;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 
