@@ -85,6 +85,41 @@ public static class DnlibUtils
         }
     }
 
+    private static void ReturningWithValue(this MethodDef method, object value)
+    {
+        var body = method.Body;
+        if (body == null)
+        {
+            throw new Exception($"{method.FullName}.Body null!");
+        }
+
+        body.Variables.Clear();
+        body.ExceptionHandlers.Clear();
+        body.Instructions.Clear();
+        switch (value)
+        {
+            case byte b:
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, b));
+                break;
+            case int i:
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, i));
+                break;
+            case long l:
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I8, l));
+                break;
+            case bool b:
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, b ? 1 : 0));
+                break;
+            case string s:
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, s));
+                break;
+            default:
+                throw new Exception($"Unknown type {value.GetType().FullName}!");
+        }
+
+        body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+    }
+
     /// <summary>
     /// Return 0 in the given method.
     /// </summary>

@@ -3,9 +3,6 @@
 namespace ISTA_Patcher.LicenseManagement;
 
 using System.Security.Cryptography;
-using System.Text;
-using System.Xml;
-using System.Xml.Serialization;
 using ISTA_Patcher.LicenseManagement.CoreFramework;
 using Serilog;
 

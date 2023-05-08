@@ -35,7 +35,7 @@ internal static class PatchUtils
     /// <param name="operation">The patcher to use.</param>
     /// <returns>The number of functions patched.</returns>
     private static int PatchFunction(
-        AssemblyDefinition assembly,
+        this AssemblyDefinition assembly,
         string type,
         string name,
         string desc,
@@ -54,8 +54,7 @@ internal static class PatchUtils
     [ValidationPatch]
     public static int PatchLicenseStatusChecker(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
             "IsLicenseValid",
             "(BMW.Rheingold.CoreFramework.LicenseInfo,System.Boolean)BMW.Rheingold.CoreFramework.LicenseStatus",
@@ -66,8 +65,7 @@ internal static class PatchUtils
     [ValidationPatch]
     public static int PatchLicenseWizardHelper(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
             "DoLicenseCheck",
             "(System.String)System.Boolean",
@@ -78,20 +76,17 @@ internal static class PatchUtils
     [ValidationPatch]
     public static int PatchLicenseManager(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseManager",
             "VerifyLicense",
             "(System.Boolean)System.Void",
             DnlibUtils.EmptyingMethod
-        ) + PatchFunction(
-            assembly,
+        ) + assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseManager",
             "CheckRITALicense",
             "()System.Void",
             DnlibUtils.EmptyingMethod
-        ) + PatchFunction(
-            assembly,
+        ) + assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseManager",
             "LastCompileTimeIsInvalid",
             "()System.Boolean",
@@ -102,8 +97,7 @@ internal static class PatchUtils
     [ValidationPatch]
     public static int PatchLicenseHelper(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseHelper",
             "IsVehicleLockedDown",
             "(BMW.Rheingold.CoreFramework.DatabaseProvider.Vehicle)System.Boolean",
@@ -114,8 +108,7 @@ internal static class PatchUtils
     [ValidationPatch]
     public static int PatchLicenseAOSManager(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseAOSManager",
             "VerifyLicense",
             "()System.Void",
@@ -126,8 +119,7 @@ internal static class PatchUtils
     [ValidationPatch]
     public static int PatchCommonServiceWrapper(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
             "VerifyLicense",
             "()System.Void",
@@ -138,8 +130,7 @@ internal static class PatchUtils
     [ValidationPatch]
     public static int PatchSecureAccessHelper(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.iLean.CommonServices.Helper.SecureAccessHelper",
             "IsCodeAccessPermitted",
             "(System.Reflection.Assembly,System.Reflection.Assembly)System.Boolean",
@@ -150,8 +141,7 @@ internal static class PatchUtils
     [ValidationPatch]
     public static int PatchFscValidationClient(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.TricTools.FscValidation.FscValidationClient",
             "IsValid",
             "(System.Byte[],System.Byte[])System.Boolean",
@@ -162,8 +152,7 @@ internal static class PatchUtils
     [ValidationPatch]
     public static int PatchMainWindowViewModel(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.ISTAGUI.ViewModels.MainWindowViewModel",
             "CheckExpirationDate",
             "()System.Void",
@@ -174,14 +163,12 @@ internal static class PatchUtils
     [ValidationPatch]
     public static int PatchActivationCertificateHelper(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
             "IsInWhiteList",
             "(System.String,System.String,System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod
-        ) + PatchFunction(
-            assembly,
+        ) + assembly.PatchFunction(
             "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
             "IsWhiteListSignatureValid",
             "(System.String,System.String)System.Boolean",
@@ -221,10 +208,10 @@ internal static class PatchUtils
             };
 
             method.ReplaceWith(patchedMethod);
+            method.Body.Variables.Clear();
         }
 
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.Programming.States.TherapyPlanCalculated",
             "IsConnectedViaENETAndBrandIsToyota",
             "()System.Boolean",
@@ -235,8 +222,7 @@ internal static class PatchUtils
     [ToyotaPatch]
     public static int PatchCommonFuncForIsta(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "Toyota.GTS.ForIsta.CommonFuncForIsta",
             "GetLicenseStatus",
             "()BMW.Rheingold.ToyotaLicenseHelper.ToyotaLicenseStatus",
@@ -247,8 +233,7 @@ internal static class PatchUtils
     [ToyotaPatch]
     public static int PatchToyotaWorker(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.Toyota.Worker.ToyotaWorker",
             "VehicleIsValid",
             "(System.String)System.Boolean",
@@ -259,8 +244,7 @@ internal static class PatchUtils
     [ToyotaPatch]
     public static int PatchIndustrialCustomerManager(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.IndustrialCustomer.Manager.IndustrialCustomerManager",
             "IsIndustrialCustomerBrand",
             "(System.String)System.Boolean",
@@ -271,8 +255,7 @@ internal static class PatchUtils
     [EssentialPatch]
     public static int PatchIntegrityManager(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.SecurityAndLicense.IntegrityManager",
             ".ctor",
             "()System.Void",
@@ -283,8 +266,7 @@ internal static class PatchUtils
     [EssentialPatch]
     public static int PatchVerifyAssemblyHelper(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
             "VerifyStrongName",
             "(System.String,System.Boolean)System.Boolean",
@@ -329,8 +311,7 @@ internal static class PatchUtils
             method.Body.ExceptionHandlers.Clear();
         }
 
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
             "ValidateHost",
             "()System.Void",
@@ -341,8 +322,7 @@ internal static class PatchUtils
     [EssentialPatch]
     public static int PatchIstaProcessStarter(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
             "CheckSignature",
             "(System.String)System.Void",
@@ -353,8 +333,7 @@ internal static class PatchUtils
     [EssentialPatch]
     public static int PatchPackageValidityService(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.ISTAGUI.Controller.PackageValidityService",
             "CyclicExpirationDateCheck",
             "()System.Void",
@@ -365,8 +344,7 @@ internal static class PatchUtils
     [EssentialPatch]
     public static int PatchServiceProgramCompilerLicense(AssemblyDefinition assembly)
     {
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.ExternalToolLicense.ServiceProgramCompilerLicense",
             "CheckLicenseExpiration",
             "()System.Boolean",
@@ -457,8 +435,7 @@ internal static class PatchUtils
             method.Body.Variables.Add(property);
         }
 
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.Psdz.Services.ConfigurationService",
             "SetPsdzProperties",
             "(System.String,System.String,System.String,System.String)System.Void",
@@ -496,8 +473,7 @@ internal static class PatchUtils
             instructions.Insert(setTitleIndex, OpCodes.Ldstr.ToInstruction("(Patched By ISTA-Patcher)"));
         }
 
-        return PatchFunction(
-            assembly,
+        return assembly.PatchFunction(
             "BMW.Rheingold.CoreFramework.Interaction.Models.InteractionAdministrationModel",
             ".ctor",
             "()System.Void",
