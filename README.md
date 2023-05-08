@@ -9,7 +9,7 @@ An IL patcher for ISTA-P
 
 ## Usage
 
-Before using it, make sure the file structure looks like the following:
+Prior to usage, it is essential to verify that the program itself can start correctly and that the folder structure conforms to the following format:
 
 ```
 C:\EC-APPS\ISTA
@@ -35,22 +35,28 @@ Execute the following command in a terminal:
 ISTA-Patcher.exe patch "C:\EC-APPS\ISTA"
 ```
 
-The patched files can be found in the following directory:
+The directory containing the patched files is located as follows:
 - `C:\EC-APPS\ISTA\TesterGUI\bin\Release\patched`
 - `C:\EC-APPS\ISTA\PSdZ\host\patched`
 - `C:\EC-APPS\ISTA\PSdZ\hostx64\patched`
 
-Import [registry file](assets/license.reg) to resolve exception while loading license.
+Import [registry file](assets/license.reg) to resolve any exceptions that may arise while loading license.
 
 Overwrite patched files to its parent directory, then run the program and, dang, it's ready to use.
 
 ## Other options
 
-Run `ISTA-Patcher` without any arguments and it will show all options.
+There are alternative modes available, which can be discovered through exploration.
+
+e.g., enabling ENET programming requires adding the `--enable-enet` parameter while patching.
+
+To view all available options, please execute ISTA-Patcher without any arguments.
 
 ## License
 
 Distributed under the GPLv3+ License. See LICENSE for more information.
+
+When redistributing programs patched by ISTA-Patcher, please be sure to include an attribution statement that credits this project and include this [url](https://github.com/tautcony/ISTA-Patcher).
 
 ## Disclaimer
 
