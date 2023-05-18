@@ -284,7 +284,7 @@ internal static class ISTAPatcher
                .Select((name, idx) => $"{new string('│', patches.Count - 1 - idx)}└{new string('─', idx)}>[{name}]");
     }
 
-    private static void PatchISTA(IPatcher patcher, PatchOptions options, string outputDirName = "patched")
+    private static void PatchISTA(IPatcher patcher, PatchOptions options, string outputDirName = "@ista-patched", string bakDirName = "@ista-backup")
     {
         var guiBasePath = Path.Join(options.TargetPath, "TesterGUI", "bin", "Release");
 
@@ -302,6 +302,9 @@ internal static class ISTAPatcher
             var originalDirPath = Path.GetDirectoryName(pendingPatchItemFullPath);
             var patchedDirPath = Path.Join(originalDirPath, outputDirName);
             var patchedFileFullPath = Path.Join(patchedDirPath, Path.GetFileName(pendingPatchItem));
+            var bakDirPath = Path.Join(originalDirPath, bakDirName);
+            var bakFileFullPath = Path.Join(bakDirPath, Path.GetFileName(pendingPatchItem));
+
             if (File.Exists(patchedFileFullPath))
             {
                 File.Delete(patchedFileFullPath);
@@ -319,6 +322,7 @@ internal static class ISTAPatcher
             }
 
             Directory.CreateDirectory(patchedDirPath);
+            Directory.CreateDirectory(bakDirPath);
 
             try
             {
@@ -344,6 +348,12 @@ internal static class ISTAPatcher
                 if (!isPatched)
                 {
                     Log.Information("{Item}{Indent}{Result} [skip]", pendingPatchItem, indent, resultStr);
+                    continue;
+                }
+
+                if (!File.Exists(bakFileFullPath))
+                {
+                    File.Copy(pendingPatchItemFullPath, bakFileFullPath, false);
                     continue;
                 }
 

@@ -27,7 +27,7 @@ C:\EC-APPS\ISTA
 │   │       ├── ...
 ```
 
-> ⚠️ Please backup the `ISTA\TesterGUI` & `ISTA\PSdZ` folders before patching.
+> ⚠️ ISTA-Patcher will backup the original files to the `@ista-backup` folder, but it is still recommended to backup the `ISTA\TesterGUI` & `ISTA\PSdZ` folders before patching.
 
 Execute the following command in a terminal:
 
@@ -36,9 +36,9 @@ ISTA-Patcher.exe patch "C:\EC-APPS\ISTA"
 ```
 
 The directory containing the patched files is located as follows:
-- `C:\EC-APPS\ISTA\TesterGUI\bin\Release\patched`
-- `C:\EC-APPS\ISTA\PSdZ\host\patched`
-- `C:\EC-APPS\ISTA\PSdZ\hostx64\patched`
+- `C:\EC-APPS\ISTA\TesterGUI\bin\Release\@ista-patched`
+- `C:\EC-APPS\ISTA\PSdZ\host\@ista-patched`
+- `C:\EC-APPS\ISTA\PSdZ\hostx64\@ista-patched`
 
 Import [registry file](assets/license.reg) to resolve any exceptions that may arise while loading license.
 
