@@ -72,6 +72,7 @@ public class HashFileInfo
         }
         catch (FormatException ex)
         {
+            this.Hash = string.Empty;
             Log.Warning(ex, "Failed to parse hash for: {FileName}", this.FileName);
         }
     }
