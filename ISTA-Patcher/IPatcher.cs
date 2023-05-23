@@ -73,8 +73,16 @@ public class BMWPatcher : IPatcher
         var encryptedFileList = Path.Join(basePath, "Ecu", "enc_cne_1.prg");
 
         // load file list from enc_cne_1.prg
-        var fileList = (IntegrityManager.DecryptFile(encryptedFileList!) ?? new List<HashFileInfo>())
+        var fileList = Array.Empty<string>();
+        if (File.Exists(encryptedFileList))
+        {
+            fileList = (IntegrityManager.DecryptFile(encryptedFileList!) ?? new List<HashFileInfo>())
                        .Select(f => f.FileName).ToArray();
+        }
+        else
+        {
+            Log.Warning("File {File} not found, fallback to load from directory", encryptedFileList);
+        }
 
         // or from directory ./TesterGUI/bin/Release
         if (fileList.Length == 0)
