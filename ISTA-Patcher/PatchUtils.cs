@@ -19,6 +19,11 @@ internal static class PatchUtils
     private static readonly IDeobfuscatorContext DeobfuscatorContext = new DeobfuscatorContext();
     private static readonly NewProcessAssemblyClientFactory ProcessAssemblyClientFactory = new();
 
+    /// <summary>
+    /// Loads a module from the specified file.
+    /// </summary>
+    /// <param name="fileName">The path to the module file.</param>
+    /// <returns>The loaded <see cref="ModuleDefMD"/>.</returns>
     public static ModuleDefMD LoadModule(string fileName)
     {
         var module = ModuleDefMD.Load(fileName, ModCtx);
@@ -26,13 +31,13 @@ internal static class PatchUtils
     }
 
     /// <summary>
-    /// Patch the assembly with the given patcher.
+    /// Applies a patch to a method in the specified assembly.
     /// </summary>
-    /// <param name="assembly">The assembly to patch.</param>
-    /// <param name="type">The type of the function.</param>
-    /// <param name="name">The name of the function.</param>
-    /// <param name="desc">The description of the function.</param>
-    /// <param name="operation">The patcher to use.</param>
+    /// <param name="assembly">The <see cref="AssemblyDefinition"/> to apply the patch to.</param>
+    /// <param name="type">The full name of the type containing the method.</param>
+    /// <param name="name">The name of the method.</param>
+    /// <param name="desc">The description of the method.</param>
+    /// <param name="operation">The action representing the patch operation to be applied to the method.</param>
     /// <returns>The number of functions patched.</returns>
     private static int PatchFunction(
         this AssemblyDefinition assembly,
@@ -577,10 +582,10 @@ internal static class PatchUtils
     }
 
     /// <summary>
-    /// Deobfuscate the assembly.
+    /// Performs deobfuscation on an obfuscated file and saves the result to a new file.
     /// </summary>
-    /// <param name="fileName">file for deobfuscate.</param>
-    /// <param name="newFileName">Deobfuscated file.</param>
+    /// <param name="fileName">The path to the obfuscated file.</param>
+    /// <param name="newFileName">The path to save the deobfuscated file.</param>
     public static void DeObfuscation(string fileName, string newFileName)
     {
         var deobfuscatorInfo = new DeobfuscatorInfo();

@@ -99,7 +99,6 @@ public static class DnlibUtils
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
     public static void ReturnTrueMethod(this MethodDef method) => method.ReturningWithValue(true);
 
-
     /// <summary>
     /// Finds the first instruction in the body of the <see cref="MethodDef"/> that matches the specified opcode and operand name.
     /// </summary>

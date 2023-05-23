@@ -75,6 +75,9 @@ public static class ProgramArgs
     [Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
     public class DecryptOptions : BaseOption
     {
+        [Option('i', "integrity", Default = false, HelpText = "Verify integrity checklist.")]
+        public bool Integrity { get; set; }
+
         [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
         public string? TargetPath { get; set; }
     }

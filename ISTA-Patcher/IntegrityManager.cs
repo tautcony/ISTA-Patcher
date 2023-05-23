@@ -62,10 +62,25 @@ public class HashFileInfo
 
     protected internal HashFileInfo(IReadOnlyList<string> fileInfos)
     {
-        this.FilePath = fileInfos[0].Trim('\uFEFF');
-        this.FileName = Path.GetFileName(this.FilePath.Replace("\\", "/")).Trim('\uFEFF');
-        var bytes = Convert.FromBase64String(fileInfos[1]);
-        var hex = BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
-        this.Hash = hex;
+        this.FilePath = fileInfos[0].Trim('\uFEFF').Replace("\\", "/");
+        this.FileName = Path.GetFileName(this.FilePath ?? string.Empty).Trim('\uFEFF');
+        try
+        {
+            var bytes = Convert.FromBase64String(fileInfos[1]);
+            var hex = BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
+            this.Hash = hex;
+        }
+        catch (FormatException ex)
+        {
+            Log.Warning(ex, "Failed to parse hash for: {FileName}", this.FileName);
+        }
+    }
+
+    public static string CalculateHash(string pathFile)
+    {
+        using var sha = SHA256.Create();
+        using var fileStream = File.OpenRead(pathFile);
+        var text = BitConverter.ToString(sha.ComputeHash(fileStream)).Replace("-", string.Empty).ToLower();
+        return text;
     }
 }

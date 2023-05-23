@@ -74,6 +74,7 @@ internal static class ISTAPatcher
         static int RunDecryptAndReturnExitCode(DecryptOptions opts)
         {
             var encryptedFileList = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
+            var basePath = Path.Join(opts.TargetPath, "TesterGUI");
             if (!File.Exists(encryptedFileList))
             {
                 Log.Error("File {FilePath} does not exist", encryptedFileList);
@@ -89,11 +90,21 @@ internal static class ISTAPatcher
             var filePathMaxLength = fileList.Select(f => f.FilePath.Length).Max();
             var hashMaxLength = fileList.Select(f => f.Hash.Length).Max();
             var markdownBuilder = new StringBuilder();
-            markdownBuilder.AppendLine($"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash(SHA256)".PadRight(hashMaxLength)} |");
-            markdownBuilder.AppendLine($"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} |");
+
+            markdownBuilder.AppendLine($"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash(SHA256)".PadRight(hashMaxLength)} | Integrity |");
+            markdownBuilder.AppendLine($"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} | ---       |");
             foreach (var fileInfo in fileList)
             {
-                markdownBuilder.AppendLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} |");
+                if (opts.Integrity)
+                {
+                    var realHash = HashFileInfo.CalculateHash(Path.Join(basePath, fileInfo.FilePath));
+                    var checkResult = (realHash == fileInfo.Hash).ToString();
+                    markdownBuilder.AppendLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {checkResult.PadRight(9)} |");
+                }
+                else
+                {
+                    markdownBuilder.AppendLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {"/".PadRight(9)} |");
+                }
             }
 
             Log.Information("Markdown result:\n{Markdown}", markdownBuilder.ToString());
