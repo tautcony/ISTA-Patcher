@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Serilog;
 
-public class IntegrityManager
+public static class IntegrityManager
 {
     private static readonly byte[] _salt = { 0xd, 0xca, 0x32, 0xe0, 0x7f, 0xa4, 0xdf, 0xf1 };
 

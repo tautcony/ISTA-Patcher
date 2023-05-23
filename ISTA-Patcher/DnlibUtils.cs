@@ -11,10 +11,10 @@ using dnlib.DotNet.Emit;
 public static class DnlibUtils
 {
     /// <summary>
-    /// Get the description of a method.
+    /// Retrieves the description of the specified <see cref="MethodDef"/>.
     /// </summary>
-    /// <param name="md">Method to get description.</param>
-    /// <returns>Description of the method.</returns>
+    /// <param name="md">The <see cref="MethodDef"/> to get the description of.</param>
+    /// <returns>The description of the method as a string.</returns>
     public static string DescriptionOf(MethodDef md)
     {
         var sb = new StringBuilder();
@@ -39,24 +39,24 @@ public static class DnlibUtils
     }
 
     /// <summary>
-    /// Get the TypeDef of a method.
+    /// Retrieves a <see cref="TypeDef"/> from the specified <see cref="ModuleDef"/> based on the provided full name.
     /// </summary>
-    /// <param name="module">Module to get TypeDef.</param>
-    /// <param name="fullName">Full name of the method.</param>
-    /// <returns>TypeDef of the method.</returns>
+    /// <param name="module">The <see cref="ModuleDef"/> to search for the type.</param>
+    /// <param name="fullName">The full name of the type.</param>
+    /// <returns>The found <see cref="TypeDef"/> or null if no matching type is found.</returns>
     public static TypeDef? GetType(this ModuleDef module, string fullName)
     {
         return module.GetTypes().FirstOrDefault(tp => tp.FullName == fullName);
     }
 
     /// <summary>
-    /// Get the MethodDef of a method from a module.
+    /// Retrieves a <see cref="MethodDef"/> from the specified <see cref="AssemblyDef"/> based on the provided type, name, and description.
     /// </summary>
-    /// <param name="asm">Assembly to get MethodDef.</param>
-    /// <param name="type">Type of the method.</param>
-    /// <param name="name">Name of the method.</param>
-    /// <param name="desc">Description of the method.</param>
-    /// <returns>MethodDef of the method.</returns>
+    /// <param name="asm">The <see cref="AssemblyDef"/> to search for the method.</param>
+    /// <param name="type">The full name of the type containing the method.</param>
+    /// <param name="name">The name of the method.</param>
+    /// <param name="desc">The description of the method.</param>
+    /// <returns>The found <see cref="MethodDef"/> or null if no matching method is found.</returns>
     public static MethodDef? GetMethod(this AssemblyDef asm, string type, string name, string desc)
     {
         var td = asm.Modules.SelectMany(m => m.GetTypes()).FirstOrDefault(tp => tp.FullName == type);
@@ -65,32 +65,114 @@ public static class DnlibUtils
     }
 
     /// <summary>
-    /// Empty the given method.
+    /// Empties the given method.
     /// </summary>
-    /// <param name="method">Method to empty.</param>
-    /// <exception cref="Exception">Thrown when the method has no body.</exception>
-    public static void EmptyingMethod(this MethodDef method)
+    /// <param name="method">The <see cref="MethodDef"/> whose body will be emptied.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
+    public static void EmptyingMethod(this MethodDef method) => method.ReturningWithValue();
+
+    /// <summary>
+    /// Modifies the body of the <see cref="MethodDef"/> to return zero.
+    /// </summary>
+    /// <param name="method">The <see cref="MethodDef"/> to modify.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
+    public static void ReturnZeroMethod(this MethodDef method) => method.ReturningWithValue(0);
+
+    /// <summary>
+    /// Modifies the body of the <see cref="MethodDef"/> to return one.
+    /// </summary>
+    /// <param name="method">The <see cref="MethodDef"/> to modify.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
+    public static void ReturnOneMethod(this MethodDef method) => method.ReturningWithValue(1);
+
+    /// <summary>
+    /// Modifies the body of the <see cref="MethodDef"/> to return false.
+    /// </summary>
+    /// <param name="method">The <see cref="MethodDef"/> to modify.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
+    public static void ReturnFalseMethod(this MethodDef method) => method.ReturningWithValue(false);
+
+    /// <summary>
+    /// Modifies the body of the <see cref="MethodDef"/> to return true.
+    /// </summary>
+    /// <param name="method">The <see cref="MethodDef"/> to modify.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
+    public static void ReturnTrueMethod(this MethodDef method) => method.ReturningWithValue(true);
+
+
+    /// <summary>
+    /// Finds the first instruction in the body of the <see cref="MethodDef"/> that matches the specified opcode and operand name.
+    /// </summary>
+    /// <param name="method">The <see cref="MethodDef"/> to search for the instruction.</param>
+    /// <param name="opCode">The opcode of the instruction to find.</param>
+    /// <param name="operandName">The full name of the operand to match.</param>
+    /// <returns>The found <see cref="Instruction"/> or null if no matching instruction is found.</returns>
+    public static Instruction? FindInstruction(this MethodDef method, OpCode opCode, string operandName)
     {
-        var body = method.Body;
-        if (body != null)
+        return method.Body.Instructions.FirstOrDefault(instruction =>
+            instruction.OpCode == opCode && (instruction.Operand as IMethod)?.FullName == operandName);
+    }
+
+    /// <summary>
+    /// Finds the operand of the first instruction in the body of the <see cref="MethodDef"/> that matches the specified opcode and operand name.
+    /// </summary>
+    /// <typeparam name="T">The type of the operand to retrieve.</typeparam>
+    /// <param name="method">The <see cref="MethodDef"/> to search for the operand.</param>
+    /// <param name="opCode">The opcode of the instruction to find.</param>
+    /// <param name="operandName">The full name of the operand to match.</param>
+    /// <returns>The found operand of type <typeparamref name="T"/> or null if no matching instruction is found or the operand type is not compatible.</returns>
+    public static T? FindOperand<T>(this MethodDef method, OpCode opCode, string operandName)
+    {
+        return (T)method.FindInstruction(opCode, operandName)?.Operand;
+    }
+
+    /// <summary>
+    /// Replaces the instructions in the body of the <see cref="MethodDef"/> with the provided collection of instructions.
+    /// </summary>
+    /// <param name="method">The <see cref="MethodDef"/> whose instructions will be replaced.</param>
+    /// <param name="instructions">The collection of instructions to replace the existing ones with.</param>
+    public static void ReplaceWith(this MethodDef method, IEnumerable<Instruction> instructions)
+    {
+        method.Body.Instructions.Clear();
+        foreach (var instruction in instructions)
         {
-            body.Variables.Clear();
-            body.ExceptionHandlers.Clear();
-            body.Instructions.Clear();
-            body.Instructions.Add(Instruction.Create(OpCodes.Ret));
-        }
-        else
-        {
-            throw new Exception($"{method.FullName}.Body null!");
+            method.Body.Instructions.Add(instruction);
         }
     }
 
-    private static void ReturningWithValue(this MethodDef method, object value)
+    /// <summary>
+    /// Builds a method call based on the provided parameters.
+    /// </summary>
+    /// <param name="module">The module definition.</param>
+    /// <param name="type">The type containing the method.</param>
+    /// <param name="method">The name of the method.</param>
+    /// <param name="returnType">The return type of the method.</param>
+    /// <param name="parameters">The array of parameter types.</param>
+    /// <returns>An instance of the <see cref="IMethod"/> interface representing the method call, or null if the method was not found.</returns>
+    public static IMethod? BuildCall(ModuleDef module, Type type, string method, Type returnType, Type[]? parameters)
+    {
+        var importer = new Importer(module);
+
+        if (method == ".ctor")
+        {
+            return (from m in type.GetConstructors() where CheckParametersByType(m, parameters) select importer.Import(m)).FirstOrDefault();
+        }
+
+        return (from m in type.GetMethods().Where(m => m.Name == method && m.ReturnType == returnType) where CheckParametersByType(m, parameters) select importer.Import(m)).FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Modifies the body of the <see cref="MethodDef"/> to return a specific value.
+    /// </summary>
+    /// <param name="method">The <see cref="MethodDef"/> to modify.</param>
+    /// <param name="value">The value to return.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the body of the method is null or if the type of the value is not supported.</exception>
+    private static void ReturningWithValue(this MethodDef method, object? value = null)
     {
         var body = method.Body;
         if (body == null)
         {
-            throw new Exception($"{method.FullName}.Body null!");
+            throw new ArgumentNullException($"{method.FullName}.Body null!");
         }
 
         body.Variables.Clear();
@@ -114,127 +196,30 @@ public static class DnlibUtils
                 body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, s));
                 break;
             default:
-                throw new Exception($"Unknown type {value.GetType().FullName}!");
+                if (value != null)
+                {
+                    throw new Exception($"Unknown type {value.GetType().FullName}!");
+                }
+
+                break;
         }
 
         body.Instructions.Add(Instruction.Create(OpCodes.Ret));
     }
 
     /// <summary>
-    /// Return 0 in the given method.
+    /// Checks whether the parameters of a given method match the specified types.
     /// </summary>
-    /// <param name="method">Method to return 0.</param>
-    /// <exception cref="Exception">Thrown when the method has no body.</exception>
-    public static void ReturnZeroMethod(this MethodDef method)
+    /// <param name="method">The <see cref="MethodBase"/> representing the method to check.</param>
+    /// <param name="types">The collection of parameter types to compare against.</param>
+    /// <returns><c>true</c> if the method's parameters match the specified types; otherwise, <c>false</c>.</returns>
+    private static bool CheckParametersByType(MethodBase method, IReadOnlyCollection<Type>? types)
     {
-        var body = method.Body;
-        if (body != null)
+        if ((types?.Count ?? 0) == method.GetParameters().Length)
         {
-            body.Variables.Clear();
-            body.ExceptionHandlers.Clear();
-            body.Instructions.Clear();
-            body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-            body.Instructions.Add(Instruction.Create(OpCodes.Ret));
-        }
-        else
-        {
-            throw new Exception($"{method.FullName}.Body null!");
-        }
-    }
-
-    /// <summary>
-    /// Return 1 in the given method.
-    /// </summary>
-    /// <param name="method">Method to return 1.</param>
-    /// <exception cref="Exception">Thrown when the method has no body.</exception>
-    public static void ReturnOneMethod(this MethodDef method)
-    {
-        var body = method.Body;
-        if (body != null)
-        {
-            body.Variables.Clear();
-            body.ExceptionHandlers.Clear();
-            body.Instructions.Clear();
-            body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4_1));
-            body.Instructions.Add(Instruction.Create(OpCodes.Ret));
-        }
-        else
-        {
-            throw new Exception($"{method.FullName}.Body null!");
-        }
-    }
-
-    /// <summary>
-    /// Return false in the given method.
-    /// </summary>
-    /// <param name="method">Method to return false.</param>
-    public static void ReturnFalseMethod(this MethodDef method)
-    {
-        ReturnZeroMethod(method);
-    }
-
-    /// <summary>
-    /// Return true in the given method.
-    /// </summary>
-    /// <param name="method">Method to return true.</param>
-    public static void ReturnTrueMethod(this MethodDef method)
-    {
-        ReturnOneMethod(method);
-    }
-
-    /// <summary>
-    /// Find the first instruction with the given opCode and operand.
-    /// </summary>
-    /// <param name="method">Method to find instruction.</param>
-    /// <param name="opCode">OpCode of the instruction.</param>
-    /// <param name="operandName">Operand of the instruction.</param>
-    /// <returns>Instruction with the given opCode and operand.</returns>
-    public static Instruction? FindInstruction(this MethodDef method, OpCode opCode, string operandName)
-    {
-        return method.Body.Instructions.FirstOrDefault(instruction =>
-            instruction.OpCode == opCode && (instruction.Operand as IMethod)?.FullName == operandName);
-    }
-
-    /// <summary>
-    /// Find the first instruction with the given opCode and operand.
-    /// </summary>
-    /// <param name="method">Method to find instruction.</param>
-    /// <param name="instructions">Instructions to find.</param>
-    public static void ReplaceWith(this MethodDef method, IEnumerable<Instruction> instructions)
-    {
-        method.Body.Instructions.Clear();
-        foreach (var instruction in instructions)
-        {
-            method.Body.Instructions.Add(instruction);
-        }
-    }
-
-    public static IMethod? BuildCall(ModuleDef module, Type type, string method, Type returnType, Type[]? parameters)
-    {
-        var importer = new Importer(module);
-        foreach (var m in type.GetMethods())
-        {
-            if (m.Name != method || m.ReturnType != returnType)
-            {
-                continue;
-            }
-
-            if (m.GetParameters().Length == 0 && parameters == null)
-            {
-                return importer.Import(m);
-            }
-
-            if (m.GetParameters().Length == parameters?.Length && CheckParametersByType(m.GetParameters(), parameters))
-            {
-                return importer.Import(m);
-            }
+            return types == null || method.GetParameters().Zip(types, (first, second) => first.ParameterType == second).All(b => b);
         }
 
-        return null;
-    }
-
-    private static bool CheckParametersByType(ParameterInfo[] parameters, Type[] types)
-    {
-        return !parameters.Where((t, i) => types[i] != t.ParameterType).Any();
+        return false;
     }
 }
