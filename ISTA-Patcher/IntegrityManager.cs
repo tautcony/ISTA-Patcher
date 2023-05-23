@@ -41,7 +41,7 @@ public static class IntegrityManager
 
             var bytes = memoryStream.ToArray();
             return (from row in Encoding.UTF8.GetString(bytes).Split(";;\r\n", StringSplitOptions.RemoveEmptyEntries)
-                select new HashFileInfo(row.Split(";;", StringSplitOptions.RemoveEmptyEntries))).ToList();
+                select new HashFileInfo(row.Split(";;", StringSplitOptions.RemoveEmptyEntries))).DistinctBy(i => i.FilePath).ToList();
         }
         catch (Exception ex)
         {
@@ -79,9 +79,17 @@ public class HashFileInfo
 
     public static string CalculateHash(string pathFile)
     {
-        using var sha = SHA256.Create();
-        using var fileStream = File.OpenRead(pathFile);
-        var text = BitConverter.ToString(sha.ComputeHash(fileStream)).Replace("-", string.Empty).ToLower();
-        return text;
+        try
+        {
+            using var sha = SHA256.Create();
+            using var fileStream = File.OpenRead(pathFile);
+            var text = BitConverter.ToString(sha.ComputeHash(fileStream)).Replace("-", string.Empty).ToLower();
+            return text;
+        }
+        catch (FileNotFoundException ex)
+        {
+            Log.Warning(ex, "Failed to calculate hash for: {FileName}", pathFile);
+            return string.Empty;
+        }
     }
 }

@@ -97,8 +97,25 @@ internal static class ISTAPatcher
             {
                 if (opts.Integrity)
                 {
-                    var realHash = HashFileInfo.CalculateHash(Path.Join(basePath, fileInfo.FilePath));
-                    var checkResult = (realHash == fileInfo.Hash).ToString();
+                    var checkResult = "/";
+                    var filePath = Path.Join(basePath, fileInfo.FilePath);
+                    if (fileInfo.Hash == string.Empty)
+                    {
+                        checkResult = "No Hash";
+                    }
+                    else
+                    {
+                        if (File.Exists(filePath))
+                        {
+                            var realHash = HashFileInfo.CalculateHash(filePath);
+                            checkResult = (realHash == fileInfo.Hash).ToString();
+                        }
+                        else
+                        {
+                            checkResult = "Not Found";
+                        }
+                    }
+
                     markdownBuilder.AppendLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {checkResult.PadRight(9)} |");
                 }
                 else
