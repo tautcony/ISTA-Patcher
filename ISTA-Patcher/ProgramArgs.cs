@@ -15,70 +15,70 @@ public static class ProgramArgs
 
     public class BaseOption
     {
-        [Option('v', "verbosity", Default = Serilog.Events.LogEventLevel.Information, HelpText = "Set output verbosity.")]
+        [Option('v', "verbosity", Default = Serilog.Events.LogEventLevel.Information, HelpText = "Set the output verbosity level.")]
         public Serilog.Events.LogEventLevel Verbosity { get; set; }
     }
 
-    [Verb("patch", HelpText = "Patch application and library.")]
+    [Verb("patch", HelpText = "Perform patching on application and library.")]
     public class PatchOptions : BaseOption
     {
-        [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Patch type, valid option: BMW, TOYOTA")]
+        [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Specify the patch type. Valid options: BMW, TOYOTA.")]
         public PatchTypeEnum PatchType { get; set; }
 
         [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
         public bool Deobfuscate { get; set; }
 
-        [Option('e', "enable-enet", Default = false, HelpText = "Enable ENET programming")]
+        [Option('e', "enable-enet", Default = false, HelpText = "Enable ENET programming.")]
         public bool EnableENET { get; set; }
 
-        [Option('f', "force", Default = false, HelpText = "Force patch application and library.")]
+        [Option('f', "force", Default = false, HelpText = "Force patching on application and library.")]
         public bool Force { get; set; }
 
-        [Value(1, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
+        [Value(1, MetaName = "ISTA-P path", Required = true, HelpText = "Specify the path for ISTA-P.")]
         public string TargetPath { get; set; }
     }
 
-    [Verb("license", HelpText = "License related operations.")]
+    [Verb("license", HelpText = "Perform license-related operations.")]
     public class LicenseOptions : BaseOption
     {
-        [Option('g', "generate", HelpText = "Generate key pair", Group = "operation")]
+        [Option('g', "generate", HelpText = "Generate a key pair.", Group = "operation")]
         public bool GenerateKeyPair { get; set; }
 
-        [Option('p', "patch", HelpText = "Patch target program", Group = "operation")]
+        [Option('p', "patch", HelpText = "Patch the target program.", Group = "operation")]
         public string? TargetPath { get; set; }
 
-        [Option('s', "sign", HelpText = "Sign license request", Group = "operation")]
+        [Option('s', "sign", HelpText = "Sign a license request.", Group = "operation")]
         public bool SignLicense { get; set; }
 
-        [Option('a', "auto", Default = false, HelpText = "Auto generate key pair and patch target program")]
+        [Option('a', "auto", Default = false, HelpText = "Automatically generate a key pair and patch the target program.")]
         public bool AutoMode { get; set; }
 
-        [Option('k', "key-pair", HelpText = "Path for key pair file")]
+        [Option('k', "key-pair", HelpText = "Specify the path for the key pair file.")]
         public string? KeyPairPath { get; set; }
 
-        [Option('l', "license", HelpText = "Path for license request file or base64 encoded content")]
+        [Option('l', "license", HelpText = "Specify the path for the license request file or provide base64-encoded content.")]
         public string? LicenseRequestPath { get; set; }
 
-        [Option('o', "output", HelpText = "Target path for signed license file")]
+        [Option('o', "output", HelpText = "Specify the target path for the signed license file.")]
         public string? SignedLicensePath { get; set; }
 
-        [Option('b', "base64", HelpText = "Base64 encoded")]
+        [Option('b', "base64", HelpText = "Treat the license request option as base64-encoded content.")]
         public bool Base64 { get; set; }
 
-        [Option('f', "force", Default = false, HelpText = "Force patch application and library.")]
+        [Option('f', "force", Default = false, HelpText = "Force patching on application and library.")]
         public bool Force { get; set; }
 
         [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
         public bool Deobfuscate { get; set; }
     }
 
-    [Verb("decrypt", HelpText = "Decrypt integrity checklist.")]
+    [Verb("decrypt", HelpText = "Decrypt the integrity checklist.")]
     public class DecryptOptions : BaseOption
     {
-        [Option('i', "integrity", Default = false, HelpText = "Verify integrity checklist.")]
+        [Option('i', "integrity", Default = false, HelpText = "Verify the integrity of the checklist.")]
         public bool Integrity { get; set; }
 
-        [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Path for ISTA-P")]
+        [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Specify the path for ISTA-P.")]
         public string? TargetPath { get; set; }
     }
 }

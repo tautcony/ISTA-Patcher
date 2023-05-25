@@ -10,7 +10,6 @@ using CommandLine;
 using ISTA_Patcher.LicenseManagement;
 using Serilog;
 using Serilog.Core;
-using Serilog.Events;
 using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 using DecryptOptions = ProgramArgs.DecryptOptions;
 using LicenseOptions = ProgramArgs.LicenseOptions;
@@ -19,297 +18,281 @@ using PatchTypeEnum = ProgramArgs.PatchTypeEnum;
 
 internal static class ISTAPatcher
 {
+    private static LoggingLevelSwitch LevelSwitch { get; } = new();
+
     public static int Main(string[] args)
     {
-        var levelSwitch = new LoggingLevelSwitch
-        {
-            MinimumLevel = LogEventLevel.Information,
-        };
         Log.Logger = new LoggerConfiguration()
-                     .MinimumLevel.ControlledBy(levelSwitch)
+                     .MinimumLevel.ControlledBy(LevelSwitch)
                      .WriteTo.Console()
                      .CreateLogger();
 
         return Parser.Default.ParseArguments<PatchOptions, DecryptOptions, LicenseOptions>(args)
                      .MapResult(
-                         (PatchOptions opts) =>
-                         {
-                             levelSwitch.MinimumLevel = opts.Verbosity;
-                             return RunPatchAndReturnExitCode(opts);
-                         },
-                         (DecryptOptions opts) =>
-                         {
-                             levelSwitch.MinimumLevel = opts.Verbosity;
-                             return RunDecryptAndReturnExitCode(opts);
-                         },
-                         (LicenseOptions opts) =>
-                         {
-                             levelSwitch.MinimumLevel = opts.Verbosity;
-                             return RunLicenseOperationAndReturnExitCode(opts);
-                         },
+                         (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
+                         (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
+                         (LicenseOptions opts) => RunLicenseOperationAndReturnExitCode(opts),
                          errs => 1);
+    }
 
-        static int RunPatchAndReturnExitCode(PatchOptions opts)
+    private static int RunPatchAndReturnExitCode(PatchOptions opts)
+    {
+        LevelSwitch.MinimumLevel = opts.Verbosity;
+        var guiBasePath = Path.Join(opts.TargetPath, "TesterGUI", "bin", "Release");
+        var psdzBasePath = Path.Join(opts.TargetPath, "PSdZ", "host");
+
+        if (!Directory.Exists(guiBasePath) || !Directory.Exists(psdzBasePath))
         {
-            var guiBasePath = Path.Join(opts.TargetPath, "TesterGUI", "bin", "Release");
-            var psdzBasePath = Path.Join(opts.TargetPath, "PSdZ", "host");
-
-            if (!Directory.Exists(guiBasePath) || !Directory.Exists(psdzBasePath))
-            {
-                Log.Fatal("Folder structure does not match, please check options");
-                return -1;
-            }
-
-            IPatcher patcher = opts.PatchType switch
-            {
-                PatchTypeEnum.BMW => new BMWPatcher(opts),
-                PatchTypeEnum.TOYOTA => new ToyotaPatcher(),
-                _ => throw new NotImplementedException(),
-            };
-
-            PatchISTA(patcher, opts);
-            return 0;
+            Log.Fatal("Folder structure does not match, please check options");
+            return -1;
         }
 
-        static int RunDecryptAndReturnExitCode(DecryptOptions opts)
+        IPatcher patcher = opts.PatchType switch
         {
-            var encryptedFileList = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
-            var basePath = Path.Join(opts.TargetPath, "TesterGUI");
-            if (!File.Exists(encryptedFileList))
-            {
-                Log.Error("File {FilePath} does not exist", encryptedFileList);
-                return -1;
-            }
+            PatchTypeEnum.BMW => new BMWPatcher(opts),
+            PatchTypeEnum.TOYOTA => new ToyotaPatcher(),
+            _ => throw new NotImplementedException(),
+        };
 
-            var fileList = IntegrityManager.DecryptFile(encryptedFileList);
-            if (fileList == null)
-            {
-                return -1;
-            }
+        PatchISTA(patcher, opts);
+        return 0;
+    }
 
-            var filePathMaxLength = fileList.Select(f => f.FilePath.Length).Max();
-            var hashMaxLength = fileList.Select(f => f.Hash.Length).Max();
-            var markdownBuilder = new StringBuilder();
+    private static int RunDecryptAndReturnExitCode(DecryptOptions opts)
+    {
+        LevelSwitch.MinimumLevel = opts.Verbosity;
+        var encryptedFileList = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
+        var basePath = Path.Join(opts.TargetPath, "TesterGUI");
+        if (!File.Exists(encryptedFileList))
+        {
+            Log.Error("File {FilePath} does not exist", encryptedFileList);
+            return -1;
+        }
 
-            markdownBuilder.AppendLine($"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash(SHA256)".PadRight(hashMaxLength)} | Integrity |");
-            markdownBuilder.AppendLine($"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} | ---       |");
-            foreach (var fileInfo in fileList)
+        var fileList = IntegrityManager.DecryptFile(encryptedFileList);
+        if (fileList == null)
+        {
+            return -1;
+        }
+
+        var filePathMaxLength = fileList.Select(f => f.FilePath.Length).Max();
+        var hashMaxLength = fileList.Select(f => f.Hash.Length).Max();
+        var markdownBuilder = new StringBuilder();
+
+        markdownBuilder.AppendLine(
+            $"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash(SHA256)".PadRight(hashMaxLength)} | Integrity |");
+        markdownBuilder.AppendLine(
+            $"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} | ---       |");
+        foreach (var fileInfo in fileList)
+        {
+            if (opts.Integrity)
             {
-                if (opts.Integrity)
+                string checkResult;
+                var filePath = Path.Join(basePath, fileInfo.FilePath);
+                if (fileInfo.Hash == string.Empty)
                 {
-                    var checkResult = "/";
-                    var filePath = Path.Join(basePath, fileInfo.FilePath);
-                    if (fileInfo.Hash == string.Empty)
+                    checkResult = "No Hash";
+                }
+                else
+                {
+                    if (File.Exists(filePath))
                     {
-                        checkResult = "No Hash";
+                        var realHash = HashFileInfo.CalculateHash(filePath);
+                        checkResult = (realHash == fileInfo.Hash).ToString();
                     }
                     else
                     {
-                        if (File.Exists(filePath))
-                        {
-                            var realHash = HashFileInfo.CalculateHash(filePath);
-                            checkResult = (realHash == fileInfo.Hash).ToString();
-                        }
-                        else
-                        {
-                            checkResult = "Not Found";
-                        }
+                        checkResult = "Not Found";
                     }
+                }
 
-                    markdownBuilder.AppendLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {checkResult.PadRight(9)} |");
-                }
-                else
-                {
-                    markdownBuilder.AppendLine($"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {"/".PadRight(9)} |");
-                }
+                markdownBuilder.AppendLine(
+                    $"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {checkResult.PadRight(9)} |");
             }
-
-            Log.Information("Markdown result:\n{Markdown}", markdownBuilder.ToString());
-            return 0;
+            else
+            {
+                markdownBuilder.AppendLine(
+                    $"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {"/".PadRight(9)} |");
+            }
         }
 
-        static int RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
+        Log.Information("Markdown result:\n{Markdown}", markdownBuilder.ToString());
+        return 0;
+    }
+
+    private static int RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
+    {
+        LevelSwitch.MinimumLevel = opts.Verbosity;
+        var privateKeyPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "privateKey.xml");
+        if (opts.AutoMode)
         {
-            var privateKeyPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "privateKey.xml");
-            if (opts.AutoMode)
+            if (opts.TargetPath == null || opts.LicenseRequestPath == null)
             {
-                if (opts.TargetPath == null || opts.LicenseRequestPath == null)
-                {
-                    Log.Fatal("You must specify --patch and --license options");
-                    return -1;
-                }
-
-                opts.GenerateKeyPair = true;
-                opts.KeyPairPath = privateKeyPath;
-                opts.SignLicense = true;
+                Log.Fatal("You must specify --patch and --license options");
+                return -1;
             }
 
-            string keyPairXml = null;
-            if (opts.KeyPairPath != null)
-            {
-                if (!File.Exists(opts.KeyPairPath))
-                {
-                    Log.Error("Private key pair {KeyPairPath} does not exist", opts.KeyPairPath);
-                    return -1;
-                }
+            opts.GenerateKeyPair = true;
+            opts.KeyPairPath = privateKeyPath;
+            opts.SignLicense = true;
+        }
 
-                using var fs = File.OpenRead(opts.KeyPairPath);
-                using var sr = new StreamReader(fs, new UTF8Encoding(false));
-                keyPairXml = sr.ReadToEnd();
-                Log.Debug("Loaded private key from {KeyPairPath}", opts.KeyPairPath);
+        string keyPairXml = null;
+        if (opts.KeyPairPath != null)
+        {
+            if (!File.Exists(opts.KeyPairPath))
+            {
+                Log.Error("Private key pair {KeyPairPath} does not exist", opts.KeyPairPath);
+                return -1;
             }
 
-            string licenseXml = null;
-            if (opts.LicenseRequestPath != null)
-            {
-                if (opts.Base64)
-                {
-                    try
-                    {
-                        var data = Convert.FromBase64String(opts.LicenseRequestPath);
-                        licenseXml = Encoding.UTF8.GetString(data);
-                        Log.Debug("Loaded license request from parameter");
-                    }
-                    catch (FormatException ex)
-                    {
-                        Log.Error(ex, "License request is not a valid base64 string");
-                        return -1;
-                    }
-                }
-                else
-                {
-                    if (!File.Exists(opts.LicenseRequestPath))
-                    {
-                        Log.Error("License request file {LicensePath} does not exist", opts.LicenseRequestPath);
-                        return -1;
-                    }
+            using var fs = File.OpenRead(opts.KeyPairPath);
+            using var sr = new StreamReader(fs, new UTF8Encoding(false));
+            keyPairXml = sr.ReadToEnd();
+            Log.Debug("Loaded private key from {KeyPairPath}", opts.KeyPairPath);
+        }
 
-                    using var fs = File.OpenRead(opts.LicenseRequestPath);
-                    using var sr = new StreamReader(fs, new UTF8Encoding(false));
-                    licenseXml = sr.ReadToEnd();
-                    Log.Debug("Loaded license request from {LicensePath}", opts.LicenseRequestPath);
-                }
-            }
-
-            // --generate
-            if (opts.GenerateKeyPair)
+        string licenseXml = null;
+        if (opts.LicenseRequestPath != null)
+        {
+            if (opts.Base64)
             {
-                // Generate key pair
-                using var rsa = new RSACryptoServiceProvider(2048);
                 try
                 {
-                    var privateKey = rsa.ToXmlString(true);
-
-                    using var fs = new FileStream(privateKeyPath, FileMode.Create);
-                    using var sw = new StreamWriter(fs);
-                    sw.Write(privateKey);
-                    Log.Information("Generated key pair located at {PrivateKeyPath}", privateKeyPath);
+                    var data = Convert.FromBase64String(opts.LicenseRequestPath);
+                    licenseXml = Encoding.UTF8.GetString(data);
+                    Log.Debug("Loaded license request from parameter");
                 }
-                finally
+                catch (FormatException ex)
                 {
-                    rsa.PersistKeyInCsp = false;
-                    rsa.Clear();
-                }
-
-                if (!opts.AutoMode)
-                {
-                    return 0;
+                    Log.Error(ex, "License request is not a valid base64 string");
+                    return -1;
                 }
             }
-
-            // --sign
-            if (opts.SignLicense && keyPairXml != null && licenseXml != null)
+            else
             {
-                var license = LicenseInfoSerializer.DeserializeFromString(licenseXml);
-                if (license == null)
+                if (!File.Exists(opts.LicenseRequestPath))
                 {
-                    Log.Error("License request is not valid");
+                    Log.Error("License request file {LicensePath} does not exist", opts.LicenseRequestPath);
                     return -1;
                 }
 
-                var isValid = false;
-                if (license.LicenseKey is { Length: > 0 })
-                {
-                    // verify license
-                    var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(keyPairXml);
-                    isValid = LicenseStatusChecker.IsLicenseValid(license, deformatter);
-                    Log.Information("License is valid: {IsValid}", isValid);
-                }
+                using var fs = File.OpenRead(opts.LicenseRequestPath);
+                using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                licenseXml = sr.ReadToEnd();
+                Log.Debug("Loaded license request from {LicensePath}", opts.LicenseRequestPath);
+            }
+        }
 
-                if (isValid)
-                {
-                    Log.Debug("License is valid, no need to patch");
-                    return 0;
-                }
+        // --generate
+        if (opts.GenerateKeyPair)
+        {
+            // Generate key pair
+            using var rsa = new RSACryptoServiceProvider(2048);
+            try
+            {
+                var privateKey = rsa.ToXmlString(true);
 
-                // update license info
-                license.Comment = "Patched by ISTA Patcher (https://github.com/tautcony/ISTA-Patcher)";
-                license.Expiration = DateTime.MaxValue;
-                foreach (var subLicense in license.SubLicenses)
-                {
-                    subLicense.PackageRule ??= "true";
-                    subLicense.PackageExpire = DateTime.MaxValue;
-                }
-
-                // generate license key
-                LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
-                var signedLicense = LicenseInfoSerializer.SerializeLicenseToByteArray(license);
-                if (opts.SignedLicensePath != null)
-                {
-                    using var fileStream = File.Create(opts.SignedLicensePath);
-                    fileStream.Write(signedLicense);
-                }
-                else
-                {
-                    Log.Information("License:\n{License}", Convert.ToBase64String(signedLicense));
-                }
-
-                if (!opts.AutoMode)
-                {
-                    return 0;
-                }
+                using var fs = new FileStream(privateKeyPath, FileMode.Create);
+                using var sw = new StreamWriter(fs);
+                sw.Write(privateKey);
+                Log.Information("Generated key pair located at {PrivateKeyPath}", privateKeyPath);
+            }
+            finally
+            {
+                rsa.PersistKeyInCsp = false;
+                rsa.Clear();
             }
 
-            // --patch
-            if (keyPairXml != null && opts.TargetPath != null)
+            if (!opts.AutoMode)
             {
-                if (!Directory.Exists(opts.TargetPath))
-                {
-                    Log.Error("Target directory {TargetPath} does not exist", opts.TargetPath);
-                    return -1;
-                }
+                return 0;
+            }
+        }
 
-                // Patch program
-                var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
-                rsaCryptoServiceProvider.FromXmlString(keyPairXml);
+        // --sign
+        if (opts.SignLicense && keyPairXml != null && licenseXml != null)
+        {
+            var license = LicenseInfoSerializer.DeserializeFromString(licenseXml);
+            if (license == null)
+            {
+                Log.Error("License request is not valid");
+                return -1;
+            }
 
-                var parameters = rsaCryptoServiceProvider.ExportParameters(true);
+            var isValid = false;
+            if (license.LicenseKey is { Length: > 0 })
+            {
+                // verify license
+                var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(keyPairXml);
+                isValid = LicenseStatusChecker.IsLicenseValid(license, deformatter);
+                Log.Information("License is valid: {IsValid}", isValid);
+            }
 
-                var modulus = Convert.ToBase64String(parameters.Modulus);
-                var exponent = Convert.ToBase64String(parameters.Exponent);
-
-                PatchISTA(new BMWLicensePatcher(modulus, exponent), new PatchOptions
-                {
-                    TargetPath = opts.TargetPath,
-                    Force = opts.Force,
-                    Deobfuscate = opts.Deobfuscate,
-                });
-
+            if (isValid)
+            {
+                Log.Debug("License is valid, no need to patch");
                 return 0;
             }
 
-            Log.Warning("No operation matched, exiting...");
-            return 1;
-        }
-    }
+            // update license info
+            license.Comment = "Patched by ISTA Patcher (https://github.com/tautcony/ISTA-Patcher)";
+            license.Expiration = DateTime.MaxValue;
+            foreach (var subLicense in license.SubLicenses)
+            {
+                subLicense.PackageRule ??= "true";
+                subLicense.PackageExpire = DateTime.MaxValue;
+            }
 
-    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, int>> patches)
-    {
-        return patches
-               .Select(i => i.Method.Name.StartsWith("Patch") ? i.Method.Name[5..] : i.Method.Name)
-               .Reverse()
-               .ToList()
-               .Select((name, idx) => $"{new string('│', patches.Count - 1 - idx)}└{new string('─', idx)}>[{name}]");
+            // generate license key
+            LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
+            var signedLicense = LicenseInfoSerializer.SerializeLicenseToByteArray(license);
+            if (opts.SignedLicensePath != null)
+            {
+                using var fileStream = File.Create(opts.SignedLicensePath);
+                fileStream.Write(signedLicense);
+            }
+            else
+            {
+                Log.Information("License:\n{License}", Convert.ToBase64String(signedLicense));
+            }
+
+            if (!opts.AutoMode)
+            {
+                return 0;
+            }
+        }
+
+        // --patch
+        if (keyPairXml != null && opts.TargetPath != null)
+        {
+            if (!Directory.Exists(opts.TargetPath))
+            {
+                Log.Error("Target directory {TargetPath} does not exist", opts.TargetPath);
+                return -1;
+            }
+
+            // Patch program
+            var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+            rsaCryptoServiceProvider.FromXmlString(keyPairXml);
+
+            var parameters = rsaCryptoServiceProvider.ExportParameters(true);
+
+            var modulus = Convert.ToBase64String(parameters.Modulus);
+            var exponent = Convert.ToBase64String(parameters.Exponent);
+
+            PatchISTA(new BMWLicensePatcher(modulus, exponent), new PatchOptions
+            {
+                TargetPath = opts.TargetPath,
+                Force = opts.Force,
+                Deobfuscate = opts.Deobfuscate,
+            });
+
+            return 0;
+        }
+
+        Log.Warning("No operation matched, exiting...");
+        return 1;
     }
 
     private static void PatchISTA(IPatcher patcher, PatchOptions options, string outputDirName = "@ista-patched", string bakDirName = "@ista-backup")
@@ -453,5 +436,14 @@ internal static class ISTAPatcher
 
         timer.Stop();
         Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
+    }
+
+    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, int>> patches)
+    {
+        return patches
+               .Select(i => i.Method.Name.StartsWith("Patch") ? i.Method.Name[5..] : i.Method.Name)
+               .Reverse()
+               .ToList()
+               .Select((name, idx) => $"{new string('│', patches.Count - 1 - idx)}└{new string('─', idx)}>[{name}]");
     }
 }

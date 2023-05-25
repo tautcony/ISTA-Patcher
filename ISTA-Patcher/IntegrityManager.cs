@@ -40,8 +40,8 @@ public static class IntegrityManager
             }
 
             var bytes = memoryStream.ToArray();
-            return (from row in Encoding.UTF8.GetString(bytes).Split(";;\r\n", StringSplitOptions.RemoveEmptyEntries)
-                select new HashFileInfo(row.Split(";;", StringSplitOptions.RemoveEmptyEntries))).DistinctBy(i => i.FilePath).ToList();
+            return (from row in Encoding.UTF8.GetString(bytes).Split(";;\r\n", StringSplitOptions.RemoveEmptyEntries).Distinct()
+                select new HashFileInfo(row.Split(";;", StringSplitOptions.RemoveEmptyEntries))).ToList();
         }
         catch (Exception ex)
         {
