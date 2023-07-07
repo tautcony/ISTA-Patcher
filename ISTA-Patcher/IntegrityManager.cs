@@ -67,13 +67,13 @@ public class HashFileInfo
         try
         {
             var bytes = Convert.FromBase64String(fileInfos[1]);
-            var hex = BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
+            var hex = BitConverter.ToString(bytes).Replace("-", string.Empty);
             this.Hash = hex;
         }
         catch (FormatException ex)
         {
             this.Hash = string.Empty;
-            Log.Warning(ex, "Failed to parse hash for: {FileName}", this.FileName);
+            Log.Warning(ex, "Failed to parse hash value [{Hash}] for: {FileName}", fileInfos[1], this.FileName);
         }
     }
 
@@ -83,7 +83,7 @@ public class HashFileInfo
         {
             using var sha = SHA256.Create();
             using var fileStream = File.OpenRead(pathFile);
-            var text = BitConverter.ToString(sha.ComputeHash(fileStream)).Replace("-", string.Empty).ToLower();
+            var text = BitConverter.ToString(sha.ComputeHash(fileStream)).Replace("-", string.Empty);
             return text;
         }
         catch (FileNotFoundException ex)
