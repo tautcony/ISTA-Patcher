@@ -12,7 +12,7 @@ An IL patcher for ISTA-P
 Prior to usage, it is essential to verify that the program itself can start correctly and that the folder structure conforms to the following format:
 
 ```
-C:\EC-APPS\ISTA
+ISTA
 ├── Ecu
 │   ├── enc_cne_1.prg
 │   ├── ...
@@ -32,17 +32,22 @@ C:\EC-APPS\ISTA
 Execute the following command in a terminal:
 
 ```shell
-ISTA-Patcher.exe patch "C:\EC-APPS\ISTA"
+ISTA-Patcher.exe patch "C:\Program Files (x86)\BMW\ISPI\TRIC\ISTA"
 ```
 
 The directory containing the patched files is located as follows:
-- `C:\EC-APPS\ISTA\TesterGUI\bin\Release\@ista-patched`
-- `C:\EC-APPS\ISTA\PSdZ\host\@ista-patched`
-- `C:\EC-APPS\ISTA\PSdZ\hostx64\@ista-patched`
+- `.\ISTA\TesterGUI\bin\Release\@ista-patched`
+- `.\ISTA\PSdZ\host\@ista-patched`
+- `.\ISTA\PSdZ\hostx64\@ista-patched`
 
-Import [registry file](assets/license.reg) to resolve any exceptions that may arise while loading license.
+Overwrite patched files to its parent directory, read the notes, then run the program and, dang, it's ready to use.
 
-Overwrite patched files to its parent directory, then run the program and, dang, it's ready to use.
+### Notes
+
+- Please ensure that all related processes been killed before starting the program.
+- Import [registry file](assets/license.reg) to resolve any exceptions that may arise while loading license.
+- Please ensure that both `ILeanActive` and `OSSModeActive` in the configuration file are set to `false`, otherwise `DealerData` will not load the default configuration correctly.
+- Please ensure that the `Logging.Directory` in the configuration file is a relative path that does not start with `%ISPIDATA%`, otherwise exceptions will occur during the log cleaning process.
 
 ## Other options
 
@@ -56,7 +61,7 @@ To view all available options, please execute ISTA-Patcher without any arguments
 
 Distributed under the GPLv3+ License. See LICENSE for more information.
 
-When redistributing programs patched by ISTA-Patcher, please be sure to include an attribution statement that credits this project and include this [url](https://github.com/tautcony/ISTA-Patcher).
+When redistributing programs patched by ISTA-Patcher, please be sure to include an attribution statement that giving credit to [ISTA-Patcher](https://github.com/tautcony/ISTA-Patcher).
 
 ## Disclaimer
 
