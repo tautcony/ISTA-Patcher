@@ -184,43 +184,11 @@ internal static class PatchUtils
     [ENETPatch]
     public static int PatchTherapyPlanCalculated(AssemblyDefinition assembly)
     {
-        void EnableENET(MethodDef method)
-        {
-            var getProgrammingSession = method.FindOperand<MethodDef>(OpCodes.Call, "BMW.Rheingold.Programming.ProgrammingEngine.ProgrammingSession BMW.Rheingold.Programming.States.TherapyPlanApplicationStateBase::get_ProgrammingSession()");
-            var getVehicle = method.FindOperand<MethodDef>(OpCodes.Callvirt, "BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle BMW.Rheingold.Programming.ProgrammingEngine.ProgrammingSession::get_Vehicle()");
-            var getVCI = method.FindOperand<MemberRef>(OpCodes.Callvirt, "BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle::get_VCI()");
-            var getVCIType = method.FindOperand<MemberRef>(OpCodes.Callvirt, "BMW.Rheingold.CoreFramework.DatabaseProvider.VCIDeviceType BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice::get_VCIType()");
-
-            if (getProgrammingSession == null || getVehicle == null || getVCI == null || getVCIType == null)
-            {
-                Log.Warning("Required instructions not found, can not patch TherapyPlanCalculated::IsConnectedViaENETAndBrandIsToyota");
-                return;
-            }
-
-            var patchedMethod = new[]
-            {
-                // return base.ProgrammingSession.Vehicle.VCI.VCIType == VCIDeviceType.ENET;
-                OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Call.ToInstruction(getProgrammingSession),
-                OpCodes.Callvirt.ToInstruction(getVehicle),
-                OpCodes.Callvirt.ToInstruction(getVCI),
-                OpCodes.Callvirt.ToInstruction(getVCIType),
-
-                OpCodes.Ldc_I4_0.ToInstruction(),
-                OpCodes.Ceq.ToInstruction(),
-
-                OpCodes.Ret.ToInstruction(),
-            };
-
-            method.ReplaceWith(patchedMethod);
-            method.Body.Variables.Clear();
-        }
-
         return assembly.PatchFunction(
             "BMW.Rheingold.Programming.States.TherapyPlanCalculated",
             "IsConnectedViaENETAndBrandIsToyota",
             "()System.Boolean",
-            EnableENET
+            DnlibUtils.ReturnTrueMethod
          );
     }
 
