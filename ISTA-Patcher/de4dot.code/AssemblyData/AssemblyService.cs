@@ -62,6 +62,7 @@ namespace AssemblyData {
 		public void DoNothing() { }
 		public virtual void Exit() => exitEvent.Set();
 		public void WaitExit() => exitEvent.WaitOne();
+		[Obsolete("This Remoting API is not supported and throws PlatformNotSupportedException.", DiagnosticId = "SYSLIB0010", UrlFormat = "https://aka.ms/dotnet-warnings/{0}")]
 		public override object InitializeLifetimeService() => null;
 
 		protected void CheckAssembly() {

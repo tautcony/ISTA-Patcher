@@ -28,14 +28,6 @@ using dnlib.DotNet.MD;
 using dnlib.PE;
 using de4dot.blocks;
 
-#if NET35
-namespace System.Runtime.ExceptionServices {
-	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-	class HandleProcessCorruptedStateExceptionsAttribute : Attribute {
-	}
-}
-#endif
-
 namespace de4dot.mdecrypt {
 	public class DynamicMethodsDecrypter {
 		static DynamicMethodsDecrypter instance;
@@ -604,7 +596,7 @@ namespace de4dot.mdecrypt {
 			return true;
 		}
 
-		[HandleProcessCorruptedStateExceptions, SecurityCritical]	// Req'd on .NET 4.0
+		[SecurityCritical]	// Req'd on .NET 4.0
 		static unsafe bool PatchRT(IntPtr baseAddr) {
 			foreach (var info in patches) {
 				try {
@@ -641,7 +633,7 @@ namespace de4dot.mdecrypt {
 			return true;
 		}
 
-		[HandleProcessCorruptedStateExceptions, SecurityCritical]	// Req'd on .NET 4.0
+		[SecurityCritical]	// Req'd on .NET 4.0
 		static unsafe IntPtr FindCMAddress(PEImage peImage, IntPtr baseAddr, IntPtr origValue) {
 			int offset = Environment.Version.Major == 2 ? 0x10 : 0x28;
 
