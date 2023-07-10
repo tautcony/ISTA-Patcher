@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
+// ReSharper disable InconsistentNaming
 namespace ISTA_Patcher;
 
 using System.Text.Json;

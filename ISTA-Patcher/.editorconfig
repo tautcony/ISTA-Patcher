@@ -14,6 +14,7 @@ dotnet_diagnostic.SA1201.severity = suggestion # SA1201ElementsMustAppearInTheCo
 dotnet_diagnostic.SA1202.severity = suggestion # SA1202ElementsMustBeOrderedByAccess
 dotnet_diagnostic.SA1203.severity = suggestion # SA1203ConstantsMustAppearBeforeFields
 dotnet_diagnostic.SA1204.severity = suggestion # SA1204StaticElementsMustAppearBeforeInstanceElements
+dotnet_diagnostic.SA1300.severity = none # SA1300ElementMustBeginWithUpperCaseLetter
 dotnet_diagnostic.SA1309.severity = suggestion # SA1309FieldNamesMustNotBeginWithUnderscore
 dotnet_diagnostic.SA1402.severity = none # SA1402FileMayOnlyContainASingleType
 dotnet_diagnostic.SA1600.severity = suggestion # SA1600ElementsMustBeDocumented

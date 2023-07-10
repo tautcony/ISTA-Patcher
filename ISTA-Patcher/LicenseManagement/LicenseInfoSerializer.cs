@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
+
 namespace ISTA_Patcher.LicenseManagement;
 
 using System.Text;
@@ -20,10 +21,9 @@ public static class LicenseInfoSerializer
                 return null;
             }
 
-            var memoryStream = new MemoryStream();
+            using var memoryStream = new MemoryStream();
             new XmlSerializer(typeof(LicenseInfo)).Serialize(memoryStream, licInfo);
             var result = memoryStream.ToArray();
-            memoryStream.Close();
             return result;
         }
         catch (Exception ex)
