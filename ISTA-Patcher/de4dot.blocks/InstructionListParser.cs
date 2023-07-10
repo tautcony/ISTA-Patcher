@@ -39,7 +39,7 @@ namespace de4dot.blocks {
 		}
 
 		void CreateInstrToIndex() {
-			instrToIndex = new Dictionary<Instruction, int>();
+			instrToIndex = new Dictionary<Instruction, int>(instructions.Count);
 
 			for (int i = 0; i < instructions.Count; i++)
 				instrToIndex[instructions[i]] = i;

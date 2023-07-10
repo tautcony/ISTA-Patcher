@@ -64,37 +64,36 @@ namespace de4dot.code.deobfuscators.Dotfuscator {
 		}
 
 		void GetFixIndexs(IList<Instruction> instructions, out List<int> nopIdxs, out List<int> ldlocIdxs) {
-			var insNoNops = new List<Instruction>();
-			var indexMapping = new Dictionary<Instruction, int>();
+			var insNoNops = new List<int>(instructions.Count);
 			var index = 0;
 			foreach (var ins in instructions) {
-				indexMapping[ins] = index++;
 				if (ins.OpCode != OpCodes.Nop)
-					insNoNops.Add(ins);
+					insNoNops.Add(index);
+				++index;
 			}
 			nopIdxs = new List<int>();
 			ldlocIdxs = new List<int>();
 			for (int i = 3; i < insNoNops.Count - 1; i++) {
 				var ldind = insNoNops[i];
-				if (ldind.OpCode != OpCodes.Ldind_I4 && ldind.OpCode != OpCodes.Ldind_I2)
+				if (instructions[ldind].OpCode != OpCodes.Ldind_I4 && instructions[ldind].OpCode != OpCodes.Ldind_I2)
 					continue;
 				var ldlocX = insNoNops[i - 1];
-				if (!ldlocX.IsLdloc() && ldlocX.OpCode.Code != Code.Ldloca && ldlocX.OpCode.Code != Code.Ldloca_S)
+				if (!instructions[ldlocX].IsLdloc() && instructions[ldlocX].OpCode.Code != Code.Ldloca && instructions[ldlocX].OpCode.Code != Code.Ldloca_S)
 					continue;
 				var stloc = insNoNops[i - 2];
-				if (!stloc.IsStloc())
+				if (!instructions[stloc].IsStloc())
 					continue;
 				var ldci4 = insNoNops[i - 3];
-				if (!ldci4.IsLdcI4())
+				if (!instructions[ldci4].IsLdcI4())
 					continue;
-				ldlocIdxs.Add(indexMapping[ldlocX]);
-				nopIdxs.Add(indexMapping[ldind]);
+				ldlocIdxs.Add(ldlocX);
+				nopIdxs.Add(ldind);
 				var convi2 = insNoNops[i + 1];
-				if (ldind.OpCode == OpCodes.Ldind_I2 && convi2.OpCode == OpCodes.Conv_I2)
-					nopIdxs.Add(indexMapping[convi2]);
+				if (instructions[ldind].OpCode == OpCodes.Ldind_I2 && instructions[convi2].OpCode == OpCodes.Conv_I2)
+					nopIdxs.Add(convi2);
 				var convi = insNoNops[i + 2];
-				if (ldind.OpCode == OpCodes.Ldind_I2 && convi.OpCode == OpCodes.Conv_I)
-					nopIdxs.Add(indexMapping[convi]);
+				if (instructions[ldind].OpCode == OpCodes.Ldind_I2 && instructions[convi].OpCode == OpCodes.Conv_I)
+					nopIdxs.Add(convi);
 			}
 		}
 

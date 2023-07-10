@@ -32,6 +32,9 @@ namespace AssemblyData {
 			case AssemblyServiceType.StringDecrypter:
 				return new StringDecrypterService();
 
+			case AssemblyServiceType.MethodDecrypter:
+				return new MethodDecrypterService();
+
 			case AssemblyServiceType.Generic:
 				return new GenericService();
 
@@ -45,6 +48,9 @@ namespace AssemblyData {
 			case AssemblyServiceType.StringDecrypter:
 				return typeof(StringDecrypterService);
 
+			case AssemblyServiceType.MethodDecrypter:
+				return typeof(MethodDecrypterService);
+
 			case AssemblyServiceType.Generic:
 				return typeof(GenericService);
 
@@ -56,6 +62,7 @@ namespace AssemblyData {
 		public void DoNothing() { }
 		public virtual void Exit() => exitEvent.Set();
 		public void WaitExit() => exitEvent.WaitOne();
+		public override object InitializeLifetimeService() => null;
 
 		protected void CheckAssembly() {
 			if (assembly == null)

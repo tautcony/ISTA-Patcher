@@ -19,6 +19,7 @@ Released under the GNU GPLv3+.</Copyright>
     <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <ApplicationIcon>patcher-icon.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

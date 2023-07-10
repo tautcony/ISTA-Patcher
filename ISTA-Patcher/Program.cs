@@ -371,11 +371,11 @@ internal static class ISTAPatcher
 
                 PatchUtils.SetPatchedMark(assembly);
                 assembly.Write(patchedFileFullPath);
+                var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
 
                 // Check if need to deobfuscate
                 if (!options.Deobfuscate)
                 {
-                    var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
                     Log.Information("{Item}{Indent}{Result} [{PatchedFunctionCount} func patched]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
                     continue;
                 }
@@ -398,19 +398,21 @@ internal static class ISTAPatcher
                         ? $" in {deobfTimer.Elapsed:mm\\:ss}"
                         : string.Empty;
                     Log.Information(
-                        "{Item}{Indent}{Result} [patched][deobfuscate success{Time}]",
+                        "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate success{Time}]",
                         pendingPatchItem,
                         indent,
                         resultStr,
+                        patchedFunctionCount,
                         timeStr);
                 }
                 catch (ApplicationException ex)
                 {
                     Log.Information(
-                        "{Item}{Indent}{Result} [patched][deobfuscate skipped]: {Reason}",
+                        "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate skipped]: {Reason}",
                         pendingPatchItem,
                         indent,
                         resultStr,
+                        patchedFunctionCount,
                         ex.Message);
                 }
             }

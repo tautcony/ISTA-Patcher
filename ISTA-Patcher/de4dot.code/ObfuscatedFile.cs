@@ -370,6 +370,8 @@ namespace de4dot.code {
 
 			deob.DeobfuscateBegin();
 			DeobfuscateMethods();
+			if (options.StringDecrypterType == DecrypterType.Delegate || options.StringDecrypterType == DecrypterType.Emulate)
+				dynamicStringInliner.LogUnusedDecrypters();
 			deob.DeobfuscateEnd();
 		}
 

@@ -64,6 +64,11 @@ namespace de4dot.code {
 	public class DynamicStringInliner : StringInlinerBase {
 		IAssemblyClient assemblyClient;
 		Dictionary<int, int> methodTokenToId = new Dictionary<int, int>();
+		Dictionary<int, MethodUseInfo> methodIdToUseInfo = new Dictionary<int, MethodUseInfo>();
+		private class MethodUseInfo {
+			public long calls;
+			public long not_nulls;
+		}
 
 		class MyCallResult : CallResult {
 			public int methodId;
@@ -84,10 +89,20 @@ namespace de4dot.code {
 			foreach (var methodToken in methodTokens) {
 				if (methodTokenToId.ContainsKey(methodToken))
 					continue;
-				methodTokenToId[methodToken] = assemblyClient.StringDecrypterService.DefineStringDecrypter(methodToken);
+				var methodId = methodTokenToId[methodToken] = assemblyClient.StringDecrypterService.DefineStringDecrypter(methodToken);
+				if (!methodIdToUseInfo.ContainsKey(methodId))
+					methodIdToUseInfo[methodId] = new MethodUseInfo { };
 			}
 		}
-
+		public void LogUnusedDecrypters() {
+			foreach (var kvp in methodTokenToId) {
+				var use_data = methodIdToUseInfo[kvp.Value];
+				if (methodIdToUseInfo.TryGetValue(kvp.Value, out var useInfo) && useInfo.calls > 0 && useInfo.not_nulls == 0) {
+					Logger.n("Decrypter with Metadata token: 0x{0:X8} we called {1} times and always returned null, may not be correctly working", kvp.Key, use_data.calls);
+				}
+				
+			}
+		}
 		protected override CallResult CreateCallResult(IMethod method, MethodSpec gim, Block block, int callInstrIndex) {
 			if (!methodTokenToId.TryGetValue(method.MDToken.ToInt32(), out int methodId))
 				return null;
@@ -110,13 +125,25 @@ namespace de4dot.code {
 					AssemblyData.SimpleData.Pack(list[i].args);
 					args[i] = list[i].args;
 				}
+				
 				var decryptedStrings = assemblyClient.StringDecrypterService.DecryptStrings(methodId, args, Method.MDToken.ToInt32());
 				if (decryptedStrings.Length != args.Length)
 					throw new ApplicationException("Invalid decrypted strings array length");
 				AssemblyData.SimpleData.Unpack(decryptedStrings);
-				for (int i = 0; i < list.Count; i++)
-					list[i].returnValue = (string)decryptedStrings[i];
+				var total_not_null = 0;
+				for (int i = 0; i < list.Count; i++) {
+					if ((list[i].returnValue = (string)decryptedStrings[i]) != null)
+						total_not_null++;
+				}
+				var use_info = methodIdToUseInfo[methodId];
+				use_info.not_nulls += total_not_null;
+				use_info.calls += list.Count;
+
+
+
+				
 			}
+
 		}
 	}
 

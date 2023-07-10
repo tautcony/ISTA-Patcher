@@ -17,14 +17,20 @@
     along with de4dot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using de4dot.blocks;
-using de4dot.mdecrypt;
+using System;
+using System.Collections.Generic;
 
-namespace AssemblyData {
-	public interface IMethodDecrypterService : IAssemblyService {
-		void InstallCompileMethod(DecryptMethodsInfo decryptMethodsInfo);
-		void LoadObfuscator(string filename);
-		bool CanDecryptMethods();
-		DumpedMethods DecryptMethods();
+namespace de4dot.mdecrypt {
+	[Serializable]
+	public class DecryptMethodsInfo {
+		// The <Module>::.cctor() method body bytes.
+		// Initialize this so only the methods decrypter method gets executed in
+		// <Module>::.cctor(). If null, all code in the original <Module>::.cctor()
+		// gets executed.
+		public byte[] moduleCctorBytes;
+
+		// The metadata tokens of all methods to decrypt. Use null if all methods should
+		// be decrypted.
+		public List<uint> methodsToDecrypt;
 	}
 }

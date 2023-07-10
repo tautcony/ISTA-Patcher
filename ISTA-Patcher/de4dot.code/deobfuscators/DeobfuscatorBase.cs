@@ -699,7 +699,7 @@ namespace de4dot.code.deobfuscators {
 					if (method.Body == null)
 						continue;
 					if (decrypterMethods.Exists(method))
-						break;	// decrypter type / nested type method
+						break;  // decrypter type / nested type method
 					if (removedMethods.Exists(method))
 						continue;
 
