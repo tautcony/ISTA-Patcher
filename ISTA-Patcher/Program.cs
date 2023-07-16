@@ -307,6 +307,7 @@ internal static class ISTAPatcher
         var timer = Stopwatch.StartNew();
         var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
 
+        List<int> totalCounting = new(new int[validPatches.Length]);
         foreach (var pendingPatchItem in pendingPatchList)
         {
             var pendingPatchItemFullPath = pendingPatchItem.StartsWith("!") ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!')) : Path.Join(guiBasePath, pendingPatchItem);
@@ -353,10 +354,12 @@ internal static class ISTAPatcher
 
                 // Patch and print result
                 var result = validPatches.Select(patch => patch(assembly)).ToList();
+                result.Select((item, index) => (item, index)).ToList().ForEach(patch => totalCounting[patch.index] += patch.item);
+
                 isPatched = result.Any(i => i > 0);
                 var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i > 0 ? i.ToString("X") : "-"));
 
-                // Check if patched
+                // Check if at least one patch has been applied
                 if (!isPatched)
                 {
                     Log.Information("{Item}{Indent}{Result} [skip]", pendingPatchItem, indent, resultStr);
@@ -365,12 +368,13 @@ internal static class ISTAPatcher
 
                 if (!File.Exists(bakFileFullPath))
                 {
+                    Log.Debug("Bakup file {BakFileFullPath} does not exist, copy...", bakFileFullPath);
                     File.Copy(pendingPatchItemFullPath, bakFileFullPath, false);
-                    continue;
                 }
 
                 PatchUtils.SetPatchedMark(assembly);
                 assembly.Write(patchedFileFullPath);
+                Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
                 var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
 
                 // Check if need to deobfuscate
@@ -432,7 +436,7 @@ internal static class ISTAPatcher
             }
         }
 
-        foreach (var line in BuildIndicator(validPatches))
+        foreach (var line in BuildIndicator(validPatches, totalCounting))
         {
             Log.Information("{Indent}{Line}", new string(' ', indentLength), line);
         }
@@ -441,12 +445,12 @@ internal static class ISTAPatcher
         Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
     }
 
-    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, int>> patches)
+    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, int>> patches, List<int> counting)
     {
         return patches
                .Select(i => i.Method.Name.StartsWith("Patch") ? i.Method.Name[5..] : i.Method.Name)
                .Reverse()
                .ToList()
-               .Select((name, idx) => $"{new string('│', patches.Count - 1 - idx)}└{new string('─', idx)}>[{name}]");
+               .Select((name, idx) => $"{new string('│', patches.Count - 1 - idx)}└{new string('─', idx)}>[{name}: {counting[patches.Count - idx - 1]}]");
     }
 }

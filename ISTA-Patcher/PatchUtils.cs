@@ -4,6 +4,7 @@
 // ReSharper disable CommentTypo, StringLiteralTypo, IdentifierTypo, InconsistentNaming
 namespace ISTA_Patcher;
 
+using System.Runtime.CompilerServices;
 using de4dot.code;
 using de4dot.code.AssemblyClient;
 using de4dot.code.deobfuscators;
@@ -45,9 +46,11 @@ internal static class PatchUtils
         string type,
         string name,
         string desc,
-        Action<MethodDef> operation)
+        Action<MethodDef> operation,
+        [CallerMemberName] string memberName = "")
     {
         var function = assembly.GetMethod(type, name, desc);
+        Log.Debug("Applying patch {PatchName} => {Name} <= {Assembly}: {Result}", memberName, name, assembly, function != null);
         if (function == null)
         {
             return 0;
