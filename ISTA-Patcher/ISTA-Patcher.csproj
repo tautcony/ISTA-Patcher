@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.2.1</Version>
-    <InformationalVersion>1.2.1</InformationalVersion>
+    <Version>1.2.2</Version>
+    <InformationalVersion>1.2.2</InformationalVersion>
     <Copyright>Copyright (C) 2022-2023 TautCony.
 Released under the GNU GPLv3+.</Copyright>
     <Title>$(AssemblyName)</Title>
