@@ -307,7 +307,7 @@ internal static class ISTAPatcher
         var timer = Stopwatch.StartNew();
         var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
 
-        List<int> totalCounting = new(new int[validPatches.Length]);
+        List<int> totalCounting = new(new int[validPatches.Count]);
         foreach (var pendingPatchItem in pendingPatchList)
         {
             var pendingPatchItemFullPath = pendingPatchItem.StartsWith("!") ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!')) : Path.Join(guiBasePath, pendingPatchItem);
@@ -330,7 +330,7 @@ internal static class ISTAPatcher
                     "{Item}{Indent}{Result} [not found]",
                     pendingPatchItem,
                     indent,
-                    string.Concat(Enumerable.Repeat("*", validPatches.Length)));
+                    string.Concat(Enumerable.Repeat("*", validPatches.Count)));
                 continue;
             }
 
@@ -348,7 +348,7 @@ internal static class ISTAPatcher
                         "{Item}{Indent}{Result} [already patched]",
                         pendingPatchItem,
                         indent,
-                        string.Concat(Enumerable.Repeat("*", validPatches.Length)));
+                        string.Concat(Enumerable.Repeat("*", validPatches.Count)));
                     continue;
                 }
 
@@ -426,7 +426,7 @@ internal static class ISTAPatcher
                     "{Item}{Indent}{Result} [failed]: {Reason}",
                     pendingPatchItem,
                     indent,
-                    string.Concat(Enumerable.Repeat("*", validPatches.Length)),
+                    string.Concat(Enumerable.Repeat("*", validPatches.Count)),
                     ex.Message);
 
                 if (File.Exists(patchedFileFullPath))

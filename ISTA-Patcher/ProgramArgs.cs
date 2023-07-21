@@ -20,17 +20,23 @@ public static class ProgramArgs
         public Serilog.Events.LogEventLevel Verbosity { get; set; }
     }
 
+    public class OptionalPatchOption : BaseOption
+    {
+        [Option("enable-enet", Default = false, HelpText = "Enable ENET programming.")]
+        public bool EnableENET { get; set; }
+
+        [Option("disable-requirements-check", Default = false, HelpText = "Disable system requirements check.")]
+        public bool DisableRequirementsCheck { get; set; }
+    }
+
     [Verb("patch", HelpText = "Perform patching on application and library.")]
-    public class PatchOptions : BaseOption
+    public class PatchOptions : OptionalPatchOption
     {
         [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Specify the patch type. Valid options: BMW, TOYOTA.")]
         public PatchTypeEnum PatchType { get; set; }
 
-        [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
+        [Option("deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
         public bool Deobfuscate { get; set; }
-
-        [Option('e', "enable-enet", Default = false, HelpText = "Enable ENET programming.")]
-        public bool EnableENET { get; set; }
 
         [Option('f', "force", Default = false, HelpText = "Force patching on application and library.")]
         public bool Force { get; set; }
@@ -40,7 +46,7 @@ public static class ProgramArgs
     }
 
     [Verb("license", HelpText = "Perform license-related operations.")]
-    public class LicenseOptions : BaseOption
+    public class LicenseOptions : OptionalPatchOption
     {
         [Option('g', "generate", HelpText = "Generate a key pair.", Group = "operation")]
         public bool GenerateKeyPair { get; set; }

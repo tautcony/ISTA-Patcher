@@ -206,6 +206,32 @@ internal static class PatchUtils
          );
     }
 
+    [RequirementsPatch]
+    public static int PatchIstaInstallationRequirements(AssemblyDefinition assembly)
+    {
+        void RemoveRequirementsCheck(MethodDef method)
+        {
+            var dictionaryCtorRef = method.FindOperand<MemberRef>(
+                OpCodes.Newobj,
+                "System.Void System.Collections.Generic.Dictionary`2<BMW.Rheingold.ISTAGUI._new.ViewModels.InsufficientSystemRequirement,System.Int32[]>::.ctor()");
+
+            if (dictionaryCtorRef == null)
+            {
+                Log.Warning("Required instructions not found, can not patch IstaInstallationRequirements::CheckSystemRequirements");
+                return;
+            }
+
+            method.ReturnObjectMethod(dictionaryCtorRef);
+        }
+
+        return assembly.PatchFunction(
+            "BMW.Rheingold.ISTAGUI.Controller.IstaInstallationRequirements",
+            "CheckSystemRequirements",
+            "(System.Boolean)System.Collections.Generic.Dictionary`2<BMW.Rheingold.ISTAGUI._new.ViewModels.InsufficientSystemRequirement,System.Int32[]>",
+            RemoveRequirementsCheck
+        );
+    }
+
     [ToyotaPatch]
     public static int PatchCommonFuncForIsta(AssemblyDefinition assembly)
     {
@@ -532,11 +558,6 @@ internal static class PatchUtils
         {
             Constant = new ConstantUser("https://github.com/tautcony/ISTA-Patcher"),
         };
-        var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        if (version == null)
-        {
-            version = new Version("0.0.0.0");
-        }
 
         var versionField = new FieldDefUser(
             "version",

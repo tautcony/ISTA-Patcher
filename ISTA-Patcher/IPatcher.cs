@@ -11,7 +11,7 @@ using PatchOptions = ProgramArgs.PatchOptions;
 
 public interface IPatcher
 {
-    public Func<AssemblyDefinition, int>[] Patches { get; set; }
+    public List<Func<AssemblyDefinition, int>> Patches { get; set; }
 
     public string[] GeneratePatchList(string basePath);
 
@@ -42,19 +42,19 @@ public interface IPatcher
         return null;
     }
 
-    public static Func<AssemblyDefinition, int>[] GetPatches(params Type[] attributes)
+    public static List<Func<AssemblyDefinition, int>> GetPatches(params Type[] attributes)
     {
         return typeof(PatchUtils)
             .GetMethods()
             .Where(m => attributes.Any(attribute => m.GetCustomAttributes(attribute, false).Length > 0))
             .Select(m => (Func<AssemblyDefinition, int>)Delegate.CreateDelegate(typeof(Func<AssemblyDefinition, int>), m))
-            .ToArray();
+            .ToList();
     }
 }
 
 public class BMWPatcher : IPatcher
 {
-    public Func<AssemblyDefinition, int>[] Patches { get; set; } =
+    public List<Func<AssemblyDefinition, int>> Patches { get; set; } =
         IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch));
 
     public BMWPatcher()
@@ -65,7 +65,12 @@ public class BMWPatcher : IPatcher
     {
         if (opts.EnableENET)
         {
-            this.Patches = IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch), typeof(ENETPatch));
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(ENETPatch)));
+        }
+
+        if (opts.DisableRequirementsCheck)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(RequirementsPatch)));
         }
     }
 
@@ -111,7 +116,7 @@ public class BMWPatcher : IPatcher
 
 public class ToyotaPatcher : IPatcher
 {
-    public Func<AssemblyDefinition, int>[] Patches { get; set; } =
+    public List<Func<AssemblyDefinition, int>> Patches { get; set; } =
         IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch), typeof(ToyotaPatcher));
 
     public string[] GeneratePatchList(string basePath)
@@ -133,8 +138,8 @@ public class BMWLicensePatcher : BMWPatcher
 {
     public BMWLicensePatcher(string modulus, string exponent)
     {
-        this.Patches = IPatcher.GetPatches(typeof(EssentialPatch)).Append(
+        this.Patches.Add(
             PatchUtils.PatchGetRSAPKCS1SignatureDeformatter(modulus, exponent)
-        ).ToArray();
+        );
     }
 }

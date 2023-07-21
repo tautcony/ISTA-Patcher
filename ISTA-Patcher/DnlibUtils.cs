@@ -99,6 +99,8 @@ public static class DnlibUtils
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
     public static void ReturnTrueMethod(this MethodDef method) => method.ReturningWithValue(true);
 
+    public static void ReturnObjectMethod(this MethodDef method, MemberRef memberRef) => method.ReturningWithValue(memberRef);
+
     /// <summary>
     /// Finds the first instruction in the body of the <see cref="MethodDef"/> that matches the specified opcode and operand name.
     /// </summary>
@@ -194,6 +196,9 @@ public static class DnlibUtils
             case string s:
                 body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, s));
                 break;
+            case MemberRef m:
+                body.Instructions.Add(Instruction.Create(OpCodes.Newobj, m));
+                break;
             default:
                 if (value != null)
                 {
@@ -230,7 +235,7 @@ public static class DnlibUtils
     /// <returns>
     /// The <see cref="PropertyDef"/> representing the property found, or <c>null</c> if the property was not found.
     /// </returns>
-    private static PropertyDef? FindPropertyInClassAndBaseClasses(TypeDef targetType, string propertyName)
+    public static PropertyDef? FindPropertyInClassAndBaseClasses(TypeDef targetType, string propertyName)
     {
         while (targetType != null)
         {

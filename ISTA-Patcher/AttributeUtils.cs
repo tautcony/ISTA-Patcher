@@ -26,3 +26,7 @@ internal class ToyotaPatch : ISTAPatch
 internal class ENETPatch : ISTAPatch
 {
 }
+
+internal class RequirementsPatch : ISTAPatch
+{
+}
