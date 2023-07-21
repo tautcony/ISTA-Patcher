@@ -221,4 +221,28 @@ public static class DnlibUtils
 
         return false;
     }
+
+    /// <summary>
+    /// Recursively searches for a property in the given <paramref name="targetType"/> and its base classes.
+    /// </summary>
+    /// <param name="targetType">The <see cref="TypeDef"/> to start the search from.</param>
+    /// <param name="propertyName">The name of the property to find.</param>
+    /// <returns>
+    /// The <see cref="PropertyDef"/> representing the property found, or <c>null</c> if the property was not found.
+    /// </returns>
+    private static PropertyDef? FindPropertyInClassAndBaseClasses(TypeDef targetType, string propertyName)
+    {
+        while (targetType != null)
+        {
+            var targetProperty = targetType.FindProperty(propertyName);
+            if (targetProperty != null)
+            {
+                return targetProperty;
+            }
+
+            targetType = targetType.BaseType?.ResolveTypeDef();
+        }
+
+        return null;
+    }
 }

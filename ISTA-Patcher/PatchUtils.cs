@@ -21,6 +21,15 @@ internal static class PatchUtils
     private static readonly IDeobfuscatorContext DeobfuscatorContext = new DeobfuscatorContext();
     private static readonly NewProcessAssemblyClientFactory ProcessAssemblyClientFactory = new();
 
+    private static string Version
+    {
+        get
+        {
+            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? new Version("0.0.0.0");
+            return version.ToString();
+        }
+    }
+
     /// <summary>
     /// Loads a module from the specified file.
     /// </summary>
@@ -40,6 +49,7 @@ internal static class PatchUtils
     /// <param name="name">The name of the method.</param>
     /// <param name="desc">The description of the method.</param>
     /// <param name="operation">The action representing the patch operation to be applied to the method.</param>
+    /// <param name="memberName">The name of the function applying the patch.</param>
     /// <returns>The number of functions patched.</returns>
     private static int PatchFunction(
         this AssemblyDefinition assembly,
@@ -420,23 +430,10 @@ internal static class PatchUtils
     }
 
     [EssentialPatch]
-    public static int PatchInteractionAdministrationModel(AssemblyDefinition assembly)
+    public static int PatchInteractionModel(AssemblyDefinition assembly)
     {
         void RewriteTitle(MethodDef method)
         {
-            var instructions = method.Body.Instructions;
-            var setTitle = instructions.FirstOrDefault(inst => inst.OpCode == OpCodes.Call && inst.Operand is MethodDef methodDef && methodDef.Name == "set_Title");
-            if (setTitle == null)
-            {
-                return;
-            }
-
-            var setTitleIndex = instructions.IndexOf(setTitle);
-            if (setTitleIndex < 0)
-            {
-                return;
-            }
-
             var mod = method.Module;
             TypeRef stringRef = new TypeRefUser(mod, "System", "String", mod.CorLibTypes.AssemblyRef);
             MemberRef concatRef = new MemberRefUser(
@@ -445,14 +442,17 @@ internal static class PatchUtils
                 MethodSig.CreateStatic(mod.CorLibTypes.String, mod.CorLibTypes.String, mod.CorLibTypes.String),
                 stringRef);
 
-            instructions.Insert(setTitleIndex, OpCodes.Call.ToInstruction(concatRef));
-            instructions.Insert(setTitleIndex, OpCodes.Ldstr.ToInstruction("(Patched By ISTA-Patcher)"));
+            var instructions = method.Body.Instructions;
+            instructions.RemoveAt(instructions.Count - 1);
+            instructions.Add(OpCodes.Ldstr.ToInstruction($" (Powered by ISTA-Patcher v{Version})"));
+            instructions.Add(OpCodes.Call.ToInstruction(concatRef));
+            instructions.Add(OpCodes.Ret.ToInstruction());
         }
 
         return assembly.PatchFunction(
-            "BMW.Rheingold.CoreFramework.Interaction.Models.InteractionAdministrationModel",
-            ".ctor",
-            "()System.Void",
+            "BMW.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
+            "get_Title",
+            "()System.String",
             RewriteTitle
         );
     }
@@ -544,7 +544,7 @@ internal static class PatchUtils
             FieldAttributes.Private | FieldAttributes.Static
         )
         {
-            Constant = new ConstantUser(version.ToString()),
+            Constant = new ConstantUser(Version),
         };
 
         patchedType.Fields.Add(dateField);
