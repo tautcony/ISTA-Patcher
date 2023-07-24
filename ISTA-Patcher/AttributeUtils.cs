@@ -30,3 +30,7 @@ internal class ENETPatch : ISTAPatch
 internal class RequirementsPatch : ISTAPatch
 {
 }
+
+internal class NotSendPatch : ISTAPatch
+{
+}

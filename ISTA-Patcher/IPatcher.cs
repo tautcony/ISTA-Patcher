@@ -72,6 +72,11 @@ public class BMWPatcher : IPatcher
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(RequirementsPatch)));
         }
+
+        if (opts.EnableNotSend)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(NotSendPatch)));
+        }
     }
 
     public static string?[] LoadFileList(string basePath)

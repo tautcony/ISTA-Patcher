@@ -428,6 +428,7 @@ internal static class ISTAPatcher
                     indent,
                     string.Concat(Enumerable.Repeat("*", validPatches.Count)),
                     ex.Message);
+                Log.Debug("ExceptionType: {ExceptionType}, StackTrace: {StackTrace}", ex.GetType().FullName, ex.StackTrace);
 
                 if (File.Exists(patchedFileFullPath))
                 {

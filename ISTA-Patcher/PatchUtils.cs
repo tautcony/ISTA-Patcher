@@ -60,7 +60,7 @@ internal static class PatchUtils
         [CallerMemberName] string memberName = "")
     {
         var function = assembly.GetMethod(type, name, desc);
-        Log.Debug("Applying patch {PatchName} => {Name} <= {Assembly}: {Result}", memberName, name, assembly, function != null);
+        Log.Verbose("Applying patch {PatchName} => {Name} <= {Assembly}: {Result}", memberName, name, assembly, function != null);
         if (function == null)
         {
             return 0;
@@ -121,17 +121,6 @@ internal static class PatchUtils
             "IsVehicleLockedDown",
             "(BMW.Rheingold.CoreFramework.DatabaseProvider.Vehicle)System.Boolean",
             DnlibUtils.ReturnFalseMethod
-        );
-    }
-
-    [ValidationPatch]
-    public static int PatchLicenseAOSManager(AssemblyDefinition assembly)
-    {
-        return assembly.PatchFunction(
-            "BMW.Rheingold.CoreFramework.LicenseAOSManager",
-            "VerifyLicense",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
         );
     }
 
@@ -229,6 +218,101 @@ internal static class PatchUtils
             "CheckSystemRequirements",
             "(System.Boolean)System.Collections.Generic.Dictionary`2<BMW.Rheingold.ISTAGUI._new.ViewModels.InsufficientSystemRequirement,System.Int32[]>",
             RemoveRequirementsCheck
+        );
+    }
+
+    [NotSendPatch]
+    public static int PatchMultisessionLogic(AssemblyDef assembly)
+    {
+        void SetNotSendOBFCMData(MethodDef method)
+        {
+            var get_CurrentOperation = method.FindOperand<MethodDef>(OpCodes.Call, "BMW.Rheingold.PresentationFramework.Contracts.IIstaOperation BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic::get_CurrentOperation()");
+            var setIsSendOBFCMDataIsForbidden = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void BMW.ISPI.IstaOperation.Contract.IIstaOperationService::SetIsSendOBFCMDataIsForbidden(System.Boolean)");
+            var onPropertyChanged = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void BMW.Rheingold.RheingoldSessionController.Logic::OnPropertyChanged(System.String)");
+
+            if (get_CurrentOperation == null || setIsSendOBFCMDataIsForbidden == null || onPropertyChanged == null)
+            {
+                Log.Warning("Required instructions not found, can not patch MultisessionLogic::SetNotSendOBFCMData");
+                return;
+            }
+
+            var patchedMethod = new[]
+            {
+                // this.CurrentOperation.SetIsSendOBFCMDataIsForbidden(true);
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Call.ToInstruction(get_CurrentOperation),
+                OpCodes.Ldc_I4_1.ToInstruction(),
+                OpCodes.Callvirt.ToInstruction(setIsSendOBFCMDataIsForbidden),
+
+                // this.OnPropertyChanged("isSendOBFCMDataForbidden");
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Ldstr.ToInstruction("isSendOBFCMDataForbidden"),
+                OpCodes.Callvirt.ToInstruction(onPropertyChanged),
+
+                // return;
+                OpCodes.Ret.ToInstruction(),
+            };
+
+            method.ReplaceWith(patchedMethod);
+            method.Body.Variables.Clear();
+            method.Body.ExceptionHandlers.Clear();
+        }
+
+        void SetNotSendFastData(MethodDef method)
+        {
+            var get_CurrentOperation = method.FindOperand<MethodDef>(OpCodes.Call, "BMW.Rheingold.PresentationFramework.Contracts.IIstaOperation BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic::get_CurrentOperation()");
+            var get_DataContext = method.FindOperand<MemberRef>(OpCodes.Callvirt, "BMW.ISPI.IstaOperation.Contract.IIstaOperationDataContext BMW.Rheingold.PresentationFramework.Contracts.IIstaOperation::get_DataContext()");
+            var get_VecInfo = method.FindOperand<MemberRef>(OpCodes.Callvirt, "BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle BMW.ISPI.IstaOperation.Contract.IIstaOperationDataContext::get_VecInfo()");
+            var set_IsSendFastaDataForbidden = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle::set_IsSendFastaDataForbidden(System.Boolean)");
+            var setIsSendFastaDataIsForbidden = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void BMW.ISPI.IstaOperation.Contract.IIstaOperationService::SetIsSendFastaDataIsForbidden(System.Boolean)");
+            var onPropertyChanged = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void BMW.Rheingold.RheingoldSessionController.Logic::OnPropertyChanged(System.String)");
+
+            if (get_CurrentOperation == null || get_DataContext == null || get_VecInfo == null || set_IsSendFastaDataForbidden == null || setIsSendFastaDataIsForbidden == null || onPropertyChanged == null)
+            {
+                Log.Warning("Required instructions not found, can not patch MultisessionLogic::SetNotSendFastData");
+                return;
+            }
+
+            var patchedMethod = new[]
+            {
+                // this.CurrentOperation.DataContext.VecInfo.IsSendFastaDataForbidden = true;
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Call.ToInstruction(get_CurrentOperation),
+                OpCodes.Callvirt.ToInstruction(get_DataContext),
+                OpCodes.Callvirt.ToInstruction(get_VecInfo),
+                OpCodes.Ldc_I4_1.ToInstruction(),
+                OpCodes.Callvirt.ToInstruction(set_IsSendFastaDataForbidden),
+
+                // this.CurrentOperation.SetIsSendFastaDataIsForbidden(true);
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Call.ToInstruction(get_CurrentOperation),
+                OpCodes.Ldc_I4_1.ToInstruction(),
+                OpCodes.Callvirt.ToInstruction(setIsSendFastaDataIsForbidden),
+
+                // this.OnPropertyChanged("IsSendFastaDataForbidden");
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Ldstr.ToInstruction("IsSendFastaDataForbidden"),
+                OpCodes.Callvirt.ToInstruction(onPropertyChanged),
+
+                // return;
+                OpCodes.Ret.ToInstruction(),
+            };
+
+            method.ReplaceWith(patchedMethod);
+            method.Body.Variables.Clear();
+            method.Body.ExceptionHandlers.Clear();
+        }
+
+        return assembly.PatchFunction(
+            "BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic",
+            "SetIsSendFastaDataForbidden",
+            "()System.Void",
+            SetNotSendFastData
+        ) + assembly.PatchFunction(
+            "BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic",
+            "SetIsSendOBFCMDataForbidden",
+            "()System.Void",
+            SetNotSendOBFCMData
         );
     }
 

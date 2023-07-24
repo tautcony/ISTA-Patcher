@@ -27,6 +27,9 @@ public static class ProgramArgs
 
         [Option("disable-requirements-check", Default = false, HelpText = "Disable system requirements check.")]
         public bool DisableRequirementsCheck { get; set; }
+
+        [Option("enable-not-send", Default = false, HelpText = "Enable VIN Not Send Data")]
+        public bool EnableNotSend { get; set; }
     }
 
     [Verb("patch", HelpText = "Perform patching on application and library.")]
