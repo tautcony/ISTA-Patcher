@@ -5,6 +5,7 @@
 namespace ISTA_Patcher;
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using CommandLine;
@@ -81,39 +82,54 @@ internal static class ISTAPatcher
         var markdownBuilder = new StringBuilder();
 
         markdownBuilder.AppendLine(
-            $"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash(SHA256)".PadRight(hashMaxLength)} | Integrity |");
+            $"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash(SHA256)".PadRight(hashMaxLength)} | Integrity    |");
         markdownBuilder.AppendLine(
-            $"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} | ---       |");
+            $"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} | ---          |");
         foreach (var fileInfo in fileList)
         {
             if (opts.Integrity)
             {
                 string checkResult;
                 var filePath = Path.Join(basePath, fileInfo.FilePath);
-                if (fileInfo.Hash == string.Empty)
+                if (File.Exists(filePath))
                 {
-                    checkResult = "No Hash";
-                }
-                else
-                {
-                    if (File.Exists(filePath))
+                    if (fileInfo.Hash == string.Empty)
                     {
-                        var realHash = HashFileInfo.CalculateHash(filePath);
-                        checkResult = (realHash == fileInfo.Hash).ToString();
+                        checkResult = "[EMPTY]";
                     }
                     else
                     {
-                        checkResult = "Not Found";
+                        var realHash = HashFileInfo.CalculateHash(filePath);
+                        checkResult = realHash == fileInfo.Hash ? "[OK]" : "[NG]";
                     }
+
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        var wasVerified = false;
+
+                        var bChecked = HashFileInfo.StrongNameSignatureVerificationEx(filePath, true, ref wasVerified);
+                        if (bChecked)
+                        {
+                            checkResult += wasVerified ? "[S:OK]" : "[S:NG]";
+                        }
+                        else
+                        {
+                            checkResult += "[S:NF]";
+                        }
+                    }
+                }
+                else
+                {
+                    checkResult = "Not Found";
                 }
 
                 markdownBuilder.AppendLine(
-                    $"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {checkResult.PadRight(9)} |");
+                    $"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {checkResult.PadRight(12)} |");
             }
             else
             {
                 markdownBuilder.AppendLine(
-                    $"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {"/".PadRight(9)} |");
+                    $"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {"/".PadRight(12)} |");
             }
         }
 
