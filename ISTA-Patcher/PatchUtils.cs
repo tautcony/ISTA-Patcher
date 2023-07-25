@@ -334,7 +334,7 @@ internal static partial class PatchUtils
 
             var instructions = method.Body.Instructions;
             instructions.RemoveAt(instructions.Count - 1);
-            instructions.Add(OpCodes.Ldstr.ToInstruction($" (Powered by ISTA-Patcher v{Version})"));
+            instructions.Add(OpCodes.Ldstr.ToInstruction($" ({PoweredBy})"));
             instructions.Add(OpCodes.Call.ToInstruction(concatRef));
             instructions.Add(OpCodes.Ret.ToInstruction());
         }

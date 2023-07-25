@@ -4,6 +4,7 @@
 // ReSharper disable CommentTypo
 namespace ISTA_Patcher;
 
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using de4dot.code;
 using de4dot.code.AssemblyClient;
@@ -19,7 +20,7 @@ using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 /// </summary>
 internal static partial class PatchUtils
 {
-    private static readonly string Timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+    private static readonly string Timestamp = DateTime.Now.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
     private static readonly ModuleContext ModCtx = ModuleDef.CreateModuleContext();
     private static readonly IDeobfuscatorContext DeobfuscatorContext = new DeobfuscatorContext();
     private static readonly NewProcessAssemblyClientFactory ProcessAssemblyClientFactory = new();
@@ -28,10 +29,20 @@ internal static partial class PatchUtils
     {
         get
         {
-            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? new Version("0.0.0.0");
+            var infoVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            if (infoVersion != null)
+            {
+                return infoVersion.InformationalVersion;
+            }
+
+            var version = Assembly.GetExecutingAssembly().GetName().Version ?? new Version("0.0.0.0");
             return version.ToString();
         }
     }
+
+    public static string PoweredBy => $"Powered by ISTA-Patcher {Version}";
+
+    public static string RepoUrl => "https://github.com/tautcony/ISTA-Patcher";
 
     /// <summary>
     /// Loads a module from the specified file.
@@ -101,12 +112,12 @@ internal static partial class PatchUtils
             "TC",
             module.CorLibTypes.Object.TypeDefOrRef)
         {
-            Attributes = TypeAttributes.Class | TypeAttributes.NestedPrivate,
+            Attributes = dnlib.DotNet.TypeAttributes.Class | dnlib.DotNet.TypeAttributes.NestedPrivate,
         };
         var dateField = new FieldDefUser(
             "date",
             new FieldSig(module.CorLibTypes.String),
-            FieldAttributes.Private | FieldAttributes.Static
+            dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
         )
         {
             Constant = new ConstantUser(Timestamp),
@@ -114,16 +125,16 @@ internal static partial class PatchUtils
         var urlField = new FieldDefUser(
             "repo",
             new FieldSig(module.CorLibTypes.String),
-            FieldAttributes.Private | FieldAttributes.Static
+            dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
         )
         {
-            Constant = new ConstantUser("https://github.com/tautcony/ISTA-Patcher"),
+            Constant = new ConstantUser(RepoUrl),
         };
 
         var versionField = new FieldDefUser(
             "version",
             new FieldSig(module.CorLibTypes.String),
-            FieldAttributes.Private | FieldAttributes.Static
+            dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
         )
         {
             Constant = new ConstantUser(Version),
@@ -133,6 +144,13 @@ internal static partial class PatchUtils
         patchedType.Fields.Add(urlField);
         patchedType.Fields.Add(versionField);
         module.Types.Add(patchedType);
+
+        var description = module.Assembly.CustomAttributes.FirstOrDefault(attribute =>
+            attribute.AttributeType.Name == nameof(AssemblyDescriptionAttribute));
+        if (description is { HasConstructorArguments: true })
+        {
+            description.ConstructorArguments[0] = new CAArgument(module.CorLibTypes.String, PoweredBy);
+        }
     }
 
     /// <summary>
