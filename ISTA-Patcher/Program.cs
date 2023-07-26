@@ -389,7 +389,15 @@ internal static class ISTAPatcher
                 }
 
                 PatchUtils.SetPatchedMark(assembly);
-                assembly.Write(patchedFileFullPath);
+                if (module.IsILOnly)
+                {
+                    module.Write(patchedFileFullPath);
+                }
+                else
+                {
+                    module.NativeWrite(patchedFileFullPath);
+                }
+
                 Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
                 var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
 

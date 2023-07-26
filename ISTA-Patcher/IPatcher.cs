@@ -122,7 +122,7 @@ public class BMWPatcher : IPatcher
 public class ToyotaPatcher : IPatcher
 {
     public List<Func<AssemblyDefinition, int>> Patches { get; set; } =
-        IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch), typeof(ToyotaPatcher));
+        IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch), typeof(ToyotaPatch));
 
     public string[] GeneratePatchList(string basePath)
     {

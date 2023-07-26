@@ -12,17 +12,6 @@ using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 internal static partial class PatchUtils
 {
     [ToyotaPatch]
-    public static int PatchCommonFuncForIsta(AssemblyDefinition assembly)
-    {
-        return assembly.PatchFunction(
-            "Toyota.GTS.ForIsta.CommonFuncForIsta",
-            "GetLicenseStatus",
-            "()BMW.Rheingold.ToyotaLicenseHelper.ToyotaLicenseStatus",
-            DnlibUtils.ReturnZeroMethod
-        );
-    }
-
-    [ToyotaPatch]
     public static int PatchToyotaWorker(AssemblyDefinition assembly)
     {
         return assembly.PatchFunction(
@@ -42,5 +31,25 @@ internal static partial class PatchUtils
             "(System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod
         );
+    }
+
+    [ToyotaPatch]
+    public static int PatchGTSLicenseManager(AssemblyDefinition assembly)
+    {
+        var typeDef = assembly.Modules.SelectMany(m => m.GetTypes())
+                         .FirstOrDefault(tp => tp.FullName == "Toyota.GTS.ForIsta.GTSLicenseManager");
+        if (typeDef == null)
+        {
+            return 0;
+        }
+
+        var licenseStatus = DnlibUtils.FindPropertyInClassAndBaseClasses(typeDef, "LicenseStatus");
+        if (licenseStatus == null)
+        {
+            return 0;
+        }
+
+        licenseStatus.GetMethod.ReturnZeroMethod();
+        return 1;
     }
 }
