@@ -1,13 +1,12 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
-// ReSharper disable CommentTypo, StringLiteralTypo, IdentifierTypo, InconsistentNaming
+// ReSharper disable CommentTypo, StringLiteralTypo, IdentifierTypo, InconsistentNaming, UnusedMember.Global
 namespace ISTA_Patcher;
 
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using Serilog;
-using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
 /// <summary>
 /// A utility class for patching files and directories.
@@ -16,9 +15,9 @@ using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 internal static partial class PatchUtils
 {
     [ENETPatch]
-    public static int PatchTherapyPlanCalculated(AssemblyDefinition assembly)
+    public static int PatchTherapyPlanCalculated(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.Programming.States.TherapyPlanCalculated",
             "IsConnectedViaENETAndBrandIsToyota",
             "()System.Boolean",
@@ -27,7 +26,7 @@ internal static partial class PatchUtils
     }
 
     [RequirementsPatch]
-    public static int PatchIstaInstallationRequirements(AssemblyDefinition assembly)
+    public static int PatchIstaInstallationRequirements(ModuleDefMD module)
     {
         void RemoveRequirementsCheck(MethodDef method)
         {
@@ -44,7 +43,7 @@ internal static partial class PatchUtils
             method.ReturnObjectMethod(dictionaryCtorRef);
         }
 
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.ISTAGUI.Controller.IstaInstallationRequirements",
             "CheckSystemRequirements",
             "(System.Boolean)System.Collections.Generic.Dictionary`2<BMW.Rheingold.ISTAGUI._new.ViewModels.InsufficientSystemRequirement,System.Int32[]>",
@@ -53,7 +52,7 @@ internal static partial class PatchUtils
     }
 
     [NotSendPatch]
-    public static int PatchMultisessionLogic(AssemblyDef assembly)
+    public static int PatchMultisessionLogic(ModuleDefMD module)
     {
         void SetNotSendOBFCMData(MethodDef method)
         {
@@ -134,12 +133,12 @@ internal static partial class PatchUtils
             method.Body.ExceptionHandlers.Clear();
         }
 
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic",
             "SetIsSendFastaDataForbidden",
             "()System.Void",
             SetNotSendFastData
-        ) + assembly.PatchFunction(
+        ) + module.PatchFunction(
             "BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic",
             "SetIsSendOBFCMDataForbidden",
             "()System.Void",

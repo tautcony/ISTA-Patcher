@@ -11,8 +11,8 @@ using de4dot.code.AssemblyClient;
 using de4dot.code.deobfuscators;
 using de4dot.code.deobfuscators.Dotfuscator;
 using dnlib.DotNet;
+using dnlib.DotNet.Writer;
 using Serilog;
-using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
 /// <summary>
 /// A utility class for patching files and directories.
@@ -51,14 +51,38 @@ internal static partial class PatchUtils
     /// <returns>The loaded <see cref="ModuleDefMD"/>.</returns>
     public static ModuleDefMD LoadModule(string fileName)
     {
-        var module = ModuleDefMD.Load(fileName, ModCtx);
+        var options = new ModuleCreationOptions(ModCtx) { TryToLoadPdbFromDisk = false };
+        var module = ModuleDefMD.Load(fileName, options);
         return module;
+    }
+
+    /// <summary>
+    /// Saves the given assembly module to a file with the specified filename.
+    /// </summary>
+    /// <param name="module">The <see cref="ModuleDef"/> to be saved.</param>
+    /// <param name="newFilename">The path to the module file will be saved.</param>
+    public static void SaveModule(ModuleDefMD module, string newFilename)
+    {
+        if (module.IsILOnly)
+        {
+            var writerOptions = new ModuleWriterOptions(module);
+            module.Write(newFilename, writerOptions);
+        }
+        else
+        {
+            var writerOptions = new NativeModuleWriterOptions(module, optimizeImageSize: true)
+            {
+                KeepExtraPEData = true,
+                KeepWin32Resources = true,
+            };
+            module.NativeWrite(newFilename, writerOptions);
+        }
     }
 
     /// <summary>
     /// Applies a patch to a method in the specified assembly.
     /// </summary>
-    /// <param name="assembly">The <see cref="AssemblyDefinition"/> to apply the patch to.</param>
+    /// <param name="module">The <see cref="ModuleDefMD"/> to apply the patch to.</param>
     /// <param name="type">The full name of the type containing the method.</param>
     /// <param name="name">The name of the method.</param>
     /// <param name="desc">The description of the method.</param>
@@ -66,15 +90,15 @@ internal static partial class PatchUtils
     /// <param name="memberName">The name of the function applying the patch.</param>
     /// <returns>The number of functions patched.</returns>
     private static int PatchFunction(
-        this AssemblyDefinition assembly,
+        this ModuleDefMD module,
         string type,
         string name,
         string desc,
         Action<MethodDef> operation,
         [CallerMemberName] string memberName = "")
     {
-        var function = assembly.GetMethod(type, name, desc);
-        Log.Verbose("Applying patch {PatchName} => {Name} <= {Assembly}: {Result}", memberName, name, assembly, function != null);
+        var function = module.GetMethod(type, name, desc);
+        Log.Verbose("Applying patch {PatchName} => {Name} <= {Module}: {Result}", memberName, name, module, function != null);
         if (function == null)
         {
             return 0;
@@ -85,24 +109,57 @@ internal static partial class PatchUtils
     }
 
     /// <summary>
+    /// Applies a patch to a property getter in the specified assembly.
+    /// </summary>
+    /// <param name="module">The <see cref="ModuleDefMD"/> to apply the patch to.</param>
+    /// <param name="type">The full name of the type containing the method.</param>
+    /// <param name="propertyName">The name of the property.</param>
+    /// <param name="operation">The action representing the patch operation to be applied to the method.</param>
+    /// <param name="memberName">The name of the function applying the patch.</param>
+    /// <returns>The number of functions patched.</returns>
+    private static int PatcherGetter(
+        this ModuleDefMD module,
+        string type,
+        string propertyName,
+        Action<MethodDef> operation,
+        [CallerMemberName] string memberName = "")
+    {
+        var typeDef = module.GetType(type);
+        if (typeDef == null)
+        {
+            return 0;
+        }
+
+        var propertyDef = DnlibUtils.FindPropertyInClassAndBaseClasses(typeDef, propertyName);
+        if (propertyDef?.GetMethod == null)
+        {
+            return 0;
+        }
+
+        Log.Verbose("Applying patch {PatchName} => {Name} <= {Module}: {Result}", memberName, $"{propertyName}::getter", module, propertyDef.GetMethod != null);
+
+        operation(propertyDef.GetMethod);
+        return 1;
+    }
+
+    /// <summary>
     /// Check if the assembly is patched by this patcher.
     /// </summary>
-    /// <param name="assembly">assembly to check.</param>
+    /// <param name="module">module to check.</param>
     /// <returns>ture for assembly has been patched.</returns>
-    public static bool HavePatchedMark(AssemblyDefinition assembly)
+    public static bool HavePatchedMark(ModuleDefMD module)
     {
-        var patchedType = assembly.Modules.First().GetType("Patched.By.TC");
+        var patchedType = module.GetType("Patched.By.TC");
         return patchedType != null;
     }
 
     /// <summary>
     /// Set the patched mark to the assembly.
     /// </summary>
-    /// <param name="assembly">assembly to set.</param>
-    public static void SetPatchedMark(AssemblyDefinition assembly)
+    /// <param name="module">module to set.</param>
+    public static void SetPatchedMark(ModuleDefMD module)
     {
-        var module = assembly.Modules.FirstOrDefault();
-        if (module == null || HavePatchedMark(assembly))
+        if (HavePatchedMark(module))
         {
             return;
         }

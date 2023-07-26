@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
-
 namespace ISTA_Patcher;
 
 using System.Reflection;
@@ -39,29 +38,30 @@ public static class DnlibUtils
     }
 
     /// <summary>
-    /// Retrieves a <see cref="TypeDef"/> from the specified <see cref="ModuleDef"/> based on the provided full name.
+    /// Retrieves a <see cref="TypeDef"/> representing the specified type from the provided <see cref="ModuleDefMD"/>.
     /// </summary>
-    /// <param name="module">The <see cref="ModuleDef"/> to search for the type.</param>
-    /// <param name="fullName">The full name of the type.</param>
-    /// <returns>The found <see cref="TypeDef"/> or null if no matching type is found.</returns>
-    public static TypeDef? GetType(this ModuleDef module, string fullName)
-    {
-        return module.GetTypes().FirstOrDefault(tp => tp.FullName == fullName);
-    }
+    /// <param name="module">The <see cref="ModuleDefMD"/> object representing the .NET assembly module to search for the type.</param>
+    /// <param name="type">The full name of the type to retrieve, including the namespace and the type name (e.g., "Namespace.ClassName").</param>
+    /// <returns>
+    /// A <see cref="TypeDef"/> object representing the specified type if found; otherwise, null.
+    /// </returns>
+    public static TypeDef? GetType(this ModuleDefMD module, string type) =>
+        module.GetTypes().FirstOrDefault(tp => tp.FullName == type);
 
     /// <summary>
-    /// Retrieves a <see cref="MethodDef"/> from the specified <see cref="AssemblyDef"/> based on the provided type, name, and description.
+    /// Retrieves a <see cref="MethodDef"/> from the specified <see cref="ModuleDefMD"/>.
     /// </summary>
-    /// <param name="asm">The <see cref="AssemblyDef"/> to search for the method.</param>
-    /// <param name="type">The full name of the type containing the method.</param>
-    /// <param name="name">The name of the method.</param>
+    /// <param name="module">The <see cref="ModuleDefMD"/> to search for the method.</param>
+    /// <param name="type">The full name of the type to retrieve, including the namespace and the type name.</param>
+    /// <param name="name">The name of the method to retrieve.</param>
     /// <param name="desc">The description of the method.</param>
-    /// <returns>The found <see cref="MethodDef"/> or null if no matching method is found.</returns>
-    public static MethodDef? GetMethod(this AssemblyDef asm, string type, string name, string desc)
+    /// <returns>
+    /// A <see cref="MethodDef"/> object representing the specified method if found; otherwise, null.
+    /// </returns>
+    public static MethodDef? GetMethod(this ModuleDefMD module, string type, string name, string desc)
     {
-        var td = asm.Modules.SelectMany(m => m.GetTypes()).FirstOrDefault(tp => tp.FullName == type);
         desc = desc.Replace(" ", string.Empty);
-        return td?.Methods.FirstOrDefault(m => m.Name.Equals(name) && DescriptionOf(m).Equals(desc));
+        return module.GetType(type)?.Methods.FirstOrDefault(m => m.Name.Equals(name) && DescriptionOf(m).Equals(desc));
     }
 
     /// <summary>

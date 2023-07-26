@@ -9,10 +9,10 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using CommandLine;
+using dnlib.DotNet;
 using ISTA_Patcher.LicenseManagement;
 using Serilog;
 using Serilog.Core;
-using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 using DecryptOptions = ProgramArgs.DecryptOptions;
 using LicenseOptions = ProgramArgs.LicenseOptions;
 using PatchOptions = ProgramArgs.PatchOptions;
@@ -356,8 +356,7 @@ internal static class ISTAPatcher
             try
             {
                 var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
-                var assembly = module.Assembly;
-                var isPatched = PatchUtils.HavePatchedMark(assembly);
+                var isPatched = PatchUtils.HavePatchedMark(module);
                 if (isPatched && !options.Force)
                 {
                     Log.Information(
@@ -369,7 +368,7 @@ internal static class ISTAPatcher
                 }
 
                 // Patch and print result
-                var result = validPatches.Select(patch => patch(assembly)).ToList();
+                var result = validPatches.Select(patch => patch(module)).ToList();
                 result.Select((item, index) => (item, index)).ToList().ForEach(patch => totalCounting[patch.index] += patch.item);
 
                 isPatched = result.Any(i => i > 0);
@@ -388,15 +387,8 @@ internal static class ISTAPatcher
                     File.Copy(pendingPatchItemFullPath, bakFileFullPath, false);
                 }
 
-                PatchUtils.SetPatchedMark(assembly);
-                if (module.IsILOnly)
-                {
-                    module.Write(patchedFileFullPath);
-                }
-                else
-                {
-                    module.NativeWrite(patchedFileFullPath);
-                }
+                PatchUtils.SetPatchedMark(module);
+                PatchUtils.SaveModule(module, patchedFileFullPath);
 
                 Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
                 var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
@@ -470,7 +462,7 @@ internal static class ISTAPatcher
         Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
     }
 
-    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<AssemblyDefinition, int>> patches, List<int> counting)
+    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<ModuleDefMD, int>> patches, List<int> counting)
     {
         return patches
                .Select(i => i.Method.Name.StartsWith("Patch") ? i.Method.Name[5..] : i.Method.Name)

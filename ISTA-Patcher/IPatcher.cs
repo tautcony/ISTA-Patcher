@@ -5,13 +5,13 @@
 namespace ISTA_Patcher;
 
 using System.Text.Json;
+using dnlib.DotNet;
 using Serilog;
-using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 using PatchOptions = ProgramArgs.PatchOptions;
 
 public interface IPatcher
 {
-    public List<Func<AssemblyDefinition, int>> Patches { get; set; }
+    public List<Func<ModuleDefMD, int>> Patches { get; set; }
 
     public string[] GeneratePatchList(string basePath);
 
@@ -42,19 +42,19 @@ public interface IPatcher
         return null;
     }
 
-    public static List<Func<AssemblyDefinition, int>> GetPatches(params Type[] attributes)
+    public static List<Func<ModuleDefMD, int>> GetPatches(params Type[] attributes)
     {
         return typeof(PatchUtils)
             .GetMethods()
             .Where(m => attributes.Any(attribute => m.GetCustomAttributes(attribute, false).Length > 0))
-            .Select(m => (Func<AssemblyDefinition, int>)Delegate.CreateDelegate(typeof(Func<AssemblyDefinition, int>), m))
+            .Select(m => (Func<ModuleDefMD, int>)Delegate.CreateDelegate(typeof(Func<ModuleDefMD, int>), m))
             .ToList();
     }
 }
 
 public class BMWPatcher : IPatcher
 {
-    public List<Func<AssemblyDefinition, int>> Patches { get; set; } =
+    public List<Func<ModuleDefMD, int>> Patches { get; set; } =
         IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch));
 
     public BMWPatcher()
@@ -121,7 +121,7 @@ public class BMWPatcher : IPatcher
 
 public class ToyotaPatcher : IPatcher
 {
-    public List<Func<AssemblyDefinition, int>> Patches { get; set; } =
+    public List<Func<ModuleDefMD, int>> Patches { get; set; } =
         IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch), typeof(ToyotaPatch));
 
     public string[] GeneratePatchList(string basePath)

@@ -1,9 +1,10 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
+// ReSharper disable InconsistentNaming, UnusedMember.Global
 namespace ISTA_Patcher;
 
-using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
+using dnlib.DotNet;
 
 /// <summary>
 /// A utility class for patching files and directories.
@@ -12,9 +13,9 @@ using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 internal static partial class PatchUtils
 {
     [ToyotaPatch]
-    public static int PatchToyotaWorker(AssemblyDefinition assembly)
+    public static int PatchToyotaWorker(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.Toyota.Worker.ToyotaWorker",
             "VehicleIsValid",
             "(System.String)System.Boolean",
@@ -23,9 +24,9 @@ internal static partial class PatchUtils
     }
 
     [ToyotaPatch]
-    public static int PatchIndustrialCustomerManager(AssemblyDefinition assembly)
+    public static int PatchIndustrialCustomerManager(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.CoreFramework.IndustrialCustomer.Manager.IndustrialCustomerManager",
             "IsIndustrialCustomerBrand",
             "(System.String)System.Boolean",
@@ -34,22 +35,11 @@ internal static partial class PatchUtils
     }
 
     [ToyotaPatch]
-    public static int PatchGTSLicenseManager(AssemblyDefinition assembly)
+    public static int PatchGTSLicenseManager(ModuleDefMD module)
     {
-        var typeDef = assembly.Modules.SelectMany(m => m.GetTypes())
-                         .FirstOrDefault(tp => tp.FullName == "Toyota.GTS.ForIsta.GTSLicenseManager");
-        if (typeDef == null)
-        {
-            return 0;
-        }
-
-        var licenseStatus = DnlibUtils.FindPropertyInClassAndBaseClasses(typeDef, "LicenseStatus");
-        if (licenseStatus == null)
-        {
-            return 0;
-        }
-
-        licenseStatus.GetMethod.ReturnZeroMethod();
-        return 1;
+        return module.PatcherGetter(
+            "Toyota.GTS.ForIsta.GTSLicenseManager",
+            "LicenseStatus",
+            DnlibUtils.ReturnZeroMethod);
     }
 }

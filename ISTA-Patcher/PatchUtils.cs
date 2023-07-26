@@ -1,13 +1,12 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
-// ReSharper disable CommentTypo, StringLiteralTypo, IdentifierTypo, InconsistentNaming
+// ReSharper disable CommentTypo, StringLiteralTypo, IdentifierTypo, InconsistentNaming, UnusedMember.Global
 namespace ISTA_Patcher;
 
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using Serilog;
-using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 
 /// <summary>
 /// A utility class for patching files and directories.
@@ -16,9 +15,9 @@ using AssemblyDefinition = dnlib.DotNet.AssemblyDef;
 internal static partial class PatchUtils
 {
     [ValidationPatch]
-    public static int PatchLicenseStatusChecker(AssemblyDefinition assembly)
+    public static int PatchLicenseStatusChecker(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
             "IsLicenseValid",
             "(BMW.Rheingold.CoreFramework.LicenseInfo,System.Boolean)BMW.Rheingold.CoreFramework.LicenseStatus",
@@ -27,9 +26,9 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchLicenseWizardHelper(AssemblyDefinition assembly)
+    public static int PatchLicenseWizardHelper(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
             "DoLicenseCheck",
             "(System.String)System.Boolean",
@@ -38,19 +37,19 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchLicenseManager(AssemblyDefinition assembly)
+    public static int PatchLicenseManager(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseManager",
             "VerifyLicense",
             "(System.Boolean)System.Void",
             DnlibUtils.EmptyingMethod
-        ) + assembly.PatchFunction(
+        ) + module.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseManager",
             "CheckRITALicense",
             "()System.Void",
             DnlibUtils.EmptyingMethod
-        ) + assembly.PatchFunction(
+        ) + module.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseManager",
             "LastCompileTimeIsInvalid",
             "()System.Boolean",
@@ -59,9 +58,9 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchLicenseHelper(AssemblyDefinition assembly)
+    public static int PatchLicenseHelper(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.CoreFramework.LicenseHelper",
             "IsVehicleLockedDown",
             "(BMW.Rheingold.CoreFramework.DatabaseProvider.Vehicle)System.Boolean",
@@ -70,9 +69,9 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchCommonServiceWrapper(AssemblyDefinition assembly)
+    public static int PatchCommonServiceWrapper(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
             "VerifyLicense",
             "()System.Void",
@@ -81,9 +80,9 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchSecureAccessHelper(AssemblyDefinition assembly)
+    public static int PatchSecureAccessHelper(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.iLean.CommonServices.Helper.SecureAccessHelper",
             "IsCodeAccessPermitted",
             "(System.Reflection.Assembly,System.Reflection.Assembly)System.Boolean",
@@ -92,9 +91,9 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchFscValidationClient(AssemblyDefinition assembly)
+    public static int PatchFscValidationClient(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.TricTools.FscValidation.FscValidationClient",
             "IsValid",
             "(System.Byte[],System.Byte[])System.Boolean",
@@ -103,9 +102,9 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchMainWindowViewModel(AssemblyDefinition assembly)
+    public static int PatchMainWindowViewModel(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.ISTAGUI.ViewModels.MainWindowViewModel",
             "CheckExpirationDate",
             "()System.Void",
@@ -114,14 +113,14 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchActivationCertificateHelper(AssemblyDefinition assembly)
+    public static int PatchActivationCertificateHelper(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
             "IsInWhiteList",
             "(System.String,System.String,System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod
-        ) + assembly.PatchFunction(
+        ) + module.PatchFunction(
             "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
             "IsWhiteListSignatureValid",
             "(System.String,System.String)System.Boolean",
@@ -130,9 +129,9 @@ internal static partial class PatchUtils
     }
 
     [EssentialPatch]
-    public static int PatchIntegrityManager(AssemblyDefinition assembly)
+    public static int PatchIntegrityManager(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.SecurityAndLicense.IntegrityManager",
             ".ctor",
             "()System.Void",
@@ -141,9 +140,9 @@ internal static partial class PatchUtils
     }
 
     [EssentialPatch]
-    public static int PatchVerifyAssemblyHelper(AssemblyDefinition assembly)
+    public static int PatchVerifyAssemblyHelper(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
             "VerifyStrongName",
             "(System.String,System.Boolean)System.Boolean",
@@ -152,13 +151,13 @@ internal static partial class PatchUtils
     }
 
     [EssentialPatch]
-    public static int PatchIstaIcsServiceClient(AssemblyDefinition assembly)
+    public static int PatchIstaIcsServiceClient(ModuleDefMD module)
     {
         void RemovePublicKeyCheck(MethodDef method)
         {
-            var getProcessesByName = DnlibUtils.BuildCall(assembly.ManifestModule, typeof(System.Diagnostics.Process), "GetProcessesByName", typeof(System.Diagnostics.Process[]), new[] { typeof(string) });
+            var getProcessesByName = DnlibUtils.BuildCall(module, typeof(System.Diagnostics.Process), "GetProcessesByName", typeof(System.Diagnostics.Process[]), new[] { typeof(string) });
             var firstOrDefault = method.FindOperand<MethodSpec>(OpCodes.Call, "System.Diagnostics.Process System.Linq.Enumerable::FirstOrDefault<System.Diagnostics.Process>(System.Collections.Generic.IEnumerable`1<System.Diagnostics.Process>)");
-            var invalidOperationException = DnlibUtils.BuildCall(assembly.ManifestModule, typeof(InvalidOperationException), ".ctor", typeof(void), new[] { typeof(string) });
+            var invalidOperationException = DnlibUtils.BuildCall(module, typeof(InvalidOperationException), ".ctor", typeof(void), new[] { typeof(string) });
             if (getProcessesByName == null || firstOrDefault == null || invalidOperationException == null)
             {
                 Log.Warning("Required instructions not found, can not patch IstaIcsServiceClient::ValidateHost");
@@ -187,7 +186,7 @@ internal static partial class PatchUtils
             method.Body.ExceptionHandlers.Clear();
         }
 
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
             "ValidateHost",
             "()System.Void",
@@ -196,9 +195,9 @@ internal static partial class PatchUtils
     }
 
     [EssentialPatch]
-    public static int PatchIstaProcessStarter(AssemblyDefinition assembly)
+    public static int PatchIstaProcessStarter(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
             "CheckSignature",
             "(System.String)System.Void",
@@ -207,9 +206,9 @@ internal static partial class PatchUtils
     }
 
     [EssentialPatch]
-    public static int PatchPackageValidityService(AssemblyDefinition assembly)
+    public static int PatchPackageValidityService(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.ISTAGUI.Controller.PackageValidityService",
             "CyclicExpirationDateCheck",
             "()System.Void",
@@ -218,9 +217,9 @@ internal static partial class PatchUtils
     }
 
     [EssentialPatch]
-    public static int PatchServiceProgramCompilerLicense(AssemblyDefinition assembly)
+    public static int PatchServiceProgramCompilerLicense(ModuleDefMD module)
     {
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.ExternalToolLicense.ServiceProgramCompilerLicense",
             "CheckLicenseExpiration",
             "()System.Boolean",
@@ -229,7 +228,7 @@ internal static partial class PatchUtils
     }
 
     [EssentialPatch]
-    public static int PatchConfigurationService(AssemblyDefinition assembly)
+    public static int PatchConfigurationService(ModuleDefMD module)
     {
         void RewriteProperties(MethodDef method)
         {
@@ -311,7 +310,7 @@ internal static partial class PatchUtils
             method.Body.Variables.Add(property);
         }
 
-        return assembly.PatchFunction(
+        return module.PatchFunction(
             "BMW.Rheingold.Psdz.Services.ConfigurationService",
             "SetPsdzProperties",
             "(System.String,System.String,System.String,System.String)System.Void",
@@ -320,16 +319,15 @@ internal static partial class PatchUtils
     }
 
     [EssentialPatch]
-    public static int PatchInteractionModel(AssemblyDefinition assembly)
+    public static int PatchInteractionModel(ModuleDefMD module)
     {
         void RewriteTitle(MethodDef method)
         {
-            var mod = method.Module;
-            TypeRef stringRef = new TypeRefUser(mod, "System", "String", mod.CorLibTypes.AssemblyRef);
+            TypeRef stringRef = new TypeRefUser(module, "System", "String", module.CorLibTypes.AssemblyRef);
             MemberRef concatRef = new MemberRefUser(
-                mod,
+                module,
                 "Concat",
-                MethodSig.CreateStatic(mod.CorLibTypes.String, mod.CorLibTypes.String, mod.CorLibTypes.String),
+                MethodSig.CreateStatic(module.CorLibTypes.String, module.CorLibTypes.String, module.CorLibTypes.String),
                 stringRef);
 
             var instructions = method.Body.Instructions;
@@ -339,16 +337,15 @@ internal static partial class PatchUtils
             instructions.Add(OpCodes.Ret.ToInstruction());
         }
 
-        return assembly.PatchFunction(
+        return module.PatcherGetter(
             "BMW.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
-            "get_Title",
-            "()System.String",
+            "Title",
             RewriteTitle
         );
     }
 
     [SignaturePatch]
-    public static Func<AssemblyDefinition, int> PatchGetRSAPKCS1SignatureDeformatter(string modulus, string exponent)
+    public static Func<ModuleDefMD, int> PatchGetRSAPKCS1SignatureDeformatter(string modulus, string exponent)
     {
         return assembly =>
         {
