@@ -324,15 +324,19 @@ internal static partial class PatchUtils
         void RewriteTitle(MethodDef method)
         {
             var stringRef = module.CorLibTypes.String.TypeRef;
-            var stringDef = ModuleDefMD.Load(typeof(string).Module).CorLibTypes.String.TypeDef;
             var concatRef = new MemberRefUser(
                 module,
                 "Concat",
                 MethodSig.CreateStatic(module.CorLibTypes.String, module.CorLibTypes.String, module.CorLibTypes.String),
                 stringRef);
-            var containsDef =
-                stringDef.Methods.FirstOrDefault(m =>
-                    m.FullName == "System.Boolean System.String::Contains(System.String)");
+
+            var containsDef = module.Types.SelectMany(t => t.Methods).Where(m => m.HasBody)
+                                    .SelectMany(m => m.Body.Instructions)
+                                    .FirstOrDefault(i => i.OpCode == OpCodes.Callvirt &&
+                                                         (i.Operand as MemberRef)?.FullName ==
+                                                         "System.Boolean System.String::Contains(System.String)")
+                                    ?.Operand as MemberRef;
+
             var titleField = method.DeclaringType.Fields.FirstOrDefault(field =>
                 field.FullName ==
                 "System.String BMW.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title");
@@ -347,7 +351,7 @@ internal static partial class PatchUtils
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldfld.ToInstruction(titleField),
                 OpCodes.Ldstr.ToInstruction("ISTA-Patcher"),
-                OpCodes.Callvirt.ToInstruction(module.Import(containsDef)),
+                OpCodes.Callvirt.ToInstruction(containsDef),
                 OpCodes.Brfalse_S.ToInstruction(label),
 
                 OpCodes.Ldarg_0.ToInstruction(),
