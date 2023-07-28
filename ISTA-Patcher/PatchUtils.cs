@@ -323,18 +323,47 @@ internal static partial class PatchUtils
     {
         void RewriteTitle(MethodDef method)
         {
-            TypeRef stringRef = new TypeRefUser(module, "System", "String", module.CorLibTypes.AssemblyRef);
-            MemberRef concatRef = new MemberRefUser(
+            var stringRef = module.CorLibTypes.String.TypeRef;
+            var stringDef = ModuleDefMD.Load(typeof(string).Module).CorLibTypes.String.TypeDef;
+            var concatRef = new MemberRefUser(
                 module,
                 "Concat",
                 MethodSig.CreateStatic(module.CorLibTypes.String, module.CorLibTypes.String, module.CorLibTypes.String),
                 stringRef);
+            var containsDef =
+                stringDef.Methods.FirstOrDefault(m =>
+                    m.FullName == "System.Boolean System.String::Contains(System.String)");
+            var titleField = method.DeclaringType.Fields.FirstOrDefault(field =>
+                field.FullName ==
+                "System.String BMW.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title");
 
-            var instructions = method.Body.Instructions;
-            instructions.RemoveAt(instructions.Count - 1);
-            instructions.Add(OpCodes.Ldstr.ToInstruction($" ({PoweredBy})"));
-            instructions.Add(OpCodes.Call.ToInstruction(concatRef));
-            instructions.Add(OpCodes.Ret.ToInstruction());
+            var label = OpCodes.Nop.ToInstruction();
+            var patchedMethod = new[]
+            {
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Ldfld.ToInstruction(titleField),
+                OpCodes.Brfalse_S.ToInstruction(label),
+
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Ldfld.ToInstruction(titleField),
+                OpCodes.Ldstr.ToInstruction("ISTA-Patcher"),
+                OpCodes.Callvirt.ToInstruction(module.Import(containsDef)),
+                OpCodes.Brfalse_S.ToInstruction(label),
+
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Ldfld.ToInstruction(titleField),
+                OpCodes.Ret.ToInstruction(),
+
+                label,
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Ldfld.ToInstruction(titleField),
+                OpCodes.Ldstr.ToInstruction($" ({PoweredBy})"),
+                OpCodes.Call.ToInstruction(concatRef),
+                OpCodes.Ret.ToInstruction(),
+            };
+            method.Body.Variables.Clear();
+            method.Body.ExceptionHandlers.Clear();
+            method.ReplaceWith(patchedMethod);
         }
 
         return module.PatcherGetter(
