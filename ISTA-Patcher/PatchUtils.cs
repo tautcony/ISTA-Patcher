@@ -153,6 +153,13 @@ internal static partial class PatchUtils
     [EssentialPatch]
     public static int PatchIstaIcsServiceClient(ModuleDefMD module)
     {
+        return module.PatchFunction(
+            "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
+            "ValidateHost",
+            "()System.Void",
+            RemovePublicKeyCheck
+        );
+
         void RemovePublicKeyCheck(MethodDef method)
         {
             var getProcessesByName = DnlibUtils.BuildCall(module, typeof(System.Diagnostics.Process), "GetProcessesByName", typeof(System.Diagnostics.Process[]), new[] { typeof(string) });
@@ -185,13 +192,6 @@ internal static partial class PatchUtils
             method.Body.Variables.Clear();
             method.Body.ExceptionHandlers.Clear();
         }
-
-        return module.PatchFunction(
-            "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
-            "ValidateHost",
-            "()System.Void",
-            RemovePublicKeyCheck
-        );
     }
 
     [EssentialPatch]
@@ -230,6 +230,13 @@ internal static partial class PatchUtils
     [EssentialPatch]
     public static int PatchConfigurationService(ModuleDefMD module)
     {
+        return module.PatchFunction(
+            "BMW.Rheingold.Psdz.Services.ConfigurationService",
+            "SetPsdzProperties",
+            "(System.String,System.String,System.String,System.String)System.Void",
+            RewriteProperties
+        );
+
         void RewriteProperties(MethodDef method)
         {
             var getBaseService = method.FindOperand<MemberRef>(OpCodes.Call, "com.bmw.psdz.api.Configuration BMW.Rheingold.Psdz.Services.ServiceBase`1<com.bmw.psdz.api.Configuration>::get_BaseService()");
@@ -309,18 +316,17 @@ internal static partial class PatchUtils
             method.Body.Variables.Clear();
             method.Body.Variables.Add(property);
         }
-
-        return module.PatchFunction(
-            "BMW.Rheingold.Psdz.Services.ConfigurationService",
-            "SetPsdzProperties",
-            "(System.String,System.String,System.String,System.String)System.Void",
-            RewriteProperties
-        );
     }
 
     [EssentialPatch]
     public static int PatchInteractionModel(ModuleDefMD module)
     {
+        return module.PatcherGetter(
+            "BMW.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
+            "Title",
+            RewriteTitle
+        );
+
         void RewriteTitle(MethodDef method)
         {
             var stringRef = module.CorLibTypes.String.TypeRef;
@@ -369,12 +375,6 @@ internal static partial class PatchUtils
             method.Body.ExceptionHandlers.Clear();
             method.ReplaceWith(patchedMethod);
         }
-
-        return module.PatcherGetter(
-            "BMW.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
-            "Title",
-            RewriteTitle
-        );
     }
 
     [SignaturePatch]

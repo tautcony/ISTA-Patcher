@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using ISTA_Patcher.LicenseManagement.CoreFramework;
 using Serilog;
 
-public class LicenseStatusChecker
+public static class LicenseStatusChecker
 {
     public static bool IsLicenseValid(LicenseInfo testLicInfo, RSAPKCS1SignatureDeformatter signatureDeformatter)
     {

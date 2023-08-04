@@ -28,6 +28,13 @@ internal static partial class PatchUtils
     [RequirementsPatch]
     public static int PatchIstaInstallationRequirements(ModuleDefMD module)
     {
+        return module.PatchFunction(
+            "BMW.Rheingold.ISTAGUI.Controller.IstaInstallationRequirements",
+            "CheckSystemRequirements",
+            "(System.Boolean)System.Collections.Generic.Dictionary`2<BMW.Rheingold.ISTAGUI._new.ViewModels.InsufficientSystemRequirement,System.Int32[]>",
+            RemoveRequirementsCheck
+        );
+
         void RemoveRequirementsCheck(MethodDef method)
         {
             var dictionaryCtorRef = method.FindOperand<MemberRef>(
@@ -42,18 +49,23 @@ internal static partial class PatchUtils
 
             method.ReturnObjectMethod(dictionaryCtorRef);
         }
-
-        return module.PatchFunction(
-            "BMW.Rheingold.ISTAGUI.Controller.IstaInstallationRequirements",
-            "CheckSystemRequirements",
-            "(System.Boolean)System.Collections.Generic.Dictionary`2<BMW.Rheingold.ISTAGUI._new.ViewModels.InsufficientSystemRequirement,System.Int32[]>",
-            RemoveRequirementsCheck
-        );
     }
 
     [NotSendPatch]
     public static int PatchMultisessionLogic(ModuleDefMD module)
     {
+        return module.PatchFunction(
+            "BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic",
+            "SetIsSendFastaDataForbidden",
+            "()System.Void",
+            SetNotSendFastData
+        ) + module.PatchFunction(
+            "BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic",
+            "SetIsSendOBFCMDataForbidden",
+            "()System.Void",
+            SetNotSendOBFCMData
+        );
+
         void SetNotSendOBFCMData(MethodDef method)
         {
             var get_CurrentOperation = method.FindOperand<MethodDef>(OpCodes.Call, "BMW.Rheingold.PresentationFramework.Contracts.IIstaOperation BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic::get_CurrentOperation()");
@@ -132,17 +144,5 @@ internal static partial class PatchUtils
             method.Body.Variables.Clear();
             method.Body.ExceptionHandlers.Clear();
         }
-
-        return module.PatchFunction(
-            "BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic",
-            "SetIsSendFastaDataForbidden",
-            "()System.Void",
-            SetNotSendFastData
-        ) + module.PatchFunction(
-            "BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic",
-            "SetIsSendOBFCMDataForbidden",
-            "()System.Void",
-            SetNotSendOBFCMData
-        );
     }
 }

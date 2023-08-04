@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
+// ReSharper disable InconsistentNaming
 namespace ISTA_Patcher.LicenseManagement.CoreFramework;
 
 using System;
@@ -70,18 +71,13 @@ public class LicenseInfo : ICloneable
 
     [XmlElement(Order = 13)]
     [DataMember]
-    public LicenseType LicenseType { get; set; }
+    public LicenseType LicenseType { get; set; } = LicenseType.offline;
 
     [DataMember]
     [XmlElement("SubLicenses", Order = 14)]
     public List<LicensePackage> SubLicenses { get; set; }
 
     private static XmlSerializer Serializer { get; } = new(typeof(LicenseInfo));
-
-    public LicenseInfo()
-    {
-        this.LicenseType = LicenseType.offline;
-    }
 
     public virtual string Serialize()
     {

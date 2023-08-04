@@ -34,7 +34,7 @@ internal static class ISTAPatcher
                          (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
                          (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
                          (LicenseOptions opts) => RunLicenseOperationAndReturnExitCode(opts),
-                         errs => 1);
+                         _ => 1);
     }
 
     private static int RunPatchAndReturnExitCode(PatchOptions opts)
