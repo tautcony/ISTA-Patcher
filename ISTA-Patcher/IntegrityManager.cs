@@ -29,7 +29,9 @@ public static class IntegrityManager
             var aesManaged = Aes.Create();
             aesManaged.BlockSize = aesManaged.LegalBlockSizes[0].MaxSize;
             aesManaged.KeySize = aesManaged.LegalKeySizes[0].MaxSize;
-            var rfc2898DeriveBytes = new Rfc2898DeriveBytes(_password, _salt, _iterations);
+
+            var rfc2898DeriveBytes = new Rfc2898DeriveBytes(_password, _salt, _iterations, HashAlgorithmName.SHA1);
+
             aesManaged.Key = rfc2898DeriveBytes.GetBytes(aesManaged.KeySize / 8);
             aesManaged.IV = rfc2898DeriveBytes.GetBytes(aesManaged.BlockSize / 8);
             aesManaged.Mode = CipherMode.CBC;

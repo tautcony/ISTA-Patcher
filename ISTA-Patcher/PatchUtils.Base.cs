@@ -221,17 +221,15 @@ internal static partial class PatchUtils
 
         using var file = new ObfuscatedFile(
             new ObfuscatedFile.Options
-        {
-            ControlFlowDeobfuscation = true,
-            Filename = fileName,
-            NewFilename = newFileName,
-            StringDecrypterType = DecrypterType.Static,
-        },
+            {
+                ControlFlowDeobfuscation = true,
+                Filename = fileName,
+                NewFilename = newFileName,
+                StringDecrypterType = DecrypterType.Static,
+            },
             ModCtx,
-            ProcessAssemblyClientFactory)
-        {
-            DeobfuscatorContext = DeobfuscatorContext,
-        };
+            ProcessAssemblyClientFactory);
+        file.DeobfuscatorContext = DeobfuscatorContext;
 
         file.Load(new List<IDeobfuscator> { deobfuscatorInfo.CreateDeobfuscator() });
         file.DeobfuscateBegin();

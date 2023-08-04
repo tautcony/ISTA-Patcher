@@ -21,10 +21,15 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET 6.x
+    - name: Setup .NET 7.x
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.x
+        dotnet-version: 7.x
+        cache: true
+        cache-dependency-path: ISTA-Patcher/packages.lock.json
+
+    - name: Restore dependencies
+      run: dotnet restore --locked-mode
 
     - name: Update version info
       if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
@@ -44,8 +49,9 @@ jobs:
       with:
         name: ISTA-Patcher-${{ matrix.runtime-identifier }}-${{ matrix.configuration }}
         path: |
-          ISTA-Patcher/bin/${{ matrix.configuration }}/net6.0/${{ matrix.runtime-identifier }}/publish/*
-          !ISTA-Patcher/bin/${{ matrix.configuration }}/net6.0/${{ matrix.runtime-identifier }}/publish/*.pdb
+          ISTA-Patcher/bin/${{ matrix.configuration }}/net7.0/${{ matrix.runtime-identifier }}/publish/*
+          !ISTA-Patcher/bin/${{ matrix.configuration }}/net7.0/${{ matrix.runtime-identifier }}/publish/*.pdb
+          !ISTA-Patcher/bin/${{ matrix.configuration }}/net7.0/${{ matrix.runtime-identifier }}/publish/*.dbg
 
   build-for-macos:
     name: 'Build (Release, osx-universal)'
@@ -55,10 +61,15 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET 6.x
+    - name: Setup .NET 7.x
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.x
+        dotnet-version: 7.x
+        cache: true
+        cache-dependency-path: ISTA-Patcher/packages.lock.json
+
+    - name: Restore dependencies
+      run: dotnet restore --locked-mode
 
     - name: Update version info
       if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
@@ -76,14 +87,15 @@ jobs:
 
     - name: Glue the binary
       run: |
-        mkdir -p ISTA-Patcher/bin/Release/net6.0/osx-universal/publish
-        lipo -create ISTA-Patcher/bin/Release/net6.0/osx-x64/publish/ISTA-Patcher ISTA-Patcher/bin/Release/net6.0/osx-arm64/publish/ISTA-Patcher -output ISTA-Patcher/bin/Release/net6.0/osx-universal/publish/ISTA-Patcher
-        cp -f ISTA-Patcher/bin/Release/net6.0/osx-x64/publish/patchConfig.json ISTA-Patcher/bin/Release/net6.0/osx-universal/publish/patchConfig.json
+        mkdir -p ISTA-Patcher/bin/Release/net7.0/osx-universal/publish
+        lipo -create ISTA-Patcher/bin/Release/net7.0/osx-x64/publish/ISTA-Patcher ISTA-Patcher/bin/Release/net7.0/osx-arm64/publish/ISTA-Patcher -output ISTA-Patcher/bin/Release/net7.0/osx-universal/publish/ISTA-Patcher
+        cp -f ISTA-Patcher/bin/Release/net7.0/osx-x64/publish/patchConfig.json ISTA-Patcher/bin/Release/net7.0/osx-universal/publish/patchConfig.json
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: ISTA-Patcher-osx-universal-Release
         path: |
-          ISTA-Patcher/bin/Release/net6.0/osx-universal/publish/*
-          !ISTA-Patcher/bin/Release/net6.0/osx-universal/publish/*.pdb
+          ISTA-Patcher/bin/Release/net7.0/osx-universal/publish/*
+          !ISTA-Patcher/bin/Release/net7.0/osx-universal/publish/*.pdb
+          !ISTA-Patcher/bin/Release/net7.0/osx-universal/publish/*.dwarf

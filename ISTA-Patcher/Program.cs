@@ -462,7 +462,7 @@ internal static class ISTAPatcher
         Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
     }
 
-    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<ModuleDefMD, int>> patches, List<int> counting)
+    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<ModuleDefMD, int>> patches, IReadOnlyList<int> counting)
     {
         return patches
                .Select(i => i.Method.Name.StartsWith("Patch") ? i.Method.Name[5..] : i.Method.Name)

@@ -7,6 +7,7 @@ trim_trailing_whitespace = true
 
 # Code files
 [*.{cs,vb}]
+dotnet_diagnostic.SA0001.severity = none # SA0001XmlCommentAnalysisDisabled
 dotnet_diagnostic.CS0169.severity = none # The private field 'class member' is never used
 dotnet_diagnostic.SA1009.severity = none # SA1009ClosingParenthesisMustBeSpacedCorrectly
 dotnet_diagnostic.SA1111.severity = none # SA1111ClosingParenthesisMustBeOnLineOfLastParameter

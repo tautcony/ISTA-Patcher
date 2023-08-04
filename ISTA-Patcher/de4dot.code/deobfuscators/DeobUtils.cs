@@ -72,7 +72,7 @@ namespace de4dot.code.deobfuscators {
 
 		public static byte[] AesDecrypt(byte[] data, byte[] key, byte[] iv)
 		{
-			using var aes = Aes.Create("AesManaged");
+			using var aes = Aes.Create();
 			using var transform = aes.CreateDecryptor(key, iv);
 			return transform.TransformFinalBlock(data, 0, data.Length);
 		}
