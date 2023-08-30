@@ -14,13 +14,16 @@ public static class ProgramArgs
         TOYOTA = 1,
     }
 
-    public class BaseOption
+    public class BaseOptions
     {
         [Option('v', "verbosity", Default = Serilog.Events.LogEventLevel.Information, HelpText = "Set the output verbosity level.")]
         public Serilog.Events.LogEventLevel Verbosity { get; set; }
+
+        [Option('r', "restore", Default = false, HelpText = "Restore patched files")]
+        public bool Restore { get; set; }
     }
 
-    public class OptionalPatchOption : BaseOption
+    public class OptionalPatchOptions : BaseOptions
     {
         [Option("enable-enet", Default = false, HelpText = "Enable ENET programming.")]
         public bool EnableENET { get; set; }
@@ -33,10 +36,13 @@ public static class ProgramArgs
     }
 
     [Verb("patch", HelpText = "Perform patching on application and library.")]
-    public class PatchOptions : OptionalPatchOption
+    public class PatchOptions : OptionalPatchOptions
     {
         [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Specify the patch type. Valid options: BMW, TOYOTA.")]
         public PatchTypeEnum PatchType { get; set; }
+
+        [Option("skip-validation-patch", Default = false, HelpText = "Skip license validation patch.")]
+        public bool SkipLicensePatch { get; set; }
 
         [Option("deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
         public bool Deobfuscate { get; set; }
@@ -49,7 +55,7 @@ public static class ProgramArgs
     }
 
     [Verb("license", HelpText = "Perform license-related operations.")]
-    public class LicenseOptions : OptionalPatchOption
+    public class LicenseOptions : OptionalPatchOptions
     {
         [Option('g', "generate", HelpText = "Generate a key pair.", Group = "operation")]
         public bool GenerateKeyPair { get; set; }
@@ -60,7 +66,7 @@ public static class ProgramArgs
         [Option('s', "sign", HelpText = "Sign a license request.", Group = "operation")]
         public bool SignLicense { get; set; }
 
-        [Option('a', "auto", Default = false, HelpText = "Automatically generate a key pair and patch the target program.")]
+        [Option("auto", Default = false, HelpText = "Automatically generate a key pair and patch the target program.")]
         public bool AutoMode { get; set; }
 
         [Option('k', "key-pair", HelpText = "Specify the path for the key pair file.")]
@@ -83,7 +89,7 @@ public static class ProgramArgs
     }
 
     [Verb("decrypt", HelpText = "Decrypt the integrity checklist.")]
-    public class DecryptOptions : BaseOption
+    public class DecryptOptions : BaseOptions
     {
         [Option('i', "integrity", Default = false, HelpText = "Verify the integrity of the checklist.")]
         public bool Integrity { get; set; }

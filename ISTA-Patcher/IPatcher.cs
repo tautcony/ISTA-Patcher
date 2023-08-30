@@ -7,6 +7,8 @@ namespace ISTA_Patcher;
 using System.Text.Json;
 using dnlib.DotNet;
 using Serilog;
+using LicenseOptions = ProgramArgs.LicenseOptions;
+using OptionalPatchOptions = ProgramArgs.OptionalPatchOptions;
 using PatchOptions = ProgramArgs.PatchOptions;
 
 public interface IPatcher
@@ -55,13 +57,15 @@ public interface IPatcher
 public class BMWPatcher : IPatcher
 {
     public List<Func<ModuleDefMD, int>> Patches { get; set; } =
-        IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch));
+        IPatcher.GetPatches(typeof(EssentialPatch));
 
-    public BMWPatcher()
+    private BMWPatcher()
     {
+        Log.Debug("Loaded patches: {Patches}", string.Join(", ", this.Patches.Select(p => p.Method.Name)));
     }
 
-    public BMWPatcher(PatchOptions opts)
+    public BMWPatcher(OptionalPatchOptions opts)
+        : this()
     {
         if (opts.EnableENET)
         {
@@ -76,6 +80,15 @@ public class BMWPatcher : IPatcher
         if (opts.EnableNotSend)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(NotSendPatch)));
+        }
+    }
+
+    public BMWPatcher(PatchOptions opts)
+        : this((OptionalPatchOptions)opts)
+    {
+        if (!opts.SkipLicensePatch)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(ValidationPatch)));
         }
     }
 
@@ -141,7 +154,8 @@ public class ToyotaPatcher : IPatcher
 
 public class BMWLicensePatcher : BMWPatcher
 {
-    public BMWLicensePatcher(string modulus, string exponent)
+    public BMWLicensePatcher(string modulus, string exponent, LicenseOptions opts)
+        : base(opts)
     {
         this.Patches.Add(
             PatchUtils.PatchGetRSAPKCS1SignatureDeformatter(modulus, exponent)

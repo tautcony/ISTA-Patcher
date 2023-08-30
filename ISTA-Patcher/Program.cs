@@ -155,7 +155,7 @@ internal static class ISTAPatcher
         }
 
         string keyPairXml = null;
-        if (opts.KeyPairPath != null)
+        if (opts.KeyPairPath != null && !opts.AutoMode)
         {
             if (!File.Exists(opts.KeyPairPath))
             {
@@ -213,6 +213,11 @@ internal static class ISTAPatcher
                 using var fs = new FileStream(privateKeyPath, FileMode.Create);
                 using var sw = new StreamWriter(fs);
                 sw.Write(privateKey);
+                if (opts.AutoMode)
+                {
+                    keyPairXml = privateKey;
+                }
+
                 Log.Information("Generated key pair located at {PrivateKeyPath}", privateKeyPath);
             }
             finally
@@ -298,8 +303,10 @@ internal static class ISTAPatcher
             var modulus = Convert.ToBase64String(parameters.Modulus);
             var exponent = Convert.ToBase64String(parameters.Exponent);
 
-            PatchISTA(new BMWLicensePatcher(modulus, exponent), new PatchOptions
+            PatchISTA(new BMWLicensePatcher(modulus, exponent, opts), new PatchOptions
             {
+                Restore = opts.Restore,
+                Verbosity = opts.Verbosity,
                 TargetPath = opts.TargetPath,
                 Force = opts.Force,
                 Deobfuscate = opts.Deobfuscate,
@@ -355,6 +362,12 @@ internal static class ISTAPatcher
 
             try
             {
+                if (options.Restore && File.Exists(bakFileFullPath))
+                {
+                    Log.Debug("Backup detected, restoring {Item}", pendingPatchItem);
+                    File.Copy(bakFileFullPath, pendingPatchItemFullPath, true);
+                }
+
                 var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
                 var isPatched = PatchUtils.HavePatchedMark(module);
                 if (isPatched && !options.Force)

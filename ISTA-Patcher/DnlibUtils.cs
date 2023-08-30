@@ -99,6 +99,8 @@ public static class DnlibUtils
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
     public static void ReturnTrueMethod(this MethodDef method) => method.ReturningWithValue(true);
 
+    public static void ReturnStringMethod(this MethodDef method, string ret) => method.ReturningWithValue(ret);
+
     public static void ReturnObjectMethod(this MethodDef method, MemberRef memberRef) => method.ReturningWithValue(memberRef);
 
     /// <summary>
