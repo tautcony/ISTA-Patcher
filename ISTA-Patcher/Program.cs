@@ -107,7 +107,7 @@ internal static class ISTAPatcher
                     {
                         var wasVerified = false;
 
-                        var bChecked = HashFileInfo.StrongNameSignatureVerificationEx(filePath, true, ref wasVerified);
+                        var bChecked = NativeMethods.StrongNameSignatureVerificationEx(filePath, true, ref wasVerified);
                         if (bChecked)
                         {
                             checkResult += wasVerified ? "[S:OK]" : "[S:NG]";

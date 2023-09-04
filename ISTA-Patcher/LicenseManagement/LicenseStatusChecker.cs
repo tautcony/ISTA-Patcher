@@ -53,7 +53,7 @@ public static class LicenseStatusChecker
         Array.Copy(serializedXmlByte, buffer, serializedXmlByte.Length);
 
         Log.Debug("licInfo stream: {ByteArray}", FormatConverter.ByteArray2String(buffer, (uint)buffer.Length));
-        return SHA1.Create().ComputeHash(buffer);
+        return SHA1.HashData(buffer);
     }
 
     public static RSAPKCS1SignatureDeformatter GetRSAPKCS1SignatureDeformatter(string xmlString)

@@ -3,6 +3,7 @@
 
 namespace ISTA_Patcher;
 
+[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal class ISTAPatch : Attribute
 {
 }
