@@ -252,4 +252,9 @@ public static class DnlibUtils
 
         return null;
     }
+
+    public static Local? GetLocalByType(this MethodDef method, string fullTypeName)
+    {
+        return method.Body.Variables.FirstOrDefault(variable => variable.Type.FullName == fullTypeName);
+    }
 }

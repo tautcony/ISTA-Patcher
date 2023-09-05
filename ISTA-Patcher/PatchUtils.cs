@@ -252,6 +252,19 @@ internal static partial class PatchUtils
                 return;
             }
 
+            if (method.Body.Variables.Count != 1)
+            {
+                var property = method.GetLocalByType("java.util.Properties");
+                if (property == null || method.Body.Variables.Count == 0)
+                {
+                    Log.Warning("Properties not found, can not patch ConfigurationService::SetPsdzProperties");
+                    return;
+                }
+
+                method.Body.Variables.Clear();
+                method.Body.Variables.Add(property);
+            }
+
             var patchedMethod = new[]
             {
                 // Properties pSdZProperties = base.BaseService.getPSdZProperties();
@@ -305,16 +318,6 @@ internal static partial class PatchUtils
             };
 
             method.ReplaceWith(patchedMethod);
-            var property =
-                method.Body.Variables.FirstOrDefault(variable => variable.Type.FullName == "java.util.Properties");
-            if (property == null)
-            {
-                Log.Warning("Properties not found, patch for ConfigurationService may not workable");
-                return;
-            }
-
-            method.Body.Variables.Clear();
-            method.Body.Variables.Add(property);
         }
     }
 
@@ -346,6 +349,12 @@ internal static partial class PatchUtils
             var titleField = method.DeclaringType.Fields.FirstOrDefault(field =>
                 field.FullName ==
                 "System.String BMW.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title");
+
+            if (containsDef == null || titleField == null)
+            {
+                Log.Warning("Required instructions not found, can not patch InteractionModel::Title");
+                return;
+            }
 
             var label = OpCodes.Nop.ToInstruction();
             var patchedMethod = new[]
@@ -392,11 +401,11 @@ internal static partial class PatchUtils
 
             void ReplaceParameters(MethodDef method)
             {
-                var lsStrInstructions = method.Body.Instructions.Where(inst => inst.OpCode == OpCodes.Ldstr).ToList();
-                if (lsStrInstructions.Count == 3)
+                var ldStrInstructions = method.Body.Instructions.Where(inst => inst.OpCode == OpCodes.Ldstr).ToList();
+                if (ldStrInstructions.Count == 3)
                 {
-                    lsStrInstructions[0].Operand = modulus;
-                    lsStrInstructions[1].Operand = exponent;
+                    ldStrInstructions[0].Operand = modulus;
+                    ldStrInstructions[1].Operand = exponent;
                 }
                 else
                 {

@@ -125,9 +125,10 @@ public class BMWPatcher : IPatcher
         var includeList = patchConfig?.GetValueOrDefault("include") ?? Array.Empty<string>();
 
         var patchList = includeList
-                        .Union(fileList.Where(f => !excludeList.Contains(f)))
+                        .Union(fileList.Except(excludeList))
                         .Distinct()
-                        .OrderBy(i => i).ToArray();
+                        .Order()
+                        .ToArray();
         return patchList;
     }
 }
@@ -145,9 +146,10 @@ public class ToyotaPatcher : IPatcher
         var includeList = patchConfig?.GetValueOrDefault("include.toyota") ?? Array.Empty<string>();
 
         var patchList = includeList
-                        .Union(fileList.Where(f => !excludeList.Contains(f)))
+                        .Union(fileList.Except(excludeList))
                         .Distinct()
-                        .OrderBy(i => i).ToArray();
+                        .Order()
+                        .ToArray();
         return patchList;
     }
 }

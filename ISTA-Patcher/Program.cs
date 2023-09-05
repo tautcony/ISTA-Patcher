@@ -133,7 +133,7 @@ internal static class ISTAPatcher
             }
         }
 
-        Log.Information("Markdown result:\n{Markdown}", markdownBuilder.ToString());
+        Log.Information("Markdown result:{NewLine}{Markdown}", Environment.NewLine, markdownBuilder.ToString());
         return 0;
     }
 
@@ -276,7 +276,7 @@ internal static class ISTAPatcher
             }
             else
             {
-                Log.Information("License:\n{License}", Convert.ToBase64String(signedLicense));
+                Log.Information("License:{NewLine}{License}", Environment.NewLine, Convert.ToBase64String(signedLicense));
             }
 
             if (!opts.AutoMode)
