@@ -5,7 +5,6 @@
 namespace ISTA_Patcher;
 
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using CommandLine;
@@ -78,7 +77,7 @@ internal static class ISTAPatcher
             return -1;
         }
 
-        var filePathMaxLength = fileList.Select(f => f.FilePath.Length).Max();
+        var filePathMaxLength = fileList.Select(f => f.FilePath.Length).Max() + 0b1111;
         var hashMaxLength = fileList.Select(f => f.Hash.Length).Max();
         var markdownBuilder = new StringBuilder();
 
@@ -91,9 +90,19 @@ internal static class ISTAPatcher
             if (opts.Integrity)
             {
                 string checkResult;
+                var version = string.Empty;
                 var filePath = Path.Join(basePath, fileInfo.FilePath);
                 if (File.Exists(filePath))
                 {
+                    try
+                    {
+                        var module = Core.PatchUtils.LoadModule(filePath);
+                        version = module.Assembly.Version.ToString();
+                    }
+                    catch (System.BadImageFormatException)
+                    {
+                    }
+
                     if (fileInfo.Hash == string.Empty)
                     {
                         checkResult = "[EMPTY]";
@@ -104,7 +113,7 @@ internal static class ISTAPatcher
                         checkResult = realHash == fileInfo.Hash ? "[OK]" : "[NG]";
                     }
 
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    if (OperatingSystem.IsWindows())
                     {
                         var wasVerified = false;
 
@@ -124,8 +133,9 @@ internal static class ISTAPatcher
                     checkResult = "Not Found";
                 }
 
+                var info = string.IsNullOrEmpty(version) ? fileInfo.FilePath : $"{fileInfo.FilePath} ({version})";
                 markdownBuilder.AppendLine(
-                    $"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {checkResult.PadRight(12)} |");
+                    $"| {info.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {checkResult.PadRight(12)} |");
             }
             else
             {
