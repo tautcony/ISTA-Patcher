@@ -376,7 +376,7 @@ internal static partial class PatchUtils
                 label,
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldfld.ToInstruction(titleField),
-                OpCodes.Ldstr.ToInstruction($" ({PatchUtils.PoweredBy})"),
+                OpCodes.Ldstr.ToInstruction($" ({PoweredBy})"),
                 OpCodes.Call.ToInstruction(concatRef),
                 OpCodes.Ret.ToInstruction(),
             };

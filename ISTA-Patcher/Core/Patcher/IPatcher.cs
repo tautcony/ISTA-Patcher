@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace ISTA_Patcher.Core.Patcher;
 
 using System.Text.Json;

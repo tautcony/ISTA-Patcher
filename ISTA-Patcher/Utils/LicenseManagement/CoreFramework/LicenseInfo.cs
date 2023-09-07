@@ -72,7 +72,7 @@ public class LicenseInfo : ICloneable
 
     [DataMember]
     [XmlElement("SubLicenses", Order = 14)]
-    public List<LicensePackage> SubLicenses { get; set; }
+    public List<LicensePackage>? SubLicenses { get; set; }
 
     private static XmlSerializer Serializer { get; } = new(typeof(LicenseInfo));
 
@@ -85,7 +85,7 @@ public class LicenseInfo : ICloneable
         return streamReader.ReadToEnd();
     }
 
-    public static bool Deserialize(string licenseXmlContent, out LicenseInfo licenseInfo, out Exception? exception)
+    public static bool Deserialize(string licenseXmlContent, out LicenseInfo? licenseInfo, out Exception? exception)
     {
         exception = null;
         licenseInfo = null;
@@ -142,7 +142,7 @@ public class LicenseInfo : ICloneable
         streamWriter.WriteLine(value);
     }
 
-    public static bool LoadFromFile(string fileName, out LicenseInfo licenseInfo, out Exception? exception)
+    public static bool LoadFromFile(string fileName, out LicenseInfo? licenseInfo, out Exception? exception)
     {
         exception = null;
         licenseInfo = null;

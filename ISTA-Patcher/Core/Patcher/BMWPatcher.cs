@@ -45,7 +45,7 @@ public class BMWPatcher : IPatcher
         }
     }
 
-    private static string?[] LoadFileList(string basePath)
+    private static IEnumerable<string> LoadFileList(string basePath)
     {
         var encryptedFileList = Path.Join(basePath, "Ecu", "enc_cne_1.prg");
 
