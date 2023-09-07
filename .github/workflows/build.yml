@@ -89,7 +89,7 @@ jobs:
       run: |
         mkdir -p ISTA-Patcher/bin/Release/net7.0/osx-universal/publish
         lipo -create ISTA-Patcher/bin/Release/net7.0/osx-x64/publish/ISTA-Patcher ISTA-Patcher/bin/Release/net7.0/osx-arm64/publish/ISTA-Patcher -output ISTA-Patcher/bin/Release/net7.0/osx-universal/publish/ISTA-Patcher
-        cp -f ISTA-Patcher/bin/Release/net7.0/osx-x64/publish/patchConfig.json ISTA-Patcher/bin/Release/net7.0/osx-universal/publish/patchConfig.json
+        cp -f ISTA-Patcher/bin/Release/net7.0/osx-x64/publish/patch-config.json ISTA-Patcher/bin/Release/net7.0/osx-universal/publish/patch-config.json
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
