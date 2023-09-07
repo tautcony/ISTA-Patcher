@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
 // ReSharper disable CommentTypo
-namespace ISTA_Patcher;
+namespace ISTA_Patcher.Core;
 
 using System.Reflection;
 using System.Runtime.CompilerServices;

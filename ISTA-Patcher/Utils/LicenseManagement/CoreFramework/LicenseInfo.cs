@@ -2,11 +2,8 @@
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
 // ReSharper disable InconsistentNaming
-namespace ISTA_Patcher.LicenseManagement.CoreFramework;
+namespace ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Serialization;

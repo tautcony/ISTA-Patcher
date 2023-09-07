@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
-namespace ISTA_Patcher.LicenseManagement;
+// ReSharper disable RedundantNameQualifier
+namespace ISTA_Patcher.Utils.LicenseManagement;
 
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-using ISTA_Patcher.LicenseManagement.CoreFramework;
+using ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
 using Serilog;
 
 public static class LicenseInfoSerializer

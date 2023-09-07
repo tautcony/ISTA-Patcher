@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
 // ReSharper disable CommentTypo, StringLiteralTypo, IdentifierTypo, InconsistentNaming, UnusedMember.Global
-namespace ISTA_Patcher;
+namespace ISTA_Patcher.Core;
 
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
@@ -376,7 +376,7 @@ internal static partial class PatchUtils
                 label,
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldfld.ToInstruction(titleField),
-                OpCodes.Ldstr.ToInstruction($" ({PoweredBy})"),
+                OpCodes.Ldstr.ToInstruction($" ({PatchUtils.PoweredBy})"),
                 OpCodes.Call.ToInstruction(concatRef),
                 OpCodes.Ret.ToInstruction(),
             };
@@ -389,10 +389,9 @@ internal static partial class PatchUtils
     [SignaturePatch]
     public static Func<ModuleDefMD, int> PatchGetRSAPKCS1SignatureDeformatter(string modulus, string exponent)
     {
-        return assembly =>
+        return module =>
         {
-            return PatchFunction(
-                assembly,
+            return module.PatchFunction(
                 "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
                 "GetRSAPKCS1SignatureDeformatter",
                 "()System.Security.Cryptography.RSAPKCS1SignatureDeformatter",

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
-// ReSharper disable IdentifierTypo, InconsistentNaming
-namespace ISTA_Patcher.LicenseManagement;
+// ReSharper disable IdentifierTypo, InconsistentNaming, RedundantNameQualifier
+namespace ISTA_Patcher.Utils.LicenseManagement;
 
 using System.Security.Cryptography;
-using ISTA_Patcher.LicenseManagement.CoreFramework;
+using ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
 using Serilog;
 
 public static class LicenseStatusChecker

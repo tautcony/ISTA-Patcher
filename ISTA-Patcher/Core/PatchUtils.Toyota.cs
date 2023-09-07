@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
 // ReSharper disable InconsistentNaming, UnusedMember.Global
-namespace ISTA_Patcher;
+namespace ISTA_Patcher.Core;
 
 using dnlib.DotNet;
 

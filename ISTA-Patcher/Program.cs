@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
-// ReSharper disable StringLiteralTypo, IdentifierTypo
+// ReSharper disable StringLiteralTypo, IdentifierTypo, RedundantNameQualifier
 namespace ISTA_Patcher;
 
 using System.Diagnostics;
@@ -10,7 +10,8 @@ using System.Security.Cryptography;
 using System.Text;
 using CommandLine;
 using dnlib.DotNet;
-using ISTA_Patcher.LicenseManagement;
+using ISTA_Patcher.Core.Patcher;
+using ISTA_Patcher.Utils.LicenseManagement;
 using Serilog;
 using Serilog.Core;
 using DecryptOptions = ProgramArgs.DecryptOptions;
@@ -71,7 +72,7 @@ internal static class ISTAPatcher
             return -1;
         }
 
-        var fileList = IntegrityManager.DecryptFile(encryptedFileList);
+        var fileList = IntegrityUtils.DecryptFile(encryptedFileList);
         if (fileList == null)
         {
             return -1;
@@ -258,7 +259,7 @@ internal static class ISTAPatcher
             }
 
             // update license info
-            license.Comment = $"{PatchUtils.PoweredBy} ({PatchUtils.RepoUrl})";
+            license.Comment = $"{Core.PatchUtils.PoweredBy} ({Core.PatchUtils.RepoUrl})";
             license.Expiration = DateTime.MaxValue;
             foreach (var subLicense in license.SubLicenses)
             {
@@ -368,8 +369,8 @@ internal static class ISTAPatcher
                     File.Copy(bakFileFullPath, pendingPatchItemFullPath, true);
                 }
 
-                var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
-                var isPatched = PatchUtils.HavePatchedMark(module);
+                var module = Core.PatchUtils.LoadModule(pendingPatchItemFullPath);
+                var isPatched = Core.PatchUtils.HavePatchedMark(module);
                 if (isPatched && !options.Force)
                 {
                     Log.Information(
@@ -400,8 +401,8 @@ internal static class ISTAPatcher
                     File.Copy(pendingPatchItemFullPath, bakFileFullPath, false);
                 }
 
-                PatchUtils.SetPatchedMark(module);
-                PatchUtils.SaveModule(module, patchedFileFullPath);
+                Core.PatchUtils.SetPatchedMark(module);
+                Core.PatchUtils.SaveModule(module, patchedFileFullPath);
 
                 Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
                 var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
@@ -418,7 +419,7 @@ internal static class ISTAPatcher
                     var deobfTimer = Stopwatch.StartNew();
 
                     var deobfPath = patchedFileFullPath + ".deobf";
-                    PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
+                    Core.PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
                     if (File.Exists(patchedFileFullPath))
                     {
                         File.Delete(patchedFileFullPath);
