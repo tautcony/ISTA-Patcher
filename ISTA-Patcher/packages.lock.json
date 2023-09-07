@@ -10,13 +10,9 @@
       },
       "dnlib": {
         "type": "Direct",
-        "requested": "[3.6.0, )",
-        "resolved": "3.6.0",
-        "contentHash": "kFegKA+GR8a2mEzYH02TueIF1nNQ5lULAd9hgNwt6VBY2qNNZDYSwr63tMpKN0Lg+goDaZnaZczmP0/pDz2gaA==",
-        "dependencies": {
-          "System.Reflection.Emit": "4.7.0",
-          "System.Reflection.Emit.Lightweight": "4.7.0"
-        }
+        "requested": "[4.1.0, )",
+        "resolved": "4.1.0",
+        "contentHash": "0Cz+EeZ+nPqtIIisMpvIpHQ1JttpOyhZowBkQeKsAItEsOon+5bwCO97H8Fs9Q06qE2eyvnUOZDfh1Oz1/Ajrg=="
       },
       "Serilog": {
         "type": "Direct",
@@ -55,16 +51,6 @@
         "type": "Transitive",
         "resolved": "1.2.0.507",
         "contentHash": "gTY3IQdRqDJ4hbhSA3e/R48oE8b/OiKfvwkt1QdNVfrJK2gMHBV8ldaHJ885jxWZfllK66soa/sdcjh9bX49Tw=="
-      },
-      "System.Reflection.Emit": {
-        "type": "Transitive",
-        "resolved": "4.7.0",
-        "contentHash": "VR4kk8XLKebQ4MZuKuIni/7oh+QGFmZW3qORd1GvBq/8026OpW501SzT/oypwiQl4TvT8ErnReh/NzY9u+C6wQ=="
-      },
-      "System.Reflection.Emit.Lightweight": {
-        "type": "Transitive",
-        "resolved": "4.7.0",
-        "contentHash": "a4OLB4IITxAXJeV74MDx49Oq2+PsF6Sml54XAFv+2RyWwtDBcabzoxiiJRhdhx+gaohLh4hEGCLQyBozXoQPqA=="
       },
       "System.Text.Encodings.Web": {
         "type": "Transitive",
