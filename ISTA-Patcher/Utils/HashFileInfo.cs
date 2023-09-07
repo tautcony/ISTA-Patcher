@@ -12,23 +12,40 @@ public class HashFileInfo
 
     public string FilePath { get; }
 
-    public string Hash { get; }
+    public string Hash
+    {
+        get
+        {
+            if (this._decoded)
+            {
+                return this._hash;
+            }
+
+            try
+            {
+                var bytes = Convert.FromBase64String(this._hash);
+                var hex = BitConverter.ToString(bytes).Replace("-", string.Empty);
+                this._hash = hex;
+            }
+            catch (FormatException ex)
+            {
+                this._hash = string.Empty;
+                Log.Warning(ex, "Failed to parse hash value [{Hash}] for: {FileName}", this._hash, this.FileName);
+            }
+
+            this._decoded = true;
+            return this._hash;
+        }
+    }
+
+    private string _hash;
+    private bool _decoded;
 
     protected internal HashFileInfo(IReadOnlyList<string> fileInfos)
     {
         this.FilePath = fileInfos[0].Trim('\uFEFF').Replace("\\", "/");
-        this.FileName = Path.GetFileName(this.FilePath ?? string.Empty).Trim('\uFEFF');
-        try
-        {
-            var bytes = Convert.FromBase64String(fileInfos[1]);
-            var hex = BitConverter.ToString(bytes).Replace("-", string.Empty);
-            this.Hash = hex;
-        }
-        catch (FormatException ex)
-        {
-            this.Hash = string.Empty;
-            Log.Warning(ex, "Failed to parse hash value [{Hash}] for: {FileName}", fileInfos[1], this.FileName);
-        }
+        this.FileName = Path.GetFileName(this.FilePath ?? string.Empty);
+        this._hash = fileInfos[1];
     }
 
     public static string CalculateHash(string pathFile)
