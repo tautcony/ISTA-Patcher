@@ -26,7 +26,7 @@ public interface IPatcher
         var cwd = Path.GetDirectoryName(AppContext.BaseDirectory)!;
         try
         {
-            using FileStream stream = new(Path.Join(cwd, "patchConfig.json"), FileMode.Open, FileAccess.Read);
+            using FileStream stream = new(Path.Join(cwd, "patch-config.json"), FileMode.Open, FileAccess.Read);
             var patchConfig = JsonSerializer.Deserialize<PatchConfig>(stream);
             return patchConfig;
         }

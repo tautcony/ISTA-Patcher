@@ -41,7 +41,7 @@ Released under the GNU GPLv3+.</Copyright>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="patchConfig.json">
+    <None Update="patch-config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
