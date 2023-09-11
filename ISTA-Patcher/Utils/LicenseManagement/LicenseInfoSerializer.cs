@@ -7,37 +7,14 @@ namespace ISTA_Patcher.Utils.LicenseManagement;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-using ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
 using Serilog;
 
 public static class LicenseInfoSerializer
 {
-    public static byte[]? SerializeRequestToByteArray(LicenseInfo? licInfo)
-    {
-        try
-        {
-            if (licInfo == null)
-            {
-                Log.Warning("license info empty");
-                return null;
-            }
-
-            using var memoryStream = new MemoryStream();
-            new XmlSerializer(typeof(LicenseInfo)).Serialize(memoryStream, licInfo);
-            var result = memoryStream.ToArray();
-            return result;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error while serializing license info");
-            return null;
-        }
-    }
-
-    public static byte[] SerializeLicenseToByteArray(LicenseInfo? licInfo)
+    public static byte[] ToByteArray<T>(T licInfo)
     {
         using var ms = new MemoryStream();
-        var serializer = new XmlSerializer(typeof(LicenseInfo));
+        var serializer = new XmlSerializer(typeof(T));
         var ws = new XmlWriterSettings
         {
             Encoding = new UTF8Encoding(false),
@@ -54,23 +31,30 @@ public static class LicenseInfoSerializer
         return buffer;
     }
 
-    public static LicenseInfo? DeserializeFromString(string licString)
+    public static string ToString<T>(T licInfo)
     {
-        if (string.IsNullOrEmpty(licString))
-        {
-            return null;
-        }
+        return Encoding.UTF8.GetString(ToByteArray(licInfo));
+    }
 
+    public static T? FromByteArray<T>(byte[] serializedValue)
+        where T : class
+    {
         try
         {
-            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(licString));
-            return (LicenseInfo)new XmlSerializer(typeof(LicenseInfo)).Deserialize(stream);
+            using var stream = new MemoryStream(serializedValue);
+            return (T)new XmlSerializer(typeof(T)).Deserialize(stream);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "DeserializeFromString failed");
+            Log.Error(ex, "Deserialize from string failed");
         }
 
         return null;
+    }
+
+    public static T? FromString<T>(string serializedValue)
+        where T : class
+    {
+        return FromByteArray<T>(Encoding.UTF8.GetBytes(serializedValue));
     }
 }

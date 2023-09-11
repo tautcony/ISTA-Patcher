@@ -11,6 +11,7 @@ using CommandLine;
 using dnlib.DotNet;
 using ISTA_Patcher.Core.Patcher;
 using ISTA_Patcher.Utils.LicenseManagement;
+using ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
 using Serilog;
 using Serilog.Core;
 using DecryptOptions = ProgramArgs.DecryptOptions;
@@ -151,6 +152,22 @@ internal static class ISTAPatcher
     private static int RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
     {
         LevelSwitch.MinimumLevel = opts.Verbosity;
+
+        if (!string.IsNullOrEmpty(opts.Decode))
+        {
+            try
+            {
+                var str = Encoding.UTF8.GetString(Convert.FromHexString(opts.Decode));
+                Log.Information("Decoded string: {String}", str);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Error while decoding string");
+            }
+
+            return 0;
+        }
+
         var privateKeyPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "privateKey.xml");
         if (opts.AutoMode)
         {
@@ -246,7 +263,7 @@ internal static class ISTAPatcher
         // --sign
         if (opts.SignLicense && keyPairXml != null && licenseXml != null)
         {
-            var license = LicenseInfoSerializer.DeserializeFromString(licenseXml);
+            var license = LicenseInfoSerializer.FromString<LicenseInfo>(licenseXml);
             if (license == null)
             {
                 Log.Error("License request is not valid");
@@ -271,15 +288,18 @@ internal static class ISTAPatcher
             // update license info
             license.Comment = $"{Core.PatchUtils.PoweredBy} ({Core.PatchUtils.RepoUrl})";
             license.Expiration = DateTime.MaxValue;
-            foreach (var subLicense in license.SubLicenses)
+            if (license.SubLicenses != null)
             {
-                subLicense.PackageRule ??= "true";
-                subLicense.PackageExpire = DateTime.MaxValue;
+                foreach (var subLicense in license.SubLicenses)
+                {
+                    subLicense.PackageRule ??= "true";
+                    subLicense.PackageExpire = DateTime.MaxValue;
+                }
             }
 
             // generate license key
             LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
-            var signedLicense = LicenseInfoSerializer.SerializeLicenseToByteArray(license);
+            var signedLicense = LicenseInfoSerializer.ToByteArray(license);
             if (opts.SignedLicensePath != null)
             {
                 using var fileStream = File.Create(opts.SignedLicensePath);

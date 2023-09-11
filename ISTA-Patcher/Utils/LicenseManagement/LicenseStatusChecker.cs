@@ -22,7 +22,7 @@ public static class LicenseStatusChecker
         licenseInfo.LicenseKey = Array.Empty<byte>();
         var hashValue = GetHashValueFrom(licenseInfo);
 
-        Log.Debug("hash stream: {ByteArray}", FormatConverter.ByteArray2String(hashValue, (uint)hashValue.Length));
+        Log.Debug("hash stream: {ByteArray}", Convert.ToHexString(hashValue));
 
         if (signatureDeformatter.VerifySignature(hashValue, licenseKey))
         {
@@ -47,12 +47,12 @@ public static class LicenseStatusChecker
 
     private static byte[] GetHashValueFrom(LicenseInfo licInfo)
     {
-        var serializedXmlByte = LicenseInfoSerializer.SerializeLicenseToByteArray(licInfo);
+        var serializedXmlByte = LicenseInfoSerializer.ToByteArray(licInfo);
         var bufferLength = Math.Max(256, (uint)Math.Pow(2, Math.Ceiling(Math.Log2(serializedXmlByte.Length))));
         var buffer = new byte[bufferLength];
         Array.Copy(serializedXmlByte, buffer, serializedXmlByte.Length);
 
-        Log.Debug("licInfo stream: {ByteArray}", FormatConverter.ByteArray2String(buffer, (uint)buffer.Length));
+        Log.Debug("licInfo stream: {ByteArray}", Convert.ToHexString(buffer));
         return SHA1.HashData(buffer);
     }
 

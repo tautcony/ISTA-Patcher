@@ -66,6 +66,9 @@ public static class ProgramArgs
         [Option('s', "sign", HelpText = "Sign a license request.", Group = "operation")]
         public bool SignLicense { get; set; }
 
+        [Option("decode", Default = null, HelpText = "Decode the license request stream.", Group = "operation")]
+        public string Decode { get; set; }
+
         [Option("auto", Default = false, HelpText = "Automatically generate a key pair and patch the target program.")]
         public bool AutoMode { get; set; }
 
