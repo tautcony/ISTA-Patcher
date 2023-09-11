@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
-// ReSharper disable InconsistentNaming, StringLiteralTypo, CommentTypo, UseUtf8StringLiteral
+// ReSharper disable UseUtf8StringLiteral
 namespace ISTA_Patcher.Utils;
 
 using System.Security.Cryptography;

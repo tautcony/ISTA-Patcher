@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2023 TautCony
 
-// ReSharper disable InconsistentNaming
 namespace ISTA_Patcher.Core.Patcher;
 
 public class BMWLicensePatcher : BMWPatcher

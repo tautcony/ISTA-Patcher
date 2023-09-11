@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
 
-// ReSharper disable StringLiteralTypo, IdentifierTypo, RedundantNameQualifier
 namespace ISTA_Patcher;
 
 using System.Diagnostics;

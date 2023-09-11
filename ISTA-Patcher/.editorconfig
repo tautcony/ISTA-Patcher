@@ -23,6 +23,17 @@ dotnet_diagnostic.SA1601.severity = none # SA1600PartialElementsMustBeDocumented
 dotnet_diagnostic.SA1602.severity = none # SA1602EnumerationItemsMustBeDocumented
 dotnet_diagnostic.SA1633.severity = none # SA1633FileMustHaveHeader
 dotnet_diagnostic.SA1649.severity = none # SA1649FileNameMustMatchTypeName
+# https://www.jetbrains.com/help/resharper/Reference__Code_Inspections_CSHARP.html
+resharper_arrange_trailing_comma_in_multiline_lists_highlighting = none
+resharper_comment_typo_highlighting = none
+resharper_identifier_typo_highlighting = none
+resharper_string_literal_typo_highlighting = none
+resharper_unused_auto_property_accessor_global_highlighting = none
+resharper_class_never_instantiated_global_highlighting = none
+resharper_inconsistent_naming_highlighting = none
+resharper_redundant_name_qualifier_highlighting = none
+resharper_arrange_this_qualifier_highlighting = none
+resharper_unused_member_global_highlighting = none
 
 [/de4dot.blocks/**]
 generated_code = true
