@@ -292,6 +292,11 @@ internal static class ISTAPatcher
             {
                 foreach (var subLicense in license.SubLicenses)
                 {
+                    if (opts.SyntheticEnv)
+                    {
+                        subLicense.PackageName = "SyntheticEnv";
+                    }
+
                     subLicense.PackageRule ??= "true";
                     subLicense.PackageExpire = DateTime.MaxValue;
                 }
@@ -307,7 +312,8 @@ internal static class ISTAPatcher
             }
             else
             {
-                Log.Information("License:{NewLine}{License}", Environment.NewLine, Convert.ToBase64String(signedLicense));
+                Log.Information("License[Base64]:{NewLine}{License}", Environment.NewLine, Convert.ToBase64String(signedLicense));
+                Log.Information("License[Xml]:{NewLine}{License}", Environment.NewLine, LicenseInfoSerializer.ToString(license).ReplaceLineEndings(string.Empty));
             }
 
             if (!opts.AutoMode)

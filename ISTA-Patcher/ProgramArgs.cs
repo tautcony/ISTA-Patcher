@@ -78,6 +78,9 @@ public static class ProgramArgs
         [Option('l', "license", HelpText = "Specify the path for the license request file or provide base64-encoded content.")]
         public string? LicenseRequestPath { get; set; }
 
+        [Option("synthetic", Default = false, HelpText = "Update all sub-licenses package name to SyntheticEnv.")]
+        public bool SyntheticEnv { get; set; }
+
         [Option('o', "output", HelpText = "Specify the target path for the signed license file.")]
         public string? SignedLicensePath { get; set; }
 

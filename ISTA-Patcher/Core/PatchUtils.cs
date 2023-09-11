@@ -386,6 +386,42 @@ internal static partial class PatchUtils
         }
     }
 
+    [EssentialPatch]
+    public static int PatchRuntimeEnvironment(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "BMW.Rheingold.CoreFramework.RuntimeEnvironment",
+            "GetSubVersion",
+            "(System.UInt32 modopt(System.Runtime.CompilerServices.IsLong),System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&,System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&,System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&,System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&)System.Void",
+            RemoveHypervisorFlag
+        );
+
+        void RemoveHypervisorFlag(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+            instructions.RemoveAt(instructions.Count - 1);
+
+            var appendInstructions = new[]
+            {
+                // ecx = ecx & 0x7fffffff
+                OpCodes.Ldarg_3.ToInstruction(),
+                OpCodes.Ldarg_3.ToInstruction(),
+                OpCodes.Ldind_U4.ToInstruction(),
+                OpCodes.Ldc_I4.ToInstruction(0x7fffffff),
+                OpCodes.And.ToInstruction(),
+                OpCodes.Stind_I4.ToInstruction(),
+
+                // return;
+                OpCodes.Ret.ToInstruction(),
+            };
+
+            foreach (var instruction in appendInstructions)
+            {
+                instructions.Add(instruction);
+            }
+        }
+    }
+
     [SignaturePatch]
     public static Func<ModuleDefMD, int> PatchGetRSAPKCS1SignatureDeformatter(string modulus, string exponent)
     {

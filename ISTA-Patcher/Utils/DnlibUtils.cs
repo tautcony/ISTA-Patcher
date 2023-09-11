@@ -61,7 +61,6 @@ public static class DnlibUtils
     /// </returns>
     public static MethodDef? GetMethod(this ModuleDefMD module, string type, string name, string desc)
     {
-        desc = desc.Replace(" ", string.Empty);
         return module.GetType(type)?.Methods.FirstOrDefault(m => m.Name.Equals(name) && DescriptionOf(m).Equals(desc));
     }
 
@@ -87,6 +86,17 @@ public static class DnlibUtils
     public static void ReturnOneMethod(this MethodDef method) => method.ReturningWithValue(1);
 
     /// <summary>
+    /// Modifies the body of the <see cref="MethodDef"/> to return one.
+    /// </summary>
+    /// <param name="value">The value to return.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
+    /// <returns>An action that modifies the body of the <see cref="MethodDef"/> to return the specified value.</returns>
+    public static Action<MethodDef> ReturnUInt32Method(uint value)
+    {
+        return method => method.ReturningWithValue(value);
+    }
+
+    /// <summary>
     /// Modifies the body of the <see cref="MethodDef"/> to return false.
     /// </summary>
     /// <param name="method">The <see cref="MethodDef"/> to modify.</param>
@@ -100,7 +110,15 @@ public static class DnlibUtils
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
     public static void ReturnTrueMethod(this MethodDef method) => method.ReturningWithValue(true);
 
-    public static void ReturnStringMethod(this MethodDef method, string ret) => method.ReturningWithValue(ret);
+    /// <summary>
+    /// Modifies the body of the <see cref="MethodDef"/> to return the specified string.
+    /// </summary>
+    /// <param name="value">The string to return.</param>
+    /// <returns>An action that modifies the body of the <see cref="MethodDef"/> to return the specified string.</returns>
+    public static Action<MethodDef> ReturnStringMethod(string value)
+    {
+        return method => method.ReturningWithValue(value);
+    }
 
     public static void ReturnObjectMethod(this MethodDef method, MemberRef memberRef) => method.ReturningWithValue(memberRef);
 
@@ -189,6 +207,9 @@ public static class DnlibUtils
                 break;
             case int i:
                 body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, i));
+                break;
+            case uint i:
+                body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, (int)i));
                 break;
             case long l:
                 body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I8, l));
