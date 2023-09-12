@@ -146,10 +146,17 @@ internal static partial class PatchUtils
     /// </summary>
     /// <param name="module">module to check.</param>
     /// <returns>ture for assembly has been patched.</returns>
-    public static bool HavePatchedMark(ModuleDefMD module)
+    public static string? HavePatchedMark(ModuleDefMD module)
     {
         var patchedType = module.GetType("Patched.By.TC");
-        return patchedType != null;
+        if (patchedType == null)
+        {
+            return null;
+        }
+
+        var field = patchedType.Fields.FirstOrDefault(field => field.Name == "version");
+        var version = field?.Constant.Value as string;
+        return version;
     }
 
     /// <summary>
@@ -158,7 +165,7 @@ internal static partial class PatchUtils
     /// <param name="module">module to set.</param>
     public static void SetPatchedMark(ModuleDefMD module)
     {
-        if (HavePatchedMark(module))
+        if (HavePatchedMark(module) != null)
         {
             return;
         }

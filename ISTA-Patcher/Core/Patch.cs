@@ -61,14 +61,16 @@ public static partial class Patch
                 }
 
                 var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
-                var isPatched = PatchUtils.HavePatchedMark(module);
+                var patcherVersion = PatchUtils.HavePatchedMark(module);
+                var isPatched = patcherVersion != null;
                 if (isPatched && !options.Force)
                 {
                     Log.Information(
-                        "{Item}{Indent}{Result} [already patched]",
+                        "{Item}{Indent}{Result} [already patched by {Version}]",
                         pendingPatchItem,
                         indent,
-                        string.Concat(Enumerable.Repeat("*", validPatches.Count)));
+                        string.Concat(Enumerable.Repeat("*", validPatches.Count)),
+                        patcherVersion);
                     continue;
                 }
 
