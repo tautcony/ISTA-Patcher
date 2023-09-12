@@ -24,8 +24,8 @@ public class HashFileInfo
             try
             {
                 var bytes = Convert.FromBase64String(this._hash);
-                var hex = BitConverter.ToString(bytes).Replace("-", string.Empty);
-                this._hash = hex;
+                var hex = BitConverter.ToString(bytes);
+                this._hash = hex.Replace("-", string.Empty);
             }
             catch (FormatException ex)
             {
@@ -44,18 +44,18 @@ public class HashFileInfo
     protected internal HashFileInfo(IReadOnlyList<string> fileInfos)
     {
         this.FilePath = fileInfos[0].Trim('\uFEFF').Replace("\\", "/");
-        this.FileName = Path.GetFileName(this.FilePath ?? string.Empty);
+        this.FileName = Path.GetFileName(this.FilePath);
         this._hash = fileInfos[1];
     }
 
-    public static string CalculateHash(string pathFile)
+    public static async Task<string> CalculateHash(string pathFile)
     {
         try
         {
             using var sha = SHA256.Create();
-            using var fileStream = File.OpenRead(pathFile);
-            var text = BitConverter.ToString(sha.ComputeHash(fileStream)).Replace("-", string.Empty);
-            return text;
+            await using var fileStream = File.OpenRead(pathFile);
+            var hex = BitConverter.ToString(await sha.ComputeHashAsync(fileStream));
+            return hex.Replace("-", string.Empty);
         }
         catch (FileNotFoundException ex)
         {

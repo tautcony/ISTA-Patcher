@@ -3,11 +3,11 @@
 
 namespace ISTA_Patcher;
 
-using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using CommandLine;
-using dnlib.DotNet;
+using ConsoleTables;
+using ISTA_Patcher.Core;
 using ISTA_Patcher.Core.Patcher;
 using ISTA_Patcher.Utils.LicenseManagement;
 using ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
@@ -22,22 +22,22 @@ internal static class ISTAPatcher
 {
     private static LoggingLevelSwitch LevelSwitch { get; } = new();
 
-    public static int Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration()
                      .MinimumLevel.ControlledBy(LevelSwitch)
                      .WriteTo.Console()
                      .CreateLogger();
 
-        return Parser.Default.ParseArguments<PatchOptions, DecryptOptions, LicenseOptions>(args)
+        return await Parser.Default.ParseArguments<PatchOptions, DecryptOptions, LicenseOptions>(args)
                      .MapResult(
                          (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
                          (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
                          (LicenseOptions opts) => RunLicenseOperationAndReturnExitCode(opts),
-                         _ => 1);
+                         _ => Task.FromResult(1));
     }
 
-    private static int RunPatchAndReturnExitCode(PatchOptions opts)
+    private static Task<int> RunPatchAndReturnExitCode(PatchOptions opts)
     {
         LevelSwitch.MinimumLevel = opts.Verbosity;
         var guiBasePath = Path.Join(opts.TargetPath, "TesterGUI", "bin", "Release");
@@ -46,7 +46,7 @@ internal static class ISTAPatcher
         if (!Directory.Exists(guiBasePath) || !Directory.Exists(psdzBasePath))
         {
             Log.Fatal("Folder structure does not match, please check options");
-            return -1;
+            return Task.FromResult(-1);
         }
 
         IPatcher patcher = opts.PatchType switch
@@ -56,11 +56,11 @@ internal static class ISTAPatcher
             _ => throw new NotImplementedException(),
         };
 
-        PatchISTA(patcher, opts);
-        return 0;
+        Patch.PatchISTA(patcher, opts);
+        return Task.FromResult(0);
     }
 
-    private static int RunDecryptAndReturnExitCode(DecryptOptions opts)
+    private static async Task<int> RunDecryptAndReturnExitCode(DecryptOptions opts)
     {
         LevelSwitch.MinimumLevel = opts.Verbosity;
         var encryptedFileList = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
@@ -77,14 +77,8 @@ internal static class ISTAPatcher
             return -1;
         }
 
-        var filePathMaxLength = fileList.Select(f => f.FilePath.Length).Max() + 0b1111;
-        var hashMaxLength = fileList.Select(f => f.Hash.Length).Max();
-        var markdownBuilder = new StringBuilder();
+        var table = new ConsoleTable("FilePath", "Hash(SHA256)", "Integrity");
 
-        markdownBuilder.AppendLine(
-            $"| {"FilePath".PadRight(filePathMaxLength)} | {"Hash(SHA256)".PadRight(hashMaxLength)} | Integrity    |");
-        markdownBuilder.AppendLine(
-            $"| {"---".PadRight(filePathMaxLength)} | {"---".PadRight(hashMaxLength)} | ---          |");
         foreach (var fileInfo in fileList)
         {
             if (opts.Integrity)
@@ -109,7 +103,7 @@ internal static class ISTAPatcher
                     }
                     else
                     {
-                        var realHash = HashFileInfo.CalculateHash(filePath);
+                        var realHash = await HashFileInfo.CalculateHash(filePath);
                         checkResult = realHash == fileInfo.Hash ? "[OK]" : "[NG]";
                     }
 
@@ -134,21 +128,19 @@ internal static class ISTAPatcher
                 }
 
                 var info = string.IsNullOrEmpty(version) ? fileInfo.FilePath : $"{fileInfo.FilePath} ({version})";
-                markdownBuilder.AppendLine(
-                    $"| {info.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {checkResult.PadRight(12)} |");
+                table.AddRow(info, fileInfo.Hash, checkResult);
             }
             else
             {
-                markdownBuilder.AppendLine(
-                    $"| {fileInfo.FilePath.PadRight(filePathMaxLength)} | {fileInfo.Hash.PadRight(hashMaxLength)} | {"/".PadRight(12)} |");
+                table.AddRow(fileInfo.FilePath, fileInfo.Hash, "/");
             }
         }
 
-        Log.Information("Markdown result:{NewLine}{Markdown}", Environment.NewLine, markdownBuilder.ToString());
+        Log.Information("Markdown result:{NewLine}{Markdown}", Environment.NewLine, table.ToMarkDownString());
         return 0;
     }
 
-    private static int RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
+    private static async Task<int> RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
     {
         LevelSwitch.MinimumLevel = opts.Verbosity;
 
@@ -167,7 +159,7 @@ internal static class ISTAPatcher
             return 0;
         }
 
-        var privateKeyPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "privateKey.xml");
+        var privateKeyPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "private-key.xml");
         if (opts.AutoMode)
         {
             if (opts.TargetPath == null || opts.LicenseRequestPath == null)
@@ -190,9 +182,9 @@ internal static class ISTAPatcher
                 return -1;
             }
 
-            using var fs = File.OpenRead(opts.KeyPairPath);
+            await using var fs = File.OpenRead(opts.KeyPairPath);
             using var sr = new StreamReader(fs, new UTF8Encoding(false));
-            keyPairXml = sr.ReadToEnd();
+            keyPairXml = await sr.ReadToEndAsync();
             Log.Debug("Loaded private key from {KeyPairPath}", opts.KeyPairPath);
         }
 
@@ -221,9 +213,9 @@ internal static class ISTAPatcher
                     return -1;
                 }
 
-                using var fs = File.OpenRead(opts.LicenseRequestPath);
+                await using var fs = File.OpenRead(opts.LicenseRequestPath);
                 using var sr = new StreamReader(fs, new UTF8Encoding(false));
-                licenseXml = sr.ReadToEnd();
+                licenseXml = await sr.ReadToEndAsync();
                 Log.Debug("Loaded license request from {LicensePath}", opts.LicenseRequestPath);
             }
         }
@@ -237,9 +229,9 @@ internal static class ISTAPatcher
             {
                 var privateKey = rsa.ToXmlString(true);
 
-                using var fs = new FileStream(privateKeyPath, FileMode.Create);
-                using var sw = new StreamWriter(fs);
-                sw.Write(privateKey);
+                await using var fs = new FileStream(privateKeyPath, FileMode.Create);
+                await using var sw = new StreamWriter(fs);
+                await sw.WriteAsync(privateKey);
                 if (opts.AutoMode)
                 {
                     keyPairXml = privateKey;
@@ -306,8 +298,8 @@ internal static class ISTAPatcher
             var signedLicense = LicenseInfoSerializer.ToByteArray(license);
             if (opts.SignedLicensePath != null)
             {
-                using var fileStream = File.Create(opts.SignedLicensePath);
-                fileStream.Write(signedLicense);
+                await using var fileStream = File.Create(opts.SignedLicensePath);
+                await fileStream.WriteAsync(signedLicense);
             }
             else
             {
@@ -339,7 +331,7 @@ internal static class ISTAPatcher
             var modulus = Convert.ToBase64String(parameters.Modulus);
             var exponent = Convert.ToBase64String(parameters.Exponent);
 
-            PatchISTA(new BMWLicensePatcher(modulus, exponent, opts), new PatchOptions
+            Patch.PatchISTA(new BMWLicensePatcher(modulus, exponent, opts), new PatchOptions
             {
                 Restore = opts.Restore,
                 Verbosity = opts.Verbosity,
@@ -353,170 +345,5 @@ internal static class ISTAPatcher
 
         Log.Warning("No operation matched, exiting...");
         return 1;
-    }
-
-    private static void PatchISTA(IPatcher patcher, PatchOptions options, string outputDirName = "@ista-patched", string bakDirName = "@ista-backup")
-    {
-        var guiBasePath = Path.Join(options.TargetPath, "TesterGUI", "bin", "Release");
-
-        var validPatches = patcher.Patches;
-        var pendingPatchList = patcher.GeneratePatchList(options.TargetPath);
-
-        Log.Information("=== ISTA Patch Begin ===");
-        var timer = Stopwatch.StartNew();
-        var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
-
-        List<int> totalCounting = new(new int[validPatches.Count]);
-        foreach (var pendingPatchItem in pendingPatchList)
-        {
-            var pendingPatchItemFullPath = pendingPatchItem.StartsWith("!") ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!')) : Path.Join(guiBasePath, pendingPatchItem);
-
-            var originalDirPath = Path.GetDirectoryName(pendingPatchItemFullPath);
-            var patchedDirPath = Path.Join(originalDirPath, outputDirName);
-            var patchedFileFullPath = Path.Join(patchedDirPath, Path.GetFileName(pendingPatchItem));
-            var bakDirPath = Path.Join(originalDirPath, bakDirName);
-            var bakFileFullPath = Path.Join(bakDirPath, Path.GetFileName(pendingPatchItem));
-
-            if (File.Exists(patchedFileFullPath))
-            {
-                File.Delete(patchedFileFullPath);
-            }
-
-            var indent = new string(' ', indentLength - pendingPatchItem.Length);
-            if (!File.Exists(pendingPatchItemFullPath))
-            {
-                Log.Information(
-                    "{Item}{Indent}{Result} [not found]",
-                    pendingPatchItem,
-                    indent,
-                    string.Concat(Enumerable.Repeat("*", validPatches.Count)));
-                continue;
-            }
-
-            Directory.CreateDirectory(patchedDirPath);
-            Directory.CreateDirectory(bakDirPath);
-
-            try
-            {
-                if (options.Restore && File.Exists(bakFileFullPath))
-                {
-                    Log.Debug("Backup detected, restoring {Item}", pendingPatchItem);
-                    File.Copy(bakFileFullPath, pendingPatchItemFullPath, true);
-                }
-
-                var module = Core.PatchUtils.LoadModule(pendingPatchItemFullPath);
-                var isPatched = Core.PatchUtils.HavePatchedMark(module);
-                if (isPatched && !options.Force)
-                {
-                    Log.Information(
-                        "{Item}{Indent}{Result} [already patched]",
-                        pendingPatchItem,
-                        indent,
-                        string.Concat(Enumerable.Repeat("*", validPatches.Count)));
-                    continue;
-                }
-
-                // Patch and print result
-                var result = validPatches.Select(patch => patch(module)).ToList();
-                result.Select((item, index) => (item, index)).ToList().ForEach(patch => totalCounting[patch.index] += patch.item);
-
-                isPatched = result.Any(i => i > 0);
-                var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i > 0 ? i.ToString("X") : "-"));
-
-                // Check if at least one patch has been applied
-                if (!isPatched)
-                {
-                    Log.Information("{Item}{Indent}{Result} [skip]", pendingPatchItem, indent, resultStr);
-                    continue;
-                }
-
-                if (!File.Exists(bakFileFullPath))
-                {
-                    Log.Debug("Bakup file {BakFileFullPath} does not exist, copy...", bakFileFullPath);
-                    File.Copy(pendingPatchItemFullPath, bakFileFullPath, false);
-                }
-
-                Core.PatchUtils.SetPatchedMark(module);
-                Core.PatchUtils.SaveModule(module, patchedFileFullPath);
-
-                Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
-                var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
-
-                // Check if need to deobfuscate
-                if (!options.Deobfuscate)
-                {
-                    Log.Information("{Item}{Indent}{Result} [{PatchedFunctionCount} func patched]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
-                    continue;
-                }
-
-                try
-                {
-                    var deobfTimer = Stopwatch.StartNew();
-
-                    var deobfPath = patchedFileFullPath + ".deobf";
-                    Core.PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
-                    if (File.Exists(patchedFileFullPath))
-                    {
-                        File.Delete(patchedFileFullPath);
-                    }
-
-                    File.Move(deobfPath, patchedFileFullPath);
-
-                    deobfTimer.Stop();
-                    var timeStr = deobfTimer.ElapsedTicks > Stopwatch.Frequency
-                        ? $" in {deobfTimer.Elapsed:mm\\:ss}"
-                        : string.Empty;
-                    Log.Information(
-                        "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate success{Time}]",
-                        pendingPatchItem,
-                        indent,
-                        resultStr,
-                        patchedFunctionCount,
-                        timeStr);
-                }
-                catch (ApplicationException ex)
-                {
-                    Log.Information(
-                        "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate skipped]: {Reason}",
-                        pendingPatchItem,
-                        indent,
-                        resultStr,
-                        patchedFunctionCount,
-                        ex.Message);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Information(
-                    "{Item}{Indent}{Result} [failed]: {Reason}",
-                    pendingPatchItem,
-                    indent,
-                    string.Concat(Enumerable.Repeat("*", validPatches.Count)),
-                    ex.Message);
-                Log.Debug("ExceptionType: {ExceptionType}, StackTrace: {StackTrace}", ex.GetType().FullName, ex.StackTrace);
-
-                if (File.Exists(patchedFileFullPath))
-                {
-                    File.Delete(patchedFileFullPath);
-                }
-            }
-        }
-
-        foreach (var line in BuildIndicator(validPatches, totalCounting))
-        {
-            Log.Information("{Indent}{Line}", new string(' ', indentLength), line);
-        }
-
-        timer.Stop();
-        Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
-    }
-
-    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<ModuleDefMD, int>> patches, IReadOnlyList<int> counting)
-    {
-        return patches
-               .Select(i => i.Method.Name.StartsWith("Patch") ? i.Method.Name[5..] : i.Method.Name)
-               .Reverse()
-               .ToList()
-               .Select((name, idx) => $"{new string('│', patches.Count - 1 - idx)}└{new string('─', idx)}>[{name}: {counting[patches.Count - idx - 1]}]");
     }
 }

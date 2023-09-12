@@ -120,7 +120,15 @@ public static class DnlibUtils
         return method => method.ReturningWithValue(value);
     }
 
-    public static void ReturnObjectMethod(this MethodDef method, MemberRef memberRef) => method.ReturningWithValue(memberRef);
+    /// <summary>
+    /// Modifies the body of the <see cref="MethodDef"/> to return the specified memberRef.
+    /// </summary>
+    /// <param name="value">The memberRef to return.</param>
+    /// <returns>An action that modifies the body of the <see cref="MethodDef"/> to return the specified memberRef.</returns>
+    public static Action<MethodDef> ReturnObjectMethod(MemberRef value)
+    {
+        return method => method.ReturningWithValue(value);
+    }
 
     /// <summary>
     /// Finds the first instruction in the body of the <see cref="MethodDef"/> that matches the specified opcode and operand name.

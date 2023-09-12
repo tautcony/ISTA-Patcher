@@ -46,7 +46,7 @@ internal static partial class PatchUtils
                 return;
             }
 
-            method.ReturnObjectMethod(dictionaryCtorRef);
+            DnlibUtils.ReturnObjectMethod(dictionaryCtorRef)(method);
         }
     }
 
