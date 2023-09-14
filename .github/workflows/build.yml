@@ -14,48 +14,8 @@ jobs:
     strategy:
       matrix:
         configuration: [ 'Release' ]
-        runtime-identifier: [ 'win-x64', 'linux-x64' ]
+        runtime-identifier: [ 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64' ]
 
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Setup .NET 8.x
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.x
-        cache: true
-        cache-dependency-path: ISTA-Patcher/packages.lock.json
-
-    - name: Restore dependencies
-      run: dotnet restore --locked-mode
-
-    - name: Update version info
-      if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
-      run: |
-        $proj_file = "ISTA-Patcher/ISTA-Patcher.csproj"
-        $version = "<InformationalVersion>$(git rev-parse --short HEAD)</InformationalVersion>"
-        $content = [System.Text.RegularExpressions.Regex]::Replace([System.IO.File]::ReadAllText($proj_file), "<InformationalVersion>[^<]+<\/InformationalVersion>", $version)
-        [System.IO.File]::WriteAllText($proj_file, $content)
-
-    - name: Publish the application
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: true
-      run: dotnet publish ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --self-contained false
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: ISTA-Patcher-${{ matrix.runtime-identifier }}-${{ matrix.configuration }}
-        path: |
-          ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*
-          !ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*.pdb
-          !ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*.dbg
-
-  build-for-macos:
-    name: 'Build (Release, osx-universal)'
-    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
       with:
@@ -81,9 +41,39 @@ jobs:
     - name: Publish the application
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: true
+      run: dotnet publish ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --self-contained false
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ISTA-Patcher-${{ matrix.runtime-identifier }}-${{ matrix.configuration }}
+        path: |
+          ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*
+          !ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*.pdb
+          !ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*.dbg
+
+  glue:
+    name: 'Build (Release, osx-universal)'
+    needs: build
+    runs-on: macos-latest
+    steps:
+    - name: Setup working directory
       run: |
-        dotnet publish ISTA-Patcher --configuration Release --runtime osx-x64 --self-contained false
-        dotnet publish ISTA-Patcher --configuration Release --runtime osx-arm64 --self-contained false
+        mkdir -p ISTA-Patcher/bin/Release/net8.0/osx-universal/publish
+        mkdir -p ISTA-Patcher/bin/Release/net8.0/osx-x64/publish
+        mkdir -p ISTA-Patcher/bin/Release/net8.0/osx-arm64/publish
+      
+    - name: Download x64 build
+      uses: actions/download-artifact@v3
+      with:
+        name: ISTA-Patcher-osx-x64-Release
+        path: ISTA-Patcher/bin/Release/net8.0/osx-x64/publish
+
+    - name: Download arm64 build
+      uses: actions/download-artifact@v3
+      with:
+        name: ISTA-Patcher-osx-arm64-Release
+        path: ISTA-Patcher/bin/Release/net8.0/osx-arm64/publish
 
     - name: Glue the binary
       run: |
