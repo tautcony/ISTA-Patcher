@@ -159,9 +159,7 @@ namespace de4dot.code.renamer.asmmodules {
 			foreach (var module in modules)
 				allTypes.AddRange(module.GetAllTypes());
 
-			var typeToTypeDef = new Dictionary<TypeDef, MTypeDef>(allTypes.Count);
-			foreach (var typeDef in allTypes)
-				typeToTypeDef[typeDef.TypeDef] = typeDef;
+			var typeToTypeDef = allTypes.ToDictionary((MTypeDef t) => t.TypeDef);
 
 			// Initialize Owner
 			foreach (var typeDef in allTypes) {

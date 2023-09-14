@@ -211,13 +211,12 @@ namespace de4dot.blocks {
 		}
 
 		// Returns true if no external blocks references the blocks
-		static bool VerifyNoExternalRefs(IList<Block> removedBlocks) {
-			var removedDict = new Dictionary<Block, bool>();
-			foreach (var removedBlock in removedBlocks)
-				removedDict[removedBlock] = true;
+		static bool VerifyNoExternalRefs(IList<Block> removedBlocks)
+		{
+			var removedSet = removedBlocks.ToHashSet();
 			foreach (var removedBlock in removedBlocks) {
 				foreach (var source in removedBlock.Sources) {
-					if (!removedDict.TryGetValue(source, out bool val))
+					if (!removedSet.Contains(source))
 						return false;   // external code references a removed block
 				}
 			}

@@ -249,10 +249,10 @@ return_from_method:
 			}
 
 			Block GetLoopStartBlock(List<BaseBlock> list) {
-				var loopBlocks = new Dictionary<Block, bool>(list.Count);
+				var loopBlocks = new HashSet<Block>(list.Count);
 				foreach (var bb in list) {
 					if (bb is Block block)
-						loopBlocks[block] = true;
+						loopBlocks.Add(block);
 				}
 
 				var targetBlocks = new Dictionary<Block, int>();
@@ -261,7 +261,7 @@ return_from_method:
 					if (block == null)
 						continue;
 					foreach (var source in block.Sources) {
-						if (loopBlocks.ContainsKey(source))
+						if (loopBlocks.Contains(source))
 							continue;
 						targetBlocks.TryGetValue(block, out int count);
 						targetBlocks[block] = count + 1;

@@ -96,7 +96,7 @@ namespace de4dot.blocks {
 		}
 
 		public void Remove(IEnumerable<int> indexes) {
-			var instrsToDelete = new List<int>(Utils.Unique(indexes));
+			var instrsToDelete = new List<int>(indexes.Distinct());
 			instrsToDelete.Sort();
 			instrsToDelete.Reverse();
 			foreach (var index in instrsToDelete)

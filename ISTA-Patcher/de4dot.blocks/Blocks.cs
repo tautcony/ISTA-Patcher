@@ -111,12 +111,10 @@ namespace de4dot.blocks {
 			}
 
 			int newIndex = -1;
-			var newLocals = new List<Local>(usedLocals.Count);
-			var newLocalsDict = new Dictionary<Local, bool>(usedLocals.Count);
-			foreach (var local in usedLocals.Keys) {
+			var newLocals = new List<Local>(usedLocals.Keys);
+			var newLocalsSet = newLocals.ToHashSet();
+			foreach (var local in newLocals) {
 				newIndex++;
-				newLocals.Add(local);
-				newLocalsDict[local] = true;
 				foreach (var info in usedLocals[local])
 					info.block.Instructions[info.index] = new Instr(OptimizeLocalInstr(info.block.Instructions[info.index], local, (uint)newIndex));
 			}
@@ -128,7 +126,7 @@ namespace de4dot.blocks {
 			// unused local. This took a while to figure out...
 			var keptAssemblies = new Dictionary<string, bool>(StringComparer.Ordinal);
 			foreach (var local in locals) {
-				if (newLocalsDict.ContainsKey(local))
+				if (newLocalsSet.Contains(local))
 					continue;
 				var defAsm = local.Type.DefinitionAssembly;
 				if (defAsm == null)
@@ -216,11 +214,7 @@ namespace de4dot.blocks {
 		void MergeNopBlocks() {
 			var allBlocks = methodBlocks.GetAllBlocks();
 
-			var nopBlocks = new Dictionary<Block, bool>();
-			foreach (var nopBlock in allBlocks) {
-				if (nopBlock.IsNopBlock())
-					nopBlocks[nopBlock] = true;
-			}
+			var nopBlocks = allBlocks.Where(block => block.IsNopBlock()).ToHashSet();
 
 			if (nopBlocks.Count == 0)
 				return;
@@ -252,12 +246,12 @@ namespace de4dot.blocks {
 					break;
 			}
 
-			foreach (var nopBlock in nopBlocks.Keys)
+			foreach (var nopBlock in nopBlocks)
 				nopBlock.Parent.RemoveDeadBlock(nopBlock);
 		}
 
-		static Block GetNopBlockTarget(Dictionary<Block, bool> nopBlocks, Block source, Block nopBlock) {
-			if (nopBlock == null || !nopBlocks.ContainsKey(nopBlock) || source == nopBlock.FallThrough)
+		static Block GetNopBlockTarget(HashSet<Block> nopBlocks, Block source, Block nopBlock) {
+			if (nopBlock == null || !nopBlocks.Contains(nopBlock) || source == nopBlock.FallThrough)
 				return null;
 			if (nopBlock.Parent.BaseBlocks[0] == nopBlock)
 				return null;
