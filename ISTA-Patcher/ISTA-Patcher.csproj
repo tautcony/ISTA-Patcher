@@ -11,7 +11,8 @@ Released under the GNU GPLv3+.</Copyright>
     <RepositoryUrl>https://github.com/tautcony/ISTA-Patcher/</RepositoryUrl>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>11</LangVersion>
     <PublishSingleFile>true</PublishSingleFile>
     <RootNamespace>ISTA_Patcher</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>

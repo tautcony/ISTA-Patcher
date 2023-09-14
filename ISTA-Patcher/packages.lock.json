@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0": {
+    "net8.0": {
       "CommandLineParser": {
         "type": "Direct",
         "requested": "[2.9.1, )",
@@ -19,6 +19,12 @@
         "requested": "[4.2.0, )",
         "resolved": "4.2.0",
         "contentHash": "HcoTWCKfnPRujJ6r5UqWBJtq14q+HKbxNwwgi9id/fXX6Q0NEYJsOaDFd9XZxo/gf7JcCjnrtf02CIdGCEoJGA=="
+      },
+      "Microsoft.NET.ILLink.Tasks": {
+        "type": "Direct",
+        "requested": "[8.0.0-rc.1.23419.4, )",
+        "resolved": "8.0.0-rc.1.23419.4",
+        "contentHash": "Te369WOsPH7E7PRtGi9/0+IRVD9BhmMQgVp4OmXVfDrna29E35bE08WKED0/15VwJ28vVd5+JbtKYZrwO3PXQg=="
       },
       "Serilog": {
         "type": "Direct",
@@ -64,28 +70,28 @@
         "contentHash": "OP6umVGxc0Z0MvZQBVigj4/U31Pw72ITihDWP9WiWDm+q5aoe0GaJivsfYGq53o6dxH7DcXWiCTl7+0o2CGdmg=="
       }
     },
-    "net7.0/linux-x64": {
+    "net8.0/linux-x64": {
       "System.Text.Encodings.Web": {
         "type": "Transitive",
         "resolved": "7.0.0",
         "contentHash": "OP6umVGxc0Z0MvZQBVigj4/U31Pw72ITihDWP9WiWDm+q5aoe0GaJivsfYGq53o6dxH7DcXWiCTl7+0o2CGdmg=="
       }
     },
-    "net7.0/osx-arm64": {
+    "net8.0/osx-arm64": {
       "System.Text.Encodings.Web": {
         "type": "Transitive",
         "resolved": "7.0.0",
         "contentHash": "OP6umVGxc0Z0MvZQBVigj4/U31Pw72ITihDWP9WiWDm+q5aoe0GaJivsfYGq53o6dxH7DcXWiCTl7+0o2CGdmg=="
       }
     },
-    "net7.0/osx-x64": {
+    "net8.0/osx-x64": {
       "System.Text.Encodings.Web": {
         "type": "Transitive",
         "resolved": "7.0.0",
         "contentHash": "OP6umVGxc0Z0MvZQBVigj4/U31Pw72ITihDWP9WiWDm+q5aoe0GaJivsfYGq53o6dxH7DcXWiCTl7+0o2CGdmg=="
       }
     },
-    "net7.0/win-x64": {
+    "net8.0/win-x64": {
       "System.Text.Encodings.Web": {
         "type": "Transitive",
         "resolved": "7.0.0",
