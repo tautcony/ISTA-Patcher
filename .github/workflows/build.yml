@@ -36,7 +36,7 @@ jobs:
       run: |
         proj_file="ISTA-Patcher/ISTA-Patcher.csproj"
         version="<InformationalVersion>$(git rev-parse --short HEAD)</InformationalVersion>"
-        sed -i '' "s#<InformationalVersion>[^<]*<\/InformationalVersion>#$version#g" $proj_file
+        sed -i "s#<InformationalVersion>[^<]*<\/InformationalVersion>#$version#g" $proj_file
 
     - name: Publish the application
       env:
