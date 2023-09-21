@@ -22,9 +22,9 @@
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[8.0.0-rc.1.23419.4, )",
-        "resolved": "8.0.0-rc.1.23419.4",
-        "contentHash": "Te369WOsPH7E7PRtGi9/0+IRVD9BhmMQgVp4OmXVfDrna29E35bE08WKED0/15VwJ28vVd5+JbtKYZrwO3PXQg=="
+        "requested": "[8.0.0-rc.2.23479.6, )",
+        "resolved": "8.0.0-rc.2.23479.6",
+        "contentHash": "neRDuxVI/tdf5yz/rLyD1kP3DkWx8uHTvb1wcqbjDn4QQDHmYHwcuHBnVVPYtBzMFmlVNmJMa91weUEhHx2z5A=="
       },
       "Serilog": {
         "type": "Direct",

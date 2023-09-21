@@ -4,37 +4,21 @@
 namespace ISTA_Patcher.Utils;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-internal class ISTAPatch : Attribute
-{
-}
+internal class ISTAPatch : Attribute;
 
-internal class ValidationPatch : ISTAPatch
-{
-}
+internal class ValidationPatch : ISTAPatch;
 
-internal class EssentialPatch : ISTAPatch
-{
-}
+internal class EssentialPatch : ISTAPatch;
 
-internal class SignaturePatch : ISTAPatch
-{
-}
+internal class SignaturePatch : ISTAPatch;
 
-internal class ToyotaPatch : ISTAPatch
-{
-}
+internal class ToyotaPatch : ISTAPatch;
 
-internal class ENETPatch : ISTAPatch
-{
-}
+internal class ENETPatch : ISTAPatch;
 
-internal class RequirementsPatch : ISTAPatch
-{
-}
+internal class RequirementsPatch : ISTAPatch;
 
-internal class NotSendPatch : ISTAPatch
-{
-}
+internal class NotSendPatch : ISTAPatch;
 
 internal class UserAuthPatch : ISTAPatch
 {

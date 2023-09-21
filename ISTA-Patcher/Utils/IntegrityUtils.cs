@@ -10,9 +10,9 @@ using Serilog;
 
 public static class IntegrityUtils
 {
-    private static readonly byte[] _salt = { 0xd, 0xca, 0x32, 0xe0, 0x7f, 0xa4, 0xdf, 0xf1 };
-
     private const int _iterations = 1100;
+
+    private static readonly byte[] _salt = { 0xd, 0xca, 0x32, 0xe0, 0x7f, 0xa4, 0xdf, 0xf1 };
 
     private static readonly byte[] _password =
     {

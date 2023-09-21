@@ -183,6 +183,7 @@ public static class DnlibUtils
     {
         var importer = new Importer(module);
 
+        // ReSharper disable once ConvertIfStatementToReturnStatement
         if (method == ".ctor")
         {
             return (from m in type.GetConstructors() where CheckParametersByType(m, parameters) select importer.Import(m)).FirstOrDefault();
