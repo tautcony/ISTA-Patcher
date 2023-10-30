@@ -430,6 +430,11 @@ internal static partial class PatchUtils
             "GetCurrentUserEnvironment",
             "()BMW.Rheingold.PresentationFramework.Authentication.UserEnvironment",
             DnlibUtils.ReturnUInt32Method(2)
+        ) + module.PatchFunction(
+            "BMW.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
+            "GetCurrentNetworkType",
+            "()BMW.Rheingold.PresentationFramework.Authentication.NetworkType",
+            DnlibUtils.ReturnUInt32Method(1)
         );
     }
 
