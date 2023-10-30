@@ -35,3 +35,9 @@ internal class RequirementsPatch : ISTAPatch
 internal class NotSendPatch : ISTAPatch
 {
 }
+
+[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+internal class FromVersion : Attribute
+{
+    public string? Version { get; set; }
+}

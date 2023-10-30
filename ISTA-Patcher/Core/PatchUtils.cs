@@ -421,6 +421,18 @@ internal static partial class PatchUtils
         }
     }
 
+    [EssentialPatch]
+    [FromVersion(Version = "4.44.1x")]
+    public static int PatchUserEnvironmentProvider(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "BMW.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
+            "GetCurrentUserEnvironment",
+            "()BMW.Rheingold.PresentationFramework.Authentication.UserEnvironment",
+            DnlibUtils.ReturnUInt32Method(2)
+        );
+    }
+
     [SignaturePatch]
     public static Func<ModuleDefMD, int> PatchGetRSAPKCS1SignatureDeformatter(string modulus, string exponent)
     {
