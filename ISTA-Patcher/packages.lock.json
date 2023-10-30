@@ -10,15 +10,15 @@
       },
       "ConsoleTables": {
         "type": "Direct",
-        "requested": "[2.5.0, )",
-        "resolved": "2.5.0",
-        "contentHash": "lfXLGH1coDInONveyIW5ufJWT/P5KbMRRV0cbR7CBnoZLNLZeTY51QUrAmtsX+gIWj7xlY9FSmg1sBYhXMmuuw=="
+        "requested": "[2.6.1, )",
+        "resolved": "2.6.1",
+        "contentHash": "TyU885plpk88kMxgayy5+QQvtt/t3ZR45+vSvaKqZiaK+YsGVE6Mv7sV3fwjUMv3jHT15DdkpxW/+o+uc+bAJQ=="
       },
       "dnlib": {
         "type": "Direct",
-        "requested": "[4.1.0, )",
-        "resolved": "4.1.0",
-        "contentHash": "0Cz+EeZ+nPqtIIisMpvIpHQ1JttpOyhZowBkQeKsAItEsOon+5bwCO97H8Fs9Q06qE2eyvnUOZDfh1Oz1/Ajrg=="
+        "requested": "[4.2.0, )",
+        "resolved": "4.2.0",
+        "contentHash": "HcoTWCKfnPRujJ6r5UqWBJtq14q+HKbxNwwgi9id/fXX6Q0NEYJsOaDFd9XZxo/gf7JcCjnrtf02CIdGCEoJGA=="
       },
       "Serilog": {
         "type": "Direct",
