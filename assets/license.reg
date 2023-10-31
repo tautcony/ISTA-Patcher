@@ -1,4 +1,0 @@
-Windows Registry Editor Version 5.00
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BMWgroup\ISPI\Rheingold]
-"License"="<?xml version=\"1.0\"?><LicenseInfo xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://tempuri.org/LicenseInfo.xsd\"><Name>ISTA Patcher</Name><Email>ista-patcher@bmw.de</Email><Expiration>2099-01-01T00:00:00</Expiration><Comment>repository: https://github.com/tautcony/ISTA-Patcher</Comment><ComputerName xsi:nil=\"true\" /><UserName>*</UserName><AvailableBrandTypes>*</AvailableBrandTypes><AvailableLanguages>*</AvailableLanguages><AvailableOperationModes>*</AvailableOperationModes><DistributionPartnerNumber>*</DistributionPartnerNumber><ComputerCharacteristics /><LicenseKey /><LicenseServerURL xsi:nil=\"true\" /><LicenseType>offline</LicenseType></LicenseInfo>"

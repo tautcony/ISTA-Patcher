@@ -11,6 +11,7 @@ using de4dot.code.deobfuscators;
 using de4dot.code.deobfuscators.Dotfuscator;
 using dnlib.DotNet;
 using dnlib.DotNet.Writer;
+using ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
 using Serilog;
 
 /// <summary>
@@ -242,5 +243,43 @@ internal static partial class PatchUtils
         file.Deobfuscate();
         file.DeobfuscateEnd();
         file.Save();
+    }
+
+    public static void GenerateMockRegFile(string basePath)
+    {
+        var licenseFile = Path.Join(basePath, "license.reg");
+        if (File.Exists(licenseFile))
+        {
+            return;
+        }
+
+        var licenseInfo = new LicenseInfo
+        {
+            Name = "ISTA Patcher",
+            Email = "ista-patcher@\u0062\u006d\u0077.de",
+            Expiration = DateTime.MaxValue,
+            Comment = PatchUtils.RepoUrl,
+            ComputerName = null,
+            UserName = "*",
+            AvailableBrandTypes = "*",
+            AvailableLanguages = "*",
+            AvailableOperationModes = "*",
+            DistributionPartnerNumber = "*",
+            ComputerCharacteristics = Array.Empty<byte>(),
+            LicenseKey = Array.Empty<byte>(),
+            LicenseServerURL = null,
+            LicenseType = LicenseType.offline,
+        };
+        var value = licenseInfo.Serialize();
+        const string template = "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\\u0042\u004d\u0057group\\ISPI\\Rheingold]\n\"License\"=\"{}\"";
+        File.WriteAllText(licenseFile, template.Replace("{}", ToLiteral(value)));
+    }
+
+    private static string ToLiteral(string valueTextForCompiler)
+    {
+        return valueTextForCompiler
+               .Replace("\r", "\\r")
+               .Replace("\n", "\\n")
+               .Replace("\"", "\\\"");
     }
 }

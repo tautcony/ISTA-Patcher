@@ -165,6 +165,8 @@ public static partial class Patch
             Log.Information("{Indent}{Line}", new string(' ', indentLength), line);
         }
 
+        PatchUtils.GenerateMockRegFile(guiBasePath);
+
         timer.Stop();
         Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
     }

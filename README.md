@@ -45,7 +45,7 @@ Overwrite patched files to its parent directory, read the notes, then run the pr
 ### Notes
 
 - Please ensure that all related processes been killed before starting the program.
-- Import [registry file](assets/license.reg) to resolve any exceptions that may arise while loading license.
+- Import generated registry file(`license.reg`) under `Release` directory to resolve any exceptions that may arise while loading license.
 - Please ensure that both `ILeanActive` and `OSSModeActive` in the configuration file are set to `false`, otherwise `DealerData` will not load the default configuration correctly.
 - Please ensure that the `Logging.Directory` in the configuration file is a relative path that does not start with `%ISPIDATA%`, otherwise exceptions will occur during the log cleaning process.
 
