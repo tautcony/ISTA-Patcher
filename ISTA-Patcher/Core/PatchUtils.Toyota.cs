@@ -15,7 +15,7 @@ internal static partial class PatchUtils
     public static int PatchToyotaWorker(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.Toyota.Worker.ToyotaWorker",
+            "\u0042\u004d\u0057.Rheingold.\u0054\u006f\u0079\u006f\u0074\u0061.Worker.ToyotaWorker",
             "VehicleIsValid",
             "(System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod
@@ -26,7 +26,7 @@ internal static partial class PatchUtils
     public static int PatchIndustrialCustomerManager(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.CoreFramework.IndustrialCustomer.Manager.IndustrialCustomerManager",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.IndustrialCustomer.Manager.IndustrialCustomerManager",
             "IsIndustrialCustomerBrand",
             "(System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod

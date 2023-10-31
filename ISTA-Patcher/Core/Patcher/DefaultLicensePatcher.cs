@@ -3,9 +3,9 @@
 
 namespace ISTA_Patcher.Core.Patcher;
 
-public class BMWLicensePatcher : BMWPatcher
+public class DefaultLicensePatcher : DefaultPatcher
 {
-    public BMWLicensePatcher(string modulus, string exponent, ProgramArgs.LicenseOptions opts)
+    public DefaultLicensePatcher(string modulus, string exponent, ProgramArgs.LicenseOptions opts)
         : base(opts)
     {
         this.Patches.Add(

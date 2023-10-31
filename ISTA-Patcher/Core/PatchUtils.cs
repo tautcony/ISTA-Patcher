@@ -17,9 +17,9 @@ internal static partial class PatchUtils
     public static int PatchLicenseStatusChecker(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
             "IsLicenseValid",
-            "(BMW.Rheingold.CoreFramework.LicenseInfo,System.Boolean)BMW.Rheingold.CoreFramework.LicenseStatus",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseInfo,System.Boolean)\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseStatus",
             DnlibUtils.ReturnZeroMethod
         );
     }
@@ -28,7 +28,7 @@ internal static partial class PatchUtils
     public static int PatchLicenseWizardHelper(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseManagement.LicenseWizardHelper",
             "DoLicenseCheck",
             "(System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod
@@ -39,17 +39,17 @@ internal static partial class PatchUtils
     public static int PatchLicenseManager(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.CoreFramework.LicenseManager",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseManager",
             "VerifyLicense",
             "(System.Boolean)System.Void",
             DnlibUtils.EmptyingMethod
         ) + module.PatchFunction(
-            "BMW.Rheingold.CoreFramework.LicenseManager",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseManager",
             "CheckRITALicense",
             "()System.Void",
             DnlibUtils.EmptyingMethod
         ) + module.PatchFunction(
-            "BMW.Rheingold.CoreFramework.LicenseManager",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseManager",
             "LastCompileTimeIsInvalid",
             "()System.Boolean",
             DnlibUtils.ReturnFalseMethod
@@ -60,9 +60,9 @@ internal static partial class PatchUtils
     public static int PatchLicenseHelper(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.CoreFramework.LicenseHelper",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseHelper",
             "IsVehicleLockedDown",
-            "(BMW.Rheingold.CoreFramework.DatabaseProvider.Vehicle)System.Boolean",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Vehicle)System.Boolean",
             DnlibUtils.ReturnFalseMethod
         );
     }
@@ -71,7 +71,7 @@ internal static partial class PatchUtils
     public static int PatchCommonServiceWrapper(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
+            "\u0042\u004d\u0057.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
             "VerifyLicense",
             "()System.Void",
             DnlibUtils.EmptyingMethod
@@ -82,7 +82,7 @@ internal static partial class PatchUtils
     public static int PatchSecureAccessHelper(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.iLean.CommonServices.Helper.SecureAccessHelper",
+            "\u0042\u004d\u0057.iLean.CommonServices.Helper.SecureAccessHelper",
             "IsCodeAccessPermitted",
             "(System.Reflection.Assembly,System.Reflection.Assembly)System.Boolean",
             DnlibUtils.ReturnTrueMethod
@@ -93,7 +93,7 @@ internal static partial class PatchUtils
     public static int PatchFscValidationClient(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.TricTools.FscValidation.FscValidationClient",
+            "\u0042\u004d\u0057.TricTools.FscValidation.FscValidationClient",
             "IsValid",
             "(System.Byte[],System.Byte[])System.Boolean",
             DnlibUtils.ReturnTrueMethod
@@ -104,7 +104,7 @@ internal static partial class PatchUtils
     public static int PatchMainWindowViewModel(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.ISTAGUI.ViewModels.MainWindowViewModel",
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.MainWindowViewModel",
             "CheckExpirationDate",
             "()System.Void",
             DnlibUtils.EmptyingMethod
@@ -115,12 +115,12 @@ internal static partial class PatchUtils
     public static int PatchActivationCertificateHelper(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
+            "\u0042\u004d\u0057.iLean.CommonServices.Helper.ActivationCertificateHelper",
             "IsInWhiteList",
             "(System.String,System.String,System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod
         ) + module.PatchFunction(
-            "BMW.iLean.CommonServices.Helper.ActivationCertificateHelper",
+            "\u0042\u004d\u0057.iLean.CommonServices.Helper.ActivationCertificateHelper",
             "IsWhiteListSignatureValid",
             "(System.String,System.String)System.Boolean",
             DnlibUtils.ReturnTrueMethod
@@ -131,7 +131,7 @@ internal static partial class PatchUtils
     public static int PatchIntegrityManager(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.SecurityAndLicense.IntegrityManager",
+            "\u0042\u004d\u0057.Rheingold.SecurityAndLicense.IntegrityManager",
             ".ctor",
             "()System.Void",
             DnlibUtils.EmptyingMethod
@@ -142,7 +142,7 @@ internal static partial class PatchUtils
     public static int PatchVerifyAssemblyHelper(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
             "VerifyStrongName",
             "(System.String,System.Boolean)System.Boolean",
             DnlibUtils.ReturnTrueMethod
@@ -153,7 +153,7 @@ internal static partial class PatchUtils
     public static int PatchIstaIcsServiceClient(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.ISPI.IstaServices.Client.IstaIcsServiceClient",
+            "\u0042\u004d\u0057.ISPI.IstaServices.Client.IstaIcsServiceClient",
             "ValidateHost",
             "()System.Void",
             RemovePublicKeyCheck
@@ -197,7 +197,7 @@ internal static partial class PatchUtils
     public static int PatchIstaProcessStarter(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
             "CheckSignature",
             "(System.String)System.Void",
             DnlibUtils.EmptyingMethod
@@ -208,7 +208,7 @@ internal static partial class PatchUtils
     public static int PatchPackageValidityService(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.ISTAGUI.Controller.PackageValidityService",
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.PackageValidityService",
             "CyclicExpirationDateCheck",
             "()System.Void",
             DnlibUtils.EmptyingMethod
@@ -219,7 +219,7 @@ internal static partial class PatchUtils
     public static int PatchServiceProgramCompilerLicense(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.ExternalToolLicense.ServiceProgramCompilerLicense",
+            "\u0042\u004d\u0057.Rheingold.ExternalToolLicense.ServiceProgramCompilerLicense",
             "CheckLicenseExpiration",
             "()System.Boolean",
             DnlibUtils.ReturnTrueMethod
@@ -230,7 +230,7 @@ internal static partial class PatchUtils
     public static int PatchConfigurationService(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.Psdz.Services.ConfigurationService",
+            "\u0042\u004d\u0057.Rheingold.Psdz.Services.ConfigurationService",
             "SetPsdzProperties",
             "(System.String,System.String,System.String,System.String)System.Void",
             RewriteProperties
@@ -238,10 +238,10 @@ internal static partial class PatchUtils
 
         void RewriteProperties(MethodDef method)
         {
-            var getBaseService = method.FindOperand<MemberRef>(OpCodes.Call, "com.bmw.psdz.api.Configuration BMW.Rheingold.Psdz.Services.ServiceBase`1<com.bmw.psdz.api.Configuration>::get_BaseService()");
-            var getPSdZProperties = method.FindOperand<MemberRef>(OpCodes.Callvirt, "java.util.Properties com.bmw.psdz.api.Configuration::getPSdZProperties()");
-            var setPSdZProperties = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void com.bmw.psdz.api.Configuration::setPSdZProperties(java.util.Properties)");
-            var putProperty = method.FindOperand<MethodDef>(OpCodes.Call, "System.Void BMW.Rheingold.Psdz.Services.ConfigurationService::PutProperty(java.util.Properties,java.lang.String,java.lang.String)");
+            var getBaseService = method.FindOperand<MemberRef>(OpCodes.Call, "com.\u0062\u006d\u0077.psdz.api.Configuration \u0042\u004d\u0057.Rheingold.Psdz.Services.ServiceBase`1<com.\u0062\u006d\u0077.psdz.api.Configuration>::get_BaseService()");
+            var getPSdZProperties = method.FindOperand<MemberRef>(OpCodes.Callvirt, "java.util.Properties com.\u0062\u006d\u0077.psdz.api.Configuration::getPSdZProperties()");
+            var setPSdZProperties = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void com.\u0062\u006d\u0077.psdz.api.Configuration::setPSdZProperties(java.util.Properties)");
+            var putProperty = method.FindOperand<MethodDef>(OpCodes.Call, "System.Void \u0042\u004d\u0057.Rheingold.Psdz.Services.ConfigurationService::PutProperty(java.util.Properties,java.lang.String,java.lang.String)");
             var stringImplicit = method.FindOperand<MemberRef>(OpCodes.Call, "java.lang.String java.lang.String::op_Implicit(System.String)");
 
             if (getBaseService == null || getPSdZProperties == null || setPSdZProperties == null || putProperty == null ||
@@ -324,7 +324,7 @@ internal static partial class PatchUtils
     public static int PatchInteractionModel(ModuleDefMD module)
     {
         return module.PatcherGetter(
-            "BMW.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
             "Title",
             RewriteTitle
         );
@@ -347,7 +347,7 @@ internal static partial class PatchUtils
 
             var titleField = method.DeclaringType.Fields.FirstOrDefault(field =>
                 field.FullName ==
-                "System.String BMW.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title");
+                "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title");
 
             if (containsDef == null || titleField == null)
             {
@@ -389,7 +389,7 @@ internal static partial class PatchUtils
     public static int PatchRuntimeEnvironment(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.CoreFramework.RuntimeEnvironment",
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.RuntimeEnvironment",
             "GetSubVersion",
             "(System.UInt32 modopt(System.Runtime.CompilerServices.IsLong),System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&,System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&,System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&,System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&)System.Void",
             RemoveHypervisorFlag
@@ -426,14 +426,14 @@ internal static partial class PatchUtils
     public static int PatchUserEnvironmentProvider(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
+            "\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
             "GetCurrentUserEnvironment",
-            "()BMW.Rheingold.PresentationFramework.Authentication.UserEnvironment",
+            "()\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironment",
             DnlibUtils.ReturnUInt32Method(2)
         ) + module.PatchFunction(
-            "BMW.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
+            "\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
             "GetCurrentNetworkType",
-            "()BMW.Rheingold.PresentationFramework.Authentication.NetworkType",
+            "()\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.NetworkType",
             DnlibUtils.ReturnUInt32Method(1)
         );
     }
@@ -444,7 +444,7 @@ internal static partial class PatchUtils
         return module =>
         {
             return module.PatchFunction(
-                "BMW.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
+                "\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseManagement.LicenseStatusChecker",
                 "GetRSAPKCS1SignatureDeformatter",
                 "()System.Security.Cryptography.RSAPKCS1SignatureDeformatter",
                 ReplaceParameters

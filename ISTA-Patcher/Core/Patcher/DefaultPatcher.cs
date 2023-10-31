@@ -6,17 +6,17 @@ namespace ISTA_Patcher.Core.Patcher;
 using dnlib.DotNet;
 using Serilog;
 
-public class BMWPatcher : IPatcher
+public class DefaultPatcher : IPatcher
 {
     public List<Func<ModuleDefMD, int>> Patches { get; set; } =
         IPatcher.GetPatches(typeof(EssentialPatch));
 
-    private BMWPatcher()
+    private DefaultPatcher()
     {
         Log.Debug("Loaded patches: {Patches}", string.Join(", ", this.Patches.Select(p => p.Method.Name)));
     }
 
-    protected BMWPatcher(ProgramArgs.OptionalPatchOptions opts)
+    protected DefaultPatcher(ProgramArgs.OptionalPatchOptions opts)
         : this()
     {
         if (opts.EnableENET)
@@ -35,7 +35,7 @@ public class BMWPatcher : IPatcher
         }
     }
 
-    public BMWPatcher(ProgramArgs.PatchOptions opts)
+    public DefaultPatcher(ProgramArgs.PatchOptions opts)
         : this((ProgramArgs.OptionalPatchOptions)opts)
     {
         if (!opts.SkipLicensePatch)

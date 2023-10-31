@@ -17,7 +17,7 @@ internal static partial class PatchUtils
     public static int PatchTherapyPlanCalculated(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.Programming.States.TherapyPlanCalculated",
+            "\u0042\u004d\u0057.Rheingold.Programming.States.TherapyPlanCalculated",
             "IsConnectedViaENETAndBrandIsToyota",
             "()System.Boolean",
             DnlibUtils.ReturnTrueMethod
@@ -28,9 +28,9 @@ internal static partial class PatchUtils
     public static int PatchIstaInstallationRequirements(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.ISTAGUI.Controller.IstaInstallationRequirements",
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.IstaInstallationRequirements",
             "CheckSystemRequirements",
-            "(System.Boolean)System.Collections.Generic.Dictionary`2<BMW.Rheingold.ISTAGUI._new.ViewModels.InsufficientSystemRequirement,System.Int32[]>",
+            "(System.Boolean)System.Collections.Generic.Dictionary`2<\u0042\u004d\u0057.Rheingold.ISTAGUI._new.ViewModels.InsufficientSystemRequirement,System.Int32[]>",
             RemoveRequirementsCheck
         );
 
@@ -38,7 +38,7 @@ internal static partial class PatchUtils
         {
             var dictionaryCtorRef = method.FindOperand<MemberRef>(
                 OpCodes.Newobj,
-                "System.Void System.Collections.Generic.Dictionary`2<BMW.Rheingold.ISTAGUI._new.ViewModels.InsufficientSystemRequirement,System.Int32[]>::.ctor()");
+                "System.Void System.Collections.Generic.Dictionary`2<\u0042\u004d\u0057.Rheingold.ISTAGUI._new.ViewModels.InsufficientSystemRequirement,System.Int32[]>::.ctor()");
 
             if (dictionaryCtorRef == null)
             {
@@ -54,12 +54,12 @@ internal static partial class PatchUtils
     public static int PatchMultisessionLogic(ModuleDefMD module)
     {
         return module.PatchFunction(
-            "BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic",
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.MultisessionLogic",
             "SetIsSendFastaDataForbidden",
             "()System.Void",
             SetNotSendFastData
         ) + module.PatchFunction(
-            "BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic",
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.MultisessionLogic",
             "SetIsSendOBFCMDataForbidden",
             "()System.Void",
             SetNotSendOBFCMData
@@ -67,9 +67,9 @@ internal static partial class PatchUtils
 
         void SetNotSendOBFCMData(MethodDef method)
         {
-            var get_CurrentOperation = method.FindOperand<MethodDef>(OpCodes.Call, "BMW.Rheingold.PresentationFramework.Contracts.IIstaOperation BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic::get_CurrentOperation()");
-            var setIsSendOBFCMDataIsForbidden = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void BMW.ISPI.IstaOperation.Contract.IIstaOperationService::SetIsSendOBFCMDataIsForbidden(System.Boolean)");
-            var onPropertyChanged = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void BMW.Rheingold.RheingoldSessionController.Logic::OnPropertyChanged(System.String)");
+            var get_CurrentOperation = method.FindOperand<MethodDef>(OpCodes.Call, "\u0042\u004d\u0057.Rheingold.PresentationFramework.Contracts.IIstaOperation \u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.MultisessionLogic::get_CurrentOperation()");
+            var setIsSendOBFCMDataIsForbidden = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void \u0042\u004d\u0057.ISPI.IstaOperation.Contract.IIstaOperationService::SetIsSendOBFCMDataIsForbidden(System.Boolean)");
+            var onPropertyChanged = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void \u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic::OnPropertyChanged(System.String)");
 
             if (get_CurrentOperation == null || setIsSendOBFCMDataIsForbidden == null || onPropertyChanged == null)
             {
@@ -101,12 +101,12 @@ internal static partial class PatchUtils
 
         void SetNotSendFastData(MethodDef method)
         {
-            var get_CurrentOperation = method.FindOperand<MethodDef>(OpCodes.Call, "BMW.Rheingold.PresentationFramework.Contracts.IIstaOperation BMW.Rheingold.ISTAGUI.Controller.MultisessionLogic::get_CurrentOperation()");
-            var get_DataContext = method.FindOperand<MemberRef>(OpCodes.Callvirt, "BMW.ISPI.IstaOperation.Contract.IIstaOperationDataContext BMW.Rheingold.PresentationFramework.Contracts.IIstaOperation::get_DataContext()");
-            var get_VecInfo = method.FindOperand<MemberRef>(OpCodes.Callvirt, "BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle BMW.ISPI.IstaOperation.Contract.IIstaOperationDataContext::get_VecInfo()");
-            var set_IsSendFastaDataForbidden = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle::set_IsSendFastaDataForbidden(System.Boolean)");
-            var setIsSendFastaDataIsForbidden = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void BMW.ISPI.IstaOperation.Contract.IIstaOperationService::SetIsSendFastaDataIsForbidden(System.Boolean)");
-            var onPropertyChanged = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void BMW.Rheingold.RheingoldSessionController.Logic::OnPropertyChanged(System.String)");
+            var get_CurrentOperation = method.FindOperand<MethodDef>(OpCodes.Call, "\u0042\u004d\u0057.Rheingold.PresentationFramework.Contracts.IIstaOperation \u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.MultisessionLogic::get_CurrentOperation()");
+            var get_DataContext = method.FindOperand<MemberRef>(OpCodes.Callvirt, "\u0042\u004d\u0057.ISPI.IstaOperation.Contract.IIstaOperationDataContext \u0042\u004d\u0057.Rheingold.PresentationFramework.Contracts.IIstaOperation::get_DataContext()");
+            var get_VecInfo = method.FindOperand<MemberRef>(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle \u0042\u004d\u0057.ISPI.IstaOperation.Contract.IIstaOperationDataContext::get_VecInfo()");
+            var set_IsSendFastaDataForbidden = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void \u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.Vehicle.IVehicle::set_IsSendFastaDataForbidden(System.Boolean)");
+            var setIsSendFastaDataIsForbidden = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void \u0042\u004d\u0057.ISPI.IstaOperation.Contract.IIstaOperationService::SetIsSendFastaDataIsForbidden(System.Boolean)");
+            var onPropertyChanged = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void \u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic::OnPropertyChanged(System.String)");
 
             if (get_CurrentOperation == null || get_DataContext == null || get_VecInfo == null || set_IsSendFastaDataForbidden == null || setIsSendFastaDataIsForbidden == null || onPropertyChanged == null)
             {

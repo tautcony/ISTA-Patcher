@@ -10,8 +10,8 @@ public static class ProgramArgs
 {
     public enum PatchTypeEnum
     {
-        BMW = 0,
-        TOYOTA = 1,
+        B = 0,
+        T = 1,
     }
 
     public class BaseOptions
@@ -38,7 +38,7 @@ public static class ProgramArgs
     [Verb("patch", HelpText = "Perform patching on application and library.")]
     public class PatchOptions : OptionalPatchOptions
     {
-        [Option('t', "type", Default = PatchTypeEnum.BMW, HelpText = "Specify the patch type. Valid options: BMW, TOYOTA.")]
+        [Option('t', "type", Default = PatchTypeEnum.B, HelpText = "Specify the patch type. Valid options: B, T.")]
         public PatchTypeEnum PatchType { get; set; }
 
         [Option("skip-validation-patch", Default = false, HelpText = "Skip license validation patch.")]

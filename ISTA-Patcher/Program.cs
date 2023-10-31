@@ -51,8 +51,8 @@ internal static class ISTAPatcher
 
         IPatcher patcher = opts.PatchType switch
         {
-            PatchTypeEnum.BMW => new BMWPatcher(opts),
-            PatchTypeEnum.TOYOTA => new ToyotaPatcher(),
+            PatchTypeEnum.B => new DefaultPatcher(opts),
+            PatchTypeEnum.T => new ToyotaPatcher(),
             _ => throw new NotImplementedException(),
         };
 
@@ -331,7 +331,7 @@ internal static class ISTAPatcher
             var modulus = Convert.ToBase64String(parameters.Modulus);
             var exponent = Convert.ToBase64String(parameters.Exponent);
 
-            Patch.PatchISTA(new BMWLicensePatcher(modulus, exponent, opts), new PatchOptions
+            Patch.PatchISTA(new DefaultLicensePatcher(modulus, exponent, opts), new PatchOptions
             {
                 Restore = opts.Restore,
                 Verbosity = opts.Verbosity,

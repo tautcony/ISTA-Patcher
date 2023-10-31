@@ -32,7 +32,7 @@ ISTA
 Execute the following command in a terminal:
 
 ```shell
-ISTA-Patcher.exe patch "C:\Program Files (x86)\BMW\ISPI\TRIC\ISTA"
+ISTA-Patcher.exe patch "\PATH\TO\ISTA"
 ```
 
 The directory containing the patched files is located as follows:
