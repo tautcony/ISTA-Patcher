@@ -23,141 +23,31 @@ public static partial class Patch
         var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
 
         List<int> totalCounting = new(new int[validPatches.Count]);
-        foreach (var pendingPatchItem in pendingPatchList)
+        var lcts = new LimitedConcurrencyLevelTaskScheduler(Environment.ProcessorCount);
+        var factory = new TaskFactory(lcts);
+        var tasks = new List<Task>();
+        using (var cts = new CancellationTokenSource())
         {
-            var pendingPatchItemFullPath = pendingPatchItem.StartsWith("!") ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!')) : Path.Join(guiBasePath, pendingPatchItem);
-
-            var originalDirPath = Path.GetDirectoryName(pendingPatchItemFullPath);
-            var patchedDirPath = Path.Join(originalDirPath, outputDirName);
-            var patchedFileFullPath = Path.Join(patchedDirPath, Path.GetFileName(pendingPatchItem));
-            var bakDirPath = Path.Join(originalDirPath, bakDirName);
-            var bakFileFullPath = Path.Join(bakDirPath, Path.GetFileName(pendingPatchItem));
-
-            if (File.Exists(patchedFileFullPath))
+            foreach (var pendingPatchItem in pendingPatchList)
             {
-                File.Delete(patchedFileFullPath);
-            }
-
-            var indent = new string(' ', indentLength - pendingPatchItem.Length);
-            if (!File.Exists(pendingPatchItemFullPath))
-            {
-                Log.Information(
-                    "{Item}{Indent}{Result} [not found]",
-                    pendingPatchItem,
-                    indent,
-                    string.Concat(Enumerable.Repeat("*", validPatches.Count)));
-                continue;
-            }
-
-            Directory.CreateDirectory(patchedDirPath);
-            Directory.CreateDirectory(bakDirPath);
-
-            try
-            {
-                if (options.Restore && File.Exists(bakFileFullPath))
-                {
-                    Log.Debug("Backup detected, restoring {Item}", pendingPatchItem);
-                    File.Copy(bakFileFullPath, pendingPatchItemFullPath, true);
-                }
-
-                var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
-                var patcherVersion = PatchUtils.HavePatchedMark(module);
-                var isPatched = patcherVersion != null;
-                if (isPatched && !options.Force)
-                {
-                    Log.Information(
-                        "{Item}{Indent}{Result} [already patched by {Version}]",
-                        pendingPatchItem,
-                        indent,
-                        string.Concat(Enumerable.Repeat("*", validPatches.Count)),
-                        patcherVersion);
-                    continue;
-                }
-
-                // Patch and print result
-                var result = validPatches.Select(patch => patch(module)).ToList();
-                result.Select((item, index) => (item, index)).ToList().ForEach(patch => totalCounting[patch.index] += patch.item);
-
-                isPatched = result.Any(i => i > 0);
-                var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i > 0 ? i.ToString("X") : "-"));
-
-                // Check if at least one patch has been applied
-                if (!isPatched)
-                {
-                    Log.Information("{Item}{Indent}{Result} [skip]", pendingPatchItem, indent, resultStr);
-                    continue;
-                }
-
-                if (!File.Exists(bakFileFullPath))
-                {
-                    Log.Debug("Bakup file {BakFileFullPath} does not exist, copy...", bakFileFullPath);
-                    File.Copy(pendingPatchItemFullPath, bakFileFullPath, false);
-                }
-
-                PatchUtils.SetPatchedMark(module);
-                PatchUtils.SaveModule(module, patchedFileFullPath);
-
-                Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
-                var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
-
-                // Check if need to deobfuscate
-                if (!options.Deobfuscate)
-                {
-                    Log.Information("{Item}{Indent}{Result} [{PatchedFunctionCount} func patched]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
-                    continue;
-                }
-
-                try
-                {
-                    var deobfTimer = Stopwatch.StartNew();
-
-                    var deobfPath = patchedFileFullPath + ".deobf";
-                    PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
-                    if (File.Exists(patchedFileFullPath))
+                tasks.Add(factory.StartNew(
+                    () =>
                     {
-                        File.Delete(patchedFileFullPath);
-                    }
-
-                    File.Move(deobfPath, patchedFileFullPath);
-
-                    deobfTimer.Stop();
-                    var timeStr = deobfTimer.ElapsedTicks > Stopwatch.Frequency
-                        ? $" in {deobfTimer.Elapsed:mm\\:ss}"
-                        : string.Empty;
-                    Log.Information(
-                        "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate success{Time}]",
-                        pendingPatchItem,
-                        indent,
-                        resultStr,
-                        patchedFunctionCount,
-                        timeStr);
-                }
-                catch (ApplicationException ex)
-                {
-                    Log.Information(
-                        "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate skipped]: {Reason}",
-                        pendingPatchItem,
-                        indent,
-                        resultStr,
-                        patchedFunctionCount,
-                        ex.Message);
-                }
+                        PatchSingleFile(
+                            pendingPatchItem,
+                            totalCounting,
+                            guiBasePath,
+                            indentLength,
+                            patcher,
+                            options,
+                            outputDirName,
+                            bakDirName
+                        );
+                    },
+                    cts.Token));
             }
-            catch (Exception ex)
-            {
-                Log.Information(
-                    "{Item}{Indent}{Result} [failed]: {Reason}",
-                    pendingPatchItem,
-                    indent,
-                    string.Concat(Enumerable.Repeat("*", validPatches.Count)),
-                    ex.Message);
-                Log.Debug("ExceptionType: {ExceptionType}, StackTrace: {StackTrace}", ex.GetType().FullName, ex.StackTrace);
 
-                if (File.Exists(patchedFileFullPath))
-                {
-                    File.Delete(patchedFileFullPath);
-                }
-            }
+            Task.WaitAll(tasks.ToArray());
         }
 
         foreach (var line in BuildIndicator(validPatches, totalCounting))
@@ -169,6 +59,146 @@ public static partial class Patch
 
         timer.Stop();
         Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
+    }
+
+    private static void PatchSingleFile(string pendingPatchItem, IList<int> totalCounting, string guiBasePath, int indentLength, IPatcher patcher, ProgramArgs.PatchOptions options, string outputDirName, string bakDirName)
+    {
+        var pendingPatchItemFullPath = pendingPatchItem.StartsWith("!")
+            ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!'))
+            : Path.Join(guiBasePath, pendingPatchItem);
+
+        var originalDirPath = Path.GetDirectoryName(pendingPatchItemFullPath);
+        var patchedDirPath = Path.Join(originalDirPath, outputDirName);
+        var patchedFileFullPath = Path.Join(patchedDirPath, Path.GetFileName(pendingPatchItem));
+        var bakDirPath = Path.Join(originalDirPath, bakDirName);
+        var bakFileFullPath = Path.Join(bakDirPath, Path.GetFileName(pendingPatchItem));
+
+        if (File.Exists(patchedFileFullPath))
+        {
+            File.Delete(patchedFileFullPath);
+        }
+
+        var indent = new string(' ', indentLength - pendingPatchItem.Length);
+        if (!File.Exists(pendingPatchItemFullPath))
+        {
+            Log.Information(
+                "{Item}{Indent}{Result} [not found]",
+                pendingPatchItem,
+                indent,
+                string.Concat(Enumerable.Repeat("*", patcher.Patches.Count)));
+            return;
+        }
+
+        Directory.CreateDirectory(patchedDirPath);
+        Directory.CreateDirectory(bakDirPath);
+
+        try
+        {
+            if (options.Restore && File.Exists(bakFileFullPath))
+            {
+                Log.Debug("Backup detected, restoring {Item}", pendingPatchItem);
+                File.Copy(bakFileFullPath, pendingPatchItemFullPath, true);
+            }
+
+            var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
+            var patcherVersion = PatchUtils.HavePatchedMark(module);
+            var isPatched = patcherVersion != null;
+            if (isPatched && !options.Force)
+            {
+                Log.Information(
+                    "{Item}{Indent}{Result} [already patched by {Version}]",
+                    pendingPatchItem,
+                    indent,
+                    string.Concat(Enumerable.Repeat("*", patcher.Patches.Count)),
+                    patcherVersion);
+                return;
+            }
+
+            // Patch and print result
+            var result = patcher.Patches.Select(patch => patch(module)).ToList();
+            result.Select((item, index) => (item, index)).ToList()
+                  .ForEach(patch => totalCounting[patch.index] += patch.item);
+
+            isPatched = result.Any(i => i > 0);
+            var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i > 0 ? i.ToString("X") : "-"));
+
+            // Check if at least one patch has been applied
+            if (!isPatched)
+            {
+                Log.Information("{Item}{Indent}{Result} [skip]", pendingPatchItem, indent, resultStr);
+                return;
+            }
+
+            if (!File.Exists(bakFileFullPath))
+            {
+                Log.Debug("Bakup file {BakFileFullPath} does not exist, copy...", bakFileFullPath);
+                File.Copy(pendingPatchItemFullPath, bakFileFullPath, false);
+            }
+
+            PatchUtils.SetPatchedMark(module);
+            PatchUtils.SaveModule(module, patchedFileFullPath);
+
+            Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
+            var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
+
+            // Check if need to deobfuscate
+            if (!options.Deobfuscate)
+            {
+                Log.Information("{Item}{Indent}{Result} [{PatchedFunctionCount} func patched]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
+                return;
+            }
+
+            try
+            {
+                var deobfTimer = Stopwatch.StartNew();
+
+                var deobfPath = patchedFileFullPath + ".deobf";
+                PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
+                if (File.Exists(patchedFileFullPath))
+                {
+                    File.Delete(patchedFileFullPath);
+                }
+
+                File.Move(deobfPath, patchedFileFullPath);
+
+                deobfTimer.Stop();
+                var timeStr = deobfTimer.ElapsedTicks > Stopwatch.Frequency
+                    ? $" in {deobfTimer.Elapsed:mm\\:ss}"
+                    : string.Empty;
+                Log.Information(
+                    "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate success{Time}]",
+                    pendingPatchItem,
+                    indent,
+                    resultStr,
+                    patchedFunctionCount,
+                    timeStr);
+            }
+            catch (ApplicationException ex)
+            {
+                Log.Information(
+                    "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate skipped]: {Reason}",
+                    pendingPatchItem,
+                    indent,
+                    resultStr,
+                    patchedFunctionCount,
+                    ex.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Information(
+                "{Item}{Indent}{Result} [failed]: {Reason}",
+                pendingPatchItem,
+                indent,
+                string.Concat(Enumerable.Repeat("*", patcher.Patches.Count)),
+                ex.Message);
+            Log.Debug("ExceptionType: {ExceptionType}, StackTrace: {StackTrace}", ex.GetType().FullName, ex.StackTrace);
+
+            if (File.Exists(patchedFileFullPath))
+            {
+                File.Delete(patchedFileFullPath);
+            }
+        }
     }
 
     private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<ModuleDefMD, int>> patches, IReadOnlyList<int> counting)
