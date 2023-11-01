@@ -11,46 +11,36 @@ using Serilog;
 
 public static partial class Patch
 {
-    public static void PatchISTA(IPatcher patcher, ProgramArgs.PatchOptions options, string outputDirName = "@ista-patched", string bakDirName = "@ista-backup")
+    public static string OutputDirName { get; set; } = "@ista-patched";
+
+    public static string BakDirName { get; set; } = "@ista-backup";
+
+    public static void PatchISTA(IPatcher patcher, ProgramArgs.PatchOptions options)
     {
-        var guiBasePath = Path.Join(options.TargetPath, "TesterGUI", "bin", "Release");
-
-        var validPatches = patcher.Patches;
-        var pendingPatchList = patcher.GeneratePatchList(options.TargetPath);
-
         Log.Information("=== ISTA Patch Begin ===");
         var timer = Stopwatch.StartNew();
-        var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
 
-        List<int> totalCounting = new(new int[validPatches.Count]);
+        var guiBasePath = Path.Join(options.TargetPath, "TesterGUI", "bin", "Release");
+        var pendingPatchList = patcher.GeneratePatchList(options.TargetPath);
+        var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
+        List<int> patchAppliedCount = new(new int[patcher.Patches.Count]);
+
         var lcts = new LimitedConcurrencyLevelTaskScheduler(Environment.ProcessorCount);
         var factory = new TaskFactory(lcts);
         var tasks = new List<Task>();
         using (var cts = new CancellationTokenSource())
         {
-            foreach (var pendingPatchItem in pendingPatchList)
-            {
-                tasks.Add(factory.StartNew(
-                    () =>
-                    {
-                        PatchSingleFile(
-                            pendingPatchItem,
-                            totalCounting,
-                            guiBasePath,
-                            indentLength,
-                            patcher,
-                            options,
-                            outputDirName,
-                            bakDirName
-                        );
-                    },
-                    cts.Token));
-            }
+            tasks.AddRange(pendingPatchList.Select(item =>
+                factory.StartNew(
+                    () => PatchSingleFile(item, patchAppliedCount, guiBasePath, indentLength, patcher, options),
+                    cts.Token)
+                )
+            );
 
             Task.WaitAll(tasks.ToArray());
         }
 
-        foreach (var line in BuildIndicator(validPatches, totalCounting))
+        foreach (var line in BuildIndicator(patcher.Patches, patchAppliedCount))
         {
             Log.Information("{Indent}{Line}", new string(' ', indentLength), line);
         }
@@ -61,16 +51,16 @@ public static partial class Patch
         Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
     }
 
-    private static void PatchSingleFile(string pendingPatchItem, IList<int> totalCounting, string guiBasePath, int indentLength, IPatcher patcher, ProgramArgs.PatchOptions options, string outputDirName, string bakDirName)
+    private static void PatchSingleFile(string pendingPatchItem, IList<int> patchAppliedCount, string guiBasePath, int indentLength, IPatcher patcher, ProgramArgs.PatchOptions options)
     {
         var pendingPatchItemFullPath = pendingPatchItem.StartsWith("!")
             ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!'))
             : Path.Join(guiBasePath, pendingPatchItem);
 
         var originalDirPath = Path.GetDirectoryName(pendingPatchItemFullPath);
-        var patchedDirPath = Path.Join(originalDirPath, outputDirName);
+        var patchedDirPath = Path.Join(originalDirPath, OutputDirName);
         var patchedFileFullPath = Path.Join(patchedDirPath, Path.GetFileName(pendingPatchItem));
-        var bakDirPath = Path.Join(originalDirPath, bakDirName);
+        var bakDirPath = Path.Join(originalDirPath, BakDirName);
         var bakFileFullPath = Path.Join(bakDirPath, Path.GetFileName(pendingPatchItem));
 
         if (File.Exists(patchedFileFullPath))
@@ -117,7 +107,7 @@ public static partial class Patch
             // Patch and print result
             var result = patcher.Patches.Select(patch => patch(module)).ToList();
             result.Select((item, index) => (item, index)).ToList()
-                  .ForEach(patch => totalCounting[patch.index] += patch.item);
+                  .ForEach(patch => patchAppliedCount[patch.index] += patch.item);
 
             isPatched = result.Any(i => i > 0);
             var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i > 0 ? i.ToString("X") : "-"));
