@@ -421,7 +421,7 @@ internal static partial class PatchUtils
         }
     }
 
-    [EssentialPatch]
+    [UserAuthPatch]
     [FromVersion("4.44.1x")]
     public static int PatchUserEnvironmentProvider(ModuleDefMD module)
     {

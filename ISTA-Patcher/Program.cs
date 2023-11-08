@@ -216,7 +216,7 @@ internal static class ISTAPatcher
         if (opts.GenerateKeyPair)
         {
             // Generate key pair
-            using var rsa = new RSACryptoServiceProvider(2048);
+            using var rsa = new RSACryptoServiceProvider(opts.dwKeySize);
             try
             {
                 var privateKey = rsa.ToXmlString(true);
@@ -305,7 +305,7 @@ internal static class ISTAPatcher
             }
 
             // Patch program
-            var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+            var rsaCryptoServiceProvider = new RSACryptoServiceProvider(opts.dwKeySize);
             rsaCryptoServiceProvider.FromXmlString(keyPairXml);
 
             var parameters = rsaCryptoServiceProvider.ExportParameters(true);

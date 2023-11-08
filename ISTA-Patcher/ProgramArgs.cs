@@ -31,8 +31,14 @@ public static class ProgramArgs
         [Option("disable-requirements-check", Default = false, HelpText = "Disable system requirements check.")]
         public bool DisableRequirementsCheck { get; set; }
 
-        [Option("enable-not-send", Default = false, HelpText = "Enable VIN Not Send Data")]
+        [Option("enable-not-send", Default = false, HelpText = "Enable VIN Not Send Data.")]
         public bool EnableNotSend { get; set; }
+
+        [Option("skip-validation-patch", Default = false, HelpText = "Skip license validation patch.")]
+        public bool SkipLicensePatch { get; set; }
+
+        [Option("patch-user-auth", Default = false, HelpText = "Patch user authentication environment.")]
+        public bool UserAuthEnv { get; set; }
     }
 
     [Verb("patch", HelpText = "Perform patching on application and library.")]
@@ -41,10 +47,10 @@ public static class ProgramArgs
         [Option('t', "type", Default = ProgramArgs.PatchType.B, HelpText = "Specify the patch type. Valid options: B, T.")]
         public PatchType PatchType { get; set; }
 
-        [Option("skip-validation-patch", Default = false, HelpText = "Skip license validation patch.")]
-        public bool SkipLicensePatch { get; set; }
+        [Option("generate-reg-file", Default = false, HelpText = "Generate mock reg file.")]
+        public bool GenerateMockRegFile { get; set; }
 
-        [Option("deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
+        [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
         public bool Deobfuscate { get; set; }
 
         [Option('f', "force", Default = false, HelpText = "Force patching on application and library.")]
@@ -59,6 +65,9 @@ public static class ProgramArgs
     {
         [Option('g', "generate", HelpText = "Generate a key pair.", Group = "operation")]
         public bool GenerateKeyPair { get; set; }
+
+        [Option("key-size", Default = 1024, HelpText = "The size of the key to use in bits")]
+        public int dwKeySize { get; set; }
 
         [Option('p', "patch", HelpText = "Patch the target program.", Group = "operation")]
         public string? TargetPath { get; set; }

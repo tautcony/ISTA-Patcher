@@ -19,6 +19,11 @@ public class DefaultPatcher : IPatcher
     protected DefaultPatcher(ProgramArgs.OptionalPatchOptions opts)
         : this()
     {
+        if (!opts.SkipLicensePatch)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(ValidationPatch)));
+        }
+
         if (opts.EnableENET)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(ENETPatch)));
@@ -33,15 +38,16 @@ public class DefaultPatcher : IPatcher
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(NotSendPatch)));
         }
+
+        if (opts.UserAuthEnv)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(UserAuthPatch)));
+        }
     }
 
     public DefaultPatcher(ProgramArgs.PatchOptions opts)
         : this((ProgramArgs.OptionalPatchOptions)opts)
     {
-        if (!opts.SkipLicensePatch)
-        {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(ValidationPatch)));
-        }
     }
 
     private static IEnumerable<string> LoadFileList(string basePath)

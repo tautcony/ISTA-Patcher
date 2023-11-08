@@ -36,6 +36,10 @@ internal class NotSendPatch : ISTAPatch
 {
 }
 
+internal class UserAuthPatch : ISTAPatch
+{
+}
+
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal class FromVersion : Attribute
 {
