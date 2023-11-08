@@ -234,7 +234,7 @@ public static class DnlibUtils
             default:
                 if (value != null)
                 {
-                    throw new Exception($"Unknown type {value.GetType().FullName}!");
+                    throw new ArgumentException($"Unknown type {value.GetType().FullName}!");
                 }
 
                 break;

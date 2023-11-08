@@ -8,7 +8,7 @@ using CommandLine;
 
 public static class ProgramArgs
 {
-    public enum PatchTypeEnum
+    public enum PatchType
     {
         B = 0,
         T = 1,
@@ -38,8 +38,8 @@ public static class ProgramArgs
     [Verb("patch", HelpText = "Perform patching on application and library.")]
     public class PatchOptions : OptionalPatchOptions
     {
-        [Option('t', "type", Default = PatchTypeEnum.B, HelpText = "Specify the patch type. Valid options: B, T.")]
-        public PatchTypeEnum PatchType { get; set; }
+        [Option('t', "type", Default = ProgramArgs.PatchType.B, HelpText = "Specify the patch type. Valid options: B, T.")]
+        public PatchType PatchType { get; set; }
 
         [Option("skip-validation-patch", Default = false, HelpText = "Skip license validation patch.")]
         public bool SkipLicensePatch { get; set; }

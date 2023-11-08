@@ -20,10 +20,10 @@ public static partial class Patch
         Log.Information("=== ISTA Patch Begin ===");
         var timer = Stopwatch.StartNew();
 
-        var guiBasePath = Path.Join(options.TargetPath, "TesterGUI", "bin", "Release");
+        var guiBasePath = Constants.TesterGUIPath.Aggregate(options.TargetPath, Path.Join);
         var pendingPatchList = patcher.GeneratePatchList(options.TargetPath);
         var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
-        List<int> patchAppliedCount = new(new int[patcher.Patches.Count]);
+        var patchAppliedCount = new int[patcher.Patches.Count];
 
         var lcts = new LimitedConcurrencyLevelTaskScheduler(Environment.ProcessorCount);
         var factory = new TaskFactory(lcts);
@@ -53,7 +53,7 @@ public static partial class Patch
 
     private static void PatchSingleFile(string pendingPatchItem, IList<int> patchAppliedCount, string guiBasePath, int indentLength, IPatcher patcher, ProgramArgs.PatchOptions options)
     {
-        var pendingPatchItemFullPath = pendingPatchItem.StartsWith("!")
+        var pendingPatchItemFullPath = pendingPatchItem.StartsWith('!')
             ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!'))
             : Path.Join(guiBasePath, pendingPatchItem);
 
@@ -109,7 +109,7 @@ public static partial class Patch
             result.Select((item, index) => (item, index)).ToList()
                   .ForEach(patch => patchAppliedCount[patch.index] += patch.item);
 
-            isPatched = result.Any(i => i > 0);
+            isPatched = result.Exists(i => i > 0);
             var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i > 0 ? i.ToString("X") : "-"));
 
             // Check if at least one patch has been applied
@@ -196,7 +196,7 @@ public static partial class Patch
         return patches
                .Select(FormatName)
                .Reverse()
-               .ToList()
+               .AsEnumerable()
                .Select((name, idx) =>
                {
                    var revIdx = patches.Count - 1 - idx;

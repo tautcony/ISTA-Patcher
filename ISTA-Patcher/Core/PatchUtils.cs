@@ -422,7 +422,7 @@ internal static partial class PatchUtils
     }
 
     [EssentialPatch]
-    [FromVersion(Version = "4.44.1x")]
+    [FromVersion("4.44.1x")]
     public static int PatchUserEnvironmentProvider(ModuleDefMD module)
     {
         return module.PatchFunction(

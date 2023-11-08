@@ -40,4 +40,9 @@ internal class NotSendPatch : ISTAPatch
 internal class FromVersion : Attribute
 {
     public string? Version { get; set; }
+
+    public FromVersion(string version)
+    {
+        this.Version = version;
+    }
 }

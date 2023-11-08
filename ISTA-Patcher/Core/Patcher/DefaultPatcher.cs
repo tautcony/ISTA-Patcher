@@ -46,7 +46,7 @@ public class DefaultPatcher : IPatcher
 
     private static IEnumerable<string> LoadFileList(string basePath)
     {
-        var encryptedFileList = Path.Join(basePath, "Ecu", "enc_cne_1.prg");
+        var encryptedFileList = Constants.EncCnePath.Aggregate(basePath, Path.Join);
 
         // load file list from enc_cne_1.prg
         var fileList = Array.Empty<string>();

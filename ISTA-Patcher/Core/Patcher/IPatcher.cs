@@ -15,7 +15,7 @@ public interface IPatcher
 
     public static string?[] LoadFileList(string basePath)
     {
-        var fileList = Directory.GetFiles(Path.Join(basePath, "TesterGUI", "bin", "Release"))
+        var fileList = Directory.GetFiles(Constants.TesterGUIPath.Aggregate(basePath, Path.Join))
                                 .Where(f => f.EndsWith(".exe") || f.EndsWith("dll"))
                                 .Select(Path.GetFileName).ToArray();
         return fileList;

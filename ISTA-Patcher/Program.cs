@@ -16,7 +16,6 @@ using Serilog.Core;
 using DecryptOptions = ProgramArgs.DecryptOptions;
 using LicenseOptions = ProgramArgs.LicenseOptions;
 using PatchOptions = ProgramArgs.PatchOptions;
-using PatchTypeEnum = ProgramArgs.PatchTypeEnum;
 
 internal static class ISTAPatcher
 {
@@ -40,8 +39,8 @@ internal static class ISTAPatcher
     private static Task<int> RunPatchAndReturnExitCode(PatchOptions opts)
     {
         LevelSwitch.MinimumLevel = opts.Verbosity;
-        var guiBasePath = Path.Join(opts.TargetPath, "TesterGUI", "bin", "Release");
-        var psdzBasePath = Path.Join(opts.TargetPath, "PSdZ", "host");
+        var guiBasePath = Utils.Constants.TesterGUIPath.Aggregate(opts.TargetPath, Path.Join);
+        var psdzBasePath = Utils.Constants.PSdZPath.Aggregate(opts.TargetPath, Path.Join);
 
         if (!Directory.Exists(guiBasePath) || !Directory.Exists(psdzBasePath))
         {
@@ -51,8 +50,8 @@ internal static class ISTAPatcher
 
         IPatcher patcher = opts.PatchType switch
         {
-            PatchTypeEnum.B => new DefaultPatcher(opts),
-            PatchTypeEnum.T => new ToyotaPatcher(),
+            ProgramArgs.PatchType.B => new DefaultPatcher(opts),
+            ProgramArgs.PatchType.T => new ToyotaPatcher(),
             _ => throw new NotImplementedException(),
         };
 
@@ -63,8 +62,8 @@ internal static class ISTAPatcher
     private static async Task<int> RunDecryptAndReturnExitCode(DecryptOptions opts)
     {
         LevelSwitch.MinimumLevel = opts.Verbosity;
-        var encryptedFileList = Path.Join(opts.TargetPath, "Ecu", "enc_cne_1.prg");
-        var basePath = Path.Join(opts.TargetPath, "TesterGUI");
+        var encryptedFileList = Utils.Constants.EncCnePath.Aggregate(opts.TargetPath, Path.Join);
+        var basePath = Path.Join(opts.TargetPath, Utils.Constants.TesterGUIPath[0]);
         if (!File.Exists(encryptedFileList))
         {
             Log.Error("File {FilePath} does not exist", encryptedFileList);
@@ -83,52 +82,9 @@ internal static class ISTAPatcher
         {
             if (opts.Integrity)
             {
-                string checkResult;
-                var version = string.Empty;
-                var filePath = Path.Join(basePath, fileInfo.FilePath);
-                if (File.Exists(filePath))
-                {
-                    try
-                    {
-                        var module = Core.PatchUtils.LoadModule(filePath);
-                        version = module.Assembly.Version.ToString();
-                    }
-                    catch (System.BadImageFormatException)
-                    {
-                    }
-
-                    if (fileInfo.Hash == string.Empty)
-                    {
-                        checkResult = "[EMPTY]";
-                    }
-                    else
-                    {
-                        var realHash = await HashFileInfo.CalculateHash(filePath);
-                        checkResult = realHash == fileInfo.Hash ? "[OK]" : "[NG]";
-                    }
-
-                    if (OperatingSystem.IsWindows())
-                    {
-                        var wasVerified = false;
-
-                        var bChecked = NativeMethods.StrongNameSignatureVerificationEx(filePath, true, ref wasVerified);
-                        if (bChecked)
-                        {
-                            checkResult += wasVerified ? "[S:OK]" : "[S:NG]";
-                        }
-                        else
-                        {
-                            checkResult += "[S:NF]";
-                        }
-                    }
-                }
-                else
-                {
-                    checkResult = "Not Found";
-                }
-
-                var info = string.IsNullOrEmpty(version) ? fileInfo.FilePath : $"{fileInfo.FilePath} ({version})";
-                table.AddRow(info, fileInfo.Hash, checkResult);
+                var checkResult = await CheckFileIntegrity(basePath, fileInfo);
+                var info = string.IsNullOrEmpty(checkResult.Value) ? fileInfo.FilePath : $"{fileInfo.FilePath} ({checkResult.Value})";
+                table.AddRow(info, fileInfo.Hash, checkResult.Key);
             }
             else
             {
@@ -138,6 +94,54 @@ internal static class ISTAPatcher
 
         Log.Information("Markdown result:{NewLine}{Markdown}", Environment.NewLine, table.ToMarkDownString());
         return 0;
+    }
+
+    private static async Task<KeyValuePair<string, string>> CheckFileIntegrity(string basePath, HashFileInfo fileInfo)
+    {
+        string checkResult;
+        var version = string.Empty;
+        var filePath = Path.Join(basePath, fileInfo.FilePath);
+        if (!File.Exists(filePath))
+        {
+            return new KeyValuePair<string, string>("Not Found", string.Empty);
+        }
+
+        try
+        {
+            var module = Core.PatchUtils.LoadModule(filePath);
+            version = module.Assembly.Version.ToString();
+        }
+        catch (System.BadImageFormatException)
+        {
+            Log.Warning("None .NET assembly found: {FilePath}", filePath);
+        }
+
+        if (fileInfo.Hash == string.Empty)
+        {
+            checkResult = "[EMPTY]";
+        }
+        else
+        {
+            var realHash = await HashFileInfo.CalculateHash(filePath);
+            checkResult = realHash == fileInfo.Hash ? "[OK]" : "[NG]";
+        }
+
+        if (OperatingSystem.IsWindows())
+        {
+            var wasVerified = false;
+
+            var bChecked = NativeMethods.StrongNameSignatureVerificationEx(filePath, true, ref wasVerified);
+            if (bChecked)
+            {
+                checkResult += wasVerified ? "[S:OK]" : "[S:NG]";
+            }
+            else
+            {
+                checkResult += "[S:NF]";
+            }
+        }
+
+        return new KeyValuePair<string, string>(checkResult, version);
     }
 
     private static async Task<int> RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
