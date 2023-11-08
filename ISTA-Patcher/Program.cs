@@ -164,21 +164,9 @@ internal static class ISTAPatcher
         }
 
         var privateKeyPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "private-key.xml");
-        if (opts.AutoMode)
-        {
-            if (opts.TargetPath == null || opts.LicenseRequestPath == null)
-            {
-                Log.Fatal("You must specify --patch and --license options");
-                return -1;
-            }
-
-            opts.GenerateKeyPair = true;
-            opts.KeyPairPath = privateKeyPath;
-            opts.SignLicense = true;
-        }
 
         string keyPairXml = null;
-        if (opts.KeyPairPath != null && !opts.AutoMode)
+        if (opts.KeyPairPath != null)
         {
             if (!File.Exists(opts.KeyPairPath))
             {
@@ -236,10 +224,6 @@ internal static class ISTAPatcher
                 await using var fs = new FileStream(privateKeyPath, FileMode.Create);
                 await using var sw = new StreamWriter(fs);
                 await sw.WriteAsync(privateKey);
-                if (opts.AutoMode)
-                {
-                    keyPairXml = privateKey;
-                }
 
                 Log.Information("Generated key pair located at {PrivateKeyPath}", privateKeyPath);
             }
@@ -249,10 +233,7 @@ internal static class ISTAPatcher
                 rsa.Clear();
             }
 
-            if (!opts.AutoMode)
-            {
-                return 0;
-            }
+            return 0;
         }
 
         // --sign
@@ -311,10 +292,7 @@ internal static class ISTAPatcher
                 Log.Information("License[Xml]:{NewLine}{License}", Environment.NewLine, LicenseInfoSerializer.ToString(license).ReplaceLineEndings(string.Empty));
             }
 
-            if (!opts.AutoMode)
-            {
-                return 0;
-            }
+            return 0;
         }
 
         // --patch

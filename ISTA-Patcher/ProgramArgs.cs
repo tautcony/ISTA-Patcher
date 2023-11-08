@@ -69,9 +69,6 @@ public static class ProgramArgs
         [Option("decode", Default = null, HelpText = "Decode the license request stream.", Group = "operation")]
         public string Decode { get; set; }
 
-        [Option("auto", Default = false, HelpText = "Automatically generate a key pair and patch the target program.")]
-        public bool AutoMode { get; set; }
-
         [Option('k', "key-pair", HelpText = "Specify the path for the key pair file.")]
         public string? KeyPairPath { get; set; }
 
