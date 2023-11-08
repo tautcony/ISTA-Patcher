@@ -16,9 +16,9 @@
       },
       "dnlib": {
         "type": "Direct",
-        "requested": "[4.2.0, )",
-        "resolved": "4.2.0",
-        "contentHash": "HcoTWCKfnPRujJ6r5UqWBJtq14q+HKbxNwwgi9id/fXX6Q0NEYJsOaDFd9XZxo/gf7JcCjnrtf02CIdGCEoJGA=="
+        "requested": "[4.3.0, )",
+        "resolved": "4.3.0",
+        "contentHash": "aGJ1KzGLV6dsU6gsR5dXfhjcIn0z0YJ29VqysPtHZ8237adtPfO0X2E6eyYehwrzeKMkZKQOdC1VQaHdQQ+yCw=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
