@@ -15,21 +15,14 @@ public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
   // The list of tasks to be executed
    private readonly LinkedList<Task> _tasks = new(); // protected by lock(_tasks)
 
-   // The maximum concurrency level allowed by this scheduler.
-   private readonly int _maxDegreeOfParallelism;
-
    // Indicates whether the scheduler is currently processing work items.
    private int _delegatesQueuedOrRunning;
 
    // Creates a new instance with the specified degree of parallelism.
    public LimitedConcurrencyLevelTaskScheduler(int maxDegreeOfParallelism)
    {
-       if (maxDegreeOfParallelism < 1)
-       {
-           throw new ArgumentOutOfRangeException(nameof(maxDegreeOfParallelism));
-       }
-
-       this._maxDegreeOfParallelism = maxDegreeOfParallelism;
+        ArgumentOutOfRangeException.ThrowIfLessThan(maxDegreeOfParallelism, 1);
+        this.MaximumConcurrencyLevel = maxDegreeOfParallelism;
    }
 
    // Queues a task to the scheduler.
@@ -40,7 +33,7 @@ public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
        lock (this._tasks)
        {
            this._tasks.AddLast(task);
-           if (this._delegatesQueuedOrRunning < this._maxDegreeOfParallelism)
+           if (this._delegatesQueuedOrRunning < this.MaximumConcurrencyLevel)
            {
                ++this._delegatesQueuedOrRunning;
                this.NotifyThreadPoolOfPendingWork();
@@ -132,8 +125,8 @@ public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
        }
    }
 
-   // Gets the maximum concurrency level supported by this scheduler.
-   public sealed override int MaximumConcurrencyLevel => this._maxDegreeOfParallelism;
+   // The maximum concurrency level allowed by this scheduler.
+   public sealed override int MaximumConcurrencyLevel { get; }
 
    // Gets an enumerable of the tasks currently scheduled on this scheduler.
    protected sealed override IEnumerable<Task> GetScheduledTasks()

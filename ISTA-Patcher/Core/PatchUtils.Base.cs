@@ -258,7 +258,7 @@ internal static partial class PatchUtils
             Name = "ISTA Patcher",
             Email = "ista-patcher@\u0062\u006d\u0077.de",
             Expiration = DateTime.MaxValue,
-            Comment = PatchUtils.RepoUrl,
+            Comment = RepoUrl,
             ComputerName = null,
             UserName = "*",
             AvailableBrandTypes = "*",

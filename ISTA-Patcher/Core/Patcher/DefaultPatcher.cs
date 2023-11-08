@@ -50,7 +50,7 @@ public class DefaultPatcher : IPatcher
     {
     }
 
-    private static IEnumerable<string> LoadFileList(string basePath)
+    private static string[] LoadFileList(string basePath)
     {
         var encryptedFileList = Constants.EncCnePath.Aggregate(basePath, Path.Join);
 
