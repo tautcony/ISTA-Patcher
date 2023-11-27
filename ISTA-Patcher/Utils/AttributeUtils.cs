@@ -23,12 +23,7 @@ internal class NotSendPatch : ISTAPatch;
 internal class UserAuthPatch : ISTAPatch;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-internal class FromVersion : Attribute
+internal class FromVersion(string version) : Attribute
 {
-    public string? Version { get; set; }
-
-    public FromVersion(string version)
-    {
-        this.Version = version;
-    }
+    public string? Version { get; set; } = version;
 }

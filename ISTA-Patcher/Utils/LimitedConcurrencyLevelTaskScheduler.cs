@@ -105,12 +105,7 @@ public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
        if (taskWasPreviouslyQueued)
        {
            // Try to run the task.
-           if (this.TryDequeue(task))
-           {
-               return this.TryExecuteTask(task);
-           }
-
-           return false;
+           return this.TryDequeue(task) && this.TryExecuteTask(task);
        }
 
        return this.TryExecuteTask(task);
@@ -131,7 +126,7 @@ public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
    // Gets an enumerable of the tasks currently scheduled on this scheduler.
    protected sealed override IEnumerable<Task> GetScheduledTasks()
    {
-       bool lockTaken = false;
+       var lockTaken = false;
        try
        {
            Monitor.TryEnter(this._tasks, ref lockTaken);

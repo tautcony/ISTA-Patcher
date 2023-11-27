@@ -142,41 +142,7 @@ public static partial class Patch
                 return;
             }
 
-            try
-            {
-                var deobfTimer = Stopwatch.StartNew();
-
-                var deobfPath = patchedFileFullPath + ".deobf";
-                PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
-                if (File.Exists(patchedFileFullPath))
-                {
-                    File.Delete(patchedFileFullPath);
-                }
-
-                File.Move(deobfPath, patchedFileFullPath);
-
-                deobfTimer.Stop();
-                var timeStr = deobfTimer.ElapsedTicks > Stopwatch.Frequency
-                    ? $" in {deobfTimer.Elapsed:mm\\:ss}"
-                    : string.Empty;
-                Log.Information(
-                    "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate success{Time}]",
-                    pendingPatchItem,
-                    indent,
-                    resultStr,
-                    patchedFunctionCount,
-                    timeStr);
-            }
-            catch (ApplicationException ex)
-            {
-                Log.Information(
-                    "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate skipped]: {Reason}",
-                    pendingPatchItem,
-                    indent,
-                    resultStr,
-                    patchedFunctionCount,
-                    ex.Message);
-            }
+            DeObfuscateSingleFile(pendingPatchItem, patchedFileFullPath, patchedFunctionCount, indent, resultStr);
         }
         catch (Exception ex)
         {
@@ -192,6 +158,45 @@ public static partial class Patch
             {
                 File.Delete(patchedFileFullPath);
             }
+        }
+    }
+
+    private static void DeObfuscateSingleFile(string pendingPatchItem, string patchedFileFullPath, int patchedFunctionCount, string indent, string resultStr)
+    {
+        try
+        {
+            var deobfTimer = Stopwatch.StartNew();
+
+            var deobfPath = patchedFileFullPath + ".deobf";
+            PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
+            if (File.Exists(patchedFileFullPath))
+            {
+                File.Delete(patchedFileFullPath);
+            }
+
+            File.Move(deobfPath, patchedFileFullPath);
+
+            deobfTimer.Stop();
+            var timeStr = deobfTimer.ElapsedTicks > Stopwatch.Frequency
+                ? $" in {deobfTimer.Elapsed:mm\\:ss}"
+                : string.Empty;
+            Log.Information(
+                "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate success{Time}]",
+                pendingPatchItem,
+                indent,
+                resultStr,
+                patchedFunctionCount,
+                timeStr);
+        }
+        catch (ApplicationException ex)
+        {
+            Log.Information(
+                "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate skipped]: {Reason}",
+                pendingPatchItem,
+                indent,
+                resultStr,
+                patchedFunctionCount,
+                ex.Message);
         }
     }
 

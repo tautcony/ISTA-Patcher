@@ -126,19 +126,21 @@ internal static class ISTAPatcher
             checkResult = realHash == fileInfo.Hash ? "[OK]" : "[NG]";
         }
 
-        if (OperatingSystem.IsWindows())
+        if (!OperatingSystem.IsWindows())
         {
-            var wasVerified = false;
+            return new KeyValuePair<string, string>(checkResult, version);
+        }
 
-            var bChecked = NativeMethods.StrongNameSignatureVerificationEx(filePath, true, ref wasVerified);
-            if (bChecked)
-            {
-                checkResult += wasVerified ? "[S:OK]" : "[S:NG]";
-            }
-            else
-            {
-                checkResult += "[S:NF]";
-            }
+        var wasVerified = false;
+
+        var bChecked = NativeMethods.StrongNameSignatureVerificationEx(filePath, true, ref wasVerified);
+        if (bChecked)
+        {
+            checkResult += wasVerified ? "[S:OK]" : "[S:NG]";
+        }
+        else
+        {
+            checkResult += "[S:NF]";
         }
 
         return new KeyValuePair<string, string>(checkResult, version);
@@ -215,84 +217,14 @@ internal static class ISTAPatcher
         // --generate
         if (opts.GenerateKeyPair)
         {
-            // Generate key pair
-            using var rsa = new RSACryptoServiceProvider(opts.dwKeySize);
-            try
-            {
-                var privateKey = rsa.ToXmlString(true);
-
-                await using var fs = new FileStream(privateKeyPath, FileMode.Create);
-                await using var sw = new StreamWriter(fs);
-                await sw.WriteAsync(privateKey);
-
-                Log.Information("Generated key pair located at {PrivateKeyPath}", privateKeyPath);
-            }
-            finally
-            {
-                rsa.PersistKeyInCsp = false;
-                rsa.Clear();
-            }
-
+            await GenerateKeyPair(privateKeyPath, opts.dwKeySize);
             return 0;
         }
 
         // --sign
         if (opts.SignLicense && keyPairXml != null && licenseXml != null)
         {
-            var license = LicenseInfoSerializer.FromString<LicenseInfo>(licenseXml);
-            if (license == null)
-            {
-                Log.Error("License request is not valid");
-                return -1;
-            }
-
-            var isValid = false;
-            if (license.LicenseKey is { Length: > 0 })
-            {
-                // verify license
-                var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(keyPairXml);
-                isValid = LicenseStatusChecker.IsLicenseValid(license, deformatter);
-                Log.Information("License is valid: {IsValid}", isValid);
-            }
-
-            if (isValid)
-            {
-                Log.Debug("License is valid, no need to patch");
-                return 0;
-            }
-
-            // update license info
-            license.Comment = $"{Core.PatchUtils.PoweredBy} ({Core.PatchUtils.RepoUrl})";
-            license.Expiration = DateTime.MaxValue;
-            if (license.SubLicenses != null)
-            {
-                foreach (var subLicense in license.SubLicenses)
-                {
-                    if (opts.SyntheticEnv)
-                    {
-                        subLicense.PackageName = "SyntheticEnv";
-                    }
-
-                    subLicense.PackageRule ??= "true";
-                    subLicense.PackageExpire = DateTime.MaxValue;
-                }
-            }
-
-            // generate license key
-            LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
-            var signedLicense = LicenseInfoSerializer.ToByteArray(license);
-            if (opts.SignedLicensePath != null)
-            {
-                await using var fileStream = File.Create(opts.SignedLicensePath);
-                await fileStream.WriteAsync(signedLicense);
-            }
-            else
-            {
-                Log.Information("License[Base64]:{NewLine}{License}", Environment.NewLine, Convert.ToBase64String(signedLicense));
-                Log.Information("License[Xml]:{NewLine}{License}", Environment.NewLine, LicenseInfoSerializer.ToString(license).ReplaceLineEndings(string.Empty));
-            }
-
-            return 0;
+            return await SignLicense(keyPairXml, licenseXml, opts);
         }
 
         // --patch
@@ -327,5 +259,83 @@ internal static class ISTAPatcher
 
         Log.Warning("No operation matched, exiting...");
         return 1;
+    }
+
+    private static async Task GenerateKeyPair(string privateKeyPath, int dwKeySize)
+    {
+        using var rsa = new RSACryptoServiceProvider(dwKeySize);
+        try
+        {
+            var privateKey = rsa.ToXmlString(true);
+
+            await using var fs = new FileStream(privateKeyPath, FileMode.Create);
+            await using var sw = new StreamWriter(fs);
+            await sw.WriteAsync(privateKey);
+
+            Log.Information("Generated key pair located at {PrivateKeyPath}", privateKeyPath);
+        }
+        finally
+        {
+            rsa.PersistKeyInCsp = false;
+            rsa.Clear();
+        }
+    }
+
+    private static async Task<int> SignLicense(string keyPairXml, string licenseXml, LicenseOptions opts)
+    {
+        var license = LicenseInfoSerializer.FromString<LicenseInfo>(licenseXml);
+        if (license == null)
+        {
+            Log.Error("License request is not valid");
+            return -1;
+        }
+
+        var isValid = false;
+        if (license.LicenseKey is { Length: > 0 })
+        {
+            // verify license
+            var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(keyPairXml);
+            isValid = LicenseStatusChecker.IsLicenseValid(license, deformatter);
+            Log.Information("License is valid: {IsValid}", isValid);
+        }
+
+        if (isValid)
+        {
+            Log.Debug("License is valid, no need to patch");
+            return 0;
+        }
+
+        // update license info
+        license.Comment = $"{Core.PatchUtils.PoweredBy} ({Core.PatchUtils.RepoUrl})";
+        license.Expiration = DateTime.MaxValue;
+        if (license.SubLicenses != null)
+        {
+            foreach (var subLicense in license.SubLicenses)
+            {
+                if (opts.SyntheticEnv)
+                {
+                    subLicense.PackageName = "SyntheticEnv";
+                }
+
+                subLicense.PackageRule ??= "true";
+                subLicense.PackageExpire = DateTime.MaxValue;
+            }
+        }
+
+        // generate license key
+        LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
+        var signedLicense = LicenseInfoSerializer.ToByteArray(license);
+        if (opts.SignedLicensePath != null)
+        {
+            await using var fileStream = File.Create(opts.SignedLicensePath);
+            await fileStream.WriteAsync(signedLicense);
+        }
+        else
+        {
+            Log.Information("License[Base64]:{NewLine}{License}", Environment.NewLine, Convert.ToBase64String(signedLicense));
+            Log.Information("License[Xml]:{NewLine}{License}", Environment.NewLine, LicenseInfoSerializer.ToString(license).ReplaceLineEndings(string.Empty));
+        }
+
+        return 0;
     }
 }
