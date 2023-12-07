@@ -27,7 +27,7 @@ public interface IPatcher
         try
         {
             using FileStream stream = new(Path.Join(cwd, "patch-config.json"), FileMode.Open, FileAccess.Read);
-            var patchConfig = JsonSerializer.Deserialize<PatchConfig>(stream);
+            var patchConfig = JsonSerializer.Deserialize(stream, PatchConfigSourceGenerationContext.Default.PatchConfig);
             return patchConfig;
         }
         catch (Exception ex) when (

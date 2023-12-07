@@ -19,3 +19,6 @@ public class PatchConfig
     [JsonPropertyName("exclude.toyota")]
     public string[]? ExcludeToyota { get; set; }
 }
+
+[JsonSerializable(typeof(PatchConfig))]
+internal partial class PatchConfigSourceGenerationContext : JsonSerializerContext;
