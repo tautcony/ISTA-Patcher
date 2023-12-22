@@ -58,7 +58,7 @@ public class DefaultPatcher : IPatcher
         var fileList = Array.Empty<string>();
         if (File.Exists(encryptedFileList))
         {
-            fileList = (IntegrityUtils.DecryptFile(encryptedFileList!) ?? new List<HashFileInfo>())
+            fileList = (IntegrityUtils.DecryptFile(encryptedFileList!) ?? [])
                        .Select(f => f.FileName).ToArray();
         }
         else

@@ -13,7 +13,7 @@ public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
    private static bool _currentThreadIsProcessingItems;
 
   // The list of tasks to be executed
-   private readonly LinkedList<Task> _tasks = new(); // protected by lock(_tasks)
+   private readonly LinkedList<Task> _tasks = []; // protected by lock(_tasks)
 
    // Indicates whether the scheduler is currently processing work items.
    private int _delegatesQueuedOrRunning;

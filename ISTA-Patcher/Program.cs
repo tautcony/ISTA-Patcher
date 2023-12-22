@@ -5,7 +5,6 @@ namespace ISTA_Patcher;
 
 using System.Security.Cryptography;
 using System.Text;
-using CommandLine;
 using ConsoleTables;
 using ISTA_Patcher.Core;
 using ISTA_Patcher.Core.Patcher;
@@ -28,12 +27,9 @@ internal static class ISTAPatcher
                      .WriteTo.Console()
                      .CreateLogger();
 
-        return await Parser.Default.ParseArguments<PatchOptions, DecryptOptions, LicenseOptions>(args)
-                     .MapResult(
-                         (PatchOptions opts) => RunPatchAndReturnExitCode(opts),
-                         (DecryptOptions opts) => RunDecryptAndReturnExitCode(opts),
-                         (LicenseOptions opts) => RunLicenseOperationAndReturnExitCode(opts),
-                         _ => Task.FromResult(1));
+        var command = ProgramArgs.BuildCommandLine(RunPatchAndReturnExitCode, RunLicenseOperationAndReturnExitCode, RunDecryptAndReturnExitCode);
+
+        return await command.Parse(args).InvokeAsync();
     }
 
     private static Task<int> RunPatchAndReturnExitCode(PatchOptions opts)
