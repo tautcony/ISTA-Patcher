@@ -17,12 +17,12 @@ jobs:
         runtime-identifier: [ 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64' ]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Setup .NET 8.x
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.x
         cache: true
@@ -44,7 +44,7 @@ jobs:
       run: dotnet publish ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --self-contained false
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ISTA-Patcher-${{ matrix.runtime-identifier }}-${{ matrix.configuration }}
         path: |
@@ -69,13 +69,13 @@ jobs:
         sudo mv /tmp/lipo /usr/local/bin/lipo
 
     - name: Download x64 build
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ISTA-Patcher-osx-x64-Release
         path: ISTA-Patcher/bin/Release/net8.0/osx-x64/publish
 
     - name: Download arm64 build
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ISTA-Patcher-osx-arm64-Release
         path: ISTA-Patcher/bin/Release/net8.0/osx-arm64/publish
@@ -87,7 +87,7 @@ jobs:
         cp -f ISTA-Patcher/bin/Release/net8.0/osx-x64/publish/patch-config.json ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/patch-config.json
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ISTA-Patcher-osx-universal-Release
         path: |

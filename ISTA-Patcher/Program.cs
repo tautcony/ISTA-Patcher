@@ -20,7 +20,7 @@ internal static class ISTAPatcher
 {
     private static LoggingLevelSwitch LevelSwitch { get; } = new();
 
-    public static async Task<int> Main(string[] args)
+    public static Task<int> Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration()
                      .MinimumLevel.ControlledBy(LevelSwitch)
@@ -29,7 +29,7 @@ internal static class ISTAPatcher
 
         var command = ProgramArgs.BuildCommandLine(RunPatchAndReturnExitCode, RunLicenseOperationAndReturnExitCode, RunDecryptAndReturnExitCode);
 
-        return await command.Parse(args).InvokeAsync();
+        return command.Parse(args).InvokeAsync();
     }
 
     private static Task<int> RunPatchAndReturnExitCode(PatchOptions opts)

@@ -18,6 +18,7 @@
 */
 
 using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
 using dnlib.DotNet;
 
 namespace de4dot.blocks {
@@ -351,7 +352,7 @@ namespace de4dot.blocks {
 			this.token = token;
 		}
 
-		public override int GetHashCode() => (int)token + GetHashCode(scope);
+		public override int GetHashCode() => HashCode.Combine(token, scope.ScopeType, scope.ScopeName);
 
 		public override bool Equals(object obj) {
 			var other = obj as ScopeAndTokenKey;
