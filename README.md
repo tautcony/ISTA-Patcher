@@ -29,10 +29,25 @@ ISTA
 
 > ⚠️ ISTA-Patcher will backup the original files to the `@ista-backup` folder, but it is still recommended to backup the `ISTA\TesterGUI` & `ISTA\PSdZ` folders before patching.
 
+> *nix users may need the following steps to get the ISTA-Patcher work.
+
+```shell
+unzip ISTA-Patcher-*-Release.zip
+cd ISTA-Patcher-*-Release
+
+# linux
+chmod +x ISTA-Patcher
+
+# macos
+xattr -d com.apple.quarantine ISTA-Patcher
+chmod +x ISTA-Patcher
+codesign --force --deep -s - ISTA-Patcher
+```
+
 Execute the following command in a terminal:
 
 ```shell
-ISTA-Patcher.exe patch "\PATH\TO\ISTA"
+ISTA-Patcher patch "\PATH\TO\ISTA"
 ```
 
 The directory containing the patched files is located as follows:
