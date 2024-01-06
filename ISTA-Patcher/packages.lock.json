@@ -14,6 +14,12 @@
         "resolved": "4.3.0",
         "contentHash": "aGJ1KzGLV6dsU6gsR5dXfhjcIn0z0YJ29VqysPtHZ8237adtPfO0X2E6eyYehwrzeKMkZKQOdC1VQaHdQQ+yCw=="
       },
+      "Meziantou.Analyzer": {
+        "type": "Direct",
+        "requested": "[2.0.134, )",
+        "resolved": "2.0.134",
+        "contentHash": "N+63EP3eJLRRZKoD3IpiGWgbdkNOnjxr0VovOBAc69LxUocrlxQ9uZODg2v1QEYQWEF7A3h6YTY0KcHPpe+EcQ=="
+      },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
         "requested": "[8.0.0, )",

@@ -341,13 +341,10 @@ internal static partial class PatchUtils
             var containsDef = module.Types.SelectMany(t => t.Methods).Where(m => m.HasBody)
                                     .SelectMany(m => m.Body.Instructions)
                                     .FirstOrDefault(i => i.OpCode == OpCodes.Callvirt &&
-                                                         (i.Operand as MemberRef)?.FullName ==
-                                                         "System.Boolean System.String::Contains(System.String)")
+                                        string.Equals((i.Operand as MemberRef)?.FullName, "System.Boolean System.String::Contains(System.String)", StringComparison.Ordinal))
                                     ?.Operand as MemberRef;
 
-            var titleField = method.DeclaringType.Fields.FirstOrDefault(field =>
-                field.FullName ==
-                "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title");
+            var titleField = method.DeclaringType.Fields.FirstOrDefault(field => string.Equals(field.FullName, "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title", StringComparison.Ordinal));
 
             if (containsDef == null || titleField == null)
             {

@@ -4,6 +4,7 @@
 namespace ISTA_Patcher.Core;
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using dnlib.DotNet;
 using ISTA_Patcher.Core.Patcher;
@@ -114,7 +115,7 @@ public static partial class Patch
                   .ForEach(patch => patchAppliedCount[patch.index] += patch.item);
 
             isPatched = result.Exists(i => i > 0);
-            var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i > 0 ? i.ToString("X") : "-"));
+            var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i > 0 ? i.ToString("X", CultureInfo.CurrentCulture) : "-"));
 
             // Check if at least one patch has been applied
             if (!isPatched)
@@ -221,10 +222,10 @@ public static partial class Patch
                 name = match.Groups[1].Value;
             }
 
-            return name.StartsWith("Patch") ? name[5..] : name;
+            return name.StartsWith("Patch", StringComparison.Ordinal) ? name[5..] : name;
         }
     }
 
-    [GeneratedRegex("^<([^>]+)>", RegexOptions.Compiled)]
+    [GeneratedRegex("^<([^>]+)>", RegexOptions.Compiled | RegexOptions.ExplicitCapture, matchTimeoutMilliseconds: 1000)]
     private static partial Regex ActionNamePattern();
 }

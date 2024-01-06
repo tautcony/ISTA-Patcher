@@ -3,6 +3,7 @@
 
 namespace ISTA_Patcher.Core;
 
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using de4dot.code;
@@ -20,7 +21,7 @@ using Serilog;
 /// </summary>
 internal static partial class PatchUtils
 {
-    private static readonly string Timestamp = DateTime.Now.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+    private static readonly string Timestamp = DateTime.Now.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.CurrentCulture);
     private static readonly ModuleContext ModCtx = ModuleDef.CreateModuleContext();
     private static readonly IDeobfuscatorContext DeobfuscatorContext = new DeobfuscatorContext();
     private static readonly NewProcessAssemblyClientFactory ProcessAssemblyClientFactory = new();

@@ -53,9 +53,12 @@ public class HashFileInfo
         try
         {
             using var sha = SHA256.Create();
-            await using var fileStream = File.OpenRead(pathFile);
-            var hex = BitConverter.ToString(await sha.ComputeHashAsync(fileStream));
-            return hex.Replace("-", string.Empty);
+            var fileStream = File.OpenRead(pathFile);
+            await using (fileStream.ConfigureAwait(false))
+            {
+                var hex = BitConverter.ToString(await sha.ComputeHashAsync(fileStream).ConfigureAwait(false));
+                return hex.Replace("-", string.Empty, StringComparison.Ordinal);
+            }
         }
         catch (FileNotFoundException ex)
         {

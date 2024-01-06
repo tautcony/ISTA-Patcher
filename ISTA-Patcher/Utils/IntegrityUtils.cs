@@ -21,7 +21,7 @@ public static class IntegrityUtils
         0x68, 0x66, 0x50, 0x69, 0x74, 0x41, 0x6d, 0x49, 0x38, 0x77, 0x45, 0x3d,
     };
 
-    public static List<HashFileInfo>? DecryptFile(string sourceFilename)
+    public static IList<HashFileInfo>? DecryptFile(string sourceFilename)
     {
         try
         {
@@ -43,7 +43,7 @@ public static class IntegrityUtils
             }
 
             var bytes = memoryStream.ToArray();
-            return (from row in Encoding.UTF8.GetString(bytes).Split(";;\r\n", StringSplitOptions.RemoveEmptyEntries).Distinct()
+            return (from row in Encoding.UTF8.GetString(bytes).Split(";;\r\n", StringSplitOptions.RemoveEmptyEntries).Distinct(StringComparer.Ordinal)
                 select new HashFileInfo(row.Split(";;", StringSplitOptions.RemoveEmptyEntries))).ToList();
         }
         catch (Exception ex)

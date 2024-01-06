@@ -83,9 +83,9 @@ public class DefaultPatcher : IPatcher
         var includeList = patchConfig?.Include ?? Array.Empty<string>();
 
         var patchList = includeList
-                        .Union(fileList.Except(excludeList))
-                        .Distinct()
-                        .Order()
+                        .Union(fileList.Except(excludeList, StringComparer.Ordinal), StringComparer.Ordinal)
+                        .Distinct(StringComparer.Ordinal)
+                        .Order(StringComparer.Ordinal)
                         .ToArray();
         return patchList;
     }

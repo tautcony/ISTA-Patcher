@@ -47,7 +47,7 @@ public static class DnlibUtils
     /// A <see cref="TypeDef"/> object representing the specified type if found; otherwise, null.
     /// </returns>
     public static TypeDef? GetType(this ModuleDefMD module, string type) =>
-        module.GetTypes().FirstOrDefault(tp => tp.FullName == type);
+        module.GetTypes().FirstOrDefault(tp => string.Equals(tp.FullName, type, StringComparison.Ordinal));
 
     /// <summary>
     /// Retrieves a <see cref="MethodDef"/> from the specified <see cref="ModuleDefMD"/>.
@@ -140,7 +140,7 @@ public static class DnlibUtils
     public static Instruction? FindInstruction(this MethodDef method, OpCode opCode, string operandName)
     {
         return method.Body.Instructions.FirstOrDefault(instruction =>
-            instruction.OpCode == opCode && (instruction.Operand as IMethod)?.FullName == operandName);
+            instruction.OpCode == opCode && string.Equals((instruction.Operand as IMethod)?.FullName, operandName, StringComparison.Ordinal));
     }
 
     /// <summary>
@@ -184,12 +184,12 @@ public static class DnlibUtils
         var importer = new Importer(module);
 
         // ReSharper disable once ConvertIfStatementToReturnStatement
-        if (method == ".ctor")
+        if (string.Equals(method, ".ctor", StringComparison.Ordinal))
         {
             return (from m in type.GetConstructors() where CheckParametersByType(m, parameters) select importer.Import(m)).FirstOrDefault();
         }
 
-        return (from m in type.GetMethods().Where(m => m.Name == method && m.ReturnType == returnType) where CheckParametersByType(m, parameters) select importer.Import(m)).FirstOrDefault();
+        return (from m in type.GetMethods().Where(m => string.Equals(m.Name, method, StringComparison.Ordinal) && m.ReturnType == returnType) where CheckParametersByType(m, parameters) select importer.Import(m)).FirstOrDefault();
     }
 
     /// <summary>
@@ -235,7 +235,7 @@ public static class DnlibUtils
             default:
                 if (value != null)
                 {
-                    throw new ArgumentException($"Unknown type {value.GetType().FullName}!");
+                    throw new ArgumentException($"Unknown type {value.GetType().FullName}!", paramName: nameof(value));
                 }
 
                 break;
@@ -286,6 +286,6 @@ public static class DnlibUtils
 
     public static Local? GetLocalByType(this MethodDef method, string fullTypeName)
     {
-        return method.Body.Variables.FirstOrDefault(variable => variable.Type.FullName == fullTypeName);
+        return method.Body.Variables.FirstOrDefault(variable => string.Equals(variable.Type.FullName, fullTypeName, StringComparison.Ordinal));
     }
 }

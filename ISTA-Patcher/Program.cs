@@ -48,7 +48,7 @@ internal static class ISTAPatcher
         {
             ProgramArgs.PatchType.B => new DefaultPatcher(opts),
             ProgramArgs.PatchType.T => new ToyotaPatcher(),
-            _ => throw new NotImplementedException(),
+            _ => throw new NotSupportedException(),
         };
 
         Patch.PatchISTA(patcher, opts);
@@ -78,7 +78,7 @@ internal static class ISTAPatcher
         {
             if (opts.Integrity)
             {
-                var checkResult = await CheckFileIntegrity(basePath, fileInfo);
+                var checkResult = await CheckFileIntegrity(basePath, fileInfo).ConfigureAwait(false);
                 var info = string.IsNullOrEmpty(checkResult.Value) ? fileInfo.FilePath : $"{fileInfo.FilePath} ({checkResult.Value})";
                 table.AddRow(info, fileInfo.Hash, checkResult.Key);
             }
@@ -118,8 +118,8 @@ internal static class ISTAPatcher
         }
         else
         {
-            var realHash = await HashFileInfo.CalculateHash(filePath);
-            checkResult = realHash == fileInfo.Hash ? "[OK]" : "[NG]";
+            var realHash = await HashFileInfo.CalculateHash(filePath).ConfigureAwait(false);
+            checkResult = string.Equals(realHash, fileInfo.Hash, StringComparison.Ordinal) ? "[OK]" : "[NG]";
         }
 
         if (!OperatingSystem.IsWindows())
@@ -172,10 +172,13 @@ internal static class ISTAPatcher
                 return -1;
             }
 
-            await using var fs = File.OpenRead(opts.KeyPairPath);
-            using var sr = new StreamReader(fs, new UTF8Encoding(false));
-            keyPairXml = await sr.ReadToEndAsync();
-            Log.Debug("Loaded private key from {KeyPairPath}", opts.KeyPairPath);
+            var fs = File.OpenRead(opts.KeyPairPath);
+            await using (fs.ConfigureAwait(false))
+            {
+                using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                keyPairXml = await sr.ReadToEndAsync().ConfigureAwait(false);
+                Log.Debug("Loaded private key from {KeyPairPath}", opts.KeyPairPath);
+            }
         }
 
         string licenseXml = null;
@@ -203,24 +206,27 @@ internal static class ISTAPatcher
                     return -1;
                 }
 
-                await using var fs = File.OpenRead(opts.LicenseRequestPath);
-                using var sr = new StreamReader(fs, new UTF8Encoding(false));
-                licenseXml = await sr.ReadToEndAsync();
-                Log.Debug("Loaded license request from {LicensePath}", opts.LicenseRequestPath);
+                var fs = File.OpenRead(opts.LicenseRequestPath);
+                await using (fs.ConfigureAwait(false))
+                {
+                    using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                    licenseXml = await sr.ReadToEndAsync().ConfigureAwait(false);
+                    Log.Debug("Loaded license request from {LicensePath}", opts.LicenseRequestPath);
+                }
             }
         }
 
         // --generate
         if (opts.GenerateKeyPair)
         {
-            await GenerateKeyPair(privateKeyPath, opts.dwKeySize);
+            await GenerateKeyPair(privateKeyPath, opts.dwKeySize).ConfigureAwait(false);
             return 0;
         }
 
         // --sign
         if (opts.SignLicense && keyPairXml != null && licenseXml != null)
         {
-            return await SignLicense(keyPairXml, licenseXml, opts);
+            return await SignLicense(keyPairXml, licenseXml, opts).ConfigureAwait(false);
         }
 
         // --patch
@@ -264,11 +270,17 @@ internal static class ISTAPatcher
         {
             var privateKey = rsa.ToXmlString(true);
 
-            await using var fs = new FileStream(privateKeyPath, FileMode.Create);
-            await using var sw = new StreamWriter(fs);
-            await sw.WriteAsync(privateKey);
+            var fs = new FileStream(privateKeyPath, FileMode.Create);
+            await using (fs.ConfigureAwait(false))
+            {
+                var sw = new StreamWriter(fs);
+                await using (sw.ConfigureAwait(false))
+                {
+                    await sw.WriteAsync(privateKey).ConfigureAwait(false);
 
-            Log.Information("Generated key pair located at {PrivateKeyPath}", privateKeyPath);
+                    Log.Information("Generated key pair located at {PrivateKeyPath}", privateKeyPath);
+                }
+            }
         }
         finally
         {
@@ -323,8 +335,11 @@ internal static class ISTAPatcher
         var signedLicense = LicenseInfoSerializer.ToByteArray(license);
         if (opts.SignedLicensePath != null)
         {
-            await using var fileStream = File.Create(opts.SignedLicensePath);
-            await fileStream.WriteAsync(signedLicense);
+            var fileStream = File.Create(opts.SignedLicensePath);
+            await using (fileStream.ConfigureAwait(false))
+            {
+                await fileStream.WriteAsync(signedLicense).ConfigureAwait(false);
+            }
         }
         else
         {
