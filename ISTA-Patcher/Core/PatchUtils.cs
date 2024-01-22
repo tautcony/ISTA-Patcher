@@ -161,9 +161,9 @@ internal static partial class PatchUtils
 
         void RemovePublicKeyCheck(MethodDef method)
         {
-            var getProcessesByName = DnlibUtils.BuildCall(module, typeof(System.Diagnostics.Process), "GetProcessesByName", typeof(System.Diagnostics.Process[]), new[] { typeof(string) });
+            var getProcessesByName = DnlibUtils.BuildCall(module, typeof(System.Diagnostics.Process), "GetProcessesByName", typeof(System.Diagnostics.Process[]), [typeof(string)]);
             var firstOrDefault = method.FindOperand<MethodSpec>(OpCodes.Call, "System.Diagnostics.Process System.Linq.Enumerable::FirstOrDefault<System.Diagnostics.Process>(System.Collections.Generic.IEnumerable`1<System.Diagnostics.Process>)");
-            var invalidOperationException = DnlibUtils.BuildCall(module, typeof(InvalidOperationException), ".ctor", typeof(void), new[] { typeof(string) });
+            var invalidOperationException = DnlibUtils.BuildCall(module, typeof(InvalidOperationException), ".ctor", typeof(void), [typeof(string)]);
             if (getProcessesByName == null || firstOrDefault == null || invalidOperationException == null)
             {
                 Log.Warning("Required instructions not found, can not patch IstaIcsServiceClient::ValidateHost");
