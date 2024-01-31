@@ -6,6 +6,7 @@ namespace ISTA_Patcher.Utils;
 
 using System.Security.Cryptography;
 using System.Text;
+using Sentry;
 using Serilog;
 
 public static class IntegrityUtils
@@ -48,6 +49,7 @@ public static class IntegrityUtils
         }
         catch (Exception ex)
         {
+            SentrySdk.CaptureException(ex);
             Log.Warning(ex, "Failed to decrypt file: {Reason}", ex.Message);
         }
 

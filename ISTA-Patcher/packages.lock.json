@@ -26,6 +26,22 @@
         "resolved": "8.0.0",
         "contentHash": "B3etT5XQ2nlWkZGO2m/ytDYrOmSsQG1XNBaM6ZYlX5Ch/tDrMFadr0/mK6gjZwaQc55g+5+WZMw4Cz3m8VEF7g=="
       },
+      "Sentry": {
+        "type": "Direct",
+        "requested": "[3.41.4, )",
+        "resolved": "3.41.4",
+        "contentHash": "GYYaim7t8+1utYHHSvwISinaPWMGf1aIJjBpIw+6+YEs65t7i5D21WNWeEH67gS4A8tGsfJaXa7/ytfIBVIZrA=="
+      },
+      "Sentry.Serilog": {
+        "type": "Direct",
+        "requested": "[3.41.4, )",
+        "resolved": "3.41.4",
+        "contentHash": "Eldms/ALJ3vAIVTfjxi5dskfXbLY0CHtDcSZt6JIRaF7lYay+/TkaBsoO/A0rYRBddCI5m1tLxa0f+d1CcFNbg==",
+        "dependencies": {
+          "Sentry": "3.41.4",
+          "Serilog": "2.10.0"
+        }
+      },
       "Serilog": {
         "type": "Direct",
         "requested": "[3.1.1, )",

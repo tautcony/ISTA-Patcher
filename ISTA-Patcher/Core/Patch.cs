@@ -8,7 +8,9 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using dnlib.DotNet;
 using ISTA_Patcher.Core.Patcher;
+using Sentry;
 using Serilog;
+using Constants = ISTA_Patcher.Utils.Constants;
 
 public static partial class Patch
 {
@@ -147,6 +149,7 @@ public static partial class Patch
         }
         catch (Exception ex)
         {
+            SentrySdk.CaptureException(ex);
             Log.Information(
                 "{Item}{Indent}{Result} [failed]: {Reason}",
                 pendingPatchItem,
@@ -191,6 +194,7 @@ public static partial class Patch
         }
         catch (ApplicationException ex)
         {
+            SentrySdk.CaptureException(ex);
             Log.Information(
                 "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate skipped]: {Reason}",
                 pendingPatchItem,

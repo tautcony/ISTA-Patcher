@@ -6,6 +6,7 @@ namespace ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
+using Sentry;
 
 [Serializable]
 [XmlType(Namespace = "http://tempuri.org/LicenseInfo.xsd")]
@@ -51,6 +52,7 @@ public class LicensePackage
         }
         catch (Exception ex)
         {
+            SentrySdk.CaptureException(ex);
             exception = ex;
             return false;
         }
@@ -77,6 +79,7 @@ public class LicensePackage
         }
         catch (Exception ex)
         {
+            SentrySdk.CaptureException(ex);
             exception = ex;
             return false;
         }
@@ -100,6 +103,7 @@ public class LicensePackage
         }
         catch (Exception ex)
         {
+            SentrySdk.CaptureException(ex);
             exception = ex;
             return false;
         }

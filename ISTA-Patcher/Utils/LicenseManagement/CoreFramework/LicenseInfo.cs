@@ -6,6 +6,7 @@ namespace ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Serialization;
+using Sentry;
 
 [Serializable]
 [XmlRoot(Namespace = "http://tempuri.org/LicenseInfo.xsd", IsNullable = false)]
@@ -95,6 +96,7 @@ public class LicenseInfo : ICloneable
         }
         catch (Exception ex)
         {
+            SentrySdk.CaptureException(ex);
             exception = ex;
             return false;
         }
@@ -129,6 +131,7 @@ public class LicenseInfo : ICloneable
         }
         catch (Exception ex)
         {
+            SentrySdk.CaptureException(ex);
             exception = ex;
             return false;
         }
@@ -152,6 +155,7 @@ public class LicenseInfo : ICloneable
         }
         catch (Exception ex)
         {
+            SentrySdk.CaptureException(ex);
             exception = ex;
             return false;
         }

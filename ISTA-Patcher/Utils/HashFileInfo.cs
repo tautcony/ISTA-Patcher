@@ -4,6 +4,7 @@
 namespace ISTA_Patcher.Utils;
 
 using System.Security.Cryptography;
+using Sentry;
 using Serilog;
 
 public class HashFileInfo
@@ -30,6 +31,7 @@ public class HashFileInfo
             catch (FormatException ex)
             {
                 this._hash = string.Empty;
+                SentrySdk.CaptureException(ex);
                 Log.Warning(ex, "Failed to parse hash value [{Hash}] for: {FileName}", this._hash, this.FileName);
             }
 

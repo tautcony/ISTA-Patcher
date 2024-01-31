@@ -5,7 +5,9 @@ namespace ISTA_Patcher.Core.Patcher;
 
 using System.Text.Json;
 using dnlib.DotNet;
+using Sentry;
 using Serilog;
+using Constants = ISTA_Patcher.Utils.Constants;
 
 public interface IPatcher
 {
@@ -34,6 +36,7 @@ public interface IPatcher
             ex is FileNotFoundException or IOException or JsonException
         )
         {
+            SentrySdk.CaptureException(ex);
             Log.Fatal(ex, "Failed to load config file: {Reason}", ex.Message);
         }
 
