@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2023 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
 
 // ReSharper disable PropertyCanBeMadeInitOnly.Global, NotNullOrRequiredMemberIsNotInitialized
 namespace ISTA_Patcher;
@@ -420,7 +420,7 @@ public static class ProgramArgs
     {
         var rootCommand = new CliRootCommand
         {
-            Description = $"Copyright (C) 2022-2023 TautCony.\n" +
+            Description = $"Copyright (C) 2022-2024 TautCony.\n" +
                           $"Released under the GNU GPLv3+.",
         };
 
