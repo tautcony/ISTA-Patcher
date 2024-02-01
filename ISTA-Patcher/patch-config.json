@@ -72,6 +72,7 @@
         "System.Threading.Channels.dll",
         "System.Threading.Tasks.Extensions.dll",
         "System.ValueTuple.dll",
+        "WebView2Loader.dll",
         "xmlunit-core.dll"
     ],
     "toyota.include": [

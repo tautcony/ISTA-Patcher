@@ -89,7 +89,7 @@ public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
                _currentThreadIsProcessingItems = false;
            }
        },
-           null);
+           state: null);
    }
 
    // Attempts to execute the specified task on the current thread.
@@ -134,10 +134,8 @@ public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
            {
                return this._tasks;
            }
-           else
-           {
-               throw new NotSupportedException();
-           }
+
+           throw new NotSupportedException();
        }
        finally
        {

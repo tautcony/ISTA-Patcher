@@ -3,6 +3,7 @@
 
 namespace ISTA_Patcher.Utils;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using dnlib.DotNet;
@@ -61,7 +62,7 @@ public static class DnlibUtils
     /// </returns>
     public static MethodDef? GetMethod(this ModuleDefMD module, string type, string name, string desc)
     {
-        return module.GetType(type)?.Methods.FirstOrDefault(m => m.Name.Equals(name) && DescriptionOf(m).Equals(desc));
+        return module.GetType(type)?.Methods.FirstOrDefault(m => m.Name.Equals(name) && DescriptionOf(m).Equals(desc, StringComparison.Ordinal));
     }
 
     /// <summary>
@@ -69,7 +70,19 @@ public static class DnlibUtils
     /// </summary>
     /// <param name="method">The <see cref="MethodDef"/> whose body will be emptied.</param>
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
-    public static void EmptyingMethod(this MethodDef method) => method.ReturningWithValue();
+    public static void EmptyingMethod(this MethodDef method)
+    {
+        var body = method.Body;
+        if (body == null)
+        {
+            throw new ArgumentNullException($"{method.FullName}.Body null!");
+        }
+
+        body.Variables.Clear();
+        body.ExceptionHandlers.Clear();
+        body.Instructions.Clear();
+        body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+    }
 
     /// <summary>
     /// Modifies the body of the <see cref="MethodDef"/> to return zero.
@@ -101,14 +114,14 @@ public static class DnlibUtils
     /// </summary>
     /// <param name="method">The <see cref="MethodDef"/> to modify.</param>
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
-    public static void ReturnFalseMethod(this MethodDef method) => method.ReturningWithValue(false);
+    public static void ReturnFalseMethod(this MethodDef method) => method.ReturningWithValue(value: false);
 
     /// <summary>
     /// Modifies the body of the <see cref="MethodDef"/> to return true.
     /// </summary>
     /// <param name="method">The <see cref="MethodDef"/> to modify.</param>
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
-    public static void ReturnTrueMethod(this MethodDef method) => method.ReturningWithValue(true);
+    public static void ReturnTrueMethod(this MethodDef method) => method.ReturningWithValue(value: true);
 
     /// <summary>
     /// Modifies the body of the <see cref="MethodDef"/> to return the specified string.
@@ -179,17 +192,26 @@ public static class DnlibUtils
     /// <param name="returnType">The return type of the method.</param>
     /// <param name="parameters">The array of parameter types.</param>
     /// <returns>An instance of the <see cref="IMethod"/> interface representing the method call, or null if the method was not found.</returns>
-    public static IMethod? BuildCall(ModuleDef module, Type type, string method, Type returnType, Type[]? parameters)
+    public static IMethod? BuildCall(
+        ModuleDef module,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)] Type type,
+        string method,
+        Type returnType,
+        Type[]? parameters)
     {
         var importer = new Importer(module);
 
-        // ReSharper disable once ConvertIfStatementToReturnStatement
+        MethodBase mb;
         if (string.Equals(method, ".ctor", StringComparison.Ordinal))
         {
-            return (from m in type.GetConstructors() where CheckParametersByType(m, parameters) select importer.Import(m)).FirstOrDefault();
+            mb = Array.Find(type.GetConstructors(), m => CheckParametersByType(m, parameters));
+        }
+        else
+        {
+            mb = Array.Find(type.GetMethods(), m => string.Equals(m.Name, method, StringComparison.Ordinal) && m.ReturnType == returnType && CheckParametersByType(m, parameters));
         }
 
-        return (from m in type.GetMethods().Where(m => string.Equals(m.Name, method, StringComparison.Ordinal) && m.ReturnType == returnType) where CheckParametersByType(m, parameters) select importer.Import(m)).FirstOrDefault();
+        return importer.Import(mb);
     }
 
     /// <summary>
@@ -198,7 +220,7 @@ public static class DnlibUtils
     /// <param name="method">The <see cref="MethodDef"/> to modify.</param>
     /// <param name="value">The value to return.</param>
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null or if the type of the value is not supported.</exception>
-    private static void ReturningWithValue(this MethodDef method, object? value = null)
+    private static void ReturningWithValue<T>(this MethodDef method, T? value)
     {
         var body = method.Body;
         if (body == null)

@@ -6,24 +6,24 @@ namespace ISTA_Patcher.Utils;
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal class ISTAPatch : Attribute;
 
-internal class ValidationPatch : ISTAPatch;
+internal sealed class ValidationPatch : ISTAPatch;
 
-internal class EssentialPatch : ISTAPatch;
+internal sealed class EssentialPatch : ISTAPatch;
 
-internal class SignaturePatch : ISTAPatch;
+internal sealed class SignaturePatch : ISTAPatch;
 
-internal class ToyotaPatch : ISTAPatch;
+internal sealed class ToyotaPatch : ISTAPatch;
 
-internal class ENETPatch : ISTAPatch;
+internal sealed class ENETPatch : ISTAPatch;
 
-internal class RequirementsPatch : ISTAPatch;
+internal sealed class RequirementsPatch : ISTAPatch;
 
-internal class NotSendPatch : ISTAPatch;
+internal sealed class NotSendPatch : ISTAPatch;
 
-internal class UserAuthPatch : ISTAPatch;
+internal sealed class UserAuthPatch : ISTAPatch;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-internal class FromVersion(string version) : Attribute
+internal sealed class FromVersion(string version) : Attribute
 {
     public string? Version { get; set; } = version;
 }

@@ -273,14 +273,14 @@ internal static partial class PatchUtils
         };
         var value = licenseInfo.Serialize();
         const string template = "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\\u0042\u004d\u0057group\\ISPI\\Rheingold]\n\"License\"=\"{}\"";
-        File.WriteAllText(licenseFile, template.Replace("{}", ToLiteral(value)));
+        File.WriteAllText(licenseFile, template.Replace("{}", ToLiteral(value), StringComparison.Ordinal));
     }
 
     private static string ToLiteral(string valueTextForCompiler)
     {
         return valueTextForCompiler
-               .Replace("\r", "\\r")
-               .Replace("\n", "\\n")
-               .Replace("\"", "\\\"");
+               .Replace("\r", "\\r", StringComparison.Ordinal)
+               .Replace("\n", "\\n", StringComparison.Ordinal)
+               .Replace("\"", "\\\"", StringComparison.Ordinal);
     }
 }

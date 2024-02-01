@@ -26,7 +26,7 @@ public class HashFileInfo
             {
                 var bytes = Convert.FromBase64String(this._hash);
                 var hex = BitConverter.ToString(bytes);
-                this._hash = hex.Replace("-", string.Empty);
+                this._hash = hex.Replace("-", string.Empty, StringComparison.Ordinal);
             }
             catch (FormatException ex)
             {
@@ -45,7 +45,7 @@ public class HashFileInfo
 
     protected internal HashFileInfo(IReadOnlyList<string> fileInfos)
     {
-        this.FilePath = fileInfos[0].Trim('\uFEFF').Replace("\\", "/");
+        this.FilePath = fileInfos[0].Trim('\uFEFF').Replace('\\', '/');
         this.FileName = Path.GetFileName(this.FilePath);
         this._hash = fileInfos[1];
     }

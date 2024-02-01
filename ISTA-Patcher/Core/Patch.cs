@@ -40,7 +40,7 @@ public static partial class Patch
                 )
             );
 
-            Task.WaitAll(tasks.ToArray());
+            Task.WaitAll(tasks.ToArray(), cts.Token);
         }
 
         foreach (var line in BuildIndicator(patcher.Patches, patchAppliedCount))
@@ -94,7 +94,7 @@ public static partial class Patch
             if (options.Restore && File.Exists(bakFileFullPath))
             {
                 Log.Debug("Backup detected, restoring {Item}", pendingPatchItem);
-                File.Copy(bakFileFullPath, pendingPatchItemFullPath, true);
+                File.Copy(bakFileFullPath, pendingPatchItemFullPath, overwrite: true);
             }
 
             var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
@@ -129,7 +129,7 @@ public static partial class Patch
             if (!File.Exists(bakFileFullPath))
             {
                 Log.Debug("Bakup file {BakFileFullPath} does not exist, copy...", bakFileFullPath);
-                File.Copy(pendingPatchItemFullPath, bakFileFullPath, false);
+                File.Copy(pendingPatchItemFullPath, bakFileFullPath, overwrite: false);
             }
 
             PatchUtils.SetPatchedMark(module);

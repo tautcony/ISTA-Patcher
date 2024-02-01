@@ -146,7 +146,7 @@ internal static class ISTAPatcher
 
         var wasVerified = false;
 
-        var bChecked = NativeMethods.StrongNameSignatureVerificationEx(filePath, true, ref wasVerified);
+        var bChecked = NativeMethods.StrongNameSignatureVerificationEx(filePath, fForceVerification: true, ref wasVerified);
         if (bChecked)
         {
             checkResult += wasVerified ? "[S:OK]" : "[S:NG]";
@@ -192,7 +192,7 @@ internal static class ISTAPatcher
             var fs = File.OpenRead(opts.KeyPairPath);
             await using (fs.ConfigureAwait(false))
             {
-                using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                using var sr = new StreamReader(fs, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
                 keyPairXml = await sr.ReadToEndAsync().ConfigureAwait(false);
                 Log.Debug("Loaded private key from {KeyPairPath}", opts.KeyPairPath);
             }
@@ -226,7 +226,7 @@ internal static class ISTAPatcher
                 var fs = File.OpenRead(opts.LicenseRequestPath);
                 await using (fs.ConfigureAwait(false))
                 {
-                    using var sr = new StreamReader(fs, new UTF8Encoding(false));
+                    using var sr = new StreamReader(fs, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
                     licenseXml = await sr.ReadToEndAsync().ConfigureAwait(false);
                     Log.Debug("Loaded license request from {LicensePath}", opts.LicenseRequestPath);
                 }
@@ -259,7 +259,7 @@ internal static class ISTAPatcher
             var rsaCryptoServiceProvider = new RSACryptoServiceProvider(opts.dwKeySize);
             rsaCryptoServiceProvider.FromXmlString(keyPairXml);
 
-            var parameters = rsaCryptoServiceProvider.ExportParameters(true);
+            var parameters = rsaCryptoServiceProvider.ExportParameters(includePrivateParameters: true);
 
             var modulus = Convert.ToBase64String(parameters.Modulus);
             var exponent = Convert.ToBase64String(parameters.Exponent);
@@ -285,7 +285,7 @@ internal static class ISTAPatcher
         using var rsa = new RSACryptoServiceProvider(dwKeySize);
         try
         {
-            var privateKey = rsa.ToXmlString(true);
+            var privateKey = rsa.ToXmlString(includePrivateParameters: true);
 
             var fs = new FileStream(privateKeyPath, FileMode.Create);
             await using (fs.ConfigureAwait(false))

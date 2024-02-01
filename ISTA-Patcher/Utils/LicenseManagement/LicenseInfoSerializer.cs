@@ -17,7 +17,7 @@ public static class LicenseInfoSerializer
         var serializer = new XmlSerializer(typeof(T));
         var ws = new XmlWriterSettings
         {
-            Encoding = new UTF8Encoding(false),
+            Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
             Indent = true,
             IndentChars = "  ",
             OmitXmlDeclaration = true,

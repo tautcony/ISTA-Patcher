@@ -23,6 +23,7 @@ Released under the GNU GPLv3+.</Copyright>
     <ApplicationIcon>patcher-icon.ico</ApplicationIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StripSymbols>false</StripSymbols>
+    <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

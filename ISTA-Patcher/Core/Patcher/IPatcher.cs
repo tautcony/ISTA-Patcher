@@ -47,7 +47,7 @@ public interface IPatcher
     {
         return typeof(PatchUtils)
             .GetMethods()
-            .Where(m => Array.Exists(attributes, attribute => m.GetCustomAttributes(attribute, false).Length > 0))
+            .Where(m => Array.Exists(attributes, attribute => m.GetCustomAttributes(attribute, inherit: false).Length > 0))
             .Select(m => (Func<ModuleDefMD, int>)Delegate.CreateDelegate(typeof(Func<ModuleDefMD, int>), m))
             .ToList();
     }
