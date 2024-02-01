@@ -6,6 +6,7 @@ namespace ISTA_Patcher.Core;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using de4dot.code;
 using de4dot.code.AssemblyClient;
 using de4dot.code.deobfuscators;
@@ -33,7 +34,14 @@ internal static partial class PatchUtils
             var infoVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
             if (infoVersion != null)
             {
-                return infoVersion.InformationalVersion;
+                var match = VersionPattern().Match(infoVersion.InformationalVersion);
+                if (!match.Success)
+                {
+                    return infoVersion.InformationalVersion;
+                }
+
+                var shortHash = match.Groups["hash"].Value[..7];
+                return $"{match.Groups["version"].Value}+{shortHash}";
             }
 
             var version = Assembly.GetExecutingAssembly().GetName().Version ?? new Version("0.0.0.0");
@@ -283,4 +291,7 @@ internal static partial class PatchUtils
                .Replace("\n", "\\n", StringComparison.Ordinal)
                .Replace("\"", "\\\"", StringComparison.Ordinal);
     }
+
+    [GeneratedRegex(@"(?<version>\d+\.\d+\.\d+)\+(?<hash>[a-f0-9]+)", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
+    private static partial Regex VersionPattern();
 }
