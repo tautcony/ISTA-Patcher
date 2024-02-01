@@ -10,21 +10,21 @@
       },
       "dnlib": {
         "type": "Direct",
-        "requested": "[4.3.0, )",
-        "resolved": "4.3.0",
-        "contentHash": "aGJ1KzGLV6dsU6gsR5dXfhjcIn0z0YJ29VqysPtHZ8237adtPfO0X2E6eyYehwrzeKMkZKQOdC1VQaHdQQ+yCw=="
+        "requested": "[4.4.0, )",
+        "resolved": "4.4.0",
+        "contentHash": "cKHI720q+zfEEvzklWVGt6B0TH3AibAyJbpUJl4U6KvTP13tycfnqJpkGHRZ/oQ45BTIoIxIwltHIJVDN+iCqQ=="
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.134, )",
-        "resolved": "2.0.134",
-        "contentHash": "N+63EP3eJLRRZKoD3IpiGWgbdkNOnjxr0VovOBAc69LxUocrlxQ9uZODg2v1QEYQWEF7A3h6YTY0KcHPpe+EcQ=="
+        "requested": "[2.0.139, )",
+        "resolved": "2.0.139",
+        "contentHash": "fN5lUcDuEAu0W/9owSNH/5OB5VuHT7mx48geXumj8Qt6MfEmVDrdxPy4CZ2cpR48UkZhckwsaba1VSI6mnIzTw=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[8.0.0, )",
-        "resolved": "8.0.0",
-        "contentHash": "B3etT5XQ2nlWkZGO2m/ytDYrOmSsQG1XNBaM6ZYlX5Ch/tDrMFadr0/mK6gjZwaQc55g+5+WZMw4Cz3m8VEF7g=="
+        "requested": "[8.0.1, )",
+        "resolved": "8.0.1",
+        "contentHash": "ADdJXuKNjwZDfBmybMnpvwd5CK3gp92WkWqqeQhW4W+q4MO3Qaa9QyW2DcFLAvCDMcCWxT5hRXqGdv13oon7nA=="
       },
       "Sentry": {
         "type": "Direct",
@@ -68,9 +68,9 @@
       },
       "System.CommandLine": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.23407.1, )",
-        "resolved": "2.0.0-beta4.23407.1",
-        "contentHash": "uhT8LJz12lBakhANCVJtdzBeuM+WpHovvRcSW7BrtVDLGoj6WiSdUYrysxEA71OX9UnpG6yWiWo8zJ3ekVFqMw=="
+        "requested": "[2.0.0-beta4.24068.1, )",
+        "resolved": "2.0.0-beta4.24068.1",
+        "contentHash": "JVV82LwShZ4FzNJS83pmWSsSmNpY9iP+nwpi7DovPK9yMsnSD+DVVVubnt8OgIb9YtQtGYyCyK5dCplu6vtI/A=="
       },
       "System.CommandLine.Generator": {
         "type": "Direct",
@@ -83,11 +83,11 @@
       },
       "System.CommandLine.NamingConventionBinder": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.23407.1, )",
-        "resolved": "2.0.0-beta4.23407.1",
-        "contentHash": "QUhf+SG+2ynpiMhjv1XXkixo59K1+FCxBkvQgAWBflWBEjaBjmtJ6pU0+Vnxavf/tehb2IRKj6BQsCr+As9AgQ==",
+        "requested": "[2.0.0-beta4.24068.1, )",
+        "resolved": "2.0.0-beta4.24068.1",
+        "contentHash": "jRrdyhsoc6W1KudxmDtVRzW2t6rEuKXQxjL95KKKxMZcFPwscICDPRkaWYXI3s70FXvfFlvZJW+DpDxw8VAImg==",
         "dependencies": {
-          "System.CommandLine": "2.0.0-beta4.23407.1"
+          "System.CommandLine": "2.0.0-beta4.24068.1"
         }
       },
       "Humanizer.Core": {

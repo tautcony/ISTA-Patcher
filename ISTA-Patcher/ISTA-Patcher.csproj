@@ -31,8 +31,8 @@ Released under the GNU GPLv3+.</Copyright>
 
   <ItemGroup>
     <PackageReference Include="ConsoleTables" Version="2.6.1" />
-    <PackageReference Include="dnlib" Version="4.3.0" />
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.134">
+    <PackageReference Include="dnlib" Version="4.4.0" />
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.139">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -44,9 +44,9 @@ Released under the GNU GPLv3+.</Copyright>
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.23407.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.24068.1" />
     <PackageReference Include="System.CommandLine.Generator" Version="2.0.0-beta4.23307.1" />
-    <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.23407.1" />
+    <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.24068.1" />
   </ItemGroup>
 
   <ItemGroup>
