@@ -4,7 +4,6 @@
 namespace ISTA_Patcher.Utils;
 
 using System.Security.Cryptography;
-using Sentry;
 using Serilog;
 
 public class HashFileInfo

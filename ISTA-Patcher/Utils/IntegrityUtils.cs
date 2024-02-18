@@ -6,7 +6,6 @@ namespace ISTA_Patcher.Utils;
 
 using System.Security.Cryptography;
 using System.Text;
-using Sentry;
 using Serilog;
 
 public static class IntegrityUtils

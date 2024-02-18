@@ -16,29 +16,29 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.139, )",
-        "resolved": "2.0.139",
-        "contentHash": "fN5lUcDuEAu0W/9owSNH/5OB5VuHT7mx48geXumj8Qt6MfEmVDrdxPy4CZ2cpR48UkZhckwsaba1VSI6mnIzTw=="
+        "requested": "[2.0.141, )",
+        "resolved": "2.0.141",
+        "contentHash": "SnQIdjQeJnc/3xmKSNvIAFHAPwV+LTXuf4QesfdiNrntnL5oCoBIKAn6194JeMj/nWoCSwRnWJybTsZAS2u51Q=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[8.0.1, )",
-        "resolved": "8.0.1",
-        "contentHash": "ADdJXuKNjwZDfBmybMnpvwd5CK3gp92WkWqqeQhW4W+q4MO3Qaa9QyW2DcFLAvCDMcCWxT5hRXqGdv13oon7nA=="
+        "requested": "[8.0.2, )",
+        "resolved": "8.0.2",
+        "contentHash": "hKTrehpfVzOhAz0mreaTAZgbz0DrMEbWq4n3hAo8Ks6WdxdqQhNPvzOqn9VygKuWf1bmxPdraqzTaXriO/sn0A=="
       },
       "Sentry": {
         "type": "Direct",
-        "requested": "[3.41.4, )",
-        "resolved": "3.41.4",
-        "contentHash": "GYYaim7t8+1utYHHSvwISinaPWMGf1aIJjBpIw+6+YEs65t7i5D21WNWeEH67gS4A8tGsfJaXa7/ytfIBVIZrA=="
+        "requested": "[4.1.1, )",
+        "resolved": "4.1.1",
+        "contentHash": "jjjQvp5I3e5mOX5cPkxR8Swib3KmoD87GbrQPWeX42b5N6Bxy6XoB5q0ZZcwrzX52g6nPJv+M1P+mDNKlsvznA=="
       },
       "Sentry.Serilog": {
         "type": "Direct",
-        "requested": "[3.41.4, )",
-        "resolved": "3.41.4",
-        "contentHash": "Eldms/ALJ3vAIVTfjxi5dskfXbLY0CHtDcSZt6JIRaF7lYay+/TkaBsoO/A0rYRBddCI5m1tLxa0f+d1CcFNbg==",
+        "requested": "[4.1.1, )",
+        "resolved": "4.1.1",
+        "contentHash": "Z8YGYU8S2WAYZuNI547/xmAFbSiNcwvYWhKwzZjFUrM41emjph5sln0NprcFGAqtotsZHrKuQte9sA/lnkwi5g==",
         "dependencies": {
-          "Sentry": "3.41.4",
+          "Sentry": "4.1.1",
           "Serilog": "2.10.0"
         }
       },
@@ -68,9 +68,9 @@
       },
       "System.CommandLine": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.24068.1, )",
-        "resolved": "2.0.0-beta4.24068.1",
-        "contentHash": "JVV82LwShZ4FzNJS83pmWSsSmNpY9iP+nwpi7DovPK9yMsnSD+DVVVubnt8OgIb9YtQtGYyCyK5dCplu6vtI/A=="
+        "requested": "[2.0.0-beta4.24112.1, )",
+        "resolved": "2.0.0-beta4.24112.1",
+        "contentHash": "Y1xK6JmFZ+X5mWrSx6n1vipkilEmADBoCrdzADG+fCwKB0lOTzJZwCmZvweq0J55iSE5nVGowHLdi6ql7VMC+w=="
       },
       "System.CommandLine.Generator": {
         "type": "Direct",
@@ -83,11 +83,11 @@
       },
       "System.CommandLine.NamingConventionBinder": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.24068.1, )",
-        "resolved": "2.0.0-beta4.24068.1",
-        "contentHash": "jRrdyhsoc6W1KudxmDtVRzW2t6rEuKXQxjL95KKKxMZcFPwscICDPRkaWYXI3s70FXvfFlvZJW+DpDxw8VAImg==",
+        "requested": "[2.0.0-beta4.24112.1, )",
+        "resolved": "2.0.0-beta4.24112.1",
+        "contentHash": "m9SxgGiTFItJ/5moHvr3m4Y9WYu8kMwMm9OhSHpKXIg5sI+nqxM39CMSetxtolnJazkg3wVLt2zjtdfI+TTYTg==",
         "dependencies": {
-          "System.CommandLine": "2.0.0-beta4.24068.1"
+          "System.CommandLine": "2.0.0-beta4.24112.1"
         }
       },
       "Humanizer.Core": {

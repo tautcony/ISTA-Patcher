@@ -8,7 +8,6 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using dnlib.DotNet;
 using ISTA_Patcher.Core.Patcher;
-using Sentry;
 using Serilog;
 using Constants = ISTA_Patcher.Utils.Constants;
 

@@ -10,7 +10,6 @@ using ISTA_Patcher.Core;
 using ISTA_Patcher.Core.Patcher;
 using ISTA_Patcher.Utils.LicenseManagement;
 using ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
-using Sentry;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -29,19 +28,15 @@ internal static class ISTAPatcher
             options.Dsn = "https://55e58df747fc4d43912790aa894700ba@o955448.ingest.sentry.io/4504370799116288";
             options.AutoSessionTracking = true;
             options.IsGlobalModeEnabled = true;
+            options.SendDefaultPii = true;
             options.EnableTracing = true;
+            options.TracesSampleRate = 1;
         });
         Log.Logger = new LoggerConfiguration()
                      .Enrich.FromLogContext()
                      .MinimumLevel.ControlledBy(LevelSwitch)
                      .WriteTo.Console()
-                     .WriteTo.Sentry(o =>
-                     {
-                         o.MinimumBreadcrumbLevel = LogEventLevel.Debug;
-                         o.MinimumEventLevel = LogEventLevel.Error;
-                         o.AttachStacktrace = true;
-                         o.SendDefaultPii = true;
-                     })
+                     .WriteTo.Sentry(LogEventLevel.Error, LogEventLevel.Debug)
                      .CreateLogger();
 
         var command = ProgramArgs.BuildCommandLine(RunPatchAndReturnExitCode, RunLicenseOperationAndReturnExitCode, RunDecryptAndReturnExitCode);

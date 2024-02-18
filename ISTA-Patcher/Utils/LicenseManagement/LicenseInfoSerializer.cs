@@ -6,7 +6,6 @@ namespace ISTA_Patcher.Utils.LicenseManagement;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-using Sentry;
 using Serilog;
 
 public static class LicenseInfoSerializer

@@ -5,7 +5,6 @@ namespace ISTA_Patcher.Core.Patcher;
 
 using System.Text.Json;
 using dnlib.DotNet;
-using Sentry;
 using Serilog;
 using Constants = ISTA_Patcher.Utils.Constants;
 
