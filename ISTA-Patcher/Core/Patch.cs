@@ -49,8 +49,8 @@ public static partial class Patch
 
         if (options.GenerateMockRegFile)
         {
-            Log.Information("=== Generating mock reg file ===");
-            PatchUtils.GenerateMockRegFile(guiBasePath);
+            Log.Information("=== Registry file generating ===");
+            PatchUtils.GenerateMockRegFile(guiBasePath, options.Force);
         }
 
         timer.Stop();

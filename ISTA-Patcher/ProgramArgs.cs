@@ -276,7 +276,7 @@ public static class ProgramArgs
         var syntheticEnvOption = new CliOption<bool>("--synthetic")
         {
             DefaultValueFactory = _ => false,
-            Description = "Update all sub-licenses package name to SyntheticEnv.",
+            Description = "Add a sub-license package with name SyntheticEnv.",
         };
         var signedLicensePathOption = new CliOption<string>("-o", "--output")
         {

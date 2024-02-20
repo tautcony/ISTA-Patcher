@@ -17,7 +17,7 @@ using DecryptOptions = ProgramArgs.DecryptOptions;
 using LicenseOptions = ProgramArgs.LicenseOptions;
 using PatchOptions = ProgramArgs.PatchOptions;
 
-internal static class ISTAPatcher
+internal static class Program
 {
     private static LoggingLevelSwitch LevelSwitch { get; } = new();
 
@@ -52,7 +52,7 @@ internal static class ISTAPatcher
 
         if (!Directory.Exists(guiBasePath) || !Directory.Exists(psdzBasePath))
         {
-            Log.Fatal("Folder structure does not match, please check options");
+            Log.Fatal("Folder structure does not match under: {TargetPath}, please check options", opts.TargetPath);
             return Task.FromResult(-1);
         }
 
@@ -330,13 +330,16 @@ internal static class ISTAPatcher
         license.Expiration = DateTime.MaxValue;
         if (license.SubLicenses != null)
         {
+            if (opts.SyntheticEnv)
+            {
+                license.SubLicenses.Add(new LicensePackage
+                {
+                    PackageName = "SyntheticEnv",
+                });
+            }
+
             foreach (var subLicense in license.SubLicenses)
             {
-                if (opts.SyntheticEnv)
-                {
-                    subLicense.PackageName = "SyntheticEnv";
-                }
-
                 subLicense.PackageRule ??= "true";
                 subLicense.PackageExpire = DateTime.MaxValue;
             }
