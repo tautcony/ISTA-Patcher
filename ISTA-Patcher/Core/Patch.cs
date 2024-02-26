@@ -193,7 +193,11 @@ public static partial class Patch
         }
         catch (ApplicationException ex)
         {
-            SentrySdk.CaptureException(ex);
+            if (!string.Equals(ex.Message, "Could not detect obfuscator!", StringComparison.Ordinal))
+            {
+                SentrySdk.CaptureException(ex);
+            }
+
             Log.Information(
                 "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate skipped]: {Reason}",
                 pendingPatchItem,
