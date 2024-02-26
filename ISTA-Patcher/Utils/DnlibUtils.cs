@@ -271,7 +271,7 @@ public static class DnlibUtils
     /// </summary>
     /// <param name="method">The <see cref="MethodBase"/> representing the method to check.</param>
     /// <param name="types">The collection of parameter types to compare against.</param>
-    /// <returns><c>true</c> if the method's parameters match the specified types; otherwise, <c>false</c>.</returns>
+    /// <returns><see langword="true"/> if the method's parameters match the specified types; otherwise, <see langword="false"/>.</returns>
     private static bool CheckParametersByType(MethodBase method, IReadOnlyCollection<Type>? types)
     {
         if ((types?.Count ?? 0) == method.GetParameters().Length)
@@ -288,7 +288,7 @@ public static class DnlibUtils
     /// <param name="targetType">The <see cref="TypeDef"/> to start the search from.</param>
     /// <param name="propertyName">The name of the property to find.</param>
     /// <returns>
-    /// The <see cref="PropertyDef"/> representing the property found, or <c>null</c> if the property was not found.
+    /// The <see cref="PropertyDef"/> representing the property found, or <see langword="null"/> if the property was not found.
     /// </returns>
     public static PropertyDef? FindPropertyInClassAndBaseClasses(TypeDef targetType, string propertyName)
     {

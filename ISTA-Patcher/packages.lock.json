@@ -16,9 +16,9 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.141, )",
-        "resolved": "2.0.141",
-        "contentHash": "SnQIdjQeJnc/3xmKSNvIAFHAPwV+LTXuf4QesfdiNrntnL5oCoBIKAn6194JeMj/nWoCSwRnWJybTsZAS2u51Q=="
+        "requested": "[2.0.145, )",
+        "resolved": "2.0.145",
+        "contentHash": "BPgr0uG1JpLaDE/dIDK04cngtwzcwNEa3MJROJ+HjOal4E5EBjfTsyPOr/1yyjB2FTCmg2yIAqGteDqSykJwng=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
@@ -28,17 +28,17 @@
       },
       "Sentry": {
         "type": "Direct",
-        "requested": "[4.1.1, )",
-        "resolved": "4.1.1",
-        "contentHash": "jjjQvp5I3e5mOX5cPkxR8Swib3KmoD87GbrQPWeX42b5N6Bxy6XoB5q0ZZcwrzX52g6nPJv+M1P+mDNKlsvznA=="
+        "requested": "[4.1.2, )",
+        "resolved": "4.1.2",
+        "contentHash": "OVCUz+Mw8P5L8K9VJdeewo4hdB4v+z7zC50tFXu1Sq6+FDBd+/DcFHBWlnn/cNLct2hZEAAn7hS9eqVc097wMg=="
       },
       "Sentry.Serilog": {
         "type": "Direct",
-        "requested": "[4.1.1, )",
-        "resolved": "4.1.1",
-        "contentHash": "Z8YGYU8S2WAYZuNI547/xmAFbSiNcwvYWhKwzZjFUrM41emjph5sln0NprcFGAqtotsZHrKuQte9sA/lnkwi5g==",
+        "requested": "[4.1.2, )",
+        "resolved": "4.1.2",
+        "contentHash": "a9U1lmy99wBnfBfeVrtIytRhA3RwIml/EycnFB2btSsd3z2AOJhh2czwYoOmLWbBwLMVoDxTG2BERCuYJVYyrg==",
         "dependencies": {
-          "Sentry": "4.1.1",
+          "Sentry": "4.1.2",
           "Serilog": "2.10.0"
         }
       },
@@ -68,9 +68,9 @@
       },
       "System.CommandLine": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.24112.1, )",
-        "resolved": "2.0.0-beta4.24112.1",
-        "contentHash": "Y1xK6JmFZ+X5mWrSx6n1vipkilEmADBoCrdzADG+fCwKB0lOTzJZwCmZvweq0J55iSE5nVGowHLdi6ql7VMC+w=="
+        "requested": "[2.0.0-beta4.24123.1, )",
+        "resolved": "2.0.0-beta4.24123.1",
+        "contentHash": "umzHjuLTc2O++NWalcdSfhrPY2p7wspJkMUb9xYCrDKk9CojFTr1M7nLzg3c+qGVa5Rhk+HxzLFwMsLUESzMwA=="
       },
       "System.CommandLine.Generator": {
         "type": "Direct",
@@ -83,11 +83,11 @@
       },
       "System.CommandLine.NamingConventionBinder": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.24112.1, )",
-        "resolved": "2.0.0-beta4.24112.1",
-        "contentHash": "m9SxgGiTFItJ/5moHvr3m4Y9WYu8kMwMm9OhSHpKXIg5sI+nqxM39CMSetxtolnJazkg3wVLt2zjtdfI+TTYTg==",
+        "requested": "[2.0.0-beta4.24123.1, )",
+        "resolved": "2.0.0-beta4.24123.1",
+        "contentHash": "glvS9C2aRkylCnj2JekcyameDbpWCp6KrCEUf0TySdOY/EalzPyKv/OsgNc55DJxe9TnuNMenBsfsSPXyPxQ5A==",
         "dependencies": {
-          "System.CommandLine": "2.0.0-beta4.24112.1"
+          "System.CommandLine": "2.0.0-beta4.24123.1"
         }
       },
       "Humanizer.Core": {
