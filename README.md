@@ -3,46 +3,29 @@
 
 # ISTA Patcher <br/> [![License: GPL v3](https://img.shields.io/github/license/tautcony/ISTA-Patcher?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0) [![build](https://img.shields.io/github/actions/workflow/status/tautcony/ISTA-Patcher/build.yml?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/actions) [![](https://img.shields.io/github/downloads/tautcony/ISTA-Patcher/total.svg?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/releases)
 
-An IL patcher for ISTA-P
+An IL patcher for ISTA-P, a product of learning about [dnlib](https://github.com/0xd4d/dnlib)
 
 </div>
 
 ## Usage
 
-Prior to usage, it is essential to verify that the program itself can start correctly and that the folder structure conforms to the following format:
+> [!IMPORTANT]
+> ISTA-Patcher will backup the original files to the `@ista-backup` folder, but it is still recommended to backup the `ISTA\TesterGUI` & `ISTA\PSdZ` folders before patching.
 
-```
-ISTA
-├── Ecu
-│   ├── enc_cne_1.prg
-│   ├── ...
-├── PSdZ
-│   ├── host
-│   ├── hostx64
-│   ├── ...
-├── TesterGUI
-│   ├── bin
-│   │   └── Release
-│   │       ├── AirCallServices.dll
-│   │       ├── ...
-```
-
-> ⚠️ ISTA-Patcher will backup the original files to the `@ista-backup` folder, but it is still recommended to backup the `ISTA\TesterGUI` & `ISTA\PSdZ` folders before patching.
-
+> [!NOTE]
 > *nix users may need the following steps to get the ISTA-Patcher work.
-
-```shell
-unzip ISTA-Patcher-*-Release.zip
-cd ISTA-Patcher-*-Release
-
-# linux
-chmod +x ISTA-Patcher
-
-# macos
-xattr -d com.apple.quarantine ISTA-Patcher
-chmod +x ISTA-Patcher
-codesign --force --deep -s - ISTA-Patcher
-```
+> ```shell
+> unzip ISTA-Patcher-*-Release.zip
+> cd ISTA-Patcher-*-Release
+> 
+> # linux
+> chmod +x ISTA-Patcher
+> 
+> # macos
+> xattr -d com.apple.quarantine ISTA-Patcher
+> chmod +x ISTA-Patcher
+> codesign --force --deep -s - ISTA-Patcher
+> ```
 
 Execute the following command in a terminal:
 
@@ -57,29 +40,28 @@ The directory containing the patched files is located as follows:
 
 Overwrite patched files to its parent directory, read the notes, then run the program and, dang, it's ready to use.
 
-### Notes
+> [!NOTE]
+> - Please ensure that all related processes been killed before starting the program.
+> - Import generated registry file(`license.reg`) under `Release` directory to resolve any exceptions that may arise while loading license.
+> - Please ensure that both `ILeanActive` and `OSSModeActive` in the configuration file are set to `false`, otherwise `DealerData` will not load the default configuration correctly.
+> - Please ensure that the `Logging.Directory` in the configuration file is a relative path that does not start with `%ISPIDATA%`, otherwise exceptions will occur during the log cleaning process.
 
-- Please ensure that all related processes been killed before starting the program.
-- Import generated registry file(`license.reg`) under `Release` directory to resolve any exceptions that may arise while loading license.
-- Please ensure that both `ILeanActive` and `OSSModeActive` in the configuration file are set to `false`, otherwise `DealerData` will not load the default configuration correctly.
-- Please ensure that the `Logging.Directory` in the configuration file is a relative path that does not start with `%ISPIDATA%`, otherwise exceptions will occur during the log cleaning process.
-
-## Other options
-
-There are alternative modes available, which can be discovered through exploration.
-
-e.g., enabling ENET programming requires adding the `--enable-enet` parameter while patching.
-
-To view all available options, please execute ISTA-Patcher without any arguments.
+> [!TIP]
+> There are some more alternative options available, which can be discovered through exploration.
+>
+> To view all available options, please execute ISTA-Patcher without any arguments.
 
 ## License
 
 Distributed under the GPLv3+ License. See LICENSE for more information.
 
-When redistributing programs patched by ISTA-Patcher, please be sure to include an attribution statement that giving credit to [ISTA-Patcher](https://github.com/tautcony/ISTA-Patcher).
+In any case where this software is used, please be sure to include an attribution statement giving credit to [ISTA-Patcher](https://github.com/tautcony/ISTA-Patcher).
+
+This project has never distributed ISTA or related programs to third parties, any person or organization that makes a profit from distribution is not affiliated with this project, and any risks or legal liabilities associated with that are not affiliated with this project.
 
 ## Disclaimer
 
 Icon credit: [comboo](https://twitter.com/comboo28).
 
-This repository has been created for educational purposes only. Use it at your own risk.
+> [!CAUTION]
+> This repository has been created for educational purposes only. Use it at your own risk.
