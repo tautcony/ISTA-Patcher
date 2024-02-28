@@ -5,7 +5,7 @@ namespace ISTA_Patcher.Core.Patcher;
 
 public class DefaultLicensePatcher : DefaultPatcher
 {
-    public DefaultLicensePatcher(string modulus, string exponent, ProgramArgs.LicenseOptions opts)
+    public DefaultLicensePatcher(string modulus, string exponent, ProgramArgs.CerebrumancyOptions opts)
         : base(opts)
     {
         this.Patches.Add(

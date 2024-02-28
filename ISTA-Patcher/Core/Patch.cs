@@ -27,19 +27,17 @@ public static partial class Patch
         var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
         var patchAppliedCount = new int[patcher.Patches.Count];
 
-        var lcts = new LimitedConcurrencyLevelTaskScheduler(Environment.ProcessorCount);
-        var factory = new TaskFactory(lcts);
-        var tasks = new List<Task>();
         using (var cts = new CancellationTokenSource())
         {
-            tasks.AddRange(pendingPatchList.Select(item =>
-                factory.StartNew(
-                    () => PatchSingleFile(item, patchAppliedCount, guiBasePath, indentLength, patcher, options),
-                    cts.Token)
-                )
-            );
-
-            Task.WaitAll(tasks.ToArray(), cts.Token);
+            var factory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(Environment.ProcessorCount));
+            Task.WaitAll(
+                pendingPatchList
+                    .Select(item =>
+                        factory.StartNew(
+                            () => PatchSingleFile(item, patchAppliedCount, guiBasePath, indentLength, patcher, options),
+                            cts.Token))
+                    .ToArray(),
+                cts.Token);
         }
 
         foreach (var line in BuildIndicator(patcher.Patches, patchAppliedCount))

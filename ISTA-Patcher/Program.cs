@@ -14,7 +14,6 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using DecryptOptions = ProgramArgs.DecryptOptions;
-using LicenseOptions = ProgramArgs.LicenseOptions;
 using PatchOptions = ProgramArgs.PatchOptions;
 
 internal static class Program
@@ -31,6 +30,9 @@ internal static class Program
             options.SendDefaultPii = true;
             options.EnableTracing = true;
             options.TracesSampleRate = 1;
+#if DEBUG
+            options.Environment = "development";
+#endif
         });
         Log.Logger = new LoggerConfiguration()
                      .Enrich.FromLogContext()
@@ -39,7 +41,7 @@ internal static class Program
                      .WriteTo.Sentry(LogEventLevel.Error, LogEventLevel.Debug)
                      .CreateLogger();
 
-        var command = ProgramArgs.BuildCommandLine(RunPatchAndReturnExitCode, RunLicenseOperationAndReturnExitCode, RunDecryptAndReturnExitCode);
+        var command = ProgramArgs.BuildCommandLine(RunPatchAndReturnExitCode, RunCerebrumancyOperationAndReturnExitCode, RunDecryptAndReturnExitCode);
 
         return command.Parse(args).InvokeAsync();
     }
@@ -154,105 +156,101 @@ internal static class Program
         return new KeyValuePair<string, string>(checkResult, version);
     }
 
-    private static async Task<int> RunLicenseOperationAndReturnExitCode(LicenseOptions opts)
+    private static async Task<int> RunCerebrumancyOperationAndReturnExitCode(ProgramArgs.CerebrumancyOptions opts)
     {
         LevelSwitch.MinimumLevel = opts.Verbosity;
 
-        if (!string.IsNullOrEmpty(opts.Decode))
+        if (!string.IsNullOrEmpty(opts.Mentalysis))
         {
             try
             {
-                var str = Encoding.UTF8.GetString(Convert.FromHexString(opts.Decode));
-                Log.Information("Decoded string: {String}", str);
+                var str = Encoding.UTF8.GetString(Convert.FromHexString(opts.Mentalysis));
+                Log.Information("Mentalysed string: {String}", str);
             }
             catch (Exception e)
             {
-                Log.Error(e, "Error while decoding string");
+                Log.Error(e, "Error while mentalysing string");
             }
 
             return 0;
         }
 
-        var privateKeyPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "private-key.xml");
+        var carvedPrimamindPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "carved-primamind.xml");
 
-        string keyPairXml = null;
-        if (opts.KeyPairPath != null)
+        string primamindXml = null;
+        if (opts.LoadPrimamind != null)
         {
-            if (!File.Exists(opts.KeyPairPath))
+            if (!File.Exists(opts.LoadPrimamind))
             {
-                Log.Error("Private key pair {KeyPairPath} does not exist", opts.KeyPairPath);
+                Log.Error("Primamind {Primamind} does not exist", opts.LoadPrimamind);
                 return -1;
             }
 
-            var fs = File.OpenRead(opts.KeyPairPath);
+            var fs = File.OpenRead(opts.LoadPrimamind);
             await using (fs.ConfigureAwait(false))
             {
                 using var sr = new StreamReader(fs, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-                keyPairXml = await sr.ReadToEndAsync().ConfigureAwait(false);
-                Log.Debug("Loaded private key from {KeyPairPath}", opts.KeyPairPath);
+                primamindXml = await sr.ReadToEndAsync().ConfigureAwait(false);
+                Log.Debug("Loaded primamind from {Primamind}", opts.LoadPrimamind);
             }
         }
 
-        string licenseXml = null;
-        if (opts.LicenseRequestPath != null)
+        string solicitationXml = null;
+        if (opts.Solicitation != null)
         {
             if (opts.Base64)
             {
                 try
                 {
-                    var data = Convert.FromBase64String(opts.LicenseRequestPath);
-                    licenseXml = Encoding.UTF8.GetString(data);
-                    Log.Debug("Loaded license request from parameter");
+                    var data = Convert.FromBase64String(opts.Solicitation);
+                    solicitationXml = Encoding.UTF8.GetString(data);
+                    Log.Debug("Loaded solicitation from parameter");
                 }
                 catch (FormatException ex)
                 {
-                    Log.Error(ex, "License request is not a valid base64 string");
+                    Log.Error(ex, "Solicitation is not a valid base64 string");
                     return -1;
                 }
             }
             else
             {
-                if (!File.Exists(opts.LicenseRequestPath))
+                if (!File.Exists(opts.Solicitation))
                 {
-                    Log.Error("License request file {LicensePath} does not exist", opts.LicenseRequestPath);
+                    Log.Error("Solicitation {Solicitation} does not exist", opts.Solicitation);
                     return -1;
                 }
 
-                var fs = File.OpenRead(opts.LicenseRequestPath);
+                var fs = File.OpenRead(opts.Solicitation);
                 await using (fs.ConfigureAwait(false))
                 {
                     using var sr = new StreamReader(fs, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-                    licenseXml = await sr.ReadToEndAsync().ConfigureAwait(false);
-                    Log.Debug("Loaded license request from {LicensePath}", opts.LicenseRequestPath);
+                    solicitationXml = await sr.ReadToEndAsync().ConfigureAwait(false);
+                    Log.Debug("Loaded solicitation from {LicensePath}", opts.Solicitation);
                 }
             }
         }
 
-        // --generate
-        if (opts.GenerateKeyPair)
+        if (opts.CarvingPrimamind)
         {
-            await GenerateKeyPair(privateKeyPath, opts.dwKeySize).ConfigureAwait(false);
+            await CarvingPrimamind(carvedPrimamindPath, opts.primamindIntensity).ConfigureAwait(false);
             return 0;
         }
 
-        // --sign
-        if (opts.SignLicense && keyPairXml != null && licenseXml != null)
+        if (opts.ConcretizePrimamind && primamindXml != null && solicitationXml != null)
         {
-            return await SignLicense(keyPairXml, licenseXml, opts).ConfigureAwait(false);
+            return await ConcretizePrimamind(primamindXml, solicitationXml, opts).ConfigureAwait(false);
         }
 
-        // --patch
-        if (keyPairXml != null && opts.TargetPath != null)
+        if (primamindXml != null && opts.Mentacorrosion != null)
         {
-            if (!Directory.Exists(opts.TargetPath))
+            if (!Directory.Exists(opts.Mentacorrosion))
             {
-                Log.Error("Target directory {TargetPath} does not exist", opts.TargetPath);
+                Log.Error("Target directory {Mentacorrosion} does not exist", opts.Mentacorrosion);
                 return -1;
             }
 
-            // Patch program
-            var rsaCryptoServiceProvider = new RSACryptoServiceProvider(opts.dwKeySize);
-            rsaCryptoServiceProvider.FromXmlString(keyPairXml);
+            var rsaCryptoServiceProvider = new RSACryptoServiceProvider(opts.primamindIntensity);
+            rsaCryptoServiceProvider.FromXmlString(primamindXml);
 
             var parameters = rsaCryptoServiceProvider.ExportParameters(includePrivateParameters: true);
 
@@ -263,9 +261,9 @@ internal static class Program
             {
                 Restore = opts.Restore,
                 Verbosity = opts.Verbosity,
-                TargetPath = opts.TargetPath,
-                Force = opts.Force,
-                Deobfuscate = opts.Deobfuscate,
+                TargetPath = opts.Mentacorrosion,
+                Force = opts.Compulsion,
+                Deobfuscate = opts.SpecialisRevelio,
             });
 
             return 0;
@@ -275,14 +273,14 @@ internal static class Program
         return 1;
     }
 
-    private static async Task GenerateKeyPair(string privateKeyPath, int dwKeySize)
+    private static async Task CarvingPrimamind(string carvedPrimamindPath, int primamindIntensity)
     {
-        using var rsa = new RSACryptoServiceProvider(dwKeySize);
+        using var rsa = new RSACryptoServiceProvider(primamindIntensity);
         try
         {
             var privateKey = rsa.ToXmlString(includePrivateParameters: true);
 
-            var fs = new FileStream(privateKeyPath, FileMode.Create);
+            var fs = new FileStream(carvedPrimamindPath, FileMode.Create);
             await using (fs.ConfigureAwait(false))
             {
                 var sw = new StreamWriter(fs);
@@ -290,7 +288,7 @@ internal static class Program
                 {
                     await sw.WriteAsync(privateKey).ConfigureAwait(false);
 
-                    Log.Information("Generated key pair located at {PrivateKeyPath}", privateKeyPath);
+                    Log.Information("Generated key pair located at {CarvedPrimamindPath}", carvedPrimamindPath);
                 }
             }
         }
@@ -301,9 +299,9 @@ internal static class Program
         }
     }
 
-    private static async Task<int> SignLicense(string keyPairXml, string licenseXml, LicenseOptions opts)
+    private static async Task<int> ConcretizePrimamind(string primamindXml, string solicitationXml, ProgramArgs.CerebrumancyOptions opts)
     {
-        var license = LicenseInfoSerializer.FromString<LicenseInfo>(licenseXml);
+        var license = LicenseInfoSerializer.FromString<LicenseInfo>(solicitationXml);
         if (license == null)
         {
             Log.Error("License request is not valid");
@@ -313,19 +311,17 @@ internal static class Program
         var isValid = false;
         if (license.LicenseKey is { Length: > 0 })
         {
-            // verify license
-            var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(keyPairXml);
+            var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(primamindXml);
             isValid = LicenseStatusChecker.IsLicenseValid(license, deformatter);
             Log.Information("License is valid: {IsValid}", isValid);
         }
 
         if (isValid)
         {
-            Log.Debug("License is valid, no need to patch");
+            Log.Debug("Solicitation is valid, no need to concretize");
             return 0;
         }
 
-        // update license info
         license.Comment = $"{Core.PatchUtils.PoweredBy} ({Core.PatchUtils.RepoUrl})";
         license.Expiration = DateTime.MaxValue;
         if (license.SubLicenses != null)
@@ -345,12 +341,11 @@ internal static class Program
             }
         }
 
-        // generate license key
-        LicenseStatusChecker.GenerateLicenseKey(license, keyPairXml);
+        LicenseStatusChecker.GenerateLicenseKey(license, primamindXml);
         var signedLicense = LicenseInfoSerializer.ToByteArray(license);
-        if (opts.SignedLicensePath != null)
+        if (opts.Manifestation != null)
         {
-            var fileStream = File.Create(opts.SignedLicensePath);
+            var fileStream = File.Create(opts.Manifestation);
             await using (fileStream.ConfigureAwait(false))
             {
                 await fileStream.WriteAsync(signedLicense).ConfigureAwait(false);
@@ -358,8 +353,8 @@ internal static class Program
         }
         else
         {
-            Log.Information("License[Base64]:{NewLine}{License}", Environment.NewLine, Convert.ToBase64String(signedLicense));
-            Log.Information("License[Xml]:{NewLine}{License}", Environment.NewLine, LicenseInfoSerializer.ToString(license).ReplaceLineEndings(string.Empty));
+            Log.Information("Manifestation[Base64]:{NewLine}{Manifestation}", Environment.NewLine, Convert.ToBase64String(signedLicense));
+            Log.Information("Manifestation[Xml]:{NewLine}{Manifestation}", Environment.NewLine, LicenseInfoSerializer.ToString(license).ReplaceLineEndings(string.Empty));
         }
 
         return 0;

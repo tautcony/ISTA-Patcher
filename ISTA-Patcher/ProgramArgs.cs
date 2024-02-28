@@ -16,97 +16,68 @@ public static class ProgramArgs
 
     public class BaseOptions
     {
-        // [Option('v', "verbosity", Default = Serilog.Events.LogEventLevel.Information, HelpText = "Set the output verbosity level.")]
         public Serilog.Events.LogEventLevel Verbosity { get; set; }
 
-        // [Option('r', "restore", Default = false, HelpText = "Restore patched files")]
         public bool Restore { get; set; }
     }
 
     public class OptionalPatchOptions : BaseOptions
     {
-        // [Option("enable-enet", Default = false, HelpText = "Enable ENET programming.")]
         public bool EnableENET { get; set; }
 
-        // [Option("disable-requirements-check", Default = false, HelpText = "Disable system requirements check.")]
         public bool DisableRequirementsCheck { get; set; }
 
-        // [Option("enable-not-send", Default = false, HelpText = "Enable VIN Not Send Data.")]
         public bool EnableNotSend { get; set; }
 
-        // [Option("skip-validation-patch", Default = false, HelpText = "Skip license validation patch.")]
         public bool SkipLicensePatch { get; set; }
 
-        // [Option("patch-user-auth", Default = false, HelpText = "Patch user authentication environment.")]
         public bool UserAuthEnv { get; set; }
     }
 
-    // [Verb("patch", HelpText = "Perform patching on application and library.")]
     public class PatchOptions : OptionalPatchOptions
     {
-        // [Option('t', "type", Default = ProgramArgs.PatchType.B, HelpText = "Specify the patch type. Valid options: B, T.")]
         public PatchType PatchType { get; set; }
 
-        // [Option("generate-reg-file", Default = false, HelpText = "Generate mock reg file.")]
         public bool GenerateMockRegFile { get; set; }
 
-        // [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
         public bool Deobfuscate { get; set; }
 
-        // [Option('f', "force", Default = false, HelpText = "Force patching on application and library.")]
         public bool Force { get; set; }
 
-        // [Value(1, MetaName = "ISTA-P path", Required = true, HelpText = "Specify the path for ISTA-P.")]
         public string TargetPath { get; set; }
     }
 
-    // [Verb("license", HelpText = "Perform license-related operations.")]
-    public class LicenseOptions : OptionalPatchOptions
+    public class CerebrumancyOptions : OptionalPatchOptions
     {
-        // [Option('g', "generate", HelpText = "Generate a key pair.", Group = "operation")]
-        public bool GenerateKeyPair { get; set; }
+        public bool CarvingPrimamind { get; set; }
 
-        // [Option("key-size", Default = 1024, HelpText = "The size of the key to use in bits")]
-        public int dwKeySize { get; set; }
+        public int primamindIntensity { get; set; }
 
-        // [Option('p', "patch", HelpText = "Patch the target program.", Group = "operation")]
-        public string? TargetPath { get; set; }
+        public string? Mentacorrosion { get; set; }
 
-        // [Option('s', "sign", HelpText = "Sign a license request.", Group = "operation")]
-        public bool SignLicense { get; set; }
+        public bool ConcretizePrimamind { get; set; }
 
-        // [Option("decode", Default = null, HelpText = "Decode the license request stream.", Group = "operation")]
-        public string Decode { get; set; }
+        public string Mentalysis { get; set; }
 
-        // [Option('k', "key-pair", HelpText = "Specify the path for the key pair file.")]
-        public string? KeyPairPath { get; set; }
+        public string? LoadPrimamind { get; set; }
 
-        // [Option('l', "license", HelpText = "Specify the path for the license request file or provide base64-encoded content.")]
-        public string? LicenseRequestPath { get; set; }
+        public string? Solicitation { get; set; }
 
-        // [Option("synthetic", Default = false, HelpText = "Update all sub-licenses package name to SyntheticEnv.")]
         public bool SyntheticEnv { get; set; }
 
-        // [Option('o', "output", HelpText = "Specify the target path for the signed license file.")]
-        public string? SignedLicensePath { get; set; }
+        public string? Manifestation { get; set; }
 
-        // [Option('b', "base64", HelpText = "Treat the license request option as base64-encoded content.")]
         public bool Base64 { get; set; }
 
-        // [Option('f', "force", Default = false, HelpText = "Force patching on application and library.")]
-        public bool Force { get; set; }
+        public bool Compulsion { get; set; }
 
-        // [Option('d', "deobfuscate", Default = false, HelpText = "Deobfuscate application and library.")]
-        public bool Deobfuscate { get; set; }
+        public bool SpecialisRevelio { get; set; }
     }
 
-    // [Verb("decrypt", HelpText = "Decrypt the integrity checklist.")]
     public class DecryptOptions : BaseOptions
     {
-        // [Option('i', "integrity", Default = false, HelpText = "Verify the integrity of the checklist.")]
         public bool Integrity { get; set; }
 
-        // [Value(0, MetaName = "ISTA-P path", Required = true, HelpText = "Specify the path for ISTA-P.")]
         public string? TargetPath { get; set; }
     }
 
@@ -114,44 +85,44 @@ public static class ProgramArgs
     private static readonly CliOption<Serilog.Events.LogEventLevel> VerbosityOption = new("-v", "--verbosity")
     {
         DefaultValueFactory = _ => Serilog.Events.LogEventLevel.Information,
-        Description = "Set the output verbosity level.",
+        Description = "[Element] Set the output verbosity level of the ISTA-Patcher's output.",
     };
 
     private static readonly CliOption<bool> RestoreOption = new("-r", "--restore")
     {
         DefaultValueFactory = _ => false,
-        Description = "Restore patched files",
+        Description = "[General] Restore patched files to their original state.",
     };
 
     // optional patch options
     private static readonly CliOption<bool> EnableEnetOption = new("--enable-enet")
     {
         DefaultValueFactory = _ => false,
-        Description = "Enable ENET programming.",
+        Description = "[Adjunct] Enable ENET programming functionality.",
     };
 
     private static readonly CliOption<bool> DisableRequirementsCheckOption = new("--disable-requirements-check")
     {
         DefaultValueFactory = _ => false,
-        Description = "Disable system requirements check.",
+        Description = "[Adjunct] Disable system requirements check functionality.",
     };
 
     private static readonly CliOption<bool> EnableNotSendOption = new("--enable-not-send")
     {
         DefaultValueFactory = _ => false,
-        Description = "Enable VIN Not Send Data.",
+        Description = "[Adjunct] Enable VIN Not Send Data functionality.",
     };
 
     private static readonly CliOption<bool> SkipValidationPatchOption = new("--skip-validation-patch")
     {
         DefaultValueFactory = _ => false,
-        Description = "Skip license validation patch.",
+        Description = "[Adjunct] Skip license validation patch.",
     };
 
     private static readonly CliOption<bool> PatchUserAuthOption = new("--patch-user-auth")
     {
         DefaultValueFactory = _ => false,
-        Description = "Patch user authentication environment.",
+        Description = "[Adjunct] Patch user authentication environment.",
     };
 
     public static CliCommand buildPatchCommand(Func<PatchOptions, Task<int>> handler)
@@ -162,29 +133,28 @@ public static class ProgramArgs
             DefaultValueFactory = _ => ProgramArgs.PatchType.B,
             Description = "Specify the patch type. Valid options: B, T.",
         };
-        var generateRegFileOption = new CliOption<bool>("--generate-reg-file")
+        var generateRegFileOption = new CliOption<bool>("--generate-registry-file")
         {
             DefaultValueFactory = _ => false,
-            Description = "Generate mock reg file.",
+            Description = "Generate a registry file.",
         };
-        var deobfuscateOption = new CliOption<bool>("-d", "--deobfuscate"
-        )
+        var deobfuscateOption = new CliOption<bool>("-d", "--deobfuscate")
         {
             DefaultValueFactory = _ => false,
-            Description = "Deobfuscate application and library.",
+            Description = "Enable deobfuscation of the application and libraries.",
         };
         var forceOption = new CliOption<bool>("-f", "--force")
         {
             DefaultValueFactory = _ => false,
-            Description = "Force patching on application and library.",
+            Description = "Force patching on application and libraries. If specified, ISTA-Patcher will apply patches forcefully, bypassing certain checks.",
         };
         var targetPathArgument = new CliArgument<string>("targetPath")
         {
             DefaultValueFactory = _ => null,
-            Description = "Specify the path for ISTA-P.",
+            Description = "Specify the path for ISTA-P. Provide the full path where ISTA-P is located on your system.",
         };
 
-        var patchCommand = new CliCommand("patch", "Perform patching on application and library.")
+        var patchCommand = new CliCommand("patch", "Perform patching on application and libraries.")
         {
             VerbosityOption,
             RestoreOption,
@@ -235,71 +205,70 @@ public static class ProgramArgs
         return patchCommand;
     }
 
-    public static CliCommand buildLicenseCommand(Func<LicenseOptions, Task<int>> handler)
+    public static CliCommand buildCerebrumancyCommand(Func<CerebrumancyOptions, Task<int>> handler)
     {
-        // License options
-        var generateKeyPairOption = new CliOption<bool>("-g", "--generate")
+        var carvingPrimamindOption = new CliOption<bool>("--carving-primamind")
         {
             DefaultValueFactory = _ => false,
-            Description = "Generate a key pair.",
+            Description = "Initiate the crafting ritual to sculpt a Primamind.",
         };
-        var keySizeOption = new CliOption<int>("--key-size")
+        var primamindIntensityOption = new CliOption<int>("--primamind-intensity")
         {
             DefaultValueFactory = _ => 1024,
-            Description = "The size of the key to use in bits",
+            Description = "The arcane potency of the carved Primamind, measured in bits.",
         };
-        var patchOption = new CliOption<string>("-p", "--patch")
+        var mentacorrosionOption = new CliOption<string>("--mentacorrosion")
         {
             DefaultValueFactory = _ => null,
-            Description = "Patch the target program.",
+            Description = "Invoke mentacorrosion upon the chosen target.",
         };
-        var signLicenseOption = new CliOption<bool>("-s", "--sign")
+        var concretizePrimamindOption = new CliOption<bool>("--concretize-primamind")
         {
             DefaultValueFactory = _ => false,
-            Description = "Sign a license request.",
+            Description = "Initiate the ritual to materialize a Primamind entity.",
         };
-        var decodeOption = new CliOption<string>("--decode")
+        var mentalysisOption = new CliOption<string>("--mentalysis")
         {
             DefaultValueFactory = _ => null,
-            Description = "Decode the license request stream.",
+            Description = "Conduct mentalysing on the mystical stream.",
         };
-        var keyPairPathOption = new CliOption<string>("-k", "--key-pair")
+        var loadPrimamindOption = new CliOption<string>("--load-primamind")
         {
             DefaultValueFactory = _ => null,
-            Description = "Specify the path for the key pair file.",
+            Description = "Channel the arcane essence to summon and infuse the Primamind. Specify the conduit path.",
         };
-        var licenseRequestPathOption = new CliOption<string>("-l", "--license")
+        var solicitationOption = new CliOption<string>("--solicitation")
         {
             DefaultValueFactory = _ => null,
-            Description = "Specify the path for the license request file or provide base64-encoded content.",
+            Description = "Designate the path for the solicitation, or supply base64-encoded mystical essence.",
         };
         var syntheticEnvOption = new CliOption<bool>("--synthetic")
         {
             DefaultValueFactory = _ => false,
-            Description = "Add a sub-license package with name SyntheticEnv.",
+            Description = "Infuse the creation with an arcane essence, naming it SyntheticEnv.",
         };
-        var signedLicensePathOption = new CliOption<string>("-o", "--output")
+        var manifestationOption = new CliOption<string>("--manifestation")
         {
             DefaultValueFactory = _ => null,
-            Description = "Specify the target path for the signed license file.",
+            Description = "Designate the destination for the manifestation.",
         };
-        var base64Option = new CliOption<bool>("-b", "--base64")
+        var base64Option = new CliOption<bool>("--base64")
         {
             DefaultValueFactory = _ => false,
-            Description = "Treat the license request option as base64-encoded content.",
+            Description = "Interpret the solicitation request as base64-encoded mystical content.",
         };
-        var forceOption = new CliOption<bool>("-f", "--force")
+        var compulsionOption = new CliOption<bool>("--compulsion")
         {
             DefaultValueFactory = _ => false,
-            Description = "Force patching on application and library.",
+            Description = "Invoke mystical forces to compel mentacorrosion.",
         };
-        var deobfuscateOption = new CliOption<bool>("-d", "--deobfuscate")
+        var specialisRevelioOption = new CliOption<bool>("--specialis-revelio")
         {
             DefaultValueFactory = _ => false,
-            Description = "Deobfuscate application and library.",
+            Description = "Initiate the spell 'Specialis Revelio' to unveil mysteries.",
         };
 
-        var licenseCommand = new CliCommand("license", "Perform license-related operations.")
+        var cerebrumancyCommand = new CliCommand("cerebrumancy", "Initiate operations related to the manipulation of consciousness.")
         {
             VerbosityOption,
             RestoreOption,
@@ -308,21 +277,21 @@ public static class ProgramArgs
             EnableNotSendOption,
             SkipValidationPatchOption,
             PatchUserAuthOption,
-            generateKeyPairOption,
-            keySizeOption,
-            patchOption,
-            signLicenseOption,
-            decodeOption,
-            keyPairPathOption,
-            licenseRequestPathOption,
+            carvingPrimamindOption,
+            primamindIntensityOption,
+            mentacorrosionOption,
+            concretizePrimamindOption,
+            mentalysisOption,
+            loadPrimamindOption,
+            solicitationOption,
             syntheticEnvOption,
-            signedLicensePathOption,
+            manifestationOption,
             base64Option,
-            forceOption,
-            deobfuscateOption,
+            compulsionOption,
+            specialisRevelioOption,
         };
 
-        licenseCommand.SetAction((result, _) =>
+        cerebrumancyCommand.SetAction((result, _) =>
         {
             var verbosityValue = result.GetValue(VerbosityOption);
             var restoreValue = result.GetValue(RestoreOption);
@@ -331,20 +300,20 @@ public static class ProgramArgs
             var enableNotSendValue = result.GetValue(EnableNotSendOption);
             var skipValidationPatchValue = result.GetValue(SkipValidationPatchOption);
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
-            var generateKeyPairValue = result.GetValue(generateKeyPairOption);
-            var keySizeValue = result.GetValue(keySizeOption);
-            var patchValue = result.GetValue(patchOption);
-            var signLicenseValue = result.GetValue(signLicenseOption);
-            var decodeValue = result.GetValue(decodeOption);
-            var keyPairPathValue = result.GetValue(keyPairPathOption);
-            var licenseRequestPathValue = result.GetValue(licenseRequestPathOption);
+            var carvingPrimamindValue = result.GetValue(carvingPrimamindOption);
+            var primamindIntensityValue = result.GetValue(primamindIntensityOption);
+            var mentacorrosionValue = result.GetValue(mentacorrosionOption);
+            var concretizePrimamindValue = result.GetValue(concretizePrimamindOption);
+            var mentalysisValue = result.GetValue(mentalysisOption);
+            var loadPrimamindValue = result.GetValue(loadPrimamindOption);
+            var solicitationValue = result.GetValue(solicitationOption);
             var syntheticEnvValue = result.GetValue(syntheticEnvOption);
-            var signedLicensePathValue = result.GetValue(signedLicensePathOption);
+            var manifestationValue = result.GetValue(manifestationOption);
             var base64Value = result.GetValue(base64Option);
-            var forceValue = result.GetValue(forceOption);
-            var deobfuscateValue = result.GetValue(deobfuscateOption);
+            var compulsionValue = result.GetValue(compulsionOption);
+            var specialisRevelioValue = result.GetValue(specialisRevelioOption);
 
-            var options = new LicenseOptions
+            var options = new CerebrumancyOptions
             {
                 Verbosity = verbosityValue,
                 Restore = restoreValue,
@@ -353,22 +322,22 @@ public static class ProgramArgs
                 EnableNotSend = enableNotSendValue,
                 SkipLicensePatch = skipValidationPatchValue,
                 UserAuthEnv = patchUserAuthValue,
-                GenerateKeyPair = generateKeyPairValue,
-                dwKeySize = keySizeValue,
-                TargetPath = patchValue,
-                SignLicense = signLicenseValue,
-                Decode = decodeValue,
-                KeyPairPath = keyPairPathValue,
-                LicenseRequestPath = licenseRequestPathValue,
+                CarvingPrimamind = carvingPrimamindValue,
+                primamindIntensity = primamindIntensityValue,
+                Mentacorrosion = mentacorrosionValue,
+                ConcretizePrimamind = concretizePrimamindValue,
+                Mentalysis = mentalysisValue,
+                LoadPrimamind = loadPrimamindValue,
+                Solicitation = solicitationValue,
                 SyntheticEnv = syntheticEnvValue,
-                SignedLicensePath = signedLicensePathValue,
+                Manifestation = manifestationValue,
                 Base64 = base64Value,
-                Force = forceValue,
-                Deobfuscate = deobfuscateValue,
+                Compulsion = compulsionValue,
+                SpecialisRevelio = specialisRevelioValue,
             };
             return Task.FromResult(handler(options));
         });
-        return licenseCommand;
+        return cerebrumancyCommand;
     }
 
     public static CliCommand buildDecryptCommand(Func<DecryptOptions, Task<int>> handler)
@@ -414,7 +383,7 @@ public static class ProgramArgs
 
     public static CliRootCommand BuildCommandLine(
         Func<PatchOptions, Task<int>> patchHandler,
-        Func<LicenseOptions, Task<int>> licenseHandler,
+        Func<CerebrumancyOptions, Task<int>> licenseHandler,
         Func<DecryptOptions, Task<int>> decryptHandler
         )
     {
@@ -425,7 +394,7 @@ public static class ProgramArgs
         };
 
         var patchCommand = buildPatchCommand(patchHandler);
-        var licenseCommand = buildLicenseCommand(licenseHandler);
+        var licenseCommand = buildCerebrumancyCommand(licenseHandler);
         var decryptCommand = buildDecryptCommand(decryptHandler);
 
         rootCommand.Add(patchCommand);
