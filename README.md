@@ -42,22 +42,20 @@ Overwrite patched files to its parent directory, read the notes, then run the pr
 
 > [!NOTE]
 > - Please ensure that all related processes been killed before starting the program.
-> - Import generated registry file(`license.reg`) under `Release` directory to resolve any exceptions that may arise while loading license.
-> - Please ensure that both `ILeanActive` and `OSSModeActive` in the configuration file are set to `false`, otherwise `DealerData` will not load the default configuration correctly.
+> - Import the generated registry file(`license.reg`) under `Release` directory to resolve some exceptions that may arise while loading the license.
+> - Please ensure that both `ILeanActive` and `OSSModeActive` are set to `false` in the configuration file, otherwise `DealerData` will not load the default configuration correctly.
 > - Please ensure that the `Logging.Directory` in the configuration file is a relative path that does not start with `%ISPIDATA%`, otherwise exceptions will occur during the log cleaning process.
 
 > [!TIP]
-> There are some more alternative options available, which can be discovered through exploration.
+> There are several other alternative features that can be discovered through exploration.
 >
-> To view all available options, please execute ISTA-Patcher without any arguments.
+> For all available options and to learn more, please execute ISTA-Patcher without any arguments and follow the instructions.
 
 ## License
 
 Distributed under the GPLv3+ License. See LICENSE for more information.
 
-In any case where this software is used, please be sure to include an attribution statement giving credit to [ISTA-Patcher](https://github.com/tautcony/ISTA-Patcher).
-
-This project has never distributed ISTA or related programs to third parties, any person or organization that makes a profit from distribution is not affiliated with this project, and any risks or legal liabilities associated with that are not affiliated with this project.
+When redistributing any content that benefiting from ISTA-Patcher, it is imperative to include an attribution statement that credits [ISTA-Patcher](https://github.com/tautcony/ISTA-Patcher).
 
 ## Disclaimer
 
@@ -65,3 +63,5 @@ Icon credit: [comboo](https://twitter.com/comboo28).
 
 > [!CAUTION]
 > This repository has been created for educational purposes only. Use it at your own risk.
+> 
+> It must be made clear that ISTA-Patcher is an independent project, any other individual or organization redistributing it or its derivatives is not affiliated with this project and may not be able to provide any support for installing or using ISTA.
