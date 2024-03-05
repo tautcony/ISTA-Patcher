@@ -29,7 +29,7 @@ public static partial class Patch
 
         using (var cts = new CancellationTokenSource())
         {
-            var factory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(Environment.ProcessorCount));
+            var factory = new TaskFactory(new ConcurrencyTaskScheduler(Environment.ProcessorCount));
             Task.WaitAll(
                 pendingPatchList
                     .Select(item =>

@@ -11,7 +11,7 @@ using System.Xml.Serialization;
 [XmlRoot(Namespace = "http://tempuri.org/LicenseInfo.xsd", IsNullable = false)]
 [XmlType(AnonymousType = true, Namespace = "http://tempuri.org/LicenseInfo.xsd")]
 [DataContract(Name = "LicenseInfo", Namespace = "http://tempuri.org/LicenseInfo.xsd")]
-public class LicenseInfo : ICloneable
+public class LicenseInfo : EntitySerializer<LicenseInfo>, ICloneable
 {
     [XmlElement(IsNullable = true, Order = 0)]
     [DataMember]
@@ -72,106 +72,6 @@ public class LicenseInfo : ICloneable
     [DataMember]
     [XmlElement("SubLicenses", Order = 14)]
     public List<LicensePackage>? SubLicenses { get; set; }
-
-    private static XmlSerializer Serializer { get; } = new(typeof(LicenseInfo));
-
-    public virtual string Serialize()
-    {
-        using var memoryStream = new MemoryStream();
-        Serializer.Serialize(memoryStream, this);
-        memoryStream.Seek(0L, SeekOrigin.Begin);
-        using var streamReader = new StreamReader(memoryStream);
-        return streamReader.ReadToEnd();
-    }
-
-    public static bool Deserialize(string licenseXmlContent, out LicenseInfo? licenseInfo, out Exception? exception)
-    {
-        exception = null;
-        licenseInfo = null;
-        try
-        {
-            licenseInfo = Deserialize(licenseXmlContent);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-            exception = ex;
-            return false;
-        }
-    }
-
-    public static bool Deserialize(string licenseXmlContent, out LicenseInfo licenseInfo)
-    {
-        return Deserialize(licenseXmlContent, out licenseInfo, out _);
-    }
-
-    public static LicenseInfo Deserialize(string licenseXmlContent)
-    {
-        StringReader stringReader = null;
-        try
-        {
-            stringReader = new StringReader(licenseXmlContent);
-            return (LicenseInfo)Serializer.Deserialize(XmlReader.Create(stringReader)) ?? throw new InvalidOperationException();
-        }
-        finally
-        {
-            stringReader?.Dispose();
-        }
-    }
-
-    public virtual bool SaveToFile(string fileName, out Exception? exception)
-    {
-        exception = null;
-        try
-        {
-            this.SaveToFile(fileName);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-            exception = ex;
-            return false;
-        }
-    }
-
-    public virtual void SaveToFile(string fileName)
-    {
-        using var streamWriter = new FileInfo(fileName).CreateText();
-        var value = this.Serialize();
-        streamWriter.WriteLine(value);
-    }
-
-    public static bool LoadFromFile(string fileName, out LicenseInfo? licenseInfo, out Exception? exception)
-    {
-        exception = null;
-        licenseInfo = null;
-        try
-        {
-            licenseInfo = LoadFromFile(fileName);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-            exception = ex;
-            return false;
-        }
-    }
-
-    public static bool LoadFromFile(string fileName, out LicenseInfo licenseInfo)
-    {
-        return LoadFromFile(fileName, out licenseInfo, out _);
-    }
-
-    public static LicenseInfo LoadFromFile(string fileName)
-    {
-        using var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-        using var streamReader = new StreamReader(fileStream);
-        var licenseContent = streamReader.ReadToEnd();
-        return Deserialize(licenseContent);
-    }
 
     public object Clone()
     {

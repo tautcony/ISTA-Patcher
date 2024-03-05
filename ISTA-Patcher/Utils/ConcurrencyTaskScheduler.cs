@@ -6,7 +6,7 @@ namespace ISTA_Patcher.Utils;
 // Provides a task scheduler that ensures a maximum concurrency level while
 // running on top of the thread pool.
 // from: https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler?view=net-7.0
-public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
+public class ConcurrencyTaskScheduler : TaskScheduler
 {
    // Indicates whether the current thread is processing work items.
    [ThreadStatic]
@@ -19,7 +19,7 @@ public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
    private int _delegatesQueuedOrRunning;
 
    // Creates a new instance with the specified degree of parallelism.
-   public LimitedConcurrencyLevelTaskScheduler(int maxDegreeOfParallelism)
+   public ConcurrencyTaskScheduler(int maxDegreeOfParallelism)
    {
         ArgumentOutOfRangeException.ThrowIfLessThan(maxDegreeOfParallelism, 1);
         this.MaximumConcurrencyLevel = maxDegreeOfParallelism;
