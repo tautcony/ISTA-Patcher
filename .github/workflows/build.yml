@@ -43,10 +43,15 @@ jobs:
         DOTNET_CLI_TELEMETRY_OPTOUT: true
       run: dotnet publish ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --self-contained false
 
+    - name: Copy files
+      run: |
+        cp -f LICENSE ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/LICENSE
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ISTA-Patcher-${{ matrix.runtime-identifier }}-${{ matrix.configuration }}
+        retention-days: 30
         path: |
           ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*
           !ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*.pdb
@@ -86,10 +91,15 @@ jobs:
         lipo -create ISTA-Patcher/bin/Release/net8.0/osx-x64/publish/ISTA-Patcher ISTA-Patcher/bin/Release/net8.0/osx-arm64/publish/ISTA-Patcher -output ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/ISTA-Patcher
         cp -f ISTA-Patcher/bin/Release/net8.0/osx-x64/publish/patch-config.json ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/patch-config.json
 
+    - name: Copy files
+      run: |
+        cp -f ISTA-Patcher/bin/Release/net8.0/osx-x64/publish/LICENSE ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/LICENSE
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ISTA-Patcher-osx-universal-Release
+        retention-days: 30
         path: |
           ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/*
           !ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/*.pdb
