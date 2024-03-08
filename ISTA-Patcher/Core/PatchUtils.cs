@@ -53,6 +53,11 @@ internal static partial class PatchUtils
             "LastCompileTimeIsInvalid",
             "()System.Boolean",
             DnlibUtils.ReturnFalseMethod
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseManager",
+            "LastCompileTimeServiceProgramCompilerLicenseIsValid",
+            "()System.Boolean",
+            DnlibUtils.ReturnTrueMethod
         );
     }
 
