@@ -68,7 +68,7 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchCommonServiceWrapper(ModuleDefMD module)
+    public static int PatchCommonServiceWrapper_VerifyLicense(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
@@ -418,6 +418,17 @@ internal static partial class PatchUtils
         }
     }
 
+    [MarketLanguagePatch]
+    public static Func<ModuleDefMD, int> PatchCommonServiceWrapper_GetMarketLanguage(string marketLanguage)
+    {
+        return module => module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
+            "GetMarketLanguage",
+            "()System.String",
+            DnlibUtils.ReturnStringMethod(marketLanguage)
+        );
+    }
+
     [UserAuthPatch]
     [FromVersion("4.44.1x")]
     public static int PatchUserEnvironmentProvider(ModuleDefMD module)
@@ -433,6 +444,36 @@ internal static partial class PatchUtils
             "()\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.NetworkType",
             DnlibUtils.ReturnUInt32Method(1)
         );
+    }
+
+    [LogEnviromentPatch]
+    [FromVersion("4.46.1x")]
+    public static int PatchClientConfiguration(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.iLean.CommonServices.Models.ClientConfiguration",
+            "AddEnvironment",
+            "(\u0042\u004d\u0057.iLean.CommonServices.Models.Environment)System.Void",
+            removeLogOperation
+        );
+
+        void removeLogOperation(MethodDef method)
+        {
+            var instruction = method.FindInstruction(OpCodes.Callvirt, "System.Void System.Collections.Generic.ICollection`1<BMW.iLean.CommonServices.Models.Environment>::Add(BMW.iLean.CommonServices.Models.Environment)");
+            var index = method.Body.Instructions.IndexOf(instruction);
+            if (index == -1)
+            {
+                Log.Warning("Required instructions not found, can not patch ClientConfiguration::AddEnvironment");
+                return;
+            }
+
+            for (var i = method.Body.Instructions.Count - 1; i > index; i--)
+            {
+                method.Body.Instructions.RemoveAt(i);
+            }
+
+            method.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+        }
     }
 
     [SignaturePatch]

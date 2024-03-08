@@ -22,6 +22,10 @@ internal sealed class NotSendPatch : ISTAPatch;
 
 internal sealed class UserAuthPatch : ISTAPatch;
 
+internal sealed class LogEnviromentPatch : ISTAPatch;
+
+internal sealed class MarketLanguagePatch : ISTAPatch;
+
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersion(string version) : Attribute
 {

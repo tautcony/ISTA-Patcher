@@ -43,6 +43,16 @@ public class DefaultPatcher : IPatcher
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(UserAuthPatch)));
         }
+
+        if (opts.DisableLogEnviroment)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(LogEnviromentPatch)));
+        }
+
+        if (opts.MarketLanguage != null)
+        {
+            this.Patches.Add(PatchUtils.PatchCommonServiceWrapper_GetMarketLanguage(opts.MarketLanguage));
+        }
     }
 
     public DefaultPatcher(ProgramArgs.PatchOptions opts)

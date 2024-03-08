@@ -32,6 +32,10 @@ public static class ProgramArgs
         public bool SkipLicensePatch { get; set; }
 
         public bool UserAuthEnv { get; set; }
+
+        public bool DisableLogEnviroment { get; set; }
+
+        public string? MarketLanguage { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions
@@ -125,6 +129,18 @@ public static class ProgramArgs
         Description = "[Adjunct] Patch user authentication environment.",
     };
 
+    private static readonly CliOption<bool> DisableLogEnviromentOption = new("--disable-log-enviroment")
+    {
+        DefaultValueFactory = _ => false,
+        Description = "[Adjunct] Disable log environment object which may failed.",
+    };
+
+    private static readonly CliOption<string> MarketLanguageOption = new("--market-language")
+    {
+        DefaultValueFactory = _ => null,
+        Description = "[Adjunct] Set the market language.",
+    };
+
     public static CliCommand buildPatchCommand(Func<PatchOptions, Task<int>> handler)
     {
         // patch options
@@ -163,6 +179,8 @@ public static class ProgramArgs
             EnableNotSendOption,
             SkipValidationPatchOption,
             PatchUserAuthOption,
+            DisableLogEnviromentOption,
+            MarketLanguageOption,
             typeOption,
             generateRegFileOption,
             deobfuscateOption,
@@ -179,6 +197,8 @@ public static class ProgramArgs
             var enableNotSendValue = result.GetValue(EnableNotSendOption);
             var skipValidationPatchValue = result.GetValue(SkipValidationPatchOption);
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
+            var disableLogEnviromentValue = result.GetValue(DisableLogEnviromentOption);
+            var marketLanguageValue = result.GetValue(MarketLanguageOption);
             var typeValue = result.GetValue(typeOption);
             var generateRegFileValue = result.GetValue(generateRegFileOption);
             var deobfuscateValue = result.GetValue(deobfuscateOption);
@@ -194,6 +214,8 @@ public static class ProgramArgs
                 EnableNotSend = enableNotSendValue,
                 SkipLicensePatch = skipValidationPatchValue,
                 UserAuthEnv = patchUserAuthValue,
+                DisableLogEnviroment = disableLogEnviromentValue,
+                MarketLanguage = marketLanguageValue,
                 PatchType = typeValue,
                 GenerateMockRegFile = generateRegFileValue,
                 Deobfuscate = deobfuscateValue,
