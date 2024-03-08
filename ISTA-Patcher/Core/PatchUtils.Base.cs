@@ -6,6 +6,7 @@ namespace ISTA_Patcher.Core;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using de4dot.code;
 using de4dot.code.AssemblyClient;
@@ -50,9 +51,16 @@ internal static partial class PatchUtils
         }
     }
 
-    public static string PoweredBy => $"Powered by ISTA-Patcher {Version}";
+    public static string Config => Encoding.UTF8.GetString([
+        0x50, 0x6f, 0x77, 0x65, 0x72, 0x65, 0x64, 0x20, 0x62, 0x79, 0x20, 0x49, 0x53, 0x54, 0x41, 0x2d, 0x50, 0x61, 0x74,
+        0x63, 0x68, 0x65, 0x72, 0x20,
+    ]) + Version;
 
-    public static string RepoUrl => "https://github.com/tautcony/ISTA-Patcher";
+    public static byte[] Source => [
+        0x68, 0x74, 0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
+        0x2f, 0x74, 0x61, 0x75, 0x74, 0x63, 0x6f, 0x6e, 0x79, 0x2f, 0x49, 0x53, 0x54, 0x41, 0x2d, 0x50, 0x61, 0x74,
+        0x63, 0x68, 0x65, 0x72,
+    ];
 
     /// <summary>
     /// Loads a module from the specified file.
@@ -202,7 +210,7 @@ internal static partial class PatchUtils
             dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
         )
         {
-            Constant = new ConstantUser(RepoUrl),
+            Constant = new ConstantUser(Encoding.UTF8.GetString(Source)),
         };
 
         var versionField = new FieldDefUser(
@@ -223,7 +231,7 @@ internal static partial class PatchUtils
             attribute.AttributeType.Name == nameof(AssemblyDescriptionAttribute));
         if (description is { HasConstructorArguments: true })
         {
-            description.ConstructorArguments[0] = new CAArgument(module.CorLibTypes.String, PoweredBy);
+            description.ConstructorArguments[0] = new CAArgument(module.CorLibTypes.String, Config);
         }
     }
 
@@ -318,7 +326,7 @@ internal static partial class PatchUtils
                         contact = new Communication
                         {
                             email = "ista-patcher@\u0062\u006d\u0077.de",
-                            url = "https://github.com/tautcony/ISTA-Patcher",
+                            url = Encoding.UTF8.GetString(Source),
                             voice = new Phone
                             {
                                 countryCode = "004989",
@@ -350,7 +358,7 @@ internal static partial class PatchUtils
             Name = "ISTA Patcher",
             Email = "ista-patcher@\u0062\u006d\u0077.de",
             Expiration = DateTime.MaxValue,
-            Comment = RepoUrl,
+            Comment = Encoding.UTF8.GetString(Source),
             ComputerName = null,
             UserName = "*",
             AvailableBrandTypes = "*",

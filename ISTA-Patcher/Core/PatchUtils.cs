@@ -3,6 +3,7 @@
 
 namespace ISTA_Patcher.Core;
 
+using System.Text;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using Serilog;
@@ -166,9 +167,9 @@ internal static partial class PatchUtils
 
         void RemovePublicKeyCheck(MethodDef method)
         {
-            var getProcessesByName = DnlibUtils.BuildCall(module, typeof(System.Diagnostics.Process), "GetProcessesByName", typeof(System.Diagnostics.Process[]), [typeof(string)]);
+            var getProcessesByName = method.FindOperand<MemberRef>(OpCodes.Call, "System.Diagnostics.Process[] System.Diagnostics.Process::GetProcessesByName(System.String)");
             var firstOrDefault = method.FindOperand<MethodSpec>(OpCodes.Call, "System.Diagnostics.Process System.Linq.Enumerable::FirstOrDefault<System.Diagnostics.Process>(System.Collections.Generic.IEnumerable`1<System.Diagnostics.Process>)");
-            var invalidOperationException = DnlibUtils.BuildCall(module, typeof(InvalidOperationException), ".ctor", typeof(void), [typeof(string)]);
+            var invalidOperationException = method.FindOperand<MemberRef>(OpCodes.Newobj, "System.Void System.InvalidOperationException::.ctor(System.String)");
             if (getProcessesByName == null || firstOrDefault == null || invalidOperationException == null)
             {
                 Log.Warning("Required instructions not found, can not patch IstaIcsServiceClient::ValidateHost");
@@ -377,7 +378,7 @@ internal static partial class PatchUtils
                 label,
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldfld.ToInstruction(titleField),
-                OpCodes.Ldstr.ToInstruction($" ({PoweredBy})"),
+                OpCodes.Ldstr.ToInstruction($" ({Config ?? Encoding.UTF8.GetString(Source)})"),
                 OpCodes.Call.ToInstruction(concatRef),
                 OpCodes.Ret.ToInstruction(),
             };

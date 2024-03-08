@@ -322,7 +322,7 @@ internal static class Program
             return 0;
         }
 
-        license.Comment = $"{Core.PatchUtils.PoweredBy} ({Core.PatchUtils.RepoUrl})";
+        license.Comment = $"{Core.PatchUtils.Config} ({Encoding.UTF8.GetString(Core.PatchUtils.Source)})";
         license.Expiration = DateTime.MaxValue;
         if (license.SubLicenses != null)
         {

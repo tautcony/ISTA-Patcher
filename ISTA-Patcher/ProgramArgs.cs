@@ -5,6 +5,8 @@
 namespace ISTA_Patcher;
 
 using System.CommandLine;
+using System.Text;
+using ISTA_Patcher.Core;
 
 public static class ProgramArgs
 {
@@ -411,13 +413,19 @@ public static class ProgramArgs
     {
         var rootCommand = new CliRootCommand
         {
-            Description = $"Copyright (C) 2022-2024 TautCony.\n" +
-                          $"Released under the GNU GPLv3+.",
+            Description = "Copyright (C) 2022-2024 TautCony.\n" +
+                          $"Repo: {Encoding.UTF8.GetString(PatchUtils.Source)}\n" +
+                          "Released under the GNU GPLv3+.",
         };
 
         var patchCommand = buildPatchCommand(patchHandler);
         var licenseCommand = buildCerebrumancyCommand(licenseHandler);
         var decryptCommand = buildDecryptCommand(decryptHandler);
+
+        if (PatchUtils.Source.Length != 40 || string.IsNullOrEmpty(PatchUtils.Config))
+        {
+            return rootCommand;
+        }
 
         rootCommand.Add(patchCommand);
         rootCommand.Add(licenseCommand);
