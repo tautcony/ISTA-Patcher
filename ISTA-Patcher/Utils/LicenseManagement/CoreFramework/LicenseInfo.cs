@@ -4,7 +4,6 @@
 namespace ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
 
 using System.Runtime.Serialization;
-using System.Xml;
 using System.Xml.Serialization;
 
 [Serializable]

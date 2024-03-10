@@ -10,6 +10,7 @@ using ISTA_Patcher.Core;
 using ISTA_Patcher.Core.Patcher;
 using ISTA_Patcher.Utils.LicenseManagement;
 using ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
+using Sentry.Profiling;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -30,8 +31,9 @@ internal static class Program
             options.SendDefaultPii = true;
             options.EnableTracing = true;
             options.TracesSampleRate = 1;
+            options.AddIntegration(new ProfilingIntegration());
 #if DEBUG
-            options.Environment = "development";
+            options.Environment = "debug";
 #endif
         });
         Log.Logger = new LoggerConfiguration()

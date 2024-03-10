@@ -21,4 +21,4 @@ public class PatchConfig
 }
 
 [JsonSerializable(typeof(PatchConfig))]
-internal partial class PatchConfigSourceGenerationContext : JsonSerializerContext;
+internal sealed partial class PatchConfigSourceGenerationContext : JsonSerializerContext;

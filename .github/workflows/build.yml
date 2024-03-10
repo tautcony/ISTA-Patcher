@@ -41,7 +41,7 @@ jobs:
     - name: Publish the application
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: true
-      run: dotnet publish ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --self-contained false
+      run: dotnet publish ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --no-self-contained
 
     - name: Copy files
       run: |
