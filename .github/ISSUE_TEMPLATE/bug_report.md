@@ -23,6 +23,9 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
+**Patch Options**
+If applicable, provide the command line options you used when patching.
+
 **Logs**
 If applicable, upload logs under `ISTA\Logs` to help troubleshoot your problem (emptying the `Logs` folder and reproducing the problem before uploading them would be more helpful in analyzing the logs).
 
