@@ -38,6 +38,8 @@ public static class ProgramArgs
         public bool DisableLogEnviroment { get; set; }
 
         public string? MarketLanguage { get; set; }
+
+        public bool SkipSyncClientConfig { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions
@@ -143,6 +145,12 @@ public static class ProgramArgs
         Description = "[Adjunct] Set the market language.",
     };
 
+    private static readonly CliOption<bool> SkipSyncClientConfig = new("--skip-sync-client-config")
+    {
+        DefaultValueFactory = _ => false,
+        Description = "[Adjunct] Skip sync client configuration.",
+    };
+
     public static CliCommand buildPatchCommand(Func<PatchOptions, Task<int>> handler)
     {
         // patch options
@@ -183,6 +191,7 @@ public static class ProgramArgs
             PatchUserAuthOption,
             DisableLogEnviromentOption,
             MarketLanguageOption,
+            SkipSyncClientConfig,
             typeOption,
             generateRegFileOption,
             deobfuscateOption,
@@ -201,6 +210,7 @@ public static class ProgramArgs
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
             var disableLogEnviromentValue = result.GetValue(DisableLogEnviromentOption);
             var marketLanguageValue = result.GetValue(MarketLanguageOption);
+            var skipSyncClientConfigValue = result.GetValue(SkipSyncClientConfig);
             var typeValue = result.GetValue(typeOption);
             var generateRegFileValue = result.GetValue(generateRegFileOption);
             var deobfuscateValue = result.GetValue(deobfuscateOption);
@@ -218,6 +228,7 @@ public static class ProgramArgs
                 UserAuthEnv = patchUserAuthValue,
                 DisableLogEnviroment = disableLogEnviromentValue,
                 MarketLanguage = marketLanguageValue,
+                SkipSyncClientConfig = skipSyncClientConfigValue,
                 PatchType = typeValue,
                 GenerateMockRegFile = generateRegFileValue,
                 Deobfuscate = deobfuscateValue,

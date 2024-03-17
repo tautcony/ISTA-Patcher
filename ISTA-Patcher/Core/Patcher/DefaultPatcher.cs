@@ -53,6 +53,11 @@ public class DefaultPatcher : IPatcher
         {
             this.Patches.Add(PatchUtils.PatchCommonServiceWrapper_GetMarketLanguage(opts.MarketLanguage));
         }
+
+        if (opts.SkipSyncClientConfig)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(SkipSyncClientConfig)));
+        }
     }
 
     public DefaultPatcher(ProgramArgs.PatchOptions opts)

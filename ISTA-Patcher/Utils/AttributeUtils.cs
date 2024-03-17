@@ -24,6 +24,8 @@ internal sealed class UserAuthPatch : ISTAPatch;
 
 internal sealed class LogEnviromentPatch : ISTAPatch;
 
+internal sealed class SkipSyncClientConfig : ISTAPatch;
+
 internal sealed class MarketLanguagePatch : ISTAPatch;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]

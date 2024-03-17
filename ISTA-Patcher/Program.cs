@@ -306,7 +306,7 @@ internal static class Program
         var license = LicenseInfoSerializer.FromString<LicenseInfo>(solicitationXml);
         if (license == null)
         {
-            Log.Error("License request is not valid");
+            Log.Error("Solicitation is not valid");
             return -1;
         }
 
@@ -315,7 +315,7 @@ internal static class Program
         {
             var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(primamindXml);
             isValid = LicenseStatusChecker.IsLicenseValid(license, deformatter);
-            Log.Information("License is valid: {IsValid}", isValid);
+            Log.Information("Solicitation is valid: {IsValid}", isValid);
         }
 
         if (isValid)

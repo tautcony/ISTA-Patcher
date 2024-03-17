@@ -465,7 +465,7 @@ internal static partial class PatchUtils
 
         void removeLogOperation(MethodDef method)
         {
-            var instruction = method.FindInstruction(OpCodes.Callvirt, "System.Void System.Collections.Generic.ICollection`1<BMW.iLean.CommonServices.Models.Environment>::Add(BMW.iLean.CommonServices.Models.Environment)");
+            var instruction = method.FindInstruction(OpCodes.Callvirt, "System.Void System.Collections.Generic.ICollection`1<\u0042\u004d\u0057.iLean.CommonServices.Models.Environment>::Add(\u0042\u004d\u0057.iLean.CommonServices.Models.Environment)");
             var index = method.Body.Instructions.IndexOf(instruction);
             if (index == -1)
             {
@@ -480,6 +480,18 @@ internal static partial class PatchUtils
 
             method.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
         }
+    }
+
+    [SkipSyncClientConfig]
+    [FromVersion("4.46.3x")]
+    public static int PatchClientConfigurationManager(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.iLean.CommonServices.Services.ClientConfigurationManager",
+            "CheckClientConfigurationChangedDate",
+            "()System.Boolean",
+            DnlibUtils.ReturnFalseMethod
+        );
     }
 
     [SignaturePatch]
