@@ -8,8 +8,9 @@ public class DefaultLicensePatcher : DefaultPatcher
     public DefaultLicensePatcher(string modulus, string exponent, ProgramArgs.CerebrumancyOptions opts)
         : base(opts)
     {
-        this.Patches.Add(
-            PatchUtils.PatchGetRSAPKCS1SignatureDeformatter(modulus, exponent)
-        );
+        this.Patches.Add((
+            PatchUtils.PatchGetRSAPKCS1SignatureDeformatter(modulus, exponent),
+            ((Delegate)PatchUtils.PatchGetRSAPKCS1SignatureDeformatter).Method
+        ));
     }
 }

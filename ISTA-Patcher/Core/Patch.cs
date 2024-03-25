@@ -5,6 +5,7 @@ namespace ISTA_Patcher.Core;
 
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using dnlib.DotNet;
 using ISTA_Patcher.Core.Patcher;
@@ -109,7 +110,11 @@ public static partial class Patch
             }
 
             // Patch and print result
-            var result = patcher.Patches.Select(patch => patch(module)).ToList();
+            var result = patcher.Patches.Select(patch =>
+            {
+                var libraryList = IPatcher.ExtractLibrariesConfigFromAttribute(patch.Method);
+                return options.SkipLibrary.Intersect(libraryList, StringComparer.Ordinal).Any() ? 0 : patch.Delegater(module);
+            }).ToList();
             result.Select((item, index) => (item, index)).ToList()
                   .ForEach(patch => patchAppliedCount[patch.index] += patch.item);
 
@@ -206,10 +211,10 @@ public static partial class Patch
         }
     }
 
-    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<Func<ModuleDefMD, int>> patches, IReadOnlyList<int> counting)
+    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> patches, IReadOnlyList<int> counting)
     {
         return patches
-               .Select(FormatName)
+               .Select(p => FormatName(p.Delegater))
                .Reverse()
                .AsEnumerable()
                .Select((name, idx) =>

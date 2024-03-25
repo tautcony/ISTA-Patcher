@@ -3,12 +3,13 @@
 
 namespace ISTA_Patcher.Core.Patcher;
 
+using System.Reflection;
 using dnlib.DotNet;
 
 public class ToyotaPatcher : IPatcher
 {
-    public List<Func<ModuleDefMD, int>> Patches { get; set; } =
-        IPatcher.GetPatches(typeof(EssentialPatch), typeof(ValidationPatch), typeof(ToyotaPatch));
+    public List<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> Patches { get; set; } =
+        IPatcher.GetPatches(typeof(EssentialPatchAttribute), typeof(ValidationPatchAttribute), typeof(ToyotaPatchAttribute));
 
     public string[] GeneratePatchList(string basePath)
     {

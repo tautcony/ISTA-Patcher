@@ -52,6 +52,8 @@ public static class ProgramArgs
 
         public bool Force { get; set; }
 
+        public string[] SkipLibrary { get; set; }
+
         public string TargetPath { get; set; }
     }
 
@@ -174,6 +176,11 @@ public static class ProgramArgs
             DefaultValueFactory = _ => false,
             Description = "Force patching on application and libraries. If specified, ISTA-Patcher will apply patches forcefully, bypassing certain checks.",
         };
+        var skipLibraryOption = new CliOption<string[]>("--skip-library")
+        {
+            DefaultValueFactory = _ => Array.Empty<string>(),
+            Description = "Specify the library to skip patching.",
+        };
         var targetPathArgument = new CliArgument<string>("targetPath")
         {
             DefaultValueFactory = _ => null,
@@ -196,6 +203,7 @@ public static class ProgramArgs
             generateRegFileOption,
             deobfuscateOption,
             forceOption,
+            skipLibraryOption,
             targetPathArgument,
         };
 
@@ -215,6 +223,7 @@ public static class ProgramArgs
             var generateRegFileValue = result.GetValue(generateRegFileOption);
             var deobfuscateValue = result.GetValue(deobfuscateOption);
             var forceValue = result.GetValue(forceOption);
+            var skipLibraryValue = result.GetValue(skipLibraryOption);
             var targetPathValue = result.GetValue(targetPathArgument);
 
             var options = new PatchOptions
@@ -233,6 +242,7 @@ public static class ProgramArgs
                 GenerateMockRegFile = generateRegFileValue,
                 Deobfuscate = deobfuscateValue,
                 Force = forceValue,
+                SkipLibrary = skipLibraryValue,
                 TargetPath = targetPathValue,
             };
             return Task.FromResult(handler(options));

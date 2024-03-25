@@ -3,13 +3,14 @@
 
 namespace ISTA_Patcher.Core.Patcher;
 
+using System.Reflection;
 using dnlib.DotNet;
 using Serilog;
 
 public class DefaultPatcher : IPatcher
 {
-    public List<Func<ModuleDefMD, int>> Patches { get; set; } =
-        IPatcher.GetPatches(typeof(EssentialPatch));
+    public List<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> Patches { get; set; } =
+        IPatcher.GetPatches(typeof(EssentialPatchAttribute));
 
     private DefaultPatcher()
     {
@@ -21,42 +22,45 @@ public class DefaultPatcher : IPatcher
     {
         if (!opts.SkipLicensePatch)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(ValidationPatch)));
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(ValidationPatchAttribute)));
         }
 
         if (opts.EnableENET)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(ENETPatch)));
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(ENETPatchAttribute)));
         }
 
         if (opts.DisableRequirementsCheck)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(RequirementsPatch)));
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(RequirementsPatchAttribute)));
         }
 
         if (opts.EnableNotSend)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(NotSendPatch)));
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(NotSendPatchAttribute)));
         }
 
         if (opts.UserAuthEnv)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(UserAuthPatch)));
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(UserAuthPatchAttribute)));
         }
 
         if (opts.DisableLogEnviroment)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(LogEnviromentPatch)));
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(LogEnviromentPatchAttribute)));
         }
 
         if (opts.MarketLanguage != null)
         {
-            this.Patches.Add(PatchUtils.PatchCommonServiceWrapper_GetMarketLanguage(opts.MarketLanguage));
+            this.Patches.Add((
+                PatchUtils.PatchCommonServiceWrapper_GetMarketLanguage(opts.MarketLanguage),
+                ((Delegate)PatchUtils.PatchCommonServiceWrapper_GetMarketLanguage).Method
+            ));
         }
 
         if (opts.SkipSyncClientConfig)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(SkipSyncClientConfig)));
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(SkipSyncClientConfigAttribute)));
         }
     }
 

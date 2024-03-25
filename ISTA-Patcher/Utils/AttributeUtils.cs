@@ -4,32 +4,38 @@
 namespace ISTA_Patcher.Utils;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-internal class ISTAPatch : Attribute;
+internal class ISTAPatchAttribute : Attribute;
 
-internal sealed class ValidationPatch : ISTAPatch;
+internal sealed class ValidationPatchAttribute : ISTAPatchAttribute;
 
-internal sealed class EssentialPatch : ISTAPatch;
+internal sealed class EssentialPatchAttribute : ISTAPatchAttribute;
 
-internal sealed class SignaturePatch : ISTAPatch;
+internal sealed class SignaturePatchAttribute : ISTAPatchAttribute;
 
-internal sealed class ToyotaPatch : ISTAPatch;
+internal sealed class ToyotaPatchAttribute : ISTAPatchAttribute;
 
-internal sealed class ENETPatch : ISTAPatch;
+internal sealed class ENETPatchAttribute : ISTAPatchAttribute;
 
-internal sealed class RequirementsPatch : ISTAPatch;
+internal sealed class RequirementsPatchAttribute : ISTAPatchAttribute;
 
-internal sealed class NotSendPatch : ISTAPatch;
+internal sealed class NotSendPatchAttribute : ISTAPatchAttribute;
 
-internal sealed class UserAuthPatch : ISTAPatch;
+internal sealed class UserAuthPatchAttribute : ISTAPatchAttribute;
 
-internal sealed class LogEnviromentPatch : ISTAPatch;
+internal sealed class LogEnviromentPatchAttribute : ISTAPatchAttribute;
 
-internal sealed class SkipSyncClientConfig : ISTAPatch;
+internal sealed class SkipSyncClientConfigAttribute : ISTAPatchAttribute;
 
-internal sealed class MarketLanguagePatch : ISTAPatch;
+internal sealed class MarketLanguagePatchAttribute : ISTAPatchAttribute;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-internal sealed class FromVersion(string version) : Attribute
+internal sealed class FromVersionAttribute(string version) : Attribute
 {
     public string? Version { get; set; } = version;
+}
+
+[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+internal sealed class LibrayNameAttribute(params string[] fileName) : Attribute
+{
+    public string[] FileName { get; set; } = fileName;
 }

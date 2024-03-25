@@ -3,6 +3,7 @@
 
 namespace ISTA_Patcher.Core.Patcher;
 
+using System.Reflection;
 using System.Text.Json;
 using dnlib.DotNet;
 using Serilog;
@@ -10,7 +11,7 @@ using Constants = ISTA_Patcher.Utils.Constants;
 
 public interface IPatcher
 {
-    public List<Func<ModuleDefMD, int>> Patches { get; set; }
+    public List<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> Patches { get; set; }
 
     public string[] GeneratePatchList(string basePath);
 
@@ -42,12 +43,20 @@ public interface IPatcher
         return null;
     }
 
-    public static List<Func<ModuleDefMD, int>> GetPatches(params Type[] attributes)
+    public static List<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> GetPatches(params Type[] attributes)
     {
         return typeof(PatchUtils)
             .GetMethods()
             .Where(m => Array.Exists(attributes, attribute => m.GetCustomAttributes(attribute, inherit: false).Length > 0))
-            .Select(m => (Func<ModuleDefMD, int>)Delegate.CreateDelegate(typeof(Func<ModuleDefMD, int>), m))
+            .Select(m => ((Func<ModuleDefMD, int>)Delegate.CreateDelegate(typeof(Func<ModuleDefMD, int>), m), m))
             .ToList();
+    }
+
+    public static string[] ExtractLibrariesConfigFromAttribute(MethodInfo methodInfo)
+    {
+        return methodInfo
+               .GetCustomAttributes(typeof(LibrayNameAttribute), inherit: false)
+               .Select(attirbute => ((LibrayNameAttribute)attirbute).FileName)
+               .SelectMany(i => i).ToArray();
     }
 }
