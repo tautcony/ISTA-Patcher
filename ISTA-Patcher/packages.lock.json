@@ -16,39 +16,39 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.145, )",
-        "resolved": "2.0.145",
-        "contentHash": "BPgr0uG1JpLaDE/dIDK04cngtwzcwNEa3MJROJ+HjOal4E5EBjfTsyPOr/1yyjB2FTCmg2yIAqGteDqSykJwng=="
+        "requested": "[2.0.146, )",
+        "resolved": "2.0.146",
+        "contentHash": "pJ3k+3UjD2WwPsZR7fkgVYviXP3PCQM0hjwN1TuM4C0u1TuGKC9WdZCo0RAPZ+azhRPmYGSUjkjsN2fkQByghQ=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[8.0.2, )",
-        "resolved": "8.0.2",
-        "contentHash": "hKTrehpfVzOhAz0mreaTAZgbz0DrMEbWq4n3hAo8Ks6WdxdqQhNPvzOqn9VygKuWf1bmxPdraqzTaXriO/sn0A=="
+        "requested": "[8.0.3, )",
+        "resolved": "8.0.3",
+        "contentHash": "0kwNg0LBIvVTx9A2mo9Mnw4wLGtaeQgjSz5P13bOOwdWPPLe9HzI+XTkwiMhS7iQCM6X4LAbFR76xScaMw0MrA=="
       },
       "Sentry": {
         "type": "Direct",
-        "requested": "[4.1.2, )",
-        "resolved": "4.1.2",
-        "contentHash": "OVCUz+Mw8P5L8K9VJdeewo4hdB4v+z7zC50tFXu1Sq6+FDBd+/DcFHBWlnn/cNLct2hZEAAn7hS9eqVc097wMg=="
+        "requested": "[4.2.1, )",
+        "resolved": "4.2.1",
+        "contentHash": "4MXZ0dwc5QDnTElAzDLXGGRa+VoywpmU2CU6gZ3o2NAYpzMA0VaiLVKNQ6bH+KW5Yv7JpOt+By7OeQOnvuQong=="
       },
       "Sentry.Profiling": {
         "type": "Direct",
-        "requested": "[4.1.2, )",
-        "resolved": "4.1.2",
-        "contentHash": "PSIJvAIzFGWLmV+yZD1K7s1Kr7aO6HQGh+kl8q0p5KB/PhKnI3K79swi5NQbZ93ZDYzNiWMuwdcl0BitV4AX7A==",
+        "requested": "[4.2.1, )",
+        "resolved": "4.2.1",
+        "contentHash": "xbcc9EyQTsTN13zlwPcWHeVGPoJ7WpH81pxwcdqjSOwS0oI/Y35E2ECebxzai+HiSFH4qWJPIuTkr9r8nhFSAQ==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.452401",
-          "Sentry": "4.1.2"
+          "Sentry": "4.2.1"
         }
       },
       "Sentry.Serilog": {
         "type": "Direct",
-        "requested": "[4.1.2, )",
-        "resolved": "4.1.2",
-        "contentHash": "a9U1lmy99wBnfBfeVrtIytRhA3RwIml/EycnFB2btSsd3z2AOJhh2czwYoOmLWbBwLMVoDxTG2BERCuYJVYyrg==",
+        "requested": "[4.2.1, )",
+        "resolved": "4.2.1",
+        "contentHash": "Qb8OL0/1ctZQJDtqdpQxsG4mmrRTaFPYMG3EruFOImjtkDbeBLR3Xynnd+cV3VpxJGP92HHn7u5Tm4bAAs/2zg==",
         "dependencies": {
-          "Sentry": "4.1.2",
+          "Sentry": "4.2.1",
           "Serilog": "2.10.0"
         }
       },
