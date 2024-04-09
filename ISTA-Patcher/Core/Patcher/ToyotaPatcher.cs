@@ -16,8 +16,8 @@ public class ToyotaPatcher : IPatcher
         var fileList = IPatcher.LoadFileList(basePath);
         var patchConfig = IPatcher.LoadConfigFile();
 
-        var excludeList = patchConfig?.ExcludeToyota ?? patchConfig?.Exclude ?? Array.Empty<string>();
-        var includeList = patchConfig?.IncludeToyota ?? Array.Empty<string>();
+        var excludeList = patchConfig?.ExcludeToyota ?? patchConfig?.Exclude ?? [];
+        var includeList = patchConfig?.IncludeToyota ?? [];
 
         var patchList = includeList
                         .Union(fileList.Except(excludeList, StringComparer.Ordinal), StringComparer.Ordinal)

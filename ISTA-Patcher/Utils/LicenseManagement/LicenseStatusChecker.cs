@@ -18,7 +18,7 @@ public static class LicenseStatusChecker
             return false;
         }
 
-        licenseInfo.LicenseKey = Array.Empty<byte>();
+        licenseInfo.LicenseKey = [];
         var hashValue = GetHashValueFrom(licenseInfo);
 
         Log.Debug("hash stream: {ByteArray}", Convert.ToHexString(hashValue));
@@ -36,7 +36,7 @@ public static class LicenseStatusChecker
     {
         var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
         rsaCryptoServiceProvider.FromXmlString(xmlString);
-        licenseInfo.LicenseKey = Array.Empty<byte>();
+        licenseInfo.LicenseKey = [];
         var hashValue = GetHashValueFrom(licenseInfo);
         var signatureFormatter = new RSAPKCS1SignatureFormatter(rsaCryptoServiceProvider);
         signatureFormatter.SetHashAlgorithm("SHA1");

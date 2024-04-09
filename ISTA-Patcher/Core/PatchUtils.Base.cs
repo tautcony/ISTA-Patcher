@@ -365,8 +365,8 @@ internal static partial class PatchUtils
             AvailableLanguages = "*",
             AvailableOperationModes = "*",
             DistributionPartnerNumber = "*",
-            ComputerCharacteristics = Array.Empty<byte>(),
-            LicenseKey = Array.Empty<byte>(),
+            ComputerCharacteristics = [],
+            LicenseKey = [],
             LicenseServerURL = null,
             LicenseType = LicenseType.offline,
             SubLicenses = [

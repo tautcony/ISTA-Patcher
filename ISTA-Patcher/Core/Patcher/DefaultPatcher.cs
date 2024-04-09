@@ -98,8 +98,8 @@ public class DefaultPatcher : IPatcher
     {
         var fileList = LoadFileList(basePath);
         var patchConfig = IPatcher.LoadConfigFile();
-        var excludeList = patchConfig?.Exclude ?? Array.Empty<string>();
-        var includeList = patchConfig?.Include ?? Array.Empty<string>();
+        var excludeList = patchConfig?.Exclude ?? [];
+        var includeList = patchConfig?.Include ?? [];
 
         var patchList = includeList
                         .Union(fileList.Except(excludeList, StringComparer.Ordinal), StringComparer.Ordinal)

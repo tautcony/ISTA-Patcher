@@ -178,7 +178,7 @@ public static class ProgramArgs
         };
         var skipLibraryOption = new CliOption<string[]>("--skip-library")
         {
-            DefaultValueFactory = _ => Array.Empty<string>(),
+            DefaultValueFactory = _ => [],
             Description = "Specify the library to skip patching.",
         };
         var targetPathArgument = new CliArgument<string>("targetPath")
