@@ -81,6 +81,9 @@ namespace de4dot.code {
 			AddIfExists(paths, path, @"Microsoft SDKs\Silverlight\v5.0\Libraries\Server");
 			AddIfExists(paths, path, @"Microsoft.NET\SDK\CompactFramework\v2.0\WindowsCE");
 			AddIfExists(paths, path, @"Microsoft.NET\SDK\CompactFramework\v3.5\WindowsCE");
+			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8");
+			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2");
+			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7");
 			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1");
 			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6");
 			AddIfExists(paths, path, @"Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.2");

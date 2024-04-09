@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using de4dot.code;
 using dnlib.DotNet;
 using ISTA_Patcher.Core.Patcher;
 using Serilog;
@@ -27,6 +28,8 @@ public static partial class Patch
         var pendingPatchList = patcher.GeneratePatchList(options.TargetPath);
         var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
         var patchAppliedCount = new int[patcher.Patches.Count];
+
+        TheAssemblyResolver.Instance.AddSearchDirectory(guiBasePath);
 
         using (var cts = new CancellationTokenSource())
         {
@@ -96,6 +99,7 @@ public static partial class Patch
             }
 
             var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
+            TheAssemblyResolver.Instance.AddModule(module);
             var patcherVersion = PatchUtils.HavePatchedMark(module);
             var isPatched = patcherVersion != null;
             if (isPatched && !options.Force)

@@ -25,7 +25,7 @@ using Serilog;
 internal static partial class PatchUtils
 {
     private static readonly string Timestamp = DateTime.Now.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.CurrentCulture);
-    private static readonly ModuleContext ModCtx = ModuleDef.CreateModuleContext();
+    private static readonly ModuleContext ModCtx = new(TheAssemblyResolver.Instance);
     private static readonly IDeobfuscatorContext DeobfuscatorContext = new DeobfuscatorContext();
     private static readonly NewProcessAssemblyClientFactory ProcessAssemblyClientFactory = new();
 
