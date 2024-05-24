@@ -2,3 +2,9 @@ version = 1
 
 [[analyzers]]
 name = "csharp"
+
+exclude_patterns = [
+  "ISTA-Patcher/de4dot.blocks/**",
+  "ISTA-Patcher/de4dot.code/**",
+  "ISTA-Patcher/de4dot.mdecrypt/**",
+]
