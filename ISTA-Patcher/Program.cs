@@ -29,7 +29,6 @@ internal static class Program
             options.AutoSessionTracking = true;
             options.IsGlobalModeEnabled = true;
             options.SendDefaultPii = true;
-            options.EnableTracing = true;
             options.TracesSampleRate = 1;
             options.AddIntegration(new ProfilingIntegration());
 #if DEBUG
@@ -40,6 +39,7 @@ internal static class Program
                      .Enrich.FromLogContext()
                      .MinimumLevel.ControlledBy(LevelSwitch)
                      .WriteTo.Console()
+                     .WriteTo.File("ista-patcher.log", rollingInterval: RollingInterval.Day)
                      .WriteTo.Sentry(LogEventLevel.Error, LogEventLevel.Debug)
                      .CreateLogger();
 

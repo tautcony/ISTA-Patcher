@@ -147,7 +147,7 @@ public static class ProgramArgs
         Description = "[Adjunct] Set the market language.",
     };
 
-    private static readonly CliOption<bool> SkipSyncClientConfig = new("--skip-sync-client-config")
+    private static readonly CliOption<bool> SkipSyncClientConfigOption = new("--skip-sync-client-config")
     {
         DefaultValueFactory = _ => false,
         Description = "[Adjunct] Skip sync client configuration.",
@@ -198,7 +198,7 @@ public static class ProgramArgs
             PatchUserAuthOption,
             DisableLogEnviromentOption,
             MarketLanguageOption,
-            SkipSyncClientConfig,
+            SkipSyncClientConfigOption,
             typeOption,
             generateRegFileOption,
             deobfuscateOption,
@@ -218,7 +218,7 @@ public static class ProgramArgs
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
             var disableLogEnviromentValue = result.GetValue(DisableLogEnviromentOption);
             var marketLanguageValue = result.GetValue(MarketLanguageOption);
-            var skipSyncClientConfigValue = result.GetValue(SkipSyncClientConfig);
+            var skipSyncClientConfigValue = result.GetValue(SkipSyncClientConfigOption);
             var typeValue = result.GetValue(typeOption);
             var generateRegFileValue = result.GetValue(generateRegFileOption);
             var deobfuscateValue = result.GetValue(deobfuscateOption);
