@@ -192,6 +192,7 @@ public static class DnlibUtils
     /// <param name="returnType">The return type of the method.</param>
     /// <param name="parameters">The array of parameter types.</param>
     /// <returns>An instance of the <see cref="IMethod"/> interface representing the method call, or null if the method was not found.</returns>
+    [Obsolete("Importer may include unwanted dependencies.")]
     public static IMethod? BuildCall(
         ModuleDef module,
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods)] Type type,
