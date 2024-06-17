@@ -40,7 +40,7 @@ public class EntitySerializer<T>
 
     public static T Deserialize(string xmlContent)
     {
-        StringReader stringReader = null;
+        StringReader? stringReader = null;
         try
         {
             stringReader = new StringReader(xmlContent);

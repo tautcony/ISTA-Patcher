@@ -110,7 +110,7 @@ internal static class Program
 
     private static async Task<KeyValuePair<string, string>> CheckFileIntegrity(string basePath, HashFileInfo fileInfo)
     {
-        string checkResult;
+        string? checkResult;
         var version = string.Empty;
         var filePath = Path.Join(basePath, fileInfo.FilePath);
         if (!File.Exists(filePath))
@@ -179,7 +179,7 @@ internal static class Program
 
         var carvedPrimamindPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "carved-primamind.xml");
 
-        string primamindXml = null;
+        string? primamindXml = null;
         if (opts.LoadPrimamind != null)
         {
             if (!File.Exists(opts.LoadPrimamind))
@@ -197,7 +197,7 @@ internal static class Program
             }
         }
 
-        string solicitationXml = null;
+        string? solicitationXml = null;
         if (opts.Solicitation != null)
         {
             if (opts.Base64)
