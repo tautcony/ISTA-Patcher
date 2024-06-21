@@ -47,7 +47,7 @@ public class DefaultPatcher : IPatcher
 
         if (opts.DisableLogEnviroment)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(LogEnviromentPatchAttribute)));
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(LogEnvironmentPatchAttribute)));
         }
 
         if (opts.MarketLanguage != null)

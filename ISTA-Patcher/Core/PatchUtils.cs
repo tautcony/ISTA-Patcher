@@ -454,7 +454,7 @@ internal static partial class PatchUtils
         );
     }
 
-    [LogEnviromentPatch]
+    [LogEnvironmentPatch]
     [LibrayName("CommonServices")]
     [FromVersion("4.46.1x")]
     public static int PatchClientConfiguration(ModuleDefMD module)
