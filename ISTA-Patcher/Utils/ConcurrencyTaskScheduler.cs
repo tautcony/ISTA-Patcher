@@ -55,7 +55,7 @@ public class ConcurrencyTaskScheduler : TaskScheduler
                // Process all available items in the queue.
                while (true)
                {
-                   Task item = null;
+                   Task? item = null;
                    lock (this._tasks)
                    {
                        // When there are no more items to be processed,

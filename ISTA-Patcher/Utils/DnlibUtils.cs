@@ -256,7 +256,7 @@ public static class DnlibUtils
                 body.Instructions.Add(Instruction.Create(OpCodes.Newobj, m));
                 break;
             default:
-                if (value != null)
+                if (!object.Equals(value, default(T)))
                 {
                     throw new ArgumentException($"Unknown type {value.GetType().FullName}!", paramName: nameof(value));
                 }
