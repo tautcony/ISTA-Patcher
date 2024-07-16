@@ -15,7 +15,7 @@ public class Contract
 {
     [XmlElement(Form = XmlSchemaForm.Unqualified)]
     [DataMember]
-    public string brand { get; set; }
+    public string? brand { get; set; }
 
     [XmlElement(Form = XmlSchemaForm.Unqualified)]
     [DataMember]
@@ -27,15 +27,15 @@ public class Contract
 
     [XmlElement(Form = XmlSchemaForm.Unqualified)]
     [DataMember]
-    public string salesBranch { get; set; }
+    public string? salesBranch { get; set; }
 
     [XmlAttribute]
     [DataMember]
-    public string internationalDealerNumber { get; set; }
+    public string? internationalDealerNumber { get; set; }
 
     [XmlAttribute]
     [DataMember]
-    public string nationalDealerNumber { get; set; }
+    public string? nationalDealerNumber { get; set; }
 
     [XmlAttribute]
     [DataMember]

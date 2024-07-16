@@ -55,8 +55,8 @@ public interface IPatcher
     public static string[] ExtractLibrariesConfigFromAttribute(MethodInfo methodInfo)
     {
         return methodInfo
-               .GetCustomAttributes(typeof(LibrayNameAttribute), inherit: false)
-               .Select(attirbute => ((LibrayNameAttribute)attirbute).FileName)
+               .GetCustomAttributes(typeof(LibraryNameAttribute), inherit: false)
+               .Select(attirbute => ((LibraryNameAttribute)attirbute).FileName)
                .SelectMany(i => i).ToArray();
     }
 }

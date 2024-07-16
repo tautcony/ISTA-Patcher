@@ -85,7 +85,7 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    [LibrayName("CommonServices")]
+    [LibraryName("CommonServices")]
     public static int PatchSecureAccessHelper(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -119,7 +119,7 @@ internal static partial class PatchUtils
     }
 
     [ValidationPatch]
-    [LibrayName("CommonServices")]
+    [LibraryName("CommonServices")]
     public static int PatchActivationCertificateHelper(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -455,7 +455,7 @@ internal static partial class PatchUtils
     }
 
     [LogEnvironmentPatch]
-    [LibrayName("CommonServices")]
+    [LibraryName("CommonServices")]
     [FromVersion("4.46.1x")]
     public static int PatchClientConfiguration(ModuleDefMD module)
     {
@@ -486,7 +486,7 @@ internal static partial class PatchUtils
     }
 
     [SkipSyncClientConfig]
-    [LibrayName("CommonServices")]
+    [LibraryName("CommonServices")]
     [FromVersion("4.46.3x")]
     public static int PatchClientConfigurationManager(ModuleDefMD module)
     {

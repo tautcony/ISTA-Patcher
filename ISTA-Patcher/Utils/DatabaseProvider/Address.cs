@@ -14,25 +14,25 @@ public class Address
 {
     [XmlAttribute]
     [DataMember]
-    public string street1 { get; set; }
+    public string? street1 { get; set; }
 
     [XmlAttribute]
     [DataMember]
-    public string street2 { get; set; }
+    public string? street2 { get; set; }
 
     [XmlAttribute]
     [DataMember]
-    public string postalCode { get; set; }
+    public string? postalCode { get; set; }
 
     [XmlAttribute]
     [DataMember]
-    public string town1 { get; set; }
+    public string? town1 { get; set; }
 
     [XmlAttribute]
     [DataMember]
-    public string town2 { get; set; }
+    public string? town2 { get; set; }
 
     [XmlAttribute]
     [DataMember]
-    public string country { get; set; }
+    public string? country { get; set; }
 }

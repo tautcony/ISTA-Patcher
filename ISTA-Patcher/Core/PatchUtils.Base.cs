@@ -253,10 +253,8 @@ internal static partial class PatchUtils
                 StringDecrypterType = DecrypterType.Static,
             },
             ModCtx,
-            ProcessAssemblyClientFactory)
-        {
-            DeobfuscatorContext = DeobfuscatorContext,
-        };
+            ProcessAssemblyClientFactory);
+        file.DeobfuscatorContext = DeobfuscatorContext;
 
         file.Load(new List<IDeobfuscator> { deobfuscatorInfo.CreateDeobfuscator() });
         file.DeobfuscateBegin();

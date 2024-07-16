@@ -14,13 +14,13 @@ public class Phone
 {
     [XmlAttribute]
     [DataMember]
-    public string countryCode { get; set; }
+    public string? countryCode { get; set; }
 
     [XmlAttribute]
     [DataMember]
-    public string areaCode { get; set; }
+    public string? areaCode { get; set; }
 
     [XmlAttribute]
     [DataMember]
-    public string localNumber { get; set; }
+    public string? localNumber { get; set; }
 }

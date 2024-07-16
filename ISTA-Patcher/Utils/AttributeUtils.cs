@@ -35,7 +35,7 @@ internal sealed class FromVersionAttribute(string version) : Attribute
 }
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-internal sealed class LibrayNameAttribute(params string[] fileName) : Attribute
+internal sealed class LibraryNameAttribute(params string[] fileName) : Attribute
 {
     public string[] FileName { get; set; } = fileName;
 }
