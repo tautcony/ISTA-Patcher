@@ -16,39 +16,39 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.158, )",
-        "resolved": "2.0.158",
-        "contentHash": "j76YbCBP7jI5H9MSxpmpsZiTz2rGiDxvQ/Vkm5XL+SAsrtsXPVcOQWx4hrwpmSxjP8acEF7l6BTELEcdj3cGRQ=="
+        "requested": "[2.0.161, )",
+        "resolved": "2.0.161",
+        "contentHash": "UiHpQz4A1u0pKVPT6JbzA0/k/H8QjTg/9y7OJr6AK/2A+SIAa5IZOrOgUoxBHJDEGdXS/hMFFf+uNrFfUSstNg=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[8.0.6, )",
-        "resolved": "8.0.6",
-        "contentHash": "E+lDylsTeP4ZiDmnEkiJ5wobnGaIJzFhOgZppznJCb69UZgbh6G3cfv1pnLDLLBx6JAgl0kAlnINDeT3uCuczQ=="
+        "requested": "[8.0.7, )",
+        "resolved": "8.0.7",
+        "contentHash": "iI52ptEKby2ymQ6B7h4TWbFmm85T4VvLgc/HvS45Yr3lgi4IIFbQtjON3bQbX/Vc94jXNSLvrDOp5Kh7SJyFYQ=="
       },
       "Sentry": {
         "type": "Direct",
-        "requested": "[4.7.0, )",
-        "resolved": "4.7.0",
-        "contentHash": "eDbhvl1HHUOIE7OzNcjn3umvkehfrHD7h1fp0syPSUaoxtYz1LBU74V+G2ooZ276FtaYVdGnAV1L/lS0LdGHCg=="
+        "requested": "[4.9.0, )",
+        "resolved": "4.9.0",
+        "contentHash": "dvafAJjs1nyv/sXPjHjMiIq/XN1jjRCvTvn6BDdkeavjZXi0eX6JMpAKwGU5C8IlHY6Xhh13nk2u5e8AHQwwrw=="
       },
       "Sentry.Profiling": {
         "type": "Direct",
-        "requested": "[4.7.0, )",
-        "resolved": "4.7.0",
-        "contentHash": "zDm87Yo+CbWOKJodYGgPynpLRq/2A9qMl0JJ9TKAZfLVXpCLKofbWtx+lu6xarzEYLlexamhqPfzI8jDBG5epg==",
+        "requested": "[4.9.0, )",
+        "resolved": "4.9.0",
+        "contentHash": "Rz+zqbAaFhasSI5s3Bj1Eoqjh4Y3cSVYfdIVZZCOwajSl6wmL8yiIB5X039IlPec7AJcsiYXiofNiJdMF2t81g==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "4.7.0"
+          "Sentry": "4.9.0"
         }
       },
       "Sentry.Serilog": {
         "type": "Direct",
-        "requested": "[4.7.0, )",
-        "resolved": "4.7.0",
-        "contentHash": "PGxecNPo9TFI4sw7R4h+irQNDBgxqJxX7z99dBIVnxKnLQ99NCovENfRK9lu8qCwfFJHrsAtIq0B1kLmcWUvJQ==",
+        "requested": "[4.9.0, )",
+        "resolved": "4.9.0",
+        "contentHash": "+OUmAEbTrIOXMfJZe7tGM5rXce20BBbX1aBdkHRtnkuZDgcNDSwDJec8BUe1LAx5zTan36+pheCiIZ2USQ3QJQ==",
         "dependencies": {
-          "Sentry": "4.7.0",
+          "Sentry": "4.9.0",
           "Serilog": "2.10.0"
         }
       },
@@ -69,11 +69,11 @@
       },
       "Serilog.Sinks.File": {
         "type": "Direct",
-        "requested": "[5.0.0, )",
-        "resolved": "5.0.0",
-        "contentHash": "uwV5hdhWPwUH1szhO8PJpFiahqXmzPzJT/sOijH/kFgUx+cyoDTMM8MHD0adw9+Iem6itoibbUXHYslzXsLEAg==",
+        "requested": "[6.0.0, )",
+        "resolved": "6.0.0",
+        "contentHash": "lxjg89Y8gJMmFxVkbZ+qDgjl+T4yC5F7WSLTvA+5q0R04tfKVLRL/EHpYoJ/MEQd2EeCKDuylBIVnAYMotmh2A==",
         "dependencies": {
-          "Serilog": "2.10.0"
+          "Serilog": "4.0.0"
         }
       },
       "StyleCop.Analyzers": {
@@ -87,9 +87,9 @@
       },
       "System.CommandLine": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.24209.3, )",
-        "resolved": "2.0.0-beta4.24209.3",
-        "contentHash": "uisMNRfkoLHfP8ldaKxhTHJ+E2pd3oJQXRi7mDBomTTCqpRFMqKc9W+KCFVjIPH7kSm9GQ8mb+0RCAK3mEWIFg=="
+        "requested": "[2.0.0-beta4.24324.3, )",
+        "resolved": "2.0.0-beta4.24324.3",
+        "contentHash": "UddDcdPmeAbRpkYHOMBHYS74UINTL5yXhzHTbruhVN7eR79J8RPGgq1nNXlz5TH4iMK/Fn6OlSFf4Z2UxCJpXw=="
       },
       "System.CommandLine.Generator": {
         "type": "Direct",
@@ -102,11 +102,11 @@
       },
       "System.CommandLine.NamingConventionBinder": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.24209.3, )",
-        "resolved": "2.0.0-beta4.24209.3",
-        "contentHash": "+x8WRd2xVTQ4uAH5uM9Im0PxP/ASu/z6oZwJV6H0Ag7NBYxmPB8vHvGOXoSyuyhgK+2oItg7KdGGfOrIXZnAVA==",
+        "requested": "[2.0.0-beta4.24324.3, )",
+        "resolved": "2.0.0-beta4.24324.3",
+        "contentHash": "5Dk8FYil70pblyoWiSzZn6OEcZVDPOTIi2C0IVa/cmwT1284ypShZjjl+o0cJOdgbBJGQZSEUmy13Ag5aobQwA==",
         "dependencies": {
-          "System.CommandLine": "2.0.0-beta4.24209.3"
+          "System.CommandLine": "2.0.0-beta4.24324.3"
         }
       },
       "Humanizer.Core": {
