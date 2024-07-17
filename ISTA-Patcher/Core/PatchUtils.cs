@@ -445,12 +445,24 @@ internal static partial class PatchUtils
             "\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
             "GetCurrentUserEnvironment",
             "()\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironment",
-            DnlibUtils.ReturnUInt32Method(2)
+            DnlibUtils.ReturnUInt32Method(2) // PROD
         ) + module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
             "GetCurrentNetworkType",
             "()\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.NetworkType",
-            DnlibUtils.ReturnUInt32Method(1)
+            DnlibUtils.ReturnUInt32Method(1) // LAN
+        );
+    }
+
+    [UserAuthPatch]
+    [FromVersion("4.48.x")]
+    public static int PatchLoginOptionsProvider(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.PresentationFramework.AuthenticationRefactored.Services.LoginOptionsProvider",
+            "IsLoginEnabled",
+            "()System.Boolean",
+            DnlibUtils.ReturnFalseMethod
         );
     }
 
