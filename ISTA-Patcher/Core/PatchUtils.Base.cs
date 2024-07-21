@@ -167,6 +167,20 @@ internal static partial class PatchUtils
     /// <returns>ture for assembly has been patched.</returns>
     public static string? HavePatchedMark(ModuleDefMD module)
     {
+        var attribute = module.Assembly.CustomAttributes.FirstOrDefault(attribute =>
+            attribute.AttributeType.Name == nameof(AssemblyMetadataAttribute) &&
+            attribute.ConstructorArguments.Count == 2 &&
+            string.Equals(
+                attribute.ConstructorArguments[0].Value.ToString(),
+                "Patched.Version",
+                StringComparison.Ordinal
+                )
+            );
+        if (attribute != null)
+        {
+            return attribute.ConstructorArguments[1].Value.ToString();
+        }
+
         var patchedType = module.GetType("Patched.By.TC");
         if (patchedType == null)
         {
@@ -189,43 +203,20 @@ internal static partial class PatchUtils
             return;
         }
 
-        var patchedType = new TypeDefUser(
-            "Patched.By",
-            "TC",
-            module.CorLibTypes.Object.TypeDefOrRef)
-        {
-            Attributes = dnlib.DotNet.TypeAttributes.Class | dnlib.DotNet.TypeAttributes.NestedPrivate,
-        };
-        var dateField = new FieldDefUser(
-            "date",
-            new FieldSig(module.CorLibTypes.String),
-            dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
-        )
-        {
-            Constant = new ConstantUser(Timestamp),
-        };
-        var urlField = new FieldDefUser(
-            "repo",
-            new FieldSig(module.CorLibTypes.String),
-            dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
-        )
-        {
-            Constant = new ConstantUser(Encoding.UTF8.GetString(Source)),
-        };
+        var assemblyTitleAttributeTypeDef = module.CorLibTypes.GetTypeRef("System.Reflection", "AssemblyMetadataAttribute").ResolveTypeDefThrow();
 
-        var versionField = new FieldDefUser(
-            "version",
-            new FieldSig(module.CorLibTypes.String),
-            dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
-        )
+        var ctor = module.Import(assemblyTitleAttributeTypeDef.FindConstructors().First());
+        var attributes = new List<CustomAttribute>
         {
-            Constant = new ConstantUser(Version),
+            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.By"), new CAArgument(module.CorLibTypes.String, "ISTA-Patcher") } },
+            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.At"), new CAArgument(module.CorLibTypes.String, Timestamp) } },
+            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Repo"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Source)) } },
+            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Version"), new CAArgument(module.CorLibTypes.String, Version) } },
         };
-
-        patchedType.Fields.Add(dateField);
-        patchedType.Fields.Add(urlField);
-        patchedType.Fields.Add(versionField);
-        module.Types.Add(patchedType);
+        foreach (var attribute in attributes)
+        {
+            module.Assembly.CustomAttributes.Add(attribute);
+        }
 
         var description = module.Assembly.CustomAttributes.FirstOrDefault(attribute =>
             attribute.AttributeType.Name == nameof(AssemblyDescriptionAttribute));

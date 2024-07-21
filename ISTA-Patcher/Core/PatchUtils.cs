@@ -466,37 +466,6 @@ internal static partial class PatchUtils
         );
     }
 
-    [LogEnvironmentPatch]
-    [LibraryName("CommonServices")]
-    [FromVersion("4.46.1x")]
-    public static int PatchClientConfiguration(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.iLean.CommonServices.Models.ClientConfiguration",
-            "AddEnvironment",
-            "(\u0042\u004d\u0057.iLean.CommonServices.Models.Environment)System.Void",
-            removeLogOperation
-        );
-
-        void removeLogOperation(MethodDef method)
-        {
-            var instruction = method.FindInstruction(OpCodes.Callvirt, "System.Void System.Collections.Generic.ICollection`1<\u0042\u004d\u0057.iLean.CommonServices.Models.Environment>::Add(\u0042\u004d\u0057.iLean.CommonServices.Models.Environment)");
-            var index = method.Body.Instructions.IndexOf(instruction);
-            if (index == -1)
-            {
-                Log.Warning("Required instructions not found, can not patch ClientConfiguration::AddEnvironment");
-                return;
-            }
-
-            for (var i = method.Body.Instructions.Count - 1; i > index; i--)
-            {
-                method.Body.Instructions.RemoveAt(i);
-            }
-
-            method.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
-        }
-    }
-
     [SkipSyncClientConfig]
     [LibraryName("CommonServices")]
     [FromVersion("4.46.3x")]

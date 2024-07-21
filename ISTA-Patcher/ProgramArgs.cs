@@ -35,8 +35,6 @@ public static class ProgramArgs
 
         public bool UserAuthEnv { get; set; }
 
-        public bool DisableLogEnviroment { get; set; }
-
         public string? MarketLanguage { get; set; }
 
         public bool SkipSyncClientConfig { get; set; }
@@ -135,12 +133,6 @@ public static class ProgramArgs
         Description = "[Adjunct] Patch user authentication environment.",
     };
 
-    private static readonly CliOption<bool> DisableLogEnviromentOption = new("--disable-log-enviroment")
-    {
-        DefaultValueFactory = _ => false,
-        Description = "[Adjunct] Disable log environment object which may failed.",
-    };
-
     private static readonly CliOption<string> MarketLanguageOption = new("--market-language")
     {
         DefaultValueFactory = _ => null,
@@ -196,7 +188,6 @@ public static class ProgramArgs
             EnableNotSendOption,
             SkipValidationPatchOption,
             PatchUserAuthOption,
-            DisableLogEnviromentOption,
             MarketLanguageOption,
             SkipSyncClientConfigOption,
             typeOption,
@@ -216,7 +207,6 @@ public static class ProgramArgs
             var enableNotSendValue = result.GetValue(EnableNotSendOption);
             var skipValidationPatchValue = result.GetValue(SkipValidationPatchOption);
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
-            var disableLogEnviromentValue = result.GetValue(DisableLogEnviromentOption);
             var marketLanguageValue = result.GetValue(MarketLanguageOption);
             var skipSyncClientConfigValue = result.GetValue(SkipSyncClientConfigOption);
             var typeValue = result.GetValue(typeOption);
@@ -235,7 +225,6 @@ public static class ProgramArgs
                 EnableNotSend = enableNotSendValue,
                 SkipLicensePatch = skipValidationPatchValue,
                 UserAuthEnv = patchUserAuthValue,
-                DisableLogEnviroment = disableLogEnviromentValue,
                 MarketLanguage = marketLanguageValue,
                 SkipSyncClientConfig = skipSyncClientConfigValue,
                 PatchType = typeValue,

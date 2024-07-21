@@ -22,8 +22,6 @@ internal sealed class NotSendPatchAttribute : ISTAPatchAttribute;
 
 internal sealed class UserAuthPatchAttribute : ISTAPatchAttribute;
 
-internal sealed class LogEnvironmentPatchAttribute : ISTAPatchAttribute;
-
 internal sealed class SkipSyncClientConfigAttribute : ISTAPatchAttribute;
 
 internal sealed class MarketLanguagePatchAttribute : ISTAPatchAttribute;

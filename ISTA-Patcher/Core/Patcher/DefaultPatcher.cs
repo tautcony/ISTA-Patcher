@@ -45,11 +45,6 @@ public class DefaultPatcher : IPatcher
             this.Patches.AddRange(IPatcher.GetPatches(typeof(UserAuthPatchAttribute)));
         }
 
-        if (opts.DisableLogEnviroment)
-        {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(LogEnvironmentPatchAttribute)));
-        }
-
         if (opts.MarketLanguage != null)
         {
             this.Patches.Add((
