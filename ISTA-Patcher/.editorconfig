@@ -26,10 +26,10 @@ dotnet_diagnostic.SA1601.severity = none # SA1600PartialElementsMustBeDocumented
 dotnet_diagnostic.SA1602.severity = none # SA1602EnumerationItemsMustBeDocumented
 dotnet_diagnostic.SA1633.severity = none # SA1633FileMustHaveHeader
 dotnet_diagnostic.SA1649.severity = none # SA1649FileNameMustMatchTypeName
-dotnet_diagnostic.MA0048.severity = suggestion
-dotnet_diagnostic.MA0016.severity = suggestion
-dotnet_diagnostic.SA1200.severity = suggestion
-dotnet_diagnostic.MA0051.severity = suggestion
+dotnet_diagnostic.SA1200.severity = suggestion # SA1200UsingDirectivesMustBePlacedCorrectly
+dotnet_diagnostic.MA0048.severity = none # MA0048 - File name must match type name
+dotnet_diagnostic.MA0016.severity = none # MA0016 - Prefer using collection abstraction instead of implementation
+dotnet_diagnostic.MA0051.severity = none # MA0051 - Method is too long
 # https://www.jetbrains.com/help/resharper/Reference__Code_Inspections_CSHARP.html
 resharper_arrange_trailing_comma_in_multiline_lists_highlighting = none
 resharper_comment_typo_highlighting = none
