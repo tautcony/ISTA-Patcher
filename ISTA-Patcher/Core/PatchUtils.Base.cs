@@ -203,19 +203,64 @@ internal static partial class PatchUtils
             return;
         }
 
-        var assemblyTitleAttributeTypeDef = module.CorLibTypes.GetTypeRef("System.Reflection", "AssemblyMetadataAttribute").ResolveTypeDefThrow();
+        var assemblyTitleAttributeTypeDef = module.CorLibTypes.GetTypeRef("System.Reflection", "AssemblyMetadataAttribute").ResolveTypeDef();
 
-        var ctor = module.Import(assemblyTitleAttributeTypeDef.FindConstructors().First());
-        var attributes = new List<CustomAttribute>
+        if (assemblyTitleAttributeTypeDef != null)
         {
-            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.By"), new CAArgument(module.CorLibTypes.String, "ISTA-Patcher") } },
-            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.At"), new CAArgument(module.CorLibTypes.String, Timestamp) } },
-            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Repo"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Source)) } },
-            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Version"), new CAArgument(module.CorLibTypes.String, Version) } },
-        };
-        foreach (var attribute in attributes)
+            var ctor = module.Import(assemblyTitleAttributeTypeDef.FindConstructors().First());
+            var attributes = new List<CustomAttribute>
+            {
+                new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.By"), new CAArgument(module.CorLibTypes.String, "ISTA-Patcher") } },
+                new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.At"), new CAArgument(module.CorLibTypes.String, Timestamp) } },
+                new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Repo"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Source)) } },
+                new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Version"), new CAArgument(module.CorLibTypes.String, Version) } },
+            };
+            foreach (var attribute in attributes)
+            {
+                module.Assembly.CustomAttributes.Add(attribute);
+            }
+        }
+        else
         {
-            module.Assembly.CustomAttributes.Add(attribute);
+            var patchedType = new TypeDefUser(
+                "Patched.By",
+                "TC",
+                module.CorLibTypes.Object.TypeDefOrRef)
+            {
+                Attributes = dnlib.DotNet.TypeAttributes.Class | dnlib.DotNet.TypeAttributes.NestedPrivate,
+            };
+            var dateField = new FieldDefUser(
+                "date",
+                new FieldSig(module.CorLibTypes.String),
+                dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
+            )
+            {
+                Constant = new ConstantUser(Timestamp),
+            };
+            var urlField = new FieldDefUser(
+                "repo",
+                new FieldSig(module.CorLibTypes.String),
+                dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
+            )
+            {
+                Constant = new ConstantUser(Encoding.UTF8.GetString(Source)),
+            };
+            var versionField = new FieldDefUser(
+                "version",
+                new FieldSig(module.CorLibTypes.String),
+                dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
+            )
+            {
+                Constant = new ConstantUser(Version),
+            };
+
+            patchedType.Fields.Add(dateField);
+            patchedType.Fields.Add(urlField);
+            patchedType.Fields.Add(versionField);
+            module.Types.Add(patchedType);
+
+            var runtimeVersion = module.Assembly.ManifestModule.RuntimeVersion;
+            Log.Warning("Failed to resolve AssemblyMetadataAttribute for {ModuleName}@{RuntimeVersion}, fallback to legacy flag implementation", module.Name, runtimeVersion);
         }
 
         var description = module.Assembly.CustomAttributes.FirstOrDefault(attribute =>
