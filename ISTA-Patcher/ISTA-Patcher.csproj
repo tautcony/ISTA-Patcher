@@ -24,6 +24,7 @@ Released under the GNU GPLv3+.</Copyright>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StripSymbols>false</StripSymbols>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -48,7 +49,6 @@ Released under the GNU GPLv3+.</Copyright>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.24324.3" />
-    <PackageReference Include="System.CommandLine.Generator" Version="2.0.0-beta4.23307.1" />
     <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.24324.3" />
   </ItemGroup>
 
