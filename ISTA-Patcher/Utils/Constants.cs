@@ -11,5 +11,5 @@ public static class Constants
 
     public static readonly string[] EncCnePath = ["Ecu", "enc_cne_1.prg"];
 
-    public const string ConfigFileName = "patch-config.json";
+    public static readonly string ConfigFileName = "patch-config.json";
 }

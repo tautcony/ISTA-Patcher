@@ -426,6 +426,20 @@ internal static partial class PatchUtils
         }
     }
 
+    [EssentialPatch]
+    public static int PatchConfigSettings(ModuleDefMD module)
+    {
+        return module.PatcherGetter(
+            "\u0042\u004d\u0057.heingold.CoreFramework.ConfigSettings",
+            "IsILeanActive",
+            DnlibUtils.ReturnFalseMethod
+        ) + module.PatcherGetter(
+            "\u0042\u004d\u0057.heingold.CoreFramework.ConfigSettings",
+            "IsOssModeActive",
+            DnlibUtils.ReturnFalseMethod
+        );
+    }
+
     [MarketLanguagePatch]
     public static Func<ModuleDefMD, int> PatchCommonServiceWrapper_GetMarketLanguage(string marketLanguage)
     {
