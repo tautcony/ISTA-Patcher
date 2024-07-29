@@ -29,11 +29,11 @@ internal sealed class MarketLanguagePatchAttribute : ISTAPatchAttribute;
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersionAttribute(string version) : Attribute
 {
-    public string? Version { get; set; } = version;
+    public string? Version { get; } = version;
 }
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class LibraryNameAttribute(params string[] fileName) : Attribute
 {
-    public string[] FileName { get; set; } = fileName;
+    public string[] FileName { get; } = fileName;
 }

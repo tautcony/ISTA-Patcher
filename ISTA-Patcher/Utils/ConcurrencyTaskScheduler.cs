@@ -33,6 +33,8 @@ public class ConcurrencyTaskScheduler : TaskScheduler
        lock (this._tasks)
        {
            this._tasks.AddLast(task);
+
+           // ReSharper disable once InvertIf
            if (this._delegatesQueuedOrRunning < this.MaximumConcurrencyLevel)
            {
                ++this._delegatesQueuedOrRunning;

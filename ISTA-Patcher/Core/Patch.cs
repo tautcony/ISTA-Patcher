@@ -15,8 +15,10 @@ using Constants = ISTA_Patcher.Utils.Constants;
 
 public static partial class Patch
 {
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
     public static string OutputDirName { get; set; } = "@ista-patched";
 
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
     public static string BakDirName { get; set; } = "@ista-backup";
 
     public static void PatchISTA(IPatcher patcher, ProgramArgs.PatchOptions options)
@@ -33,7 +35,7 @@ public static partial class Patch
 
         using (var cts = new CancellationTokenSource())
         {
-            var factory = new TaskFactory(new ConcurrencyTaskScheduler(Environment.ProcessorCount));
+            var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
             Task.WaitAll(
                 pendingPatchList
                     .Select(item =>

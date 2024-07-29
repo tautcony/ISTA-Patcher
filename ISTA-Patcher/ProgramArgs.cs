@@ -38,6 +38,8 @@ public static class ProgramArgs
         public string? MarketLanguage { get; set; }
 
         public bool SkipSyncClientConfig { get; set; }
+
+        public int MaxDegreeOfParallelism { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions
@@ -145,6 +147,13 @@ public static class ProgramArgs
         Description = "[Adjunct] Skip sync client configuration.",
     };
 
+    // MaxDegreeOfParallelism
+    private static readonly CliOption<int> MaxDegreeOfParallelismOption = new("--max-degree-of-parallelism")
+    {
+        DefaultValueFactory = _ => Environment.ProcessorCount,
+        Description = "[Adjunct] Set the maximum degree of parallelism.",
+    };
+
     public static CliCommand buildPatchCommand(Func<PatchOptions, Task<int>> handler)
     {
         // patch options
@@ -190,6 +199,7 @@ public static class ProgramArgs
             PatchUserAuthOption,
             MarketLanguageOption,
             SkipSyncClientConfigOption,
+            MaxDegreeOfParallelismOption,
             typeOption,
             generateRegFileOption,
             deobfuscateOption,
@@ -209,6 +219,7 @@ public static class ProgramArgs
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
             var marketLanguageValue = result.GetValue(MarketLanguageOption);
             var skipSyncClientConfigValue = result.GetValue(SkipSyncClientConfigOption);
+            var maxDegreeOfParallelismValue = result.GetValue(MaxDegreeOfParallelismOption);
             var typeValue = result.GetValue(typeOption);
             var generateRegFileValue = result.GetValue(generateRegFileOption);
             var deobfuscateValue = result.GetValue(deobfuscateOption);
@@ -233,6 +244,7 @@ public static class ProgramArgs
                 Force = forceValue,
                 SkipLibrary = skipLibraryValue,
                 TargetPath = targetPathValue,
+                MaxDegreeOfParallelism = maxDegreeOfParallelismValue,
             };
             return Task.FromResult(handler(options));
         });
