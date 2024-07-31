@@ -1,9 +1,9 @@
 <div align="center">
 <img alt="LOGO" src="assets/patcher-icon.png" width="256" height="256" />
 
-# ISTA Patcher <br/> [![License: GPL v3](https://img.shields.io/github/license/tautcony/ISTA-Patcher?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0) [![build](https://img.shields.io/github/actions/workflow/status/tautcony/ISTA-Patcher/build.yml?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/actions) [![](https://img.shields.io/github/downloads/tautcony/ISTA-Patcher/total.svg?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/releases)
+# $$\mathbf{ISTA\ Patcher}^{\color{orange}overdose}$$ <br/> [![License: GPL v3](https://img.shields.io/github/license/tautcony/ISTA-Patcher?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0) [![build](https://img.shields.io/github/actions/workflow/status/tautcony/ISTA-Patcher/build.yml?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/actions) [![](https://img.shields.io/github/downloads/tautcony/ISTA-Patcher/total.svg?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/releases)
 
-An IL patcher for ISTA-P, a product of learning about [dnlib](https://github.com/0xd4d/dnlib)
+An IL patcher for ISTA-P from scratch, a product of learning about [dnlib](https://github.com/0xd4d/dnlib).
 
 </div>
 
@@ -43,7 +43,7 @@ Overwrite patched files to its parent directory, read the notes, then run the pr
 > [!NOTE]
 > - Please ensure that all related processes been killed before starting the program.
 > - Import the generated registry file(`license.reg`) under `Release` directory to resolve some exceptions that may arise while loading the license.
-> - From version `4.48.20`, Please ensure that `BMW.Rheingold.Auth.Enabled` in the configuration file is set to `false`, or try the `--patch-user-auth` option.
+> - From version `4.48.x`, Please ensure that `BMW.Rheingold.Auth.Enabled` in the configuration file is set to `false`, or try the `--patch-user-auth` option.
 > - Please ensure that the `Logging.Directory` in the configuration file is a relative path that does not start with `%ISPIDATA%`, otherwise exceptions will occur during the log cleaning process.
 
 > [!TIP]
