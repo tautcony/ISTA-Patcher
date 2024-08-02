@@ -144,4 +144,57 @@ internal static partial class PatchUtils
             method.Body.ExceptionHandlers.Clear();
         }
     }
+
+    [MarketLanguagePatch]
+    public static Func<ModuleDefMD, int> PatchCommonServiceWrapper_GetMarketLanguage(string marketLanguage)
+    {
+        return module => module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
+            "GetMarketLanguage",
+            "()System.String",
+            DnlibUtils.ReturnStringMethod(marketLanguage)
+        );
+    }
+
+    [UserAuthPatch]
+    [FromVersion("4.44.1x")]
+    public static int PatchUserEnvironmentProvider(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
+            "GetCurrentUserEnvironment",
+            "()\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironment",
+            DnlibUtils.ReturnUInt32Method(2) // PROD
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
+            "GetCurrentNetworkType",
+            "()\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.NetworkType",
+            DnlibUtils.ReturnUInt32Method(1) // LAN
+        );
+    }
+
+    [UserAuthPatch]
+    [FromVersion("4.48.x")]
+    public static int PatchLoginOptionsProvider(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.PresentationFramework.AuthenticationRefactored.Services.LoginOptionsProvider",
+            "IsLoginEnabled",
+            "()System.Boolean",
+            DnlibUtils.ReturnFalseMethod
+        );
+    }
+
+    [SkipSyncClientConfig]
+    [LibraryName("CommonServices")]
+    [FromVersion("4.46.3x")]
+    public static int PatchClientConfigurationManager(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.iLean.CommonServices.Services.ClientConfigurationManager",
+            "CheckClientConfigurationChangedDate",
+            "()System.Boolean",
+            DnlibUtils.ReturnFalseMethod
+        );
+    }
 }
