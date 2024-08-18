@@ -146,7 +146,7 @@ public static partial class Patch
             Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
             var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
 
-            // Check if need to deobfuscate
+            // Check if assembly need to be deobfuscated
             if (!options.Deobfuscate)
             {
                 Log.Information("{Item}{Indent}{Result} [{PatchedFunctionCount} func patched]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
