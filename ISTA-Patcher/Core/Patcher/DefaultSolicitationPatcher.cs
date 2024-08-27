@@ -3,9 +3,9 @@
 
 namespace ISTA_Patcher.Core.Patcher;
 
-public class DefaultLicensePatcher : DefaultPatcher
+public class DefaultSolicitationPatcher : DefaultPatcher
 {
-    public DefaultLicensePatcher(string modulus, string exponent, ProgramArgs.CerebrumancyOptions opts)
+    public DefaultSolicitationPatcher(string modulus, string exponent, ProgramArgs.CerebrumancyOptions opts)
         : base(opts)
     {
         this.Patches.Add((

@@ -259,7 +259,7 @@ internal static class Program
             var modulus = Convert.ToBase64String(parameters.Modulus);
             var exponent = Convert.ToBase64String(parameters.Exponent);
 
-            Patch.PatchISTA(new DefaultLicensePatcher(modulus, exponent, opts), new PatchOptions
+            Patch.PatchISTA(new DefaultSolicitationPatcher(modulus, exponent, opts), new PatchOptions
             {
                 Restore = opts.Restore,
                 Verbosity = opts.Verbosity,
