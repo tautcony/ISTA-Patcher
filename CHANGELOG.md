@@ -1,5 +1,14 @@
 ﻿# Changelog
 
+## 2.3.2 / 2024-09-02
+
+- Feat - Reduce size of the executable
+- Feat - Patch some `ConfigSettings` properties to avoid manual setup
+- Feat - Add support to specify the maximum number of concurrent tasks with `--max-degree-of-parallelism` flag
+- Chore - Remove unused dependencies
+- Chore - Upgrade dependencies
+- Chore - Refactor code
+
 ## 2.3.0 / 2024-07-21
 
 - Feat - Add support to specific market language with `--market-language` flag
