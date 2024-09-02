@@ -28,27 +28,27 @@
       },
       "Sentry": {
         "type": "Direct",
-        "requested": "[4.10.1, )",
-        "resolved": "4.10.1",
-        "contentHash": "6k8b4SeFIgGcbOJeuQ6XjrKPvcRmR9S8sks0Nf7XxwXZ2QH1z5JrED3+oCJP0DF34tJDTvSrwLD76i6MRfGikg=="
+        "requested": "[4.10.2, )",
+        "resolved": "4.10.2",
+        "contentHash": "B5amIE3VXi4BdERxExlmaRWTfUNmv7uiznMdyVZBAbT9pq/uS8rabQ2/K3qNCpew9hzGvHeA7oRLaumS84COEA=="
       },
       "Sentry.Profiling": {
         "type": "Direct",
-        "requested": "[4.10.1, )",
-        "resolved": "4.10.1",
-        "contentHash": "yPg3twdZNB+Y9d4KUUfoIhXKGEK/qQxguTukNZfsm2qsm0j21zefxsmu2QBIjpNxOubJiueuGVo7FE4nU79Rqw==",
+        "requested": "[4.10.2, )",
+        "resolved": "4.10.2",
+        "contentHash": "OgFfG7nnF6iENkq9AqDPn5T1H1/aPbo4zj990YdSddfrE/A5PCpU8cDKZ/JT2oWokb6igtQgpJHjFxAeZM9NBQ==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "4.10.1"
+          "Sentry": "4.10.2"
         }
       },
       "Sentry.Serilog": {
         "type": "Direct",
-        "requested": "[4.10.1, )",
-        "resolved": "4.10.1",
-        "contentHash": "az1Ph0Bl5xu+K1rnWRqTUt2PPty3ZTIkBMwiiOP/xm/btg8vLhq5keZXpxuB/b3CeIyAbaNHZd/FrFyV9PxSSQ==",
+        "requested": "[4.10.2, )",
+        "resolved": "4.10.2",
+        "contentHash": "k4iQtZU/f3Vsd0qspHLcH6oN12n6/6qMLbqO6KBhS9wa/4NOr54Fv0XZzagQ2yTImJzZdRrpoBjB2D2/+B+yCA==",
         "dependencies": {
-          "Sentry": "4.10.1",
+          "Sentry": "4.10.2",
           "Serilog": "2.10.0"
         }
       },
