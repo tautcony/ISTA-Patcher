@@ -16,9 +16,9 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.163, )",
-        "resolved": "2.0.163",
-        "contentHash": "vN0YmOkuvPLukMsefLHYCWYaLPzpc6SfoR74aPwuLeK8QdxgxkavywQ1q/II0shLEEaN1RhlMjmL1RxMPW853w=="
+        "requested": "[2.0.168, )",
+        "resolved": "2.0.168",
+        "contentHash": "PgFjmwh/dxkDbUYWxQNxfH6sxicnyF5CkXL/ZdaY8+nFl0kXgWtDSsIHMZ6X+ZwkLSEal0/u4oSlx90W73j/cw=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
@@ -28,27 +28,27 @@
       },
       "Sentry": {
         "type": "Direct",
-        "requested": "[4.10.2, )",
-        "resolved": "4.10.2",
-        "contentHash": "B5amIE3VXi4BdERxExlmaRWTfUNmv7uiznMdyVZBAbT9pq/uS8rabQ2/K3qNCpew9hzGvHeA7oRLaumS84COEA=="
+        "requested": "[4.11.0, )",
+        "resolved": "4.11.0",
+        "contentHash": "uIWfs/AH8lq2lW3P0K7oOvOoja1HZpKA7TIwWHdHDNq2fRV3I6AwIJQtOqrB61dXqI+7zwo6DCMkYF/vY9HZwA=="
       },
       "Sentry.Profiling": {
         "type": "Direct",
-        "requested": "[4.10.2, )",
-        "resolved": "4.10.2",
-        "contentHash": "OgFfG7nnF6iENkq9AqDPn5T1H1/aPbo4zj990YdSddfrE/A5PCpU8cDKZ/JT2oWokb6igtQgpJHjFxAeZM9NBQ==",
+        "requested": "[4.11.0, )",
+        "resolved": "4.11.0",
+        "contentHash": "8gCrqzxLcR8c7Mp6/76ufeIcnyXpmjyHu5PwY+rg1DqUwZ0xZVAizy+0bHxYcbiKoCBS8r+Ue1UIcda/ZzgPrQ==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "4.10.2"
+          "Sentry": "4.11.0"
         }
       },
       "Sentry.Serilog": {
         "type": "Direct",
-        "requested": "[4.10.2, )",
-        "resolved": "4.10.2",
-        "contentHash": "k4iQtZU/f3Vsd0qspHLcH6oN12n6/6qMLbqO6KBhS9wa/4NOr54Fv0XZzagQ2yTImJzZdRrpoBjB2D2/+B+yCA==",
+        "requested": "[4.11.0, )",
+        "resolved": "4.11.0",
+        "contentHash": "kp1uPIg8Jo2KoQsng/q2XAPYblsUy1nC2IrPhdOKZFQ+nEJ2jMIRATak5JhnFxF6Co4kqFBmY0rU6ypCPrymPg==",
         "dependencies": {
-          "Sentry": "4.10.2",
+          "Sentry": "4.11.0",
           "Serilog": "2.10.0"
         }
       },
