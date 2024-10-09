@@ -56,7 +56,7 @@ public interface IPatcher
     {
         return methodInfo
                .GetCustomAttributes(typeof(LibraryNameAttribute), inherit: false)
-               .Select(attirbute => ((LibraryNameAttribute)attirbute).FileName)
+               .Select(attribute => ((LibraryNameAttribute)attribute).FileName)
                .SelectMany(i => i).ToArray();
     }
 }

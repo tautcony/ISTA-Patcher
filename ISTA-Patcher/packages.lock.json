@@ -4,9 +4,12 @@
     "net8.0": {
       "ConsoleTables": {
         "type": "Direct",
-        "requested": "[2.6.1, )",
-        "resolved": "2.6.1",
-        "contentHash": "TyU885plpk88kMxgayy5+QQvtt/t3ZR45+vSvaKqZiaK+YsGVE6Mv7sV3fwjUMv3jHT15DdkpxW/+o+uc+bAJQ=="
+        "requested": "[2.6.2, )",
+        "resolved": "2.6.2",
+        "contentHash": "/bH4u0Lni2FPUtGvg1oAKpsEzmhhBlqj0DD67kvV/4qELaEBXDbVo9w3lHFQFe00vLEAZi+5Rr8Nai0D2z7+bg==",
+        "dependencies": {
+          "Wcwidth": "1.0.0"
+        }
       },
       "dnlib": {
         "type": "Direct",
@@ -16,47 +19,47 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.168, )",
-        "resolved": "2.0.168",
-        "contentHash": "PgFjmwh/dxkDbUYWxQNxfH6sxicnyF5CkXL/ZdaY8+nFl0kXgWtDSsIHMZ6X+ZwkLSEal0/u4oSlx90W73j/cw=="
+        "requested": "[2.0.169, )",
+        "resolved": "2.0.169",
+        "contentHash": "Bxp0RwDW2ZdvF7Xsil/oebCujkENaisjzUFFW3PGXJ3tIfirZU7MTyEGW4WMbrNiIY8Yj5cJbcqM/KVEqEvFfw=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[8.0.8, )",
-        "resolved": "8.0.8",
-        "contentHash": "P8wR6MUWwYXIjPJuBaZgo5zlI/GWI6QEAo6NyVIbPefa9CCkohYu7dP2rD/mrqnjEqfRHyl+h9VZrDoGpELqYg=="
+        "requested": "[8.0.10, )",
+        "resolved": "8.0.10",
+        "contentHash": "xT8jYjlroY7SLbGtoV9vUTVW/TPgodL4Egc31a444Xe0TMytLZ3UlKQ0kxMZsy/CrWsFB6wtKnSG1SsXcWreew=="
       },
       "Sentry": {
         "type": "Direct",
-        "requested": "[4.11.0, )",
-        "resolved": "4.11.0",
-        "contentHash": "uIWfs/AH8lq2lW3P0K7oOvOoja1HZpKA7TIwWHdHDNq2fRV3I6AwIJQtOqrB61dXqI+7zwo6DCMkYF/vY9HZwA=="
+        "requested": "[4.12.0, )",
+        "resolved": "4.12.0",
+        "contentHash": "Y4bk2iLoBjHoOCWFmIGqvUQ33wEIogJcpC4JRUKPZk3/Kudv/8uqsWtdqJ/v4AFK9e6a0JP48zZ80T2oOOg2dQ=="
       },
       "Sentry.Profiling": {
         "type": "Direct",
-        "requested": "[4.11.0, )",
-        "resolved": "4.11.0",
-        "contentHash": "8gCrqzxLcR8c7Mp6/76ufeIcnyXpmjyHu5PwY+rg1DqUwZ0xZVAizy+0bHxYcbiKoCBS8r+Ue1UIcda/ZzgPrQ==",
+        "requested": "[4.12.0, )",
+        "resolved": "4.12.0",
+        "contentHash": "YLlLgoDGsm9IpbzS4Qi3BOsD3SCCg6l/IeRDz9k5DMZLkaUxvNvYcKcUGnGJU2Xk7faNSS082lRFw2KiXKZdHg==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "4.11.0"
+          "Sentry": "4.12.0"
         }
       },
       "Sentry.Serilog": {
         "type": "Direct",
-        "requested": "[4.11.0, )",
-        "resolved": "4.11.0",
-        "contentHash": "kp1uPIg8Jo2KoQsng/q2XAPYblsUy1nC2IrPhdOKZFQ+nEJ2jMIRATak5JhnFxF6Co4kqFBmY0rU6ypCPrymPg==",
+        "requested": "[4.12.0, )",
+        "resolved": "4.12.0",
+        "contentHash": "7TuRvd7NlvV0UxMGNEQp3MM1/JQiojz2RlYcPRqB/R6f6sLfdLpF6njhp4+4jftgH1ujLi2Q86D3aMH4vk2r+w==",
         "dependencies": {
-          "Sentry": "4.11.0",
+          "Sentry": "4.12.0",
           "Serilog": "2.10.0"
         }
       },
       "Serilog": {
         "type": "Direct",
-        "requested": "[4.0.1, )",
-        "resolved": "4.0.1",
-        "contentHash": "pzeDRXdpSLSsgBHpZcmpIDxqMy845Ab4s+dfnBg0sN9h8q/4Wo3vAoe0QCGPze1Q06EVtEPupS+UvLm8iXQmTQ=="
+        "requested": "[4.0.2, )",
+        "resolved": "4.0.2",
+        "contentHash": "Vehq4uNYtURe/OnHEpWGvMgrvr5Vou7oZLdn3BuEH5FSCeHXDpNJtpzWoqywXsSvCTuiv0I65mZDRnJSeUvisA=="
       },
       "Serilog.Sinks.Console": {
         "type": "Direct",
@@ -173,6 +176,11 @@
         "type": "Transitive",
         "resolved": "6.0.0",
         "contentHash": "/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg=="
+      },
+      "Wcwidth": {
+        "type": "Transitive",
+        "resolved": "1.0.0",
+        "contentHash": "aekut5BeF4c1Jr2qab3aXcttcgPEfPb2ok2L8911EIzn3RnDBYnUWgx/1OVlqrSXCdwAkBpNgYWXb6b5t4cBng=="
       }
     },
     "net8.0/linux-x64": {},

@@ -133,7 +133,8 @@ namespace de4dot.code {
 		public static string GetOurBaseDir() {
 			if (ourBaseDir != null)
 				return ourBaseDir;
-			return ourBaseDir = GetDirName(typeof(Utils).Assembly.Location);
+
+			return ourBaseDir = System.AppContext.BaseDirectory;
 		}
 
 		public static string GetPathOfOurFile(string filename) => Path.Combine(GetOurBaseDir(), filename);
