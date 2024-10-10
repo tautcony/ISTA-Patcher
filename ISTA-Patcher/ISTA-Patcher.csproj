@@ -25,6 +25,7 @@ Released under the GNU GPLv3+.</Copyright>
     <StripSymbols>false</StripSymbols>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+    <DefineConstants Condition="$(RuntimeIdentifier.StartsWith('win'))">$(DefineConstants);_WINDOWS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -50,6 +51,7 @@ Released under the GNU GPLv3+.</Copyright>
     </PackageReference>
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.24324.3" />
     <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.24324.3" />
+    <PackageReference Include="System.Management" Version="8.0.0" Condition="$(RuntimeIdentifier.StartsWith('win'))" />
   </ItemGroup>
 
   <ItemGroup>

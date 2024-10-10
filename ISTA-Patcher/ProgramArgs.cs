@@ -93,6 +93,19 @@ public static class ProgramArgs
         public string? TargetPath { get; set; }
     }
 
+    public class ILeanOptions : BaseOptions
+    {
+        public string? MachineGuid { get; set; }
+
+        public string? VolumeSerialNumber { get; set; }
+
+        public bool ShowMachineInfo { get; set; }
+
+        public string? Encrypt { get; set; }
+
+        public string? Decrypt { get; set; }
+    }
+
     // base options
     private static readonly CliOption<Serilog.Events.LogEventLevel> VerbosityOption = new("-v", "--verbosity")
     {
@@ -441,10 +454,76 @@ public static class ProgramArgs
         return decryptCommand;
     }
 
+    public static CliCommand buildILeanCommand(Func<ILeanOptions, Task<int>> handler)
+    {
+        var machineGuidOption = new CliOption<string>("--machine-guid")
+        {
+            DefaultValueFactory = _ => null,
+            Description = "Specify the machine GUID.",
+        };
+
+        var volumeSerialNumberOption = new CliOption<string>("--volume-serial-number")
+        {
+            DefaultValueFactory = _ => null,
+            Description = "Specify the volume serial number.",
+        };
+
+        var showMachineInfoOption = new CliOption<bool>("--show-machine-info")
+        {
+            DefaultValueFactory = _ => false,
+            Description = "Show the machine information.",
+        };
+
+        var encryptOption = new CliOption<string>("--encrypt")
+        {
+            DefaultValueFactory = _ => null,
+            Description = "Encrypt the provided file.",
+        };
+
+        var decryptOption = new CliOption<string>("--decrypt")
+        {
+            DefaultValueFactory = _ => null,
+            Description = "Decrypt the provided file.",
+        };
+
+        var iLeanCommand = new CliCommand("ilean", "Perform operations related to iLean.")
+        {
+            VerbosityOption,
+            machineGuidOption,
+            volumeSerialNumberOption,
+            showMachineInfoOption,
+            encryptOption,
+            decryptOption,
+        };
+
+        iLeanCommand.SetAction((result, _) =>
+        {
+            var verbosityValue = result.GetValue(VerbosityOption);
+            var machineGuidValue = result.GetValue(machineGuidOption);
+            var volumeSerialNumberValue = result.GetValue(volumeSerialNumberOption);
+            var showMachineInfoValue = result.GetValue(showMachineInfoOption);
+            var encryptValue = result.GetValue(encryptOption);
+            var decryptValue = result.GetValue(decryptOption);
+
+            var options = new ILeanOptions
+            {
+                Verbosity = verbosityValue,
+                MachineGuid = machineGuidValue,
+                VolumeSerialNumber = volumeSerialNumberValue,
+                ShowMachineInfo = showMachineInfoValue,
+                Encrypt = encryptValue,
+                Decrypt = decryptValue,
+            };
+            return handler(options);
+        });
+        return iLeanCommand;
+    }
+
     public static CliRootCommand BuildCommandLine(
         Func<PatchOptions, Task<int>> patchHandler,
         Func<CerebrumancyOptions, Task<int>> licenseHandler,
-        Func<DecryptOptions, Task<int>> decryptHandler
+        Func<DecryptOptions, Task<int>> decryptHandler,
+        Func<ILeanOptions, Task<int>> iLeanHandler
         )
     {
         var rootCommand = new CliRootCommand
@@ -457,6 +536,7 @@ public static class ProgramArgs
         var patchCommand = buildPatchCommand(patchHandler);
         var licenseCommand = buildCerebrumancyCommand(licenseHandler);
         var decryptCommand = buildDecryptCommand(decryptHandler);
+        var iLeanCommand = buildILeanCommand(iLeanHandler);
 
         if (PatchUtils.Source.Length != 40 || string.IsNullOrEmpty(PatchUtils.Config))
         {
@@ -466,6 +546,7 @@ public static class ProgramArgs
         rootCommand.Add(patchCommand);
         rootCommand.Add(licenseCommand);
         rootCommand.Add(decryptCommand);
+        rootCommand.Add(iLeanCommand);
 
         return rootCommand;
     }
