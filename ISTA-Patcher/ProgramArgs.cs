@@ -112,7 +112,7 @@ public static class ProgramArgs
         DefaultValueFactory = _ => false,
         Description = "[Adjunct] Enable ENET programming functionality.",
     };
-
+    
     private static readonly CliOption<bool> EnableFinishedOperationsOption = new("--enable-finished-op")
     {
         DefaultValueFactory = _ => false,
@@ -354,7 +354,7 @@ public static class ProgramArgs
             var verbosityValue = result.GetValue(VerbosityOption);
             var restoreValue = result.GetValue(RestoreOption);
             var enableEnetValue = result.GetValue(EnableEnetOption);
-            var EnableFinishedOperationsValue = result.GetValue(EnableFinishedOperationsOption);
+            var enableFinishedOperationsValue = result.GetValue(EnableFinishedOperationsOption);
             var disableRequirementsCheckValue = result.GetValue(DisableRequirementsCheckOption);
             var enableNotSendValue = result.GetValue(EnableNotSendOption);
             var skipValidationPatchValue = result.GetValue(SkipValidationPatchOption);
@@ -458,7 +458,7 @@ public static class ProgramArgs
         var licenseCommand = buildCerebrumancyCommand(licenseHandler);
         var decryptCommand = buildDecryptCommand(decryptHandler);
 
-        if (PatchUtils.Source.Length != 40 || string.IsNullOrEmpty(PatchUtils.Config))
+        if (PatchUtils.Source.Length != 40)
         {
             return rootCommand;
         }
