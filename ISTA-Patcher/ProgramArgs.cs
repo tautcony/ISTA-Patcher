@@ -112,7 +112,7 @@ public static class ProgramArgs
         DefaultValueFactory = _ => false,
         Description = "[Adjunct] Enable ENET programming functionality.",
     };
-    
+
     private static readonly CliOption<bool> EnableFinishedOperationsOption = new("--enable-finished-op")
     {
         DefaultValueFactory = _ => false,
