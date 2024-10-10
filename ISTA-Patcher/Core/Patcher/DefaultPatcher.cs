@@ -29,6 +29,11 @@ public class DefaultPatcher : IPatcher
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(ENETPatchAttribute)));
         }
+        
+        if (opts.EnableFinishedOperations)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(FinishedOPPatchAttribute)));
+        }
 
         if (opts.DisableRequirementsCheck)
         {
