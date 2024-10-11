@@ -13,7 +13,7 @@ using Serilog;
 /// </summary>
 internal static partial class PatchUtils
 {
-    [FinishedOP]
+    [FinishedOPPatch]
     public static int PatchIsProgrammingSession(ModuleDefMD module)
     {
         return module.PatchFunction(
