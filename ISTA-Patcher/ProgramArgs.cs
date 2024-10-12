@@ -27,6 +27,8 @@ public static class ProgramArgs
     {
         public bool EnableENET { get; set; }
 
+        public bool EnableFinishedOperations { get; set; }
+
         public bool DisableRequirementsCheck { get; set; }
 
         public bool EnableNotSend { get; set; }
@@ -111,6 +113,12 @@ public static class ProgramArgs
         Description = "[Adjunct] Enable ENET programming functionality.",
     };
 
+    private static readonly CliOption<bool> EnableFinishedOperationsOption = new("--enable-finished-op")
+    {
+        DefaultValueFactory = _ => false,
+        Description = "[Adjunct] Enable to open finished operations.",
+    };
+
     private static readonly CliOption<bool> DisableRequirementsCheckOption = new("--disable-requirements-check")
     {
         DefaultValueFactory = _ => false,
@@ -193,6 +201,7 @@ public static class ProgramArgs
             VerbosityOption,
             RestoreOption,
             EnableEnetOption,
+            EnableFinishedOperationsOption,
             DisableRequirementsCheckOption,
             EnableNotSendOption,
             SkipValidationPatchOption,
@@ -213,6 +222,7 @@ public static class ProgramArgs
             var verbosityValue = result.GetValue(VerbosityOption);
             var restoreValue = result.GetValue(RestoreOption);
             var enableEnetValue = result.GetValue(EnableEnetOption);
+            var enableFinishedOpValue = result.GetValue(EnableFinishedOperationsOption);
             var disableRequirementsCheckValue = result.GetValue(DisableRequirementsCheckOption);
             var enableNotSendValue = result.GetValue(EnableNotSendOption);
             var skipValidationPatchValue = result.GetValue(SkipValidationPatchOption);
@@ -232,6 +242,7 @@ public static class ProgramArgs
                 Verbosity = verbosityValue,
                 Restore = restoreValue,
                 EnableENET = enableEnetValue,
+                EnableFinishedOperations = enableFinishedOpValue,
                 DisableRequirementsCheck = disableRequirementsCheckValue,
                 EnableNotSend = enableNotSendValue,
                 SkipLicensePatch = skipValidationPatchValue,
@@ -319,6 +330,7 @@ public static class ProgramArgs
             VerbosityOption,
             RestoreOption,
             EnableEnetOption,
+            EnableFinishedOperationsOption,
             DisableRequirementsCheckOption,
             EnableNotSendOption,
             SkipValidationPatchOption,
@@ -342,6 +354,7 @@ public static class ProgramArgs
             var verbosityValue = result.GetValue(VerbosityOption);
             var restoreValue = result.GetValue(RestoreOption);
             var enableEnetValue = result.GetValue(EnableEnetOption);
+            var enableFinishedOperationsValue = result.GetValue(EnableFinishedOperationsOption);
             var disableRequirementsCheckValue = result.GetValue(DisableRequirementsCheckOption);
             var enableNotSendValue = result.GetValue(EnableNotSendOption);
             var skipValidationPatchValue = result.GetValue(SkipValidationPatchOption);
@@ -364,6 +377,7 @@ public static class ProgramArgs
                 Verbosity = verbosityValue,
                 Restore = restoreValue,
                 EnableENET = enableEnetValue,
+                EnableFinishedOperations = EnableFinishedOperationsValue,
                 DisableRequirementsCheck = disableRequirementsCheckValue,
                 EnableNotSend = enableNotSendValue,
                 SkipLicensePatch = skipValidationPatchValue,
@@ -444,7 +458,7 @@ public static class ProgramArgs
         var licenseCommand = buildCerebrumancyCommand(licenseHandler);
         var decryptCommand = buildDecryptCommand(decryptHandler);
 
-        if (PatchUtils.Source.Length != 40 || string.IsNullOrEmpty(PatchUtils.Config))
+        if (PatchUtils.Source.Length != 40)
         {
             return rootCommand;
         }

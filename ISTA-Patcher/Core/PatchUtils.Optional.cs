@@ -13,6 +13,17 @@ using Serilog;
 /// </summary>
 internal static partial class PatchUtils
 {
+    [FinishedOPPatch]
+    public static int PatchIsProgrammingSession(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.ISPI.IstaServices.Contract.PUK.Data.TransactionMetaData",
+            "get_IsProgrammingSession",
+            "()System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+         );
+    }
+
     [ENETPatch]
     public static int PatchTherapyPlanCalculated(ModuleDefMD module)
     {

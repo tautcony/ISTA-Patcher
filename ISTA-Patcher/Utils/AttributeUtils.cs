@@ -16,6 +16,8 @@ internal sealed class ToyotaPatchAttribute : ISTAPatchAttribute;
 
 internal sealed class ENETPatchAttribute : ISTAPatchAttribute;
 
+internal sealed class FinishedOPPatchAttribute : ISTAPatchAttribute;
+
 internal sealed class RequirementsPatchAttribute : ISTAPatchAttribute;
 
 internal sealed class NotSendPatchAttribute : ISTAPatchAttribute;
