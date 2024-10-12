@@ -377,7 +377,7 @@ public static class ProgramArgs
                 Verbosity = verbosityValue,
                 Restore = restoreValue,
                 EnableENET = enableEnetValue,
-                EnableFinishedOperations = EnableFinishedOperationsValue,
+                EnableFinishedOperations = enableFinishedOperationsValue,
                 DisableRequirementsCheck = disableRequirementsCheckValue,
                 EnableNotSend = enableNotSendValue,
                 SkipLicensePatch = skipValidationPatchValue,
@@ -458,7 +458,7 @@ public static class ProgramArgs
         var licenseCommand = buildCerebrumancyCommand(licenseHandler);
         var decryptCommand = buildDecryptCommand(decryptHandler);
 
-        if (PatchUtils.Source.Length != 40)
+        if (PatchUtils.Source.Length != 40 || string.IsNullOrEmpty(PatchUtils.Config))
         {
             return rootCommand;
         }
