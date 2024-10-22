@@ -4,9 +4,7 @@
 namespace ISTA_Patcher.Utils;
 
 using System.Globalization;
-#if _WINDOWS
 using System.Management;
-#endif
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Win32;
@@ -38,7 +36,6 @@ internal static partial class NativeMethods
     public static string GetVolumeSerialNumber()
     {
         var volumeSerialNumber = string.Empty;
-#if _WINDOWS
         var driveLetter = Path.GetPathRoot(Environment.SystemDirectory);
         driveLetter = driveLetter?.Replace("\\", string.Empty, StringComparison.Ordinal);
 
@@ -50,7 +47,6 @@ internal static partial class NativeMethods
                                          .FirstOrDefault(disk => disk["VolumeSerialNumber"] != null)?
                                          .GetPropertyValue("VolumeSerialNumber")
                                          .ToString();
-#endif
         if (string.IsNullOrEmpty(volumeSerialNumber))
         {
             volumeSerialNumber = "a";

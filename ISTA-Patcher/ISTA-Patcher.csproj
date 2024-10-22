@@ -25,7 +25,6 @@ Released under the GNU GPLv3+.</Copyright>
     <StripSymbols>false</StripSymbols>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-    <DefineConstants Condition="$(RuntimeIdentifier.StartsWith('win'))">$(DefineConstants);_WINDOWS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -35,14 +34,14 @@ Released under the GNU GPLv3+.</Copyright>
   <ItemGroup>
     <PackageReference Include="ConsoleTables" Version="2.6.2" />
     <PackageReference Include="dnlib" Version="4.4.0" />
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.169">
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.173">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Sentry" Version="4.12.1" />
     <PackageReference Include="Sentry.Profiling" Version="4.12.1" />
     <PackageReference Include="Sentry.Serilog" Version="4.12.1" />
-    <PackageReference Include="Serilog" Version="4.0.2" />
+    <PackageReference Include="Serilog" Version="4.1.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
@@ -51,7 +50,7 @@ Released under the GNU GPLv3+.</Copyright>
     </PackageReference>
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.24324.3" />
     <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.24324.3" />
-    <PackageReference Include="System.Management" Version="8.0.0" Condition="$(RuntimeIdentifier.StartsWith('win'))" />
+    <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
