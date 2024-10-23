@@ -14,8 +14,8 @@ using de4dot.code.deobfuscators;
 using de4dot.code.deobfuscators.Dotfuscator;
 using dnlib.DotNet;
 using dnlib.DotNet.Writer;
-using ISTA_Patcher.Utils.DatabaseProvider;
-using ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
+using ISTA_Patcher.Models.Rheingold.DatabaseProvider;
+using ISTA_Patcher.Models.Rheingold.LicenseManagement.CoreFramework;
 using Serilog;
 
 /// <summary>

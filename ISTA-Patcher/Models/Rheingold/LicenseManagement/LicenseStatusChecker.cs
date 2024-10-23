@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
 
-namespace ISTA_Patcher.Utils.LicenseManagement;
+namespace ISTA_Patcher.Models.Rheingold.LicenseManagement;
 
 using System.Security.Cryptography;
-using ISTA_Patcher.Utils.LicenseManagement.CoreFramework;
+using ISTA_Patcher.Models.Rheingold.LicenseManagement.CoreFramework;
 using Serilog;
 
 public static class LicenseStatusChecker
