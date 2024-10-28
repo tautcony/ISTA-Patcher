@@ -16,6 +16,7 @@ using dnlib.DotNet;
 using dnlib.DotNet.Writer;
 using ISTA_Patcher.Models.Rheingold.DatabaseProvider;
 using ISTA_Patcher.Models.Rheingold.LicenseManagement.CoreFramework;
+using ISTA_Patcher.Utils;
 using Serilog;
 
 /// <summary>

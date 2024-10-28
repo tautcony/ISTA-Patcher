@@ -534,7 +534,7 @@ public static class ProgramArgs
         };
 
         var patchCommand = buildPatchCommand(patchHandler);
-        var licenseCommand = buildCerebrumancyCommand(licenseHandler);
+        var cerebrumancyCommand = buildCerebrumancyCommand(licenseHandler);
         var decryptCommand = buildDecryptCommand(decryptHandler);
         var iLeanCommand = buildILeanCommand(iLeanHandler);
 
@@ -544,7 +544,7 @@ public static class ProgramArgs
         }
 
         rootCommand.Add(patchCommand);
-        rootCommand.Add(licenseCommand);
+        rootCommand.Add(cerebrumancyCommand);
         rootCommand.Add(decryptCommand);
         rootCommand.Add(iLeanCommand);
 

@@ -5,6 +5,7 @@ namespace ISTA_Patcher.Core.Patcher;
 
 using System.Reflection;
 using dnlib.DotNet;
+using ISTA_Patcher.Utils;
 using Serilog;
 
 public class DefaultPatcher : IPatcher

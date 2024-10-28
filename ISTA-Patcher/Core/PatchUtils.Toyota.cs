@@ -4,6 +4,7 @@
 namespace ISTA_Patcher.Core;
 
 using dnlib.DotNet;
+using ISTA_Patcher.Utils;
 
 /// <summary>
 /// A utility class for patching files and directories.

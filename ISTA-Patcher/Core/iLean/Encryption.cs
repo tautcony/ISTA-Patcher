@@ -6,6 +6,7 @@ namespace ISTA_Patcher.Core.iLean;
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Text;
+using ISTA_Patcher.Utils;
 
 public static class Encryption
 {

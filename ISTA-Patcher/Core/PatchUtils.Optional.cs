@@ -5,6 +5,7 @@ namespace ISTA_Patcher.Core;
 
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using ISTA_Patcher.Utils;
 using Serilog;
 
 /// <summary>

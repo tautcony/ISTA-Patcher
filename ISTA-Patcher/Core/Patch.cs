@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using de4dot.code;
 using dnlib.DotNet;
 using ISTA_Patcher.Core.Patcher;
+using ISTA_Patcher.Utils;
 using Serilog;
 using Constants = ISTA_Patcher.Utils.Constants;
 
