@@ -28,6 +28,8 @@ internal sealed class SkipSyncClientConfigAttribute : ISTAPatchAttribute;
 
 internal sealed class MarketLanguagePatchAttribute : ISTAPatchAttribute;
 
+internal sealed class EnableOfflinePatchAttribute : ISTAPatchAttribute;
+
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersionAttribute(string version) : Attribute
 {

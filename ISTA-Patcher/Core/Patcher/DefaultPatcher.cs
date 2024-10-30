@@ -59,6 +59,11 @@ public class DefaultPatcher : IPatcher
             ));
         }
 
+        if (opts.EnableOffline)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(EnableOfflinePatchAttribute)));
+        }
+
         if (opts.SkipSyncClientConfig)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(SkipSyncClientConfigAttribute)));

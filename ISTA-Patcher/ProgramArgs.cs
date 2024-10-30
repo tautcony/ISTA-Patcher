@@ -35,6 +35,8 @@ public static class ProgramArgs
 
         public bool SkipLicensePatch { get; set; }
 
+        public bool EnableOffline { get; set; }
+
         public bool UserAuthEnv { get; set; }
 
         public string? MarketLanguage { get; set; }
@@ -168,11 +170,16 @@ public static class ProgramArgs
         Description = "[Adjunct] Skip sync client configuration.",
     };
 
-    // MaxDegreeOfParallelism
+    private static readonly CliOption<bool> EnableOfflineOption = new("--enable-offline")
+    {
+        DefaultValueFactory = _ => false,
+        Description = "[Adjunct] Enable offline functionality.",
+    };
+
     private static readonly CliOption<int> MaxDegreeOfParallelismOption = new("--max-degree-of-parallelism")
     {
         DefaultValueFactory = _ => Environment.ProcessorCount,
-        Description = "[Adjunct] Set the maximum degree of parallelism.",
+        Description = "[Adjunct] Set the maximum degree of parallelism for patching.",
     };
 
     public static CliCommand buildPatchCommand(Func<PatchOptions, Task<int>> handler)
@@ -218,6 +225,7 @@ public static class ProgramArgs
             DisableRequirementsCheckOption,
             EnableNotSendOption,
             SkipValidationPatchOption,
+            EnableOfflineOption,
             PatchUserAuthOption,
             MarketLanguageOption,
             SkipSyncClientConfigOption,
@@ -249,6 +257,7 @@ public static class ProgramArgs
             var forceValue = result.GetValue(forceOption);
             var skipLibraryValue = result.GetValue(skipLibraryOption);
             var targetPathValue = result.GetValue(targetPathArgument);
+            var enableOfflineValue = result.GetValue(EnableOfflineOption);
 
             var options = new PatchOptions
             {
@@ -259,6 +268,7 @@ public static class ProgramArgs
                 DisableRequirementsCheck = disableRequirementsCheckValue,
                 EnableNotSend = enableNotSendValue,
                 SkipLicensePatch = skipValidationPatchValue,
+                EnableOffline = enableOfflineValue,
                 UserAuthEnv = patchUserAuthValue,
                 MarketLanguage = marketLanguageValue,
                 SkipSyncClientConfig = skipSyncClientConfigValue,

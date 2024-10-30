@@ -62,6 +62,42 @@ internal static partial class PatchUtils
         }
     }
 
+    [RequirementsPatch]
+    public static int PatchRuntimeEnvironment(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.RuntimeEnvironment",
+            "GetSubVersion",
+            "(System.UInt32 modopt(System.Runtime.CompilerServices.IsLong),System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&,System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&,System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&,System.UInt32 modopt(System.Runtime.CompilerServices.IsLong)&)System.Void",
+            RemoveHypervisorFlag
+        );
+
+        void RemoveHypervisorFlag(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+            instructions.RemoveAt(instructions.Count - 1);
+
+            var appendInstructions = new[]
+            {
+                // ecx = ecx & 0x7fffffff
+                OpCodes.Ldarg_3.ToInstruction(),
+                OpCodes.Ldarg_3.ToInstruction(),
+                OpCodes.Ldind_U4.ToInstruction(),
+                OpCodes.Ldc_I4.ToInstruction(0x7fffffff),
+                OpCodes.And.ToInstruction(),
+                OpCodes.Stind_I4.ToInstruction(),
+
+                // return;
+                OpCodes.Ret.ToInstruction(),
+            };
+
+            foreach (var instruction in appendInstructions)
+            {
+                instructions.Add(instruction);
+            }
+        }
+    }
+
     [NotSendPatch]
     public static int PatchMultisessionLogic(ModuleDefMD module)
     {
@@ -165,6 +201,20 @@ internal static partial class PatchUtils
             "GetMarketLanguage",
             "()System.String",
             DnlibUtils.ReturnStringMethod(marketLanguage)
+        );
+    }
+
+    [EnableOfflinePatch]
+    public static int PatchConfigSettings(ModuleDefMD module)
+    {
+        return module.PatcherGetter(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
+            "IsILeanActive",
+            DnlibUtils.ReturnFalseMethod
+        ) + module.PatcherGetter(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
+            "IsOssModeActive",
+            DnlibUtils.ReturnFalseMethod
         );
     }
 
