@@ -19,9 +19,9 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.173, )",
-        "resolved": "2.0.173",
-        "contentHash": "9+diHPxxRz6R98NA7OcTexy2vfUuJZqvbkNMNfcIMxSMRIxEeknDCGk0qiOJmYd5fgH2rVsk4wfVgyUJnu8Ujw=="
+        "requested": "[2.0.177, )",
+        "resolved": "2.0.177",
+        "contentHash": "aGdHdJfHugY7nyXeKVNPd76fetilSq/CSGO54QEiEh2SSwncg3XAdPh68ui3++hwtkdvDz4ATwFfS2RFX8S+vg=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
@@ -90,17 +90,17 @@
       },
       "System.CommandLine": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.24324.3, )",
-        "resolved": "2.0.0-beta4.24324.3",
-        "contentHash": "UddDcdPmeAbRpkYHOMBHYS74UINTL5yXhzHTbruhVN7eR79J8RPGgq1nNXlz5TH4iMK/Fn6OlSFf4Z2UxCJpXw=="
+        "requested": "[2.0.0-beta4.24528.1, )",
+        "resolved": "2.0.0-beta4.24528.1",
+        "contentHash": "Xt8tsSU8yd0ZpbT9gl5DAwkMYWLo8PV1fq2R/belrUbHVVOIKqhLfbWksbdknUDpmzMHZenBtD6AGAp9uJTa2w=="
       },
       "System.CommandLine.NamingConventionBinder": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.24324.3, )",
-        "resolved": "2.0.0-beta4.24324.3",
-        "contentHash": "5Dk8FYil70pblyoWiSzZn6OEcZVDPOTIi2C0IVa/cmwT1284ypShZjjl+o0cJOdgbBJGQZSEUmy13Ag5aobQwA==",
+        "requested": "[2.0.0-beta4.24528.1, )",
+        "resolved": "2.0.0-beta4.24528.1",
+        "contentHash": "rWxXQkDyAfr7OsYCCSH57GQMacYlpkXMUS5GdhBsybiK/R3P1nUcCWstzc5+2ouiC2HPLTW+ckG+PgRK1cY1MQ==",
         "dependencies": {
-          "System.CommandLine": "2.0.0-beta4.24324.3"
+          "System.CommandLine": "2.0.0-beta4.24528.1"
         }
       },
       "System.Management": {
