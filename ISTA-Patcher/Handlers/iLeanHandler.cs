@@ -7,7 +7,7 @@ using ISTA_Patcher.Core.iLean;
 using ISTA_Patcher.Utils;
 using Serilog;
 
-public class iLeanHandler
+public static class iLeanHandler
 {
     public static async Task<int> Execute(ProgramArgs.ILeanOptions opts)
     {

@@ -329,66 +329,54 @@ internal static partial class PatchUtils
         }
     }
 
-    [EssentialPatch]
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static int PatchInteractionModel(ModuleDefMD module)
     {
         return module.PatcherGetter(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
             "Title",
-            RewriteTitle
-        );
-
-        void RewriteTitle(MethodDef method)
-        {
-            var stringRef = module.CorLibTypes.String.TypeRef;
-            var concatRef = new MemberRefUser(
-                module,
-                "Concat",
-                MethodSig.CreateStatic(module.CorLibTypes.String, module.CorLibTypes.String, module.CorLibTypes.String),
-                stringRef);
-
-            var containsDef = module.Types.SelectMany(t => t.Methods).Where(m => m.HasBody)
-                                    .SelectMany(m => m.Body.Instructions)
-                                    .FirstOrDefault(i => i.OpCode == OpCodes.Callvirt &&
-                                        string.Equals((i.Operand as MemberRef)?.FullName, "System.Boolean System.String::Contains(System.String)", StringComparison.Ordinal))
-                                    ?.Operand as MemberRef;
-
-            var titleField = method.DeclaringType.Fields.FirstOrDefault(field => string.Equals(field.FullName, "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title", StringComparison.Ordinal));
-
-            if (containsDef == null || titleField == null)
+            method =>
             {
-                Log.Warning("Required instructions not found, can not patch InteractionModel::Title");
-                return;
+                var containsDef = module.Types.SelectMany(t => t.Methods).Where(m => m.HasBody).SelectMany(m => m.Body.Instructions).FirstOrDefault(i => i.OpCode == OpCodes.Callvirt && string.Equals((i.Operand as MemberRef)?.FullName, "System.Boolean System.String::Contains(System.String)", StringComparison.Ordinal))?.Operand as MemberRef;
+                var titleField = method.DeclaringType.Fields.FirstOrDefault(field => string.Equals(field.FullName, "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title", StringComparison.Ordinal));
+
+                if (containsDef == null || titleField == null)
+                {
+                    return;
+                }
+
+                var stringRef = module.CorLibTypes.String.TypeRef;
+                var concatRef = new MemberRefUser(module,  "Concat", MethodSig.CreateStatic(module.CorLibTypes.String, module.CorLibTypes.String, module.CorLibTypes.String), stringRef);
+
+                var label = OpCodes.Nop.ToInstruction();
+                var patchedMethod = new[]
+                {
+                    OpCodes.Ldarg_0.ToInstruction(),
+                    OpCodes.Ldfld.ToInstruction(titleField),
+                    OpCodes.Brfalse_S.ToInstruction(label),
+
+                    OpCodes.Ldarg_0.ToInstruction(),
+                    OpCodes.Ldfld.ToInstruction(titleField),
+                    OpCodes.Ldstr.ToInstruction("ISTA-Patcher"),
+                    OpCodes.Callvirt.ToInstruction(containsDef),
+                    OpCodes.Brfalse_S.ToInstruction(label),
+
+                    OpCodes.Ldarg_0.ToInstruction(),
+                    OpCodes.Ldfld.ToInstruction(titleField),
+                    OpCodes.Ret.ToInstruction(),
+
+                    label,
+                    OpCodes.Ldarg_0.ToInstruction(),
+                    OpCodes.Ldfld.ToInstruction(titleField),
+                    OpCodes.Ldstr.ToInstruction($" ({Config ?? Encoding.UTF8.GetString(Source)})"),
+                    OpCodes.Call.ToInstruction(concatRef),
+                    OpCodes.Ret.ToInstruction(),
+                };
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+                method.ReplaceWith(patchedMethod);
             }
-
-            var label = OpCodes.Nop.ToInstruction();
-            var patchedMethod = new[]
-            {
-                OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Ldfld.ToInstruction(titleField),
-                OpCodes.Brfalse_S.ToInstruction(label),
-
-                OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Ldfld.ToInstruction(titleField),
-                OpCodes.Ldstr.ToInstruction("ISTA-Patcher"),
-                OpCodes.Callvirt.ToInstruction(containsDef),
-                OpCodes.Brfalse_S.ToInstruction(label),
-
-                OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Ldfld.ToInstruction(titleField),
-                OpCodes.Ret.ToInstruction(),
-
-                label,
-                OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Ldfld.ToInstruction(titleField),
-                OpCodes.Ldstr.ToInstruction($" ({Config ?? Encoding.UTF8.GetString(Source)})"),
-                OpCodes.Call.ToInstruction(concatRef),
-                OpCodes.Ret.ToInstruction(),
-            };
-            method.Body.Variables.Clear();
-            method.Body.ExceptionHandlers.Clear();
-            method.ReplaceWith(patchedMethod);
-        }
+        );
     }
 
     [SignaturePatch]

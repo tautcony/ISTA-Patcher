@@ -108,7 +108,7 @@ internal static partial class PatchUtils
     /// <param name="operation">The action representing the patch operation to be applied to the method.</param>
     /// <param name="memberName">The name of the function applying the patch.</param>
     /// <returns>The number of functions patched.</returns>
-    private static int PatchFunction(
+    public static int PatchFunction(
         this ModuleDefMD module,
         string type,
         string name,
@@ -136,7 +136,7 @@ internal static partial class PatchUtils
     /// <param name="operation">The action representing the patch operation to be applied to the method.</param>
     /// <param name="memberName">The name of the function applying the patch.</param>
     /// <returns>The number of functions patched.</returns>
-    private static int PatcherGetter(
+    public static int PatcherGetter(
         this ModuleDefMD module,
         string type,
         string propertyName,
@@ -270,6 +270,8 @@ internal static partial class PatchUtils
         {
             description.ConstructorArguments[0] = new CAArgument(module.CorLibTypes.String, Config);
         }
+
+        PatchInteractionModel(module);
     }
 
     /// <summary>
@@ -313,7 +315,7 @@ internal static partial class PatchUtils
 
         List<Contract> contracts =
         [
-            new Contract
+            new()
             {
                 internationalDealerNumber = dealerNumber,
                 nationalDealerNumber = dealerNumber,

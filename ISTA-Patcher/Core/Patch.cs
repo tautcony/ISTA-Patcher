@@ -137,7 +137,7 @@ public static partial class Patch
 
             if (!File.Exists(bakFileFullPath))
             {
-                Log.Debug("Bakup file {BakFileFullPath} does not exist, copy...", bakFileFullPath);
+                Log.Debug("Backup file {BakFileFullPath} does not exist, copy...", bakFileFullPath);
                 File.Copy(pendingPatchItemFullPath, bakFileFullPath, overwrite: false);
             }
 

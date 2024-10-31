@@ -11,7 +11,7 @@ using ISTA_Patcher.Models.Rheingold.LicenseManagement;
 using ISTA_Patcher.Models.Rheingold.LicenseManagement.CoreFramework;
 using Serilog;
 
-public class CerebrumancyHandler
+public static class CerebrumancyHandler
 {
     public static async Task<int> Execute(ProgramArgs.CerebrumancyOptions opts)
     {

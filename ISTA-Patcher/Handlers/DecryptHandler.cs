@@ -7,7 +7,7 @@ using ConsoleTables;
 using ISTA_Patcher.Utils;
 using Serilog;
 
-public class DecryptHandler
+public static class DecryptHandler
 {
     public static async Task<int> Execute(ProgramArgs.DecryptOptions opts)
     {

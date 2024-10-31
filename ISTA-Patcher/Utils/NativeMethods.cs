@@ -35,14 +35,13 @@ internal static partial class NativeMethods
     [SupportedOSPlatform("Windows")]
     public static string GetVolumeSerialNumber()
     {
-        var volumeSerialNumber = string.Empty;
         var driveLetter = Path.GetPathRoot(Environment.SystemDirectory);
         driveLetter = driveLetter?.Replace("\\", string.Empty, StringComparison.Ordinal);
 
         var query = $"SELECT VolumeSerialNumber FROM Win32_LogicalDisk WHERE DeviceID='{driveLetter}'";
 
         using var searcher = new ManagementObjectSearcher(query);
-        volumeSerialNumber = searcher.Get()
+        var volumeSerialNumber = searcher.Get()
                                          .Cast<ManagementObject>()
                                          .FirstOrDefault(disk => disk["VolumeSerialNumber"] != null)?
                                          .GetPropertyValue("VolumeSerialNumber")

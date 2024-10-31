@@ -7,7 +7,7 @@ using ISTA_Patcher.Core;
 using ISTA_Patcher.Core.Patcher;
 using Serilog;
 
-public class PatchHandler
+public static class PatchHandler
 {
     public static Task<int> Execute(ProgramArgs.PatchOptions opts)
     {

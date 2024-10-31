@@ -5,7 +5,7 @@ namespace ISTA_Patcher;
 
 using Serilog.Core;
 
-public class Global
+public static class Global
 {
     public static LoggingLevelSwitch LevelSwitch { get; } = new();
 }
