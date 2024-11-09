@@ -7,6 +7,9 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+'
   pull_request:
 
+env:
+  DOTNET_VERSION: net8.0
+
 jobs:
   build:
     name: 'Build'
@@ -26,26 +29,30 @@ jobs:
       with:
         dotnet-version: 8.x
         cache: true
-        cache-dependency-path: ISTA-Patcher/packages.lock.json
+        cache-dependency-path: |
+          src/ISTA-Patcher/packages.lock.json
+          src/ISTAlter/packages.lock.json
 
     - name: Restore dependencies
-      run: dotnet restore --locked-mode
+      run: |
+        dotnet restore src/ISTA-Patcher/ISTA-Patcher.csproj --locked-mode
+        dotnet restore src/ISTAlter/ISTAlter.csproj --locked-mode
 
     - name: Update version info
       if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
       run: |
-        proj_file="ISTA-Patcher/ISTA-Patcher.csproj"
+        proj_file="src/ISTA-Patcher/ISTA-Patcher.csproj"
         version="<InformationalVersion>$(git rev-parse --short HEAD)</InformationalVersion>"
         sed -i "s#<InformationalVersion>[^<]*<\/InformationalVersion>#$version#g" $proj_file
 
     - name: Publish the application
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: true
-      run: dotnet publish ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --no-self-contained
+      run: dotnet publish src/ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --no-self-contained
 
     - name: Copy files
       run: |
-        cp -f LICENSE ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/LICENSE
+        cp -f LICENSE src/ISTA-Patcher/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/LICENSE
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -53,9 +60,9 @@ jobs:
         name: ISTA-Patcher-${{ matrix.runtime-identifier }}-${{ matrix.configuration }}
         retention-days: 30
         path: |
-          ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*
-          !ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*.pdb
-          !ISTA-Patcher/bin/${{ matrix.configuration }}/net8.0/${{ matrix.runtime-identifier }}/publish/*.dbg
+          src/ISTA-Patcher/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*
+          !src/ISTA-Patcher/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*.pdb
+          !src/ISTA-Patcher/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*.dbg
 
   glue:
     name: 'Build (Release, osx-universal)'
@@ -64,8 +71,8 @@ jobs:
     steps:
     - name: Setup working directory
       run: |
-        mkdir -p ISTA-Patcher/bin/Release/net8.0/osx-x64/publish
-        mkdir -p ISTA-Patcher/bin/Release/net8.0/osx-arm64/publish
+        mkdir -p src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish
+        mkdir -p src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-arm64/publish
 
     - name: Setup lipo
       run: |
@@ -77,23 +84,23 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: ISTA-Patcher-osx-x64-Release
-        path: ISTA-Patcher/bin/Release/net8.0/osx-x64/publish
+        path: src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish
 
     - name: Download arm64 build
       uses: actions/download-artifact@v4
       with:
         name: ISTA-Patcher-osx-arm64-Release
-        path: ISTA-Patcher/bin/Release/net8.0/osx-arm64/publish
+        path: src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-arm64/publish
 
     - name: Glue the binary
       run: |
-        mkdir -p ISTA-Patcher/bin/Release/net8.0/osx-universal/publish
-        lipo -create ISTA-Patcher/bin/Release/net8.0/osx-x64/publish/ISTA-Patcher ISTA-Patcher/bin/Release/net8.0/osx-arm64/publish/ISTA-Patcher -output ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/ISTA-Patcher
-        cp -f ISTA-Patcher/bin/Release/net8.0/osx-x64/publish/patch-config.json ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/patch-config.json
+        mkdir -p src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish
+        lipo -create src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/ISTA-Patcher src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-arm64/publish/ISTA-Patcher -output src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/ISTA-Patcher
 
     - name: Copy files
       run: |
-        cp -f ISTA-Patcher/bin/Release/net8.0/osx-x64/publish/LICENSE ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/LICENSE
+        cp -f src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/LICENSE src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/LICENSE
+        cp -f src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/patch-config.json src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/patch-config.json
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -101,6 +108,6 @@ jobs:
         name: ISTA-Patcher-osx-universal-Release
         retention-days: 30
         path: |
-          ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/*
-          !ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/*.pdb
-          !ISTA-Patcher/bin/Release/net8.0/osx-universal/publish/*.dwarf
+          src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*
+          !src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*.pdb
+          !src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*.dwarf

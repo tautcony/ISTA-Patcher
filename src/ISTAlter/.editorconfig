@@ -1,0 +1,8 @@
+[/de4dot.blocks/**]
+generated_code = true
+
+[/de4dot.code/**]
+generated_code = true
+
+[/de4dot.mdecrypt/**]
+generated_code = true

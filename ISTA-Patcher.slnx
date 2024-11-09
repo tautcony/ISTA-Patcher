@@ -1,3 +1,4 @@
 ﻿<Solution>
-  <Project Path="ISTA-Patcher\ISTA-Patcher.csproj" Type="Classic C#" />
+  <Project Path="src\ISTA-Patcher\ISTA-Patcher.csproj" Type="Classic C#" />
+  <Project Path="src\ISTAlter\ISTAlter.csproj" Type="Classic C#" />
 </Solution>

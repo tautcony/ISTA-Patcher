@@ -1,9 +1,9 @@
 version = 1
 
 exclude_patterns = [
-  "ISTA-Patcher/de4dot.blocks/**",
-  "ISTA-Patcher/de4dot.code/**",
-  "ISTA-Patcher/de4dot.mdecrypt/**",
+  "src/ISTAlter/de4dot.blocks/**",
+  "src/ISTAlter/de4dot.code/**",
+  "src/ISTAlter/de4dot.mdecrypt/**",
 ]
 
 [[analyzers]]
