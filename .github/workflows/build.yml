@@ -8,7 +8,7 @@ on:
   pull_request:
 
 env:
-  DOTNET_VERSION: net8.0
+  DOTNET_VERSION: net9.0
 
 jobs:
   build:
@@ -24,10 +24,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET 8.x
+    - name: Setup .NET 9.x
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.x
+        dotnet-version: 9.x
         cache: true
         cache-dependency-path: |
           src/ISTA-Patcher/packages.lock.json
