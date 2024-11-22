@@ -30,6 +30,8 @@ internal sealed class MarketLanguagePatchAttribute : ISTAPatchAttribute;
 
 internal sealed class EnableOfflinePatchAttribute : ISTAPatchAttribute;
 
+internal sealed class DisableFakeFSCRejectPatchAttribute : ISTAPatchAttribute;
+
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersionAttribute(string version) : Attribute
 {

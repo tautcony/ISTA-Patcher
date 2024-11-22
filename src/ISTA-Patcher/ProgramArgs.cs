@@ -84,6 +84,12 @@ public static class ProgramArgs
         Description = "[Adjunct] Set the maximum degree of parallelism for patching.",
     };
 
+    private static readonly CliOption<bool> DisableFakeFSCRejectOption = new("--disable-fake-fsc-reject")
+    {
+        DefaultValueFactory = _ => false,
+        Description = "[Adjunct] Disable fake FSC reject.",
+    };
+
     public static CliCommand buildPatchCommand(Func<ISTAOptions.PatchOptions, Task<int>> handler)
     {
         // patch options
@@ -132,6 +138,7 @@ public static class ProgramArgs
             MarketLanguageOption,
             SkipSyncClientConfigOption,
             MaxDegreeOfParallelismOption,
+            DisableFakeFSCRejectOption,
             typeOption,
             generateRegFileOption,
             deobfuscateOption,
@@ -160,6 +167,7 @@ public static class ProgramArgs
             var skipLibraryValue = result.GetValue(skipLibraryOption);
             var targetPathValue = result.GetValue(targetPathArgument);
             var enableOfflineValue = result.GetValue(EnableOfflineOption);
+            var disableFakeFSCRejectValue = result.GetValue(DisableFakeFSCRejectOption);
 
             var options = new ISTAOptions.PatchOptions
             {
@@ -181,6 +189,7 @@ public static class ProgramArgs
                 SkipLibrary = skipLibraryValue,
                 TargetPath = targetPathValue,
                 MaxDegreeOfParallelism = maxDegreeOfParallelismValue,
+                DisableFakeFSCReject = disableFakeFSCRejectValue,
             };
             return Task.FromResult(handler(options));
         });

@@ -259,4 +259,68 @@ public static partial class PatchUtils
             DnlibUtils.ReturnFalseMethod
         );
     }
+
+    [DisableFakeFSCRejectPatch]
+    public static int PatchRetrieveActualSwtInfoState(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.Programming.ProgrammingEngine.States.RetrieveActualSwtInfoState",
+            "Handle",
+            "(\u0042\u004d\u0057.Rheingold.Programming.ProgrammingEngine.ProgrammingSession)\u0042\u004d\u0057.Rheingold.Programming.ProgrammingEngine.States.DefaultStateResult",
+            SetPeriodicalCheck
+        );
+
+        void SetPeriodicalCheck(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+            var requestSwtAction = method.FindInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
+            if (requestSwtAction == null)
+            {
+                Log.Warning("Required instructions not found, can not patch RetrieveActualSwtInfoState::Handle");
+                return;
+            }
+
+            var indexOfRequestSwtAction = instructions.IndexOf(requestSwtAction);
+            var ldcI4One = instructions[indexOfRequestSwtAction - 1];
+            if (!ldcI4One.IsLdcI4())
+            {
+                Log.Warning("Required instructions not found, can not patch RetrieveActualSwtInfoState::Handle");
+                return;
+            }
+
+            ldcI4One.OpCode = OpCodes.Ldc_I4_0;
+        }
+    }
+
+    [DisableFakeFSCRejectPatch]
+    public static int PatchRetrieveActualSwtEnablingCodesState(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.Programming.ProgrammingEngine.States.RetrieveActualSwtEnablingCodesState",
+            "Handle",
+            "(\u0042\u004d\u0057.Rheingold.Programming.ProgrammingEngine.ProgrammingSession)\u0042\u004d\u0057.Rheingold.Programming.ProgrammingEngine.States.DefaultStateResult",
+            SetPeriodicalCheck
+        );
+
+        void SetPeriodicalCheck(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+            var requestSwtAction = method.FindInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
+            if (requestSwtAction == null)
+            {
+                Log.Warning("Required instructions not found, can not patch RetrieveActualSwtEnablingCodesState::Handle");
+                return;
+            }
+
+            var indexOfRequestSwtAction = instructions.IndexOf(requestSwtAction);
+            var ldcI4One = instructions[indexOfRequestSwtAction - 1];
+            if (!ldcI4One.IsLdcI4())
+            {
+                Log.Warning("Required instructions not found, can not patch RetrieveActualSwtEnablingCodesState::Handle");
+                return;
+            }
+
+            ldcI4One.OpCode = OpCodes.Ldc_I4_0;
+        }
+    }
 }

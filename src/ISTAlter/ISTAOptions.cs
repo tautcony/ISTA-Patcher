@@ -40,6 +40,8 @@ public class ISTAOptions
         public bool SkipSyncClientConfig { get; set; }
 
         public int MaxDegreeOfParallelism { get; set; }
+
+        public bool DisableFakeFSCReject { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions

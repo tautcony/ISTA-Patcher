@@ -68,6 +68,11 @@ public class DefaultPatcher : IPatcher
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(SkipSyncClientConfigAttribute)));
         }
+
+        if (opts.DisableFakeFSCReject)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(DisableFakeFSCRejectPatchAttribute)));
+        }
     }
 
     public DefaultPatcher(ISTAOptions.PatchOptions opts)
