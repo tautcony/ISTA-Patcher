@@ -21,7 +21,7 @@ public class DefaultPatcher : IPatcher
     protected DefaultPatcher(ISTAOptions.OptionalPatchOptions opts)
         : this()
     {
-        if (!opts.SkipLicensePatch)
+        if (!opts.ILeanMode)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(ValidationPatchAttribute)));
         }
@@ -59,14 +59,14 @@ public class DefaultPatcher : IPatcher
             ));
         }
 
-        if (opts.EnableOffline)
+        if (opts.StandaloneMode)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(EnableOfflinePatchAttribute)));
         }
 
         if (opts.SkipSyncClientConfig)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(SkipSyncClientConfigAttribute)));
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(SyncClientConfigAttribute)));
         }
 
         if (opts.DisableFakeFSCReject)

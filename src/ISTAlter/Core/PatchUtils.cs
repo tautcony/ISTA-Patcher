@@ -98,17 +98,6 @@ public static partial class PatchUtils
     }
 
     [ValidationPatch]
-    public static int PatchFscValidationClient(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.TricTools.FscValidation.FscValidationClient",
-            "IsValid",
-            "(System.Byte[],System.Byte[])System.Boolean",
-            DnlibUtils.ReturnTrueMethod
-        );
-    }
-
-    [ValidationPatch]
     public static int PatchMainWindowViewModel(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -147,95 +136,7 @@ public static partial class PatchUtils
         );
     }
 
-    [EssentialPatch]
-    public static int PatchIntegrityManager(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.Rheingold.SecurityAndLicense.IntegrityManager",
-            ".ctor",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    [EssentialPatch]
-    public static int PatchVerifyAssemblyHelper(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
-            "VerifyStrongName",
-            "(System.String,System.Boolean)System.Boolean",
-            DnlibUtils.ReturnTrueMethod
-        );
-    }
-
-    [EssentialPatch]
-    public static int PatchIstaIcsServiceClient(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.ISPI.IstaServices.Client.IstaIcsServiceClient",
-            "ValidateHost",
-            "()System.Void",
-            RemovePublicKeyCheck
-        );
-
-        void RemovePublicKeyCheck(MethodDef method)
-        {
-            var getProcessesByName = method.FindOperand<MemberRef>(OpCodes.Call, "System.Diagnostics.Process[] System.Diagnostics.Process::GetProcessesByName(System.String)");
-            var firstOrDefault = method.FindOperand<MethodSpec>(OpCodes.Call, "System.Diagnostics.Process System.Linq.Enumerable::FirstOrDefault<System.Diagnostics.Process>(System.Collections.Generic.IEnumerable`1<System.Diagnostics.Process>)");
-            var invalidOperationException = method.FindOperand<MemberRef>(OpCodes.Newobj, "System.Void System.InvalidOperationException::.ctor(System.String)");
-            if (getProcessesByName == null || firstOrDefault == null || invalidOperationException == null)
-            {
-                Log.Warning("Required instructions not found, can not patch IstaIcsServiceClient::ValidateHost");
-                return;
-            }
-
-            var ret = OpCodes.Ret.ToInstruction();
-            var patchedMethod = new[]
-            {
-                // if (Process.GetProcessesByName("IstaServicesHost").FirstOrDefault() == null)
-                OpCodes.Ldstr.ToInstruction("IstaServicesHost"),
-                OpCodes.Call.ToInstruction(getProcessesByName),
-                OpCodes.Call.ToInstruction(firstOrDefault),
-                OpCodes.Brtrue_S.ToInstruction(ret),
-
-                // throw new InvalidOperationException("Host not found.");
-                OpCodes.Ldstr.ToInstruction("Host not found."),
-                OpCodes.Newobj.ToInstruction(invalidOperationException),
-                OpCodes.Throw.ToInstruction(),
-
-                ret,
-            };
-
-            method.ReplaceWith(patchedMethod);
-            method.Body.Variables.Clear();
-            method.Body.ExceptionHandlers.Clear();
-        }
-    }
-
-    [EssentialPatch]
-    public static int PatchIstaProcessStarter(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
-            "CheckSignature",
-            "(System.String)System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    [EssentialPatch]
-    public static int PatchPackageValidityService(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.PackageValidityService",
-            "CyclicExpirationDateCheck",
-            "()System.Void",
-            DnlibUtils.EmptyingMethod
-        );
-    }
-
-    [EssentialPatch]
+    [ValidationPatch]
     public static int PatchConfigurationService(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -327,6 +228,94 @@ public static partial class PatchUtils
 
             method.ReplaceWith(patchedMethod);
         }
+    }
+
+    [EssentialPatch]
+    public static int PatchIntegrityManager(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.SecurityAndLicense.IntegrityManager",
+            ".ctor",
+            "()System.Void",
+            DnlibUtils.EmptyingMethod
+        );
+    }
+
+    [EssentialPatch]
+    public static int PatchVerifyAssemblyHelper(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
+            "VerifyStrongName",
+            "(System.String,System.Boolean)System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EssentialPatch]
+    public static int PatchIstaIcsServiceClient(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.ISPI.IstaServices.Client.IstaIcsServiceClient",
+            "ValidateHost",
+            "()System.Void",
+            RemovePublicKeyCheck
+        );
+
+        void RemovePublicKeyCheck(MethodDef method)
+        {
+            var getProcessesByName = method.FindOperand<MemberRef>(OpCodes.Call, "System.Diagnostics.Process[] System.Diagnostics.Process::GetProcessesByName(System.String)");
+            var firstOrDefault = method.FindOperand<MethodSpec>(OpCodes.Call, "System.Diagnostics.Process System.Linq.Enumerable::FirstOrDefault<System.Diagnostics.Process>(System.Collections.Generic.IEnumerable`1<System.Diagnostics.Process>)");
+            var invalidOperationException = method.FindOperand<MemberRef>(OpCodes.Newobj, "System.Void System.InvalidOperationException::.ctor(System.String)");
+            if (getProcessesByName == null || firstOrDefault == null || invalidOperationException == null)
+            {
+                Log.Warning("Required instructions not found, can not patch IstaIcsServiceClient::ValidateHost");
+                return;
+            }
+
+            var ret = OpCodes.Ret.ToInstruction();
+            var patchedMethod = new[]
+            {
+                // if (Process.GetProcessesByName("IstaServicesHost").FirstOrDefault() == null)
+                OpCodes.Ldstr.ToInstruction("IstaServicesHost"),
+                OpCodes.Call.ToInstruction(getProcessesByName),
+                OpCodes.Call.ToInstruction(firstOrDefault),
+                OpCodes.Brtrue_S.ToInstruction(ret),
+
+                // throw new InvalidOperationException("Host not found.");
+                OpCodes.Ldstr.ToInstruction("Host not found."),
+                OpCodes.Newobj.ToInstruction(invalidOperationException),
+                OpCodes.Throw.ToInstruction(),
+
+                ret,
+            };
+
+            method.ReplaceWith(patchedMethod);
+            method.Body.Variables.Clear();
+            method.Body.ExceptionHandlers.Clear();
+        }
+    }
+
+    [EssentialPatch]
+    public static int PatchIstaProcessStarter(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
+            "CheckSignature",
+            "(System.String)System.Void",
+            DnlibUtils.EmptyingMethod
+        );
+    }
+
+    [EssentialPatch]
+    public static int PatchPackageValidityService(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.PackageValidityService",
+            "CyclicExpirationDateCheck",
+            "()System.Void",
+            DnlibUtils.EmptyingMethod
+        );
     }
 
     // ReSharper disable once UnusedMethodReturnValue.Global

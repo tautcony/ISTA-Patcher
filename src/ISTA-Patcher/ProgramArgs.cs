@@ -14,80 +14,80 @@ public static class ProgramArgs
     private static readonly CliOption<Serilog.Events.LogEventLevel> VerbosityOption = new("-v", "--verbosity")
     {
         DefaultValueFactory = _ => Serilog.Events.LogEventLevel.Information,
-        Description = "[Element] Set the output verbosity level of the ISTA-Patcher's output.",
+        Description = "Set the verbosity level of the output.",
     };
 
     private static readonly CliOption<bool> RestoreOption = new("-r", "--restore")
     {
         DefaultValueFactory = _ => false,
-        Description = "[General] Restore patched files to their original state.",
+        Description = "Restore the patched files to their original state.",
     };
 
     // optional patch options
     private static readonly CliOption<bool> EnableEnetOption = new("--enable-enet")
     {
         DefaultValueFactory = _ => false,
-        Description = "[Adjunct] Enable ENET programming functionality.",
+        Description = "Enable ENET programming functionality.",
     };
 
     private static readonly CliOption<bool> EnableFinishedOperationsOption = new("--enable-finished-op")
     {
         DefaultValueFactory = _ => false,
-        Description = "[Adjunct] Enable to open finished operations.",
+        Description = "Enable to open finished operations functionality.",
     };
 
     private static readonly CliOption<bool> DisableRequirementsCheckOption = new("--disable-requirements-check")
     {
         DefaultValueFactory = _ => false,
-        Description = "[Adjunct] Disable system requirements check functionality.",
+        Description = "Disable the system requirements check functionality.",
     };
 
     private static readonly CliOption<bool> EnableNotSendOption = new("--enable-not-send")
     {
         DefaultValueFactory = _ => false,
-        Description = "[Adjunct] Enable VIN Not Send Data functionality.",
+        Description = "Enable VIN Not Send Data functionality.",
     };
 
-    private static readonly CliOption<bool> SkipValidationPatchOption = new("--skip-validation-patch")
+    private static readonly CliOption<bool> ILeanModeOption = new("--ilean-mode")
     {
         DefaultValueFactory = _ => false,
-        Description = "[Adjunct] Skip license validation patch.",
+        Description = "Skip specific patches for iLean mode.",
     };
 
     private static readonly CliOption<bool> PatchUserAuthOption = new("--patch-user-auth")
     {
         DefaultValueFactory = _ => false,
-        Description = "[Adjunct] Patch user authentication environment.",
+        Description = "Patch the user authentication environment.",
     };
 
     private static readonly CliOption<string> MarketLanguageOption = new("--market-language")
     {
         DefaultValueFactory = _ => null,
-        Description = "[Adjunct] Set the market language.",
+        Description = "Specify the market language.",
     };
 
-    private static readonly CliOption<bool> SkipSyncClientConfigOption = new("--skip-sync-client-config")
+    private static readonly CliOption<bool> SyncClientConfigOption = new("--skip-sync-client-config")
     {
         DefaultValueFactory = _ => false,
-        Description = "[Adjunct] Skip sync client configuration.",
+        Description = "Disable sync client configuration functionality.",
     };
 
-    private static readonly CliOption<bool> EnableOfflineOption = new("--enable-offline")
+    private static readonly CliOption<bool> StandaloneModeOption = new("--standalone-mode")
     {
         DefaultValueFactory = _ => false,
-        Description = "[Adjunct] Enable offline functionality.",
+        Description = "Overwrite essential config for standalone mode.",
     };
 
     private static readonly CliOption<int> MaxDegreeOfParallelismOption = new("--max-degree-of-parallelism")
     {
         DefaultValueFactory = _ => Environment.ProcessorCount,
-        Description = "[Adjunct] Set the maximum degree of parallelism for patching.",
+        Description = "Set the maximum degree of parallelism for patching.",
     };
 
     private static readonly CliOption<bool> DisableFakeFSCRejectOption = new("--disable-fake-fsc-reject")
     {
         DefaultValueFactory = _ => false,
-        Description = "[Adjunct] Disable fake FSC reject.",
+        Description = "Disable fake FSC reject functionality.",
     };
 
     public static CliCommand buildPatchCommand(Func<ISTAOptions.PatchOptions, Task<int>> handler)
@@ -96,7 +96,7 @@ public static class ProgramArgs
         var typeOption = new CliOption<ISTAOptions.PatchType>("-t", "--type")
         {
             DefaultValueFactory = _ => ISTAOptions.PatchType.B,
-            Description = "Specify the patch type. Valid options: B, T.",
+            Description = "Specify the patch type.",
         };
         var generateRegFileOption = new CliOption<bool>("--generate-registry-file")
         {
@@ -106,43 +106,43 @@ public static class ProgramArgs
         var deobfuscateOption = new CliOption<bool>("-d", "--deobfuscate")
         {
             DefaultValueFactory = _ => false,
-            Description = "Enable deobfuscation of the application and libraries.",
+            Description = "Run deobfuscator for the application and libraries.",
         };
         var forceOption = new CliOption<bool>("-f", "--force")
         {
             DefaultValueFactory = _ => false,
-            Description = "Force patching on application and libraries. If specified, ISTA-Patcher will apply patches forcefully, bypassing certain checks.",
+            Description = "Force patching on application and libraries.",
         };
         var skipLibraryOption = new CliOption<string[]>("--skip-library")
         {
             DefaultValueFactory = _ => [],
-            Description = "Specify the library to skip patching.",
+            Description = "Specify the libraries to skip patching.",
         };
         var targetPathArgument = new CliArgument<string>("targetPath")
         {
             DefaultValueFactory = _ => null,
-            Description = "Specify the path for ISTA-P. Provide the full path where ISTA-P is located on your system.",
+            Description = "Specify the path for ISTA-P.",
         };
 
         var patchCommand = new CliCommand("patch", "Perform patching on application and libraries.")
         {
+            typeOption,
             VerbosityOption,
             RestoreOption,
+            deobfuscateOption,
+            forceOption,
+            ILeanModeOption,
+            StandaloneModeOption,
             EnableEnetOption,
             EnableFinishedOperationsOption,
             DisableRequirementsCheckOption,
             EnableNotSendOption,
-            SkipValidationPatchOption,
-            EnableOfflineOption,
             PatchUserAuthOption,
             MarketLanguageOption,
-            SkipSyncClientConfigOption,
-            MaxDegreeOfParallelismOption,
+            SyncClientConfigOption,
             DisableFakeFSCRejectOption,
-            typeOption,
+            MaxDegreeOfParallelismOption,
             generateRegFileOption,
-            deobfuscateOption,
-            forceOption,
             skipLibraryOption,
             targetPathArgument,
         };
@@ -155,10 +155,10 @@ public static class ProgramArgs
             var enableFinishedOpValue = result.GetValue(EnableFinishedOperationsOption);
             var disableRequirementsCheckValue = result.GetValue(DisableRequirementsCheckOption);
             var enableNotSendValue = result.GetValue(EnableNotSendOption);
-            var skipValidationPatchValue = result.GetValue(SkipValidationPatchOption);
+            var iLeanModeValue = result.GetValue(ILeanModeOption);
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
             var marketLanguageValue = result.GetValue(MarketLanguageOption);
-            var skipSyncClientConfigValue = result.GetValue(SkipSyncClientConfigOption);
+            var syncClientConfigValue = result.GetValue(SyncClientConfigOption);
             var maxDegreeOfParallelismValue = result.GetValue(MaxDegreeOfParallelismOption);
             var typeValue = result.GetValue(typeOption);
             var generateRegFileValue = result.GetValue(generateRegFileOption);
@@ -166,7 +166,7 @@ public static class ProgramArgs
             var forceValue = result.GetValue(forceOption);
             var skipLibraryValue = result.GetValue(skipLibraryOption);
             var targetPathValue = result.GetValue(targetPathArgument);
-            var enableOfflineValue = result.GetValue(EnableOfflineOption);
+            var enableStandaloneValue = result.GetValue(StandaloneModeOption);
             var disableFakeFSCRejectValue = result.GetValue(DisableFakeFSCRejectOption);
 
             var options = new ISTAOptions.PatchOptions
@@ -177,11 +177,11 @@ public static class ProgramArgs
                 EnableFinishedOperations = enableFinishedOpValue,
                 DisableRequirementsCheck = disableRequirementsCheckValue,
                 EnableNotSend = enableNotSendValue,
-                SkipLicensePatch = skipValidationPatchValue,
-                EnableOffline = enableOfflineValue,
+                ILeanMode = iLeanModeValue,
+                StandaloneMode = enableStandaloneValue,
                 UserAuthEnv = patchUserAuthValue,
                 MarketLanguage = marketLanguageValue,
-                SkipSyncClientConfig = skipSyncClientConfigValue,
+                SkipSyncClientConfig = syncClientConfigValue,
                 PatchType = typeValue,
                 GenerateMockRegFile = generateRegFileValue,
                 Deobfuscate = deobfuscateValue,
@@ -267,7 +267,7 @@ public static class ProgramArgs
             EnableFinishedOperationsOption,
             DisableRequirementsCheckOption,
             EnableNotSendOption,
-            SkipValidationPatchOption,
+            ILeanModeOption,
             PatchUserAuthOption,
             carvingPrimamindOption,
             primamindIntensityOption,
@@ -291,7 +291,7 @@ public static class ProgramArgs
             var enableFinishedOperationsValue = result.GetValue(EnableFinishedOperationsOption);
             var disableRequirementsCheckValue = result.GetValue(DisableRequirementsCheckOption);
             var enableNotSendValue = result.GetValue(EnableNotSendOption);
-            var skipValidationPatchValue = result.GetValue(SkipValidationPatchOption);
+            var skipValidationPatchValue = result.GetValue(ILeanModeOption);
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
             var carvingPrimamindValue = result.GetValue(carvingPrimamindOption);
             var primamindIntensityValue = result.GetValue(primamindIntensityOption);
@@ -314,7 +314,7 @@ public static class ProgramArgs
                 EnableFinishedOperations = enableFinishedOperationsValue,
                 DisableRequirementsCheck = disableRequirementsCheckValue,
                 EnableNotSend = enableNotSendValue,
-                SkipLicensePatch = skipValidationPatchValue,
+                ILeanMode = skipValidationPatchValue,
                 UserAuthEnv = patchUserAuthValue,
                 CarvingPrimamind = carvingPrimamindValue,
                 primamindIntensity = primamindIntensityValue,

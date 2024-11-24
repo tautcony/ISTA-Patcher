@@ -29,9 +29,9 @@ public class ISTAOptions
 
         public bool EnableNotSend { get; set; }
 
-        public bool SkipLicensePatch { get; set; }
+        public bool ILeanMode { get; set; }
 
-        public bool EnableOffline { get; set; }
+        public bool StandaloneMode { get; set; }
 
         public bool UserAuthEnv { get; set; }
 

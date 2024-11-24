@@ -247,7 +247,7 @@ public static partial class PatchUtils
         );
     }
 
-    [SkipSyncClientConfig]
+    [SyncClientConfig]
     [LibraryName("CommonServices")]
     [FromVersion("4.46.3x")]
     public static int PatchClientConfigurationManager(ModuleDefMD module)
