@@ -12,6 +12,12 @@ public class ISTAOptions
         T = 1,
     }
 
+    public enum ModeType
+    {
+        Standalone = 0,
+        iLean = 1,
+    }
+
     public class BaseOptions
     {
         public Serilog.Events.LogEventLevel Verbosity { get; set; }
@@ -21,17 +27,15 @@ public class ISTAOptions
 
     public class OptionalPatchOptions : BaseOptions
     {
-        public bool EnableENET { get; set; }
+        public bool ENET { get; set; }
 
-        public bool EnableFinishedOperations { get; set; }
+        public bool FinishedOperations { get; set; }
 
-        public bool DisableRequirementsCheck { get; set; }
+        public bool SkipRequirementsCheck { get; set; }
 
-        public bool EnableNotSend { get; set; }
+        public bool DataNotSend { get; set; }
 
-        public bool ILeanMode { get; set; }
-
-        public bool StandaloneMode { get; set; }
+        public ModeType Mode { get; set; }
 
         public bool UserAuthEnv { get; set; }
 
@@ -41,7 +45,7 @@ public class ISTAOptions
 
         public int MaxDegreeOfParallelism { get; set; }
 
-        public bool DisableFakeFSCReject { get; set; }
+        public bool SkipFakeFSCReject { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions

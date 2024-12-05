@@ -21,27 +21,33 @@ public class DefaultPatcher : IPatcher
     protected DefaultPatcher(ISTAOptions.OptionalPatchOptions opts)
         : this()
     {
-        if (!opts.ILeanMode)
+        switch (opts.Mode)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(ValidationPatchAttribute)));
+            case ISTAOptions.ModeType.Standalone:
+                this.Patches.AddRange(IPatcher.GetPatches(typeof(ValidationPatchAttribute)));
+                this.Patches.AddRange(IPatcher.GetPatches(typeof(EnableOfflinePatchAttribute)));
+                break;
+            case ISTAOptions.ModeType.iLean:
+            default:
+                break;
         }
 
-        if (opts.EnableENET)
+        if (opts.ENET)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(ENETPatchAttribute)));
         }
 
-        if (opts.EnableFinishedOperations)
+        if (opts.FinishedOperations)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(FinishedOPPatchAttribute)));
         }
 
-        if (opts.DisableRequirementsCheck)
+        if (opts.SkipRequirementsCheck)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(RequirementsPatchAttribute)));
         }
 
-        if (opts.EnableNotSend)
+        if (opts.DataNotSend)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(NotSendPatchAttribute)));
         }
@@ -59,17 +65,12 @@ public class DefaultPatcher : IPatcher
             ));
         }
 
-        if (opts.StandaloneMode)
-        {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(EnableOfflinePatchAttribute)));
-        }
-
         if (opts.SkipSyncClientConfig)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(SyncClientConfigAttribute)));
         }
 
-        if (opts.DisableFakeFSCReject)
+        if (opts.SkipFakeFSCReject)
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(DisableFakeFSCRejectPatchAttribute)));
         }

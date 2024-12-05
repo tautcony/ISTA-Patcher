@@ -14,7 +14,7 @@ public static class ProgramArgs
     private static readonly CliOption<Serilog.Events.LogEventLevel> VerbosityOption = new("-v", "--verbosity")
     {
         DefaultValueFactory = _ => Serilog.Events.LogEventLevel.Information,
-        Description = "Set the verbosity level of the output.",
+        Description = "Specify the verbosity level of the output.",
     };
 
     private static readonly CliOption<bool> RestoreOption = new("-r", "--restore")
@@ -36,22 +36,16 @@ public static class ProgramArgs
         Description = "Enable to open finished operations functionality.",
     };
 
-    private static readonly CliOption<bool> DisableRequirementsCheckOption = new("--disable-requirements-check")
+    private static readonly CliOption<bool> EnableSkipRequirementsCheckOption = new("--enable-skip-system-check")
     {
         DefaultValueFactory = _ => false,
-        Description = "Disable the system requirements check functionality.",
+        Description = "Enable skip the system requirements check functionality.",
     };
 
-    private static readonly CliOption<bool> EnableNotSendOption = new("--enable-not-send")
+    private static readonly CliOption<bool> EnableDataNotSendOption = new("--enable-data-not-send")
     {
         DefaultValueFactory = _ => false,
         Description = "Enable VIN Not Send Data functionality.",
-    };
-
-    private static readonly CliOption<bool> ILeanModeOption = new("--ilean-mode")
-    {
-        DefaultValueFactory = _ => false,
-        Description = "Skip specific patches for iLean mode.",
     };
 
     private static readonly CliOption<bool> PatchUserAuthOption = new("--patch-user-auth")
@@ -60,34 +54,34 @@ public static class ProgramArgs
         Description = "Patch the user authentication environment.",
     };
 
+    private static readonly CliOption<bool> EnableSkipSyncClientConfigOption = new("--enable-skip-sync-client-config")
+    {
+        DefaultValueFactory = _ => false,
+        Description = "Enable skip sync client configuration functionality.",
+    };
+
+    private static readonly CliOption<bool> EnableSkipFakeFSCRejectOption = new("--enable-skip-fake-fsc-reject")
+    {
+        DefaultValueFactory = _ => false,
+        Description = "Enable skip fake FSC reject functionality.",
+    };
+
+    private static readonly CliOption<ISTAOptions.ModeType> ModeOption = new("--mode")
+    {
+        DefaultValueFactory = _ => ISTAOptions.ModeType.Standalone,
+        Description = "Specify the mode type.",
+    };
+
     private static readonly CliOption<string> MarketLanguageOption = new("--market-language")
     {
         DefaultValueFactory = _ => null,
         Description = "Specify the market language.",
     };
 
-    private static readonly CliOption<bool> SyncClientConfigOption = new("--skip-sync-client-config")
-    {
-        DefaultValueFactory = _ => false,
-        Description = "Disable sync client configuration functionality.",
-    };
-
-    private static readonly CliOption<bool> StandaloneModeOption = new("--standalone-mode")
-    {
-        DefaultValueFactory = _ => false,
-        Description = "Overwrite essential config for standalone mode.",
-    };
-
     private static readonly CliOption<int> MaxDegreeOfParallelismOption = new("--max-degree-of-parallelism")
     {
         DefaultValueFactory = _ => Environment.ProcessorCount,
-        Description = "Set the maximum degree of parallelism for patching.",
-    };
-
-    private static readonly CliOption<bool> DisableFakeFSCRejectOption = new("--disable-fake-fsc-reject")
-    {
-        DefaultValueFactory = _ => false,
-        Description = "Disable fake FSC reject functionality.",
+        Description = "Specify the maximum degree of parallelism for patching.",
     };
 
     public static CliCommand buildPatchCommand(Func<ISTAOptions.PatchOptions, Task<int>> handler)
@@ -131,16 +125,15 @@ public static class ProgramArgs
             RestoreOption,
             deobfuscateOption,
             forceOption,
-            ILeanModeOption,
-            StandaloneModeOption,
+            ModeOption,
             EnableEnetOption,
             EnableFinishedOperationsOption,
-            DisableRequirementsCheckOption,
-            EnableNotSendOption,
+            EnableSkipRequirementsCheckOption,
+            EnableDataNotSendOption,
             PatchUserAuthOption,
             MarketLanguageOption,
-            SyncClientConfigOption,
-            DisableFakeFSCRejectOption,
+            EnableSkipSyncClientConfigOption,
+            EnableSkipFakeFSCRejectOption,
             MaxDegreeOfParallelismOption,
             generateRegFileOption,
             skipLibraryOption,
@@ -153,35 +146,33 @@ public static class ProgramArgs
             var restoreValue = result.GetValue(RestoreOption);
             var enableEnetValue = result.GetValue(EnableEnetOption);
             var enableFinishedOpValue = result.GetValue(EnableFinishedOperationsOption);
-            var disableRequirementsCheckValue = result.GetValue(DisableRequirementsCheckOption);
-            var enableNotSendValue = result.GetValue(EnableNotSendOption);
-            var iLeanModeValue = result.GetValue(ILeanModeOption);
+            var enableSkipRequirementsCheckValue = result.GetValue(EnableSkipRequirementsCheckOption);
+            var enableDataNotSendValue = result.GetValue(EnableDataNotSendOption);
+            var enableSyncClientConfigValue = result.GetValue(EnableSkipSyncClientConfigOption);
+            var enableSkipFakeFSCRejectValue = result.GetValue(EnableSkipFakeFSCRejectOption);
+            var typeValue = result.GetValue(typeOption);
+            var modeValue = result.GetValue(ModeOption);
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
             var marketLanguageValue = result.GetValue(MarketLanguageOption);
-            var syncClientConfigValue = result.GetValue(SyncClientConfigOption);
             var maxDegreeOfParallelismValue = result.GetValue(MaxDegreeOfParallelismOption);
-            var typeValue = result.GetValue(typeOption);
             var generateRegFileValue = result.GetValue(generateRegFileOption);
             var deobfuscateValue = result.GetValue(deobfuscateOption);
             var forceValue = result.GetValue(forceOption);
             var skipLibraryValue = result.GetValue(skipLibraryOption);
             var targetPathValue = result.GetValue(targetPathArgument);
-            var enableStandaloneValue = result.GetValue(StandaloneModeOption);
-            var disableFakeFSCRejectValue = result.GetValue(DisableFakeFSCRejectOption);
 
             var options = new ISTAOptions.PatchOptions
             {
                 Verbosity = verbosityValue,
                 Restore = restoreValue,
-                EnableENET = enableEnetValue,
-                EnableFinishedOperations = enableFinishedOpValue,
-                DisableRequirementsCheck = disableRequirementsCheckValue,
-                EnableNotSend = enableNotSendValue,
-                ILeanMode = iLeanModeValue,
-                StandaloneMode = enableStandaloneValue,
+                ENET = enableEnetValue,
+                FinishedOperations = enableFinishedOpValue,
+                SkipRequirementsCheck = enableSkipRequirementsCheckValue,
+                DataNotSend = enableDataNotSendValue,
+                Mode = modeValue,
                 UserAuthEnv = patchUserAuthValue,
                 MarketLanguage = marketLanguageValue,
-                SkipSyncClientConfig = syncClientConfigValue,
+                SkipSyncClientConfig = enableSyncClientConfigValue,
                 PatchType = typeValue,
                 GenerateMockRegFile = generateRegFileValue,
                 Deobfuscate = deobfuscateValue,
@@ -189,7 +180,7 @@ public static class ProgramArgs
                 SkipLibrary = skipLibraryValue,
                 TargetPath = targetPathValue,
                 MaxDegreeOfParallelism = maxDegreeOfParallelismValue,
-                DisableFakeFSCReject = disableFakeFSCRejectValue,
+                SkipFakeFSCReject = enableSkipFakeFSCRejectValue,
             };
             return Task.FromResult(handler(options));
         });
@@ -265,9 +256,9 @@ public static class ProgramArgs
             RestoreOption,
             EnableEnetOption,
             EnableFinishedOperationsOption,
-            DisableRequirementsCheckOption,
-            EnableNotSendOption,
-            ILeanModeOption,
+            EnableSkipRequirementsCheckOption,
+            EnableDataNotSendOption,
+            ModeOption,
             PatchUserAuthOption,
             carvingPrimamindOption,
             primamindIntensityOption,
@@ -287,11 +278,11 @@ public static class ProgramArgs
         {
             var verbosityValue = result.GetValue(VerbosityOption);
             var restoreValue = result.GetValue(RestoreOption);
-            var enableEnetValue = result.GetValue(EnableEnetOption);
-            var enableFinishedOperationsValue = result.GetValue(EnableFinishedOperationsOption);
-            var disableRequirementsCheckValue = result.GetValue(DisableRequirementsCheckOption);
-            var enableNotSendValue = result.GetValue(EnableNotSendOption);
-            var skipValidationPatchValue = result.GetValue(ILeanModeOption);
+            var enetValue = result.GetValue(EnableEnetOption);
+            var finishedOperationsValue = result.GetValue(EnableFinishedOperationsOption);
+            var skipRequirementsCheckValue = result.GetValue(EnableSkipRequirementsCheckOption);
+            var dataNotSendValue = result.GetValue(EnableDataNotSendOption);
+            var modeOptionValue = result.GetValue(ModeOption);
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
             var carvingPrimamindValue = result.GetValue(carvingPrimamindOption);
             var primamindIntensityValue = result.GetValue(primamindIntensityOption);
@@ -310,11 +301,11 @@ public static class ProgramArgs
             {
                 Verbosity = verbosityValue,
                 Restore = restoreValue,
-                EnableENET = enableEnetValue,
-                EnableFinishedOperations = enableFinishedOperationsValue,
-                DisableRequirementsCheck = disableRequirementsCheckValue,
-                EnableNotSend = enableNotSendValue,
-                ILeanMode = skipValidationPatchValue,
+                ENET = enetValue,
+                FinishedOperations = finishedOperationsValue,
+                SkipRequirementsCheck = skipRequirementsCheckValue,
+                DataNotSend = dataNotSendValue,
+                Mode = modeOptionValue,
                 UserAuthEnv = patchUserAuthValue,
                 CarvingPrimamind = carvingPrimamindValue,
                 primamindIntensity = primamindIntensityValue,
