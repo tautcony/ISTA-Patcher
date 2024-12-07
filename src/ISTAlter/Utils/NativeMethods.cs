@@ -4,28 +4,38 @@
 namespace ISTAlter.Utils;
 
 using System.Globalization;
-using System.Management;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Microsoft.Win32;
 
 public static partial class NativeMethods
 {
     /// <summary>
-    /// Gets a value that indicates whether the assembly manifest at the supplied path contains a strong name signature.
+    /// Retrieves the Machine UUID.
+    /// The returned UUID is in uppercase and without hyphens.
     /// </summary>
-    /// <param name="wszFilePath">[in] The path to the portable executable (.exe or .dll) file for the assembly to be verified.</param>
-    /// <param name="fForceVerification">[in] true to perform verification, even if it is necessary to override registry settings; otherwise, false.</param>
-    /// <param name="pfWasVerified">[out] true if the strong name signature was verified; otherwise, false. pfWasVerified is also set to false if the verification was successful due to registry settings.</param>
-    /// <returns>S_OK if the verification was successful; otherwise, an HRESULT value that indicates failure.</returns>
+    /// <returns>The Machine UUID in uppercase without hyphens, or an empty string if not found.</returns>
     [SupportedOSPlatform("Windows")]
-    [LibraryImport("mscoree.dll", StringMarshalling = StringMarshalling.Utf16, SetLastError = true, EntryPoint = "StrongNameSignatureVerificationEx")]
-    [return: MarshalAs(UnmanagedType.U1)]
-    public static partial bool StrongNameSignatureVerificationEx(
-        [MarshalAs(UnmanagedType.LPWStr)]string wszFilePath,
-        [MarshalAs(UnmanagedType.U1)]bool fForceVerification,
-        [MarshalAs(UnmanagedType.U1)]ref bool pfWasVerified
-    );
+    [SupportedOSPlatform("macOS")]
+    public static string GetMachineUUID()
+    {
+        var uuid = string.Empty;
+
+        if (OperatingSystem.IsWindows())
+        {
+            uuid = GetWindowsMachineGuid();
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            uuid = GetIOPlatformUUID();
+        }
+
+        if (string.IsNullOrEmpty(uuid) || uuid.Length < 16)
+        {
+            return uuid ?? string.Empty;
+        }
+
+        return uuid.ToUpper(CultureInfo.InvariantCulture).Replace("-", string.Empty, StringComparison.Ordinal);
+    }
 
     /// <summary>
     /// Retrieves the volume serial number of the drive where the system directory is located.
@@ -33,19 +43,21 @@ public static partial class NativeMethods
     /// </summary>
     /// <returns>The truncated volume serial number of the system drive.</returns>
     [SupportedOSPlatform("Windows")]
+    [SupportedOSPlatform("macOS")]
     public static string GetVolumeSerialNumber()
     {
-        var driveLetter = Path.GetPathRoot(Environment.SystemDirectory);
-        driveLetter = driveLetter?.Replace("\\", string.Empty, StringComparison.Ordinal);
+        var volumeSerialNumber = string.Empty;
 
-        var query = $"SELECT VolumeSerialNumber FROM Win32_LogicalDisk WHERE DeviceID='{driveLetter}'";
+        if (OperatingSystem.IsWindows())
+        {
+            volumeSerialNumber = GetWindowsVolumeSerialNumber();
+        }
 
-        using var searcher = new ManagementObjectSearcher(query);
-        var volumeSerialNumber = searcher.Get()
-                                         .Cast<ManagementObject>()
-                                         .FirstOrDefault(disk => disk["VolumeSerialNumber"] != null)?
-                                         .GetPropertyValue("VolumeSerialNumber")
-                                         .ToString();
+        if (OperatingSystem.IsMacOS())
+        {
+            volumeSerialNumber = GetMacVolumeSerialNumber();
+        }
+
         if (string.IsNullOrEmpty(volumeSerialNumber))
         {
             volumeSerialNumber = "a";
@@ -54,24 +66,5 @@ public static partial class NativeMethods
         volumeSerialNumber = volumeSerialNumber.Replace("-", string.Empty, StringComparison.Ordinal);
         volumeSerialNumber += "12345678";
         return volumeSerialNumber[..8];
-    }
-
-    /// <summary>
-    /// Retrieves the Machine GUID from the Windows registry.
-    /// The returned GUID is in uppercase and without hyphens.
-    /// </summary>
-    /// <returns>The Machine GUID in uppercase without hyphens, or an empty string if not found.</returns>
-    [SupportedOSPlatform("Windows")]
-    public static string GetMachineGuid()
-    {
-        using var localMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
-        using var registryKey = localMachine.OpenSubKey(@"SOFTWARE\Microsoft\Cryptography\");
-        var guid = registryKey?.GetValue("MachineGuid")?.ToString();
-        if (string.IsNullOrEmpty(guid) || guid.Length < 16)
-        {
-            return guid ?? string.Empty;
-        }
-
-        return guid.ToUpper(CultureInfo.InvariantCulture).Replace("-", string.Empty, StringComparison.Ordinal);
     }
 }

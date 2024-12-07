@@ -15,9 +15,10 @@ public static class Encryption
     public static string? VolumeSerialNumber { get; set; }
 
     [SupportedOSPlatform("Windows")]
+    [SupportedOSPlatform("macOS")]
     public static void InitializeMachineInfo()
     {
-        MachineGuid = NativeMethods.GetMachineGuid();
+        MachineGuid = NativeMethods.GetMachineUUID();
         VolumeSerialNumber = NativeMethods.GetVolumeSerialNumber();
     }
 

@@ -16,15 +16,14 @@ public static class iLeanHandler
 
         if (opts.ShowMachineInfo)
         {
-            if (OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
             {
-                Log.Information("MachineGuid: {MachineGuid}", NativeMethods.GetMachineGuid());
+                Log.Information("MachineGuid: {MachineGuid}", NativeMethods.GetMachineUUID());
                 Log.Information("VolumeSerialNumber: {VolumeSerialNumber}", NativeMethods.GetVolumeSerialNumber());
             }
             else
             {
                 Log.Error("--show-machine-info option is not supported on this platform");
-                return -1;
             }
 
             return 0;
@@ -36,7 +35,7 @@ public static class iLeanHandler
         }
         else
         {
-            if (OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
             {
                 Encryption.InitializeMachineInfo();
             }
