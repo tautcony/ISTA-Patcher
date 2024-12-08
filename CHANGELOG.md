@@ -1,5 +1,16 @@
 ﻿# Changelog
 
+## 2.3.3 / 2024-12-*
+
+- Feat - Upgrade to .NET 9.0
+- Feat - Add patch to enable opening of finished operations with `--enable-finished-op` flag
+- Feat - Add show machine info for ilean offline client with `ilean` command
+- Feat - Add patch to skip fake fsc reject with `--enable-skip-fake-fsc-reject` flag
+- Feat - Add support to skip validation patch with `--mode` option
+- Feat - Reorder and rename cli options
+- Chore - Upgrade dependencies
+- Chore - Refactor project structure
+
 ## 2.3.2 / 2024-09-02
 
 - Feat - Reduce size of the executable
