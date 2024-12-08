@@ -15,6 +15,7 @@ public static partial class NativeMethods
     /// <returns>The Machine UUID in uppercase without hyphens, or an empty string if not found.</returns>
     [SupportedOSPlatform("Windows")]
     [SupportedOSPlatform("macOS")]
+    [SupportedOSPlatform("Linux")]
     public static string GetMachineUUID()
     {
         var uuid = string.Empty;
@@ -27,6 +28,11 @@ public static partial class NativeMethods
         if (OperatingSystem.IsMacOS())
         {
             uuid = GetIOPlatformUUID();
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            uuid = GetLinuxMachineId();
         }
 
         if (string.IsNullOrEmpty(uuid) || uuid.Length < 16)
@@ -44,6 +50,7 @@ public static partial class NativeMethods
     /// <returns>The truncated volume serial number of the system drive.</returns>
     [SupportedOSPlatform("Windows")]
     [SupportedOSPlatform("macOS")]
+    [SupportedOSPlatform("Linux")]
     public static string GetVolumeSerialNumber()
     {
         var volumeSerialNumber = string.Empty;
@@ -56,6 +63,11 @@ public static partial class NativeMethods
         if (OperatingSystem.IsMacOS())
         {
             volumeSerialNumber = GetMacVolumeSerialNumber();
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            volumeSerialNumber = GetLinuxVolumeSerialNumber();
         }
 
         if (string.IsNullOrEmpty(volumeSerialNumber))

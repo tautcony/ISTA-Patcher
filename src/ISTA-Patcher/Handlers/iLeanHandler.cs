@@ -16,7 +16,7 @@ public static class iLeanHandler
 
         if (opts.ShowMachineInfo)
         {
-            if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS())
+            if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
             {
                 Log.Information("MachineGuid: {MachineGuid}", NativeMethods.GetMachineUUID());
                 Log.Information("VolumeSerialNumber: {VolumeSerialNumber}", NativeMethods.GetVolumeSerialNumber());
