@@ -7,12 +7,8 @@ using System.Runtime.InteropServices;
 using CFDictionaryRef = System.IntPtr;
 using CFStringRef = System.IntPtr;
 
-internal partial class IOKit
+internal static partial class IOKit
 {
-    private IOKit()
-    {
-    }
-
     private const string IOKitLibrary = "/System/Library/Frameworks/IOKit.framework/IOKit";
 
     /// <summary>

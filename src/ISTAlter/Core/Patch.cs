@@ -61,7 +61,7 @@ public static partial class Patch
         Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
     }
 
-    private static void PatchSingleFile(string pendingPatchItem, IList<int> patchAppliedCount, string guiBasePath, int indentLength, IPatcher patcher, ISTAOptions.PatchOptions options)
+    private static void PatchSingleFile(string pendingPatchItem, int[] patchAppliedCount, string guiBasePath, int indentLength, IPatcher patcher, ISTAOptions.PatchOptions options)
     {
         var pendingPatchItemFullPath = pendingPatchItem.StartsWith('!')
             ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!'))
@@ -217,7 +217,7 @@ public static partial class Patch
         }
     }
 
-    private static IEnumerable<string> BuildIndicator(IReadOnlyCollection<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> patches, IReadOnlyList<int> counting)
+    private static IEnumerable<string> BuildIndicator(List<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> patches, int[] counting)
     {
         return patches
                .Select(p => FormatName(p.Delegater))

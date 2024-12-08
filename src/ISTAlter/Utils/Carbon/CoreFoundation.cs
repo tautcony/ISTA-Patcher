@@ -9,14 +9,11 @@ using CFBooleanRef = System.IntPtr;
 using CFDictionaryRef = System.IntPtr;
 using CFNumberRef = System.IntPtr;
 using CFStringRef = System.IntPtr;
+using CFURLRef = System.IntPtr;
 using CFUUIDRef = System.IntPtr;
 
-internal partial class CoreFoundation
+internal static partial class CoreFoundation
 {
-    private CoreFoundation()
-    {
-    }
-
     private const string CoreFoundationLibrary = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation";
 
     /// <summary>
@@ -98,7 +95,7 @@ internal partial class CoreFoundation
         kCFStringEncodingUnicode = 0x0100,
         kCFStringEncodingUTF8 = 0x08000100,
         kCFStringEncodingNonLossyASCII = 0x0BFF,
-        kCFStringEncodingUTF16 = 0x0100,
+        kCFStringEncodingUTF16 = kCFStringEncodingUnicode,
         kCFStringEncodingUTF16BE = 0x10000100,
         kCFStringEncodingUTF16LE = 0x14000100,
         kCFStringEncodingUTF32 = 0x0c000100,
@@ -114,6 +111,17 @@ internal partial class CoreFoundation
     internal static partial void CFDictionaryGetKeysAndValues(CFDictionaryRef theDict, [Out] IntPtr[] keys, [Out] IntPtr[] values);
 
     [LibraryImport(CoreFoundationLibrary)]
+    [return: MarshalAs(UnmanagedType.U1)]
+    internal static partial bool CFNumberGetValue(CFNumberRef number, CFNumberType theType, out int value);
+
+    [LibraryImport(CoreFoundationLibrary)]
+    [return: MarshalAs(UnmanagedType.U1)]
+    internal static partial bool CFBooleanGetValue(CFBooleanRef boolean);
+
+    [LibraryImport(CoreFoundationLibrary)]
+    internal static partial CFStringRef CFURLGetString(CFURLRef anURL);
+
+    [LibraryImport(CoreFoundationLibrary)]
     internal static partial IntPtr CFGetTypeID(IntPtr cf);
 
     [LibraryImport(CoreFoundationLibrary)]
@@ -126,15 +134,16 @@ internal partial class CoreFoundation
     internal static partial IntPtr CFBooleanGetTypeID();
 
     [LibraryImport(CoreFoundationLibrary)]
-    [return: MarshalAs(UnmanagedType.U1)]
-    internal static partial bool CFNumberGetValue(CFNumberRef number, CFNumberType theType, out int value);
-
-    [LibraryImport(CoreFoundationLibrary)]
-    [return: MarshalAs(UnmanagedType.U1)]
-    internal static partial bool CFBooleanGetValue(CFBooleanRef boolean);
-
-    [LibraryImport(CoreFoundationLibrary)]
     internal static partial IntPtr CFUUIDGetTypeID();
+
+    [LibraryImport(CoreFoundationLibrary)]
+    internal static partial IntPtr CFArrayGetTypeID();
+
+    [LibraryImport(CoreFoundationLibrary)]
+    internal static partial IntPtr CFDictionaryGetTypeID();
+
+    [LibraryImport(CoreFoundationLibrary)]
+    internal static partial IntPtr CFURLGetTypeID();
 
     /// <summary>
     /// Prints the contents of a CFDictionary to the log.
@@ -163,7 +172,7 @@ internal partial class CoreFoundation
             if (typeId == CFStringGetTypeID())
             {
                 var valueInteriorPointer = CFStringGetCStringPtr(value, CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-                var valueString = valueInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(valueInteriorPointer)! : "<null>";
+                var valueString = valueInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(valueInteriorPointer)! : "<null string>";
                 Log.Information($"{keyString}: {valueString}");
             }
             else if (typeId == CFNumberGetTypeID())
@@ -182,8 +191,23 @@ internal partial class CoreFoundation
             {
                 using var uuidCFString = CFUUIDCreateString(IntPtr.Zero, value);
                 var valueInteriorPointer = CFStringGetCStringPtr(uuidCFString.DangerousGetHandle(), CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-                var uuidString = valueInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(valueInteriorPointer)! : "<null>";
+                var uuidString = valueInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(valueInteriorPointer)! : "<null uuid>";
                 Log.Information($"{keyString}: {uuidString}");
+            }
+            else if (typeId == CFArrayGetTypeID())
+            {
+                Log.Information($"{keyString}: <array>");
+            }
+            else if (typeId == CFDictionaryGetTypeID())
+            {
+                Log.Information($"{keyString}: <dictionary>");
+            }
+            else if (typeId == CFURLGetTypeID())
+            {
+                var urlString = CFURLGetString(value);
+                var urlInteriorPointer = CFStringGetCStringPtr(urlString, CFStringBuiltInEncodings.kCFStringEncodingUTF8);
+                var url = urlInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(urlInteriorPointer)! : "<null url>";
+                Log.Information($"{keyString}: {url}");
             }
             else
             {

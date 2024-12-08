@@ -37,15 +37,16 @@ public static partial class NativeMethods
 
         using var DAVolumeUUIDKey = CFStringCreateWithCString(IntPtr.Zero, "DAVolumeUUID", CFStringBuiltInEncodings.kCFStringEncodingUTF8);
         var valuePtr = CFDictionaryGetValue(description.DangerousGetHandle(), DAVolumeUUIDKey.DangerousGetHandle());
-        if (valuePtr != IntPtr.Zero)
+        if (valuePtr == IntPtr.Zero)
         {
-            using var uuidCFString = CFUUIDCreateString(IntPtr.Zero, valuePtr);
+            return ret;
+        }
 
-            var interiorPointer = CFStringGetCStringPtr(uuidCFString.DangerousGetHandle(), CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-            if (interiorPointer != IntPtr.Zero)
-            {
-                ret = Marshal.PtrToStringUTF8(interiorPointer)!;
-            }
+        using var uuidCFString = CFUUIDCreateString(IntPtr.Zero, valuePtr);
+        var interiorPointer = CFStringGetCStringPtr(uuidCFString.DangerousGetHandle(), CFStringBuiltInEncodings.kCFStringEncodingUTF8);
+        if (interiorPointer != IntPtr.Zero)
+        {
+            ret = Marshal.PtrToStringUTF8(interiorPointer)!;
         }
 
         return ret;

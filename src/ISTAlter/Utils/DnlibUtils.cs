@@ -273,9 +273,9 @@ public static class DnlibUtils
     /// <param name="method">The <see cref="MethodBase"/> representing the method to check.</param>
     /// <param name="types">The collection of parameter types to compare against.</param>
     /// <returns><see langword="true"/> if the method's parameters match the specified types; otherwise, <see langword="false"/>.</returns>
-    private static bool CheckParametersByType(MethodBase method, IReadOnlyCollection<Type>? types)
+    private static bool CheckParametersByType(MethodBase method, Type[]? types)
     {
-        if ((types?.Count ?? 0) == method.GetParameters().Length)
+        if ((types?.Length ?? 0) == method.GetParameters().Length)
         {
             return types == null || method.GetParameters().Zip(types, (first, second) => first.ParameterType == second).All(b => b);
         }

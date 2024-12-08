@@ -8,12 +8,8 @@ using CFURLRef = System.IntPtr;
 using DADiskRef = System.IntPtr;
 using DASessionRef = System.IntPtr;
 
-internal partial class DiskArbitration
+internal static partial class DiskArbitration
 {
-    private DiskArbitration()
-    {
-    }
-
     private const string DiskArbitrationLibrary = "/System/Library/Frameworks/DiskArbitration.framework/DiskArbitration";
 
     /// <summary>
