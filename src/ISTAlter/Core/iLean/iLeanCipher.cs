@@ -62,6 +62,11 @@ public sealed class iLeanCipher : IDisposable
 
     public string Encrypt(string toEncrypt)
     {
+        if (string.IsNullOrEmpty(toEncrypt))
+        {
+            return string.Empty;
+        }
+
         try
         {
             using var memoryStream = new MemoryStream();
@@ -75,12 +80,18 @@ public sealed class iLeanCipher : IDisposable
         {
             Log.Information("MachineGuid: {MachineGuid}, VolumeSerialNumber: {VolumeSerialNumber}", this.machineGuid, this.volumeSerialNumber);
             Log.Error(ex, "iLean Encryption failed.");
-            throw;
         }
+
+        return string.Empty;
     }
 
     public string Decrypt(string toDecrypt)
     {
+        if (string.IsNullOrEmpty(toDecrypt))
+        {
+            return string.Empty;
+        }
+
         try
         {
             using var memoryStream = new MemoryStream();
@@ -94,8 +105,9 @@ public sealed class iLeanCipher : IDisposable
         {
             Log.Information("MachineGuid: {MachineGuid}, VolumeSerialNumber: {VolumeSerialNumber}", this.machineGuid, this.volumeSerialNumber);
             Log.Error(ex, "iLean Decryption failed.");
-            throw;
         }
+
+        return string.Empty;
     }
 
     private static string ReverseString(string value)

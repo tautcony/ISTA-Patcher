@@ -24,10 +24,10 @@ public static partial class NativeMethods
             CreateNoWindow = true,
         };
 
-        using Process process = Process.Start(psi);
-        string output = process.StandardOutput.ReadToEnd().Trim();
-        process.WaitForExit();
-        return output;
+        using var process = Process.Start(psi);
+        var output = process?.StandardOutput.ReadToEnd().Trim();
+        process?.WaitForExit();
+        return output?.Trim() ?? string.Empty;
     }
 
     /// <summary>
@@ -40,21 +40,22 @@ public static partial class NativeMethods
         const string EtcMachineId = "/etc/machine-id";
 
         var ret = string.Empty;
-        if (File.Exists(EtcMachineId))
+        if (!File.Exists(EtcMachineId))
         {
-            string[] lines;
-            try
+            return ret;
+        }
+
+        try
+        {
+            var lines = File.ReadAllLines(EtcMachineId);
+            if (lines.Length > 0)
             {
-                lines = File.ReadAllLines(EtcMachineId);
-                if (lines.Length > 0)
-                {
-                    ret = lines[0];
-                }
+                ret = lines[0];
             }
-            catch
-            {
-                return ret;
-            }
+        }
+        catch
+        {
+            return ret;
         }
 
         return ret;

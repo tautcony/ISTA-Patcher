@@ -18,6 +18,12 @@ public class ISTAOptions
         iLean = 1,
     }
 
+    public enum CipherEnum
+    {
+        DefaultCipher = 0,
+        PasswordCipher = 1,
+    }
+
     public class BaseOptions
     {
         public Serilog.Events.LogEventLevel Verbosity { get; set; }
