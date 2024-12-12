@@ -1,6 +1,6 @@
 ﻿# Changelog
 
-## 2.3.3 / 2024-12-*
+## 2.3.3 / 2024-12-12
 
 - Feat - Upgrade to .NET 9.0
 - Feat - Add patch to enable opening of finished operations with `--enable-finished-op` flag
