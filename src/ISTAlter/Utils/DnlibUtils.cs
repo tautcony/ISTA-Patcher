@@ -232,36 +232,22 @@ public static class DnlibUtils
         body.Variables.Clear();
         body.ExceptionHandlers.Clear();
         body.Instructions.Clear();
-        switch (value)
-        {
-            case byte b:
-                body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, b));
-                break;
-            case int i:
-                body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, i));
-                break;
-            case uint i:
-                body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, (int)i));
-                break;
-            case long l:
-                body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I8, l));
-                break;
-            case bool b:
-                body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, b ? 1 : 0));
-                break;
-            case string s:
-                body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, s));
-                break;
-            case MemberRef m:
-                body.Instructions.Add(Instruction.Create(OpCodes.Newobj, m));
-                break;
-            default:
-                if (!object.Equals(value, default(T)))
-                {
-                    throw new ArgumentException($"Unknown type {value.GetType().FullName}!", paramName: nameof(value));
-                }
 
-                break;
+        Instruction instruction = value switch
+        {
+            byte b => Instruction.Create(OpCodes.Ldc_I4, b),
+            int i => Instruction.Create(OpCodes.Ldc_I4, i),
+            uint i => Instruction.Create(OpCodes.Ldc_I4, (int)i),
+            long l => Instruction.Create(OpCodes.Ldc_I8, l),
+            bool b => Instruction.Create(OpCodes.Ldc_I4, b ? 1 : 0),
+            string s => Instruction.Create(OpCodes.Ldstr, s),
+            MemberRef m => Instruction.Create(OpCodes.Newobj, m),
+            _ => !Equals(value, default(T)) ? throw new ArgumentException($"Unknown type {value.GetType().FullName}!", paramName: nameof(value)) : null,
+        };
+
+        if (instruction != null)
+        {
+            body.Instructions.Add(instruction);
         }
 
         body.Instructions.Add(Instruction.Create(OpCodes.Ret));

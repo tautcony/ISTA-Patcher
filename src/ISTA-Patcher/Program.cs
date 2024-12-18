@@ -7,6 +7,7 @@ using ISTA_Patcher.Handlers;
 using Sentry.Profiling;
 using Serilog;
 using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 
 internal static class Program
 {
@@ -27,7 +28,7 @@ internal static class Program
         Log.Logger = new LoggerConfiguration()
                      .Enrich.FromLogContext()
                      .MinimumLevel.ControlledBy(Global.LevelSwitch)
-                     .WriteTo.Console()
+                     .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                      .WriteTo.File("ista-patcher.log", rollingInterval: RollingInterval.Day)
                      .WriteTo.Sentry(LogEventLevel.Error, LogEventLevel.Debug)
                      .CreateLogger();

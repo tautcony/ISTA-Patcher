@@ -10,20 +10,20 @@ Released under the GNU GPLv3+.</Copyright>
     <PackageProjectUrl>https://github.com/tautcony/ISTA-Patcher</PackageProjectUrl>
     <RepositoryUrl>https://github.com/tautcony/ISTA-Patcher/</RepositoryUrl>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>13</LangVersion>
-    <PublishSingleFile>true</PublishSingleFile>
-    <RootNamespace>ISTA_Patcher</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>annotations</Nullable>
     <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <ApplicationIcon>patcher-icon.ico</ApplicationIcon>
     <StripSymbols>false</StripSymbols>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+    <RootNamespace>ISTA_Patcher</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <PublishSingleFile>true</PublishSingleFile>
+    <ApplicationIcon>patcher-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -36,14 +36,8 @@ public static partial class Patch
         using (var cts = new CancellationTokenSource())
         {
             var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
-            Task.WaitAll(
-                pendingPatchList
-                    .Select(item =>
-                        factory.StartNew(
-                            () => PatchSingleFile(item, patchAppliedCount, guiBasePath, indentLength, patcher, options),
-                            cts.Token))
-                    .ToArray(),
-                cts.Token);
+            var tasks = pendingPatchList.Select(item => factory.StartNew(() => PatchSingleFile(item, patchAppliedCount, guiBasePath, indentLength, patcher, options), cts.Token));
+            Task.WaitAll(tasks, cts.Token);
         }
 
         foreach (var line in BuildIndicator(patcher.Patches, patchAppliedCount))
@@ -82,7 +76,7 @@ public static partial class Patch
         if (!File.Exists(pendingPatchItemFullPath))
         {
             Log.Information(
-                "{Item}{Indent}{Result} [not found]",
+                "{Item}{Indent}{Result} [404]",
                 pendingPatchItem,
                 indent,
                 string.Concat(Enumerable.Repeat("*", patcher.Patches.Count)));
@@ -107,7 +101,7 @@ public static partial class Patch
             if (isPatched && !options.Force)
             {
                 Log.Information(
-                    "{Item}{Indent}{Result} [already patched by {Version}]",
+                    "{Item}{Indent}{Result} [VER: {Version}]",
                     pendingPatchItem,
                     indent,
                     string.Concat(Enumerable.Repeat("*", patcher.Patches.Count)),
@@ -125,12 +119,12 @@ public static partial class Patch
                   .ForEach(patch => patchAppliedCount[patch.index] += patch.item);
 
             isPatched = result.Exists(i => i > 0);
-            var resultStr = result.Aggregate(string.Empty, (c, i) => c + (i > 0 ? i.ToString("X", CultureInfo.CurrentCulture) : "-"));
+            var resultStr = string.Concat(result.Select(i => i > 0 ? i.ToString("X", CultureInfo.CurrentCulture) : "-"));
 
             // Check if at least one patch has been applied
             if (!isPatched)
             {
-                Log.Information("{Item}{Indent}{Result} [skip]", pendingPatchItem, indent, resultStr);
+                Log.Information("{Item}{Indent}{Result} [NOP]", pendingPatchItem, indent, resultStr);
                 return;
             }
 
@@ -149,7 +143,7 @@ public static partial class Patch
             // Check if assembly need to be deobfuscated
             if (!options.Deobfuscate)
             {
-                Log.Information("{Item}{Indent}{Result} [{PatchedFunctionCount} func patched]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
+                Log.Information("{Item}{Indent}{Result} [FNC: {PatchedFunctionCount:00}]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
                 return;
             }
 

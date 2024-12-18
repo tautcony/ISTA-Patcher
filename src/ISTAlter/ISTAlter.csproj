@@ -1,29 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Version>2.3.3</Version>
+    <InformationalVersion>2.3.3</InformationalVersion>
+    <Copyright>Copyright (C) 2022-2024 TautCony.
+Released under the GNU GPLv3+.</Copyright>
+    <Title>$(AssemblyName)</Title>
+    <Authors>TautCony</Authors>
+    <PackageProjectUrl>https://github.com/tautcony/ISTA-Patcher</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/tautcony/ISTA-Patcher/</RepositoryUrl>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>13</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>annotations</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <StripSymbols>false</StripSymbols>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="dnlib" Version="4.4.0"/>
+    <PackageReference Include="dnlib" Version="4.4.0" />
     <PackageReference Include="Meziantou.Analyzer" Version="2.0.182">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Sentry" Version="4.13.0"/>
-    <PackageReference Include="Sentry.Profiling" Version="4.13.0"/>
-    <PackageReference Include="Sentry.Serilog" Version="4.13.0"/>
-    <PackageReference Include="Serilog" Version="4.1.0"/>
+    <PackageReference Include="Sentry" Version="4.13.0" />
+    <PackageReference Include="Sentry.Profiling" Version="4.13.0" />
+    <PackageReference Include="Sentry.Serilog" Version="4.13.0" />
+    <PackageReference Include="Serilog" Version="4.1.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
