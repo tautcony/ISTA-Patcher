@@ -58,6 +58,7 @@
         "Moq.dll",
         "Newtonsoft.Json.dll",
         "Npgsql.dll",
+        "procdump.exe",
         "Oracle.ManagedDataAccess.dll",
         "Quartz.dll",
         "SharpBITS.Base.dll",
@@ -84,7 +85,8 @@
         "System.ValueTuple.dll",
         "WebSocket4Net.dll",
         "WebView2Loader.dll",
-        "xmlunit-core.dll"
+        "xmlunit-core.dll",
+        "zeroconf.dll"
     ],
     "toyota.include": [
         "Authoring.dll",

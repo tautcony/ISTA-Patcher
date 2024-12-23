@@ -261,7 +261,6 @@ public static partial class PatchUtils
             module.Types.Add(patchedType);
 
             var runtimeVersion = module.Assembly.ManifestModule.RuntimeVersion;
-            Log.Warning("Failed to resolve AssemblyMetadataAttribute for {ModuleName}@{RuntimeVersion}, fallback to legacy flag implementation", module.Name, runtimeVersion);
         }
 
         var description = module.Assembly.CustomAttributes.FirstOrDefault(attribute =>

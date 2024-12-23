@@ -4,6 +4,7 @@
 namespace ISTA_Patcher;
 
 using ISTA_Patcher.Handlers;
+using LibGit2Sharp;
 using Sentry.Profiling;
 using Serilog;
 using Serilog.Events;
@@ -33,12 +34,42 @@ internal static class Program
                      .WriteTo.Sentry(LogEventLevel.Error, LogEventLevel.Debug)
                      .CreateLogger();
 
+        var repoPath = Repository.Discover(AppDomain.CurrentDomain.BaseDirectory);
+        if (repoPath != null)
+        {
+            SentrySdk.ConfigureScope(scope =>
+            {
+                try
+                {
+                    using var repo = new Repository(repoPath);
+                    var username = repo.Config.Get<string>("user.name");
+                    var email = repo.Config.Get<string>("user.email");
+                    scope.SetTag("git.username", username.Value);
+                    scope.SetTag("git.email", email.Value);
+                    scope.SetTag("git.branch", repo.Head.FriendlyName);
+                    scope.SetTag("git.commit", repo.Head.Tip.Sha);
+                    if (repo.Network.Remotes["origin"] != null)
+                    {
+                        scope.SetTag("git.remote", repo.Network.Remotes["origin"].Url);
+                    }
+                }
+                catch (LibGit2SharpException)
+                {
+                    // ignore
+                }
+            });
+        }
+
         var command = ProgramArgs.BuildCommandLine(
             PatchHandler.Execute,
             CerebrumancyHandler.Execute,
             DecryptHandler.Execute,
             iLeanHandler.Execute);
 
-        return command.Parse(args).InvokeAsync();
+        var parseResult = command.Parse(args);
+        var transaction = SentrySdk.StartTransaction("ISTA-Patcher", parseResult.CommandResult.Command.ToString());
+        var ret = parseResult.InvokeAsync();
+        transaction.Finish();
+        return ret;
     }
 }
