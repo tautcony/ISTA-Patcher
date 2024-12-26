@@ -10,7 +10,6 @@ public class SentryTask : IStartupTask
 {
     public void Execute()
     {
-
         SentrySdk.Init(options =>
         {
             options.Dsn = "https://55e58df747fc4d43912790aa894700ba@o955448.ingest.sentry.io/4504370799116288";
