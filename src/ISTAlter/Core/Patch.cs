@@ -33,12 +33,10 @@ public static partial class Patch
 
         TheAssemblyResolver.Instance.AddSearchDirectory(guiBasePath);
 
-        using (var cts = new CancellationTokenSource())
-        {
-            var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
-            var tasks = pendingPatchList.Select(item => factory.StartNew(() => PatchSingleFile(item, patchAppliedCount, guiBasePath, indentLength, patcher, options), cts.Token));
-            Task.WaitAll(tasks, cts.Token);
-        }
+        var cts = new CancellationTokenSource();
+        var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
+        var tasks = pendingPatchList.Select(item => factory.StartNew(() => PatchSingleFile(item, patchAppliedCount, guiBasePath, indentLength, patcher, options), cts.Token));
+        Task.WaitAll(tasks, cts.Token);
 
         foreach (var line in BuildIndicator(patcher.Patches, patchAppliedCount))
         {
@@ -126,6 +124,23 @@ public static partial class Patch
             {
                 Log.Information("{Item}{Indent}{Result} [NOP]", pendingPatchItem, indent, resultStr);
                 return;
+            }
+
+            if (module.Name == "ISTAGUI.exe")
+            {
+                ResourceUtils.UpdateResource(
+                    module,
+                    "ISTAGUI.g.resources",
+                    "grafik/png/ista_logo.png",
+                    entry =>
+                    {
+                        if (entry.Value is Stream stream)
+                        {
+                            return ResourceUtils.AddWatermark(stream, PatchUtils.Config[..PatchUtils.Config.LastIndexOf(' ')]);
+                        }
+
+                        return null;
+                    });
             }
 
             if (!File.Exists(bakFileFullPath))
