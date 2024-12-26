@@ -94,6 +94,7 @@ public static class ResourceUtils
 
             module.Resources.Remove(resource);
             module.Resources.Add(updatedResource);
+            break;
         }
 
         if (!resourceFound)
