@@ -126,6 +126,7 @@ public static partial class Patch
                 return;
             }
 
+            /*
             if (module.Name == "ISTAGUI.exe")
             {
                 ResourceUtils.UpdateResource(
@@ -142,6 +143,7 @@ public static partial class Patch
                         return null;
                     });
             }
+            */
 
             if (!File.Exists(bakFileFullPath))
             {
