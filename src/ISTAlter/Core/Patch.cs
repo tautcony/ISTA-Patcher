@@ -50,7 +50,7 @@ public static partial class Patch
         }
 
         timer.Stop();
-        Log.Information("=== ISTA Patch Done in {Time:mm\\:ss} ===", timer.Elapsed);
+        Log.Information(@"=== ISTA Patch Done in {Time:mm\:ss\.fff} ===", timer.Elapsed);
     }
 
     private static void PatchSingleFile(string pendingPatchItem, int[] patchAppliedCount, string guiBasePath, int indentLength, IPatcher patcher, ISTAOptions.PatchOptions options)
