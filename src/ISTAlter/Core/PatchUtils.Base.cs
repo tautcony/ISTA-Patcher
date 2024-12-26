@@ -30,32 +30,39 @@ public static partial class PatchUtils
     private static readonly IDeobfuscatorContext DeobfuscatorContext = new DeobfuscatorContext();
     private static readonly NewProcessAssemblyClientFactory ProcessAssemblyClientFactory = new();
 
-    private static string Version
+    private static byte[] Version
     {
         get
         {
             var infoVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            var version = string.Empty;
             if (infoVersion != null)
             {
                 var match = VersionPattern().Match(infoVersion.InformationalVersion);
                 if (!match.Success)
                 {
-                    return infoVersion.InformationalVersion;
+                    version = infoVersion.InformationalVersion;
                 }
-
-                var shortHash = match.Groups["hash"].Value[..7];
-                return $"{match.Groups["version"].Value}+{shortHash}";
+                else
+                {
+                    var shortHash = match.Groups["hash"].Value[..7];
+                    version = $"{match.Groups["version"].Value}+{shortHash}";
+                }
             }
 
-            var version = Assembly.GetExecutingAssembly().GetName().Version ?? new Version("0.0.0.0");
-            return version.ToString();
+            if (string.IsNullOrEmpty(version))
+            {
+                version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
+            }
+
+            return Encoding.UTF8.GetBytes(version);
         }
     }
 
-    public static string Config => Encoding.UTF8.GetString([
+    public static string Config => Encoding.UTF8.GetString(((byte[])[
         0x50, 0x6f, 0x77, 0x65, 0x72, 0x65, 0x64, 0x20, 0x62, 0x79, 0x20, 0x49, 0x53, 0x54, 0x41, 0x2d, 0x50, 0x61, 0x74,
         0x63, 0x68, 0x65, 0x72, 0x20,
-    ]) + Version;
+    ]).Concat(Version).ToArray());
 
     public static byte[] Source => [
         0x68, 0x74, 0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
@@ -214,7 +221,7 @@ public static partial class PatchUtils
                 new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.By"), new CAArgument(module.CorLibTypes.String, "ISTA-Patcher") } },
                 new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.At"), new CAArgument(module.CorLibTypes.String, Timestamp) } },
                 new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Repo"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Source)) } },
-                new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Version"), new CAArgument(module.CorLibTypes.String, Version) } },
+                new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Version"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Version)) } },
             };
             foreach (var attribute in attributes)
             {
@@ -252,7 +259,7 @@ public static partial class PatchUtils
                 dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
             )
             {
-                Constant = new ConstantUser(Version),
+                Constant = new ConstantUser(Encoding.UTF8.GetString(Version)),
             };
 
             patchedType.Fields.Add(dateField);
@@ -260,7 +267,7 @@ public static partial class PatchUtils
             patchedType.Fields.Add(versionField);
             module.Types.Add(patchedType);
 
-            var runtimeVersion = module.Assembly.ManifestModule.RuntimeVersion;
+            // var runtimeVersion = module.Assembly.ManifestModule.RuntimeVersion;
         }
 
         var description = module.Assembly.CustomAttributes.FirstOrDefault(attribute =>

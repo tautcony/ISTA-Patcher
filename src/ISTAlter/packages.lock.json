@@ -10,33 +10,33 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.182, )",
-        "resolved": "2.0.182",
-        "contentHash": "/QgftLQfuCwP7P9neBMYjfOoUEezFAhlCXAZudO27Q9JTQZilQ2qjLzYG4UD4FBlLNz7zTON0ca6lCzzf/zO5A=="
+        "requested": "[2.0.183, )",
+        "resolved": "2.0.183",
+        "contentHash": "19+73xExMyoZxh/3dPvYvqWqpiPFVFdusqd9LSTX6DnwCZ9Jp1gcvplIh9wOe1p72gU7vgkcYKSNKzpAC655Cg=="
       },
       "Sentry": {
         "type": "Direct",
-        "requested": "[4.13.0, )",
-        "resolved": "4.13.0",
-        "contentHash": "Wfw3M1WpFcrYaGzPm7QyUTfIOYkVXQ1ry6p4WYjhbLz9fPwV23SGQZTFDpdox67NHM0V0g1aoQ4YKLm4ANtEEg=="
+        "requested": "[5.0.0, )",
+        "resolved": "5.0.0",
+        "contentHash": "VCqGv7bE8rnEI4m8+lrxLFFGMrOMvOTArz51gj+1MID5Zzhi9KNoDIjJb1qLY2ys90Cr2YH5HSXcTg5mCG2beQ=="
       },
       "Sentry.Profiling": {
         "type": "Direct",
-        "requested": "[4.13.0, )",
-        "resolved": "4.13.0",
-        "contentHash": "FJM5SDwHGN2+ceVGCeVQLHXNSBQEHSpvPrBVqVdbbduIdf7yWvaCdCn8MZyCJsvOuKMpwbrle6lXtxrKOZ2ESA==",
+        "requested": "[5.0.0, )",
+        "resolved": "5.0.0",
+        "contentHash": "pvi9TOLvGzgRC9yDPobCkFf2rUvLp2O7IxCNMIyP68iBN9SHbr5UtcSKaN0D8r8YwjxhYUYDf0a4lo+yi9HeSA==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "4.13.0"
+          "Sentry": "5.0.0"
         }
       },
       "Sentry.Serilog": {
         "type": "Direct",
-        "requested": "[4.13.0, )",
-        "resolved": "4.13.0",
-        "contentHash": "HTD8qajsD7aefMMPrudmr/34HxvbCfZHzEJvH61wW5O5Shn7IzX/IMwrWQavzdqQFAuAFTU4QlOnilxtqofPwA==",
+        "requested": "[5.0.0, )",
+        "resolved": "5.0.0",
+        "contentHash": "of9dwHADe6JSBc+AMBKU9dQ1vo61cJBLBuyadipep9InDYV6Tk0Oz6KsXg0DBf9nKFXDSc8Gdk0+fMX4bc7Qiw==",
         "dependencies": {
-          "Sentry": "4.13.0",
+          "Sentry": "5.0.0",
           "Serilog": "2.10.0"
         }
       },
@@ -45,6 +45,28 @@
         "requested": "[4.1.0, )",
         "resolved": "4.1.0",
         "contentHash": "u1aZI8HZ62LWlq5dZLFwm6jMax/sUwnWZSw5lkPsCt518cJBxFKoNmc7oSxe5aA5BgSkzy9rzwFGR/i/acnSPw=="
+      },
+      "SixLabors.Fonts": {
+        "type": "Direct",
+        "requested": "[2.0.7, )",
+        "resolved": "2.0.7",
+        "contentHash": "RnoF1lPH6ypZwcEPpebW0Be0KkpH998Nl0mVp2x9oKyj00ARwyaGl0itOpQjoVQYoWcZeeohAZh3PYdqvw4dCA=="
+      },
+      "SixLabors.ImageSharp": {
+        "type": "Direct",
+        "requested": "[3.1.6, )",
+        "resolved": "3.1.6",
+        "contentHash": "dHQ5jugF9v+5/LCVHCWVzaaIL6WOehqJy6eju/0VFYFPEj2WtqkGPoEV9EVQP83dHsdoqYaTuWpZdwAd37UwfA=="
+      },
+      "SixLabors.ImageSharp.Drawing": {
+        "type": "Direct",
+        "requested": "[2.1.4, )",
+        "resolved": "2.1.4",
+        "contentHash": "p4VwtAABggDUhUS5zXldCZHVGfjJl76+SrBHY4biNQ8+890igFK6RL87qIv9GqvEjMcYOar1sPkf2iMQ6uq9/g==",
+        "dependencies": {
+          "SixLabors.Fonts": "2.0.4",
+          "SixLabors.ImageSharp": "3.1.5"
+        }
       },
       "StyleCop.Analyzers": {
         "type": "Direct",

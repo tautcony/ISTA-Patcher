@@ -233,7 +233,7 @@ public static class DnlibUtils
         body.ExceptionHandlers.Clear();
         body.Instructions.Clear();
 
-        Instruction instruction = value switch
+        var instruction = value switch
         {
             byte b => Instruction.Create(OpCodes.Ldc_I4, b),
             int i => Instruction.Create(OpCodes.Ldc_I4, i),
