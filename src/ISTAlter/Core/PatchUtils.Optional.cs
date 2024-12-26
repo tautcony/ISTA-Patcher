@@ -22,7 +22,41 @@ public static partial class PatchUtils
             "get_IsProgrammingSession",
             "()System.Boolean",
             DnlibUtils.ReturnTrueMethod
-         );
+         ) + module.PatchFunction(
+            "BMW.Rheingold.ISTAGUI.ViewModels.OperationFinishedListViewModel",
+            "PerformAcceptOperation",
+            "(BMW.ISPI.IstaServices.Contract.PUK.Data.TransactionMetaData)System.Void",
+            RemoveIsProgrammingEnabledCheck
+        );
+
+        void RemoveIsProgrammingEnabledCheck(MethodDef def)
+        {
+            const string patchTargetName = "OperationFinishedListViewModel::PerformAcceptOperation";
+
+            if (def.CustomAttributes.FirstOrDefault() is not { ConstructorArguments: [{ Value: ValueTypeSig stateMachineType }] })
+            {
+                Log.Warning($"Attribute not found, can not patch {patchTargetName}");
+                return;
+            }
+
+            var typeDef = stateMachineType.TypeDefOrRef.ResolveTypeDef();
+            if (typeDef?.Methods.FirstOrDefault(m => m.Name == "MoveNext" && m.HasOverrides) is not { } method)
+            {
+                Log.Warning($"Method not found, can not patch {patchTargetName}");
+                return;
+            }
+
+            if (method.Body.Instructions.FirstOrDefault(inst =>
+                    inst.OpCode == OpCodes.Call && inst.Operand is IMethod methodOperand &&
+                    methodOperand.Name == "IsProgrammingEnabled") is not { } instruction)
+            {
+                Log.Warning($"Required instruction not found, can not patch {patchTargetName}");
+                return;
+            }
+
+            instruction.OpCode = OpCodes.Ldc_I4_1;
+            instruction.Operand = null;
+        }
     }
 
     [ENETPatch]
