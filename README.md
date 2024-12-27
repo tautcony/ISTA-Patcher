@@ -10,10 +10,10 @@ An IL patcher for ISTA-P from scratch, a product of learning about [dnlib](https
 ## Usage
 
 > [!IMPORTANT]
-> ISTA-Patcher will back up the original files to the `@ista-backup` folder, but it is still recommended to back up the `ISTA\TesterGUI` & `ISTA\PSdZ` folders before patching.
+> ISTA-Patcher will back up the original files to the `@ista-backup` folder. However, it is recommended to manually back up the `ISTA\TesterGUI` & `ISTA\PSdZ` folders before patching.
 
 > [!NOTE]
-> *nix users may need the following steps to get the ISTA-Patcher work.
+> *nix users may need the following steps to get ISTA-Patcher working:
 > ```shell
 > unzip ISTA-Patcher-*-Release.zip
 > cd ISTA-Patcher-*-Release
@@ -39,18 +39,16 @@ The directory containing the patched files is located as follows:
 - `.\ISTA\PSdZ\host\@ista-patched`
 - `.\ISTA\PSdZ\hostx64\@ista-patched`
 
-Overwrite patched files to its parent directory, read the notes, then run the program and, dang, it's ready to use.
+Overwrite the patched files in their respective parent directories, read the notes, then run the program and, dang, it's ready to use.
 
 > [!NOTE]
-> - Please ensure that all related processes been killed before starting the program.
-> - Path should be enclosed in quotes if it contains spaces to avoid errors.
-> - Please ensure that both `CoreFramework.ILeanActive` and `CoreFramework.OSSModeActive` in the configuration file are set to `false`.
-> - Please ensure that the `Logging.Directory` in the configuration file is a relative path that does not start with `%ISPIDATA%`, otherwise exceptions will occur during the log cleaning process.
-> - If choose to generate a dummy license, import the generated registry file(`license.reg`) under `Release` directory.
-> - From version `4.48.x`, Please ensure that `Auth.Enabled` in the configuration file is set to `false`, or try the `--patch-user-auth` option.
+> - The program offers optional parameters, which vary by version. Configure settings as needed.
+> - Ensure that all related processes are terminated before starting.
+> - Enclose paths containing spaces in quotes to avoid errors.
+> - Verify that environment variables (eg: `ISPIDATA`) and the configuration files are correctly set.
 
 > [!TIP]
-> There are several other alternative features that can be discovered through exploration.
+> Explore alternative features available in the program.
 >
 > For all available options and to learn more, please execute ISTA-Patcher without any arguments and follow the instructions.
 
@@ -67,4 +65,4 @@ Icon credit: [comboo](https://twitter.com/comboo28).
 > [!CAUTION]
 > This repository has been created for educational purposes only. Use it at your own risk.
 > 
-> It must be made clear that ISTA-Patcher is an independent project, any other individual or organization redistributing it or its derivatives is not affiliated with this project and may not be able to provide any support for installing or using ISTA.
+> It must be made clear that ISTA-Patcher is an independent project and does not provide support for the installation or usage of ISTA. Any individual or organization redistributing it or its derivatives is not affiliated with this project.
