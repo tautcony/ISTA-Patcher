@@ -233,26 +233,21 @@ public static partial class Patch
         return patches
                .Select(p => FormatName(p.Delegater))
                .Reverse()
-               .AsEnumerable()
                .Select((name, idx) =>
                {
                    var revIdx = patches.Count - 1 - idx;
-                   return $"{new string('│', revIdx)}└{new string('─', idx)}>[{name}: {counting[revIdx]}]";
+                   var verticalBars = new string('│', revIdx);
+                   var horizontalBars = new string('─', idx);
+                   return $"{verticalBars}└{horizontalBars}>[{name}: {counting[revIdx]}]";
                });
 
         string FormatName(Func<ModuleDefMD, int> func)
         {
-            var name = func.Method.Name;
-            var match = ActionNamePattern().Match(name);
-            if (match.Success)
-            {
-                name = match.Groups[1].Value;
-            }
-
-            return name.StartsWith("Patch", StringComparison.Ordinal) ? name[5..] : name;
+            var match = ActionNamePattern().Match(func.Method.Name);
+            return match.Success ? match.Groups["name"].Value : func.Method.Name;
         }
     }
 
-    [GeneratedRegex("^<([^>]+)>", RegexOptions.Compiled | RegexOptions.ExplicitCapture, matchTimeoutMilliseconds: 1000)]
+    [GeneratedRegex("(?<=Patch)(?<name>.*?)(?=>|$)", RegexOptions.Compiled | RegexOptions.ExplicitCapture, matchTimeoutMilliseconds: 1000)]
     private static partial Regex ActionNamePattern();
 }
