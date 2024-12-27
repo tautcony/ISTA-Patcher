@@ -3,7 +3,11 @@
 
 namespace ISTA_Patcher.Handlers;
 
-using ConsoleTables;
+using System.Drawing;
+using BetterConsoles.Tables;
+using BetterConsoles.Tables.Builders;
+using BetterConsoles.Tables.Configuration;
+using BetterConsoles.Tables.Models;
 using ISTAlter;
 using ISTAlter.Core;
 using ISTAlter.Utils;
@@ -14,8 +18,8 @@ public static class DecryptHandler
     public static async Task<int> Execute(ISTAOptions.DecryptOptions opts)
     {
         Global.LevelSwitch.MinimumLevel = opts.Verbosity;
-        var encryptedFileList = Constants.EncCnePath.Aggregate(opts.TargetPath, Path.Join);
-        var basePath = Path.Join(opts.TargetPath, Constants.TesterGUIPath[0]);
+        var encryptedFileList = ISTAlter.Utils.Constants.EncCnePath.Aggregate(opts.TargetPath, Path.Join);
+        var basePath = Path.Join(opts.TargetPath, ISTAlter.Utils.Constants.TesterGUIPath[0]);
         if (!File.Exists(encryptedFileList))
         {
             Log.Error("File {FilePath} does not exist", encryptedFileList);
@@ -28,7 +32,22 @@ public static class DecryptHandler
             return -1;
         }
 
-        var table = new ConsoleTable("FilePath", "Hash(SHA256)", "Integrity");
+        var headerFormat = new CellFormat
+        {
+            Alignment = Alignment.Center,
+            ForegroundColor = Color.Chocolate,
+        };
+
+        var table = new TableBuilder(headerFormat)
+            .AddColumn("FilePath").RowsFormat()
+            .ForegroundColor(Color.Teal)
+            .AddColumn("Hash(SHA256)").RowsFormat()
+            .ForegroundColor(Color.Aqua)
+            .AddColumn("Integrity").RowsFormat()
+            .ForegroundColor(Color.DarkTurquoise)
+            .Alignment(Alignment.Center)
+            .Build();
+        table.Config = TableConfig.Unicode();
 
         foreach (var fileInfo in fileList)
         {
@@ -44,18 +63,25 @@ public static class DecryptHandler
             }
         }
 
-        Log.Information("Markdown result:{NewLine}{Markdown}", Environment.NewLine, table.ToMarkDownString());
+        Log.Information("Result:{NewLine}{Table}", Environment.NewLine, table.ToString());
         return 0;
     }
 
     private static async Task<KeyValuePair<string, string>> CheckFileIntegrity(string basePath, HashFileInfo fileInfo)
     {
+        const string checkNF = "[404]";
+        const string checkOK = "[OK]";
+        const string checkNG = "[NG]";
+        const string checkSignOK = "[SIGN:OK]";
+        const string checkSignNG = "[SIGN:NG]";
+        const string checkSignNF = "[SIGN:404]";
+
         string? checkResult;
         var version = string.Empty;
         var filePath = Path.Join(basePath, fileInfo.FilePath);
         if (!File.Exists(filePath))
         {
-            return new KeyValuePair<string, string>("Not Found", string.Empty);
+            return new KeyValuePair<string, string>(checkNF, string.Empty);
         }
 
         try
@@ -65,7 +91,7 @@ public static class DecryptHandler
         }
         catch (System.BadImageFormatException)
         {
-            Log.Warning("None .NET assembly found: {FilePath}", filePath);
+            Log.Warning("This file does not contain a managed assembly: {FilePath}", filePath);
         }
 
         if (fileInfo.Hash == string.Empty)
@@ -75,24 +101,22 @@ public static class DecryptHandler
         else
         {
             var realHash = await HashFileInfo.CalculateHash(filePath).ConfigureAwait(false);
-            checkResult = string.Equals(realHash, fileInfo.Hash, StringComparison.Ordinal) ? "[OK]" : "[NG]";
+            checkResult = string.Equals(realHash, fileInfo.Hash, StringComparison.Ordinal) ? checkOK : checkNG;
         }
 
-        if (!OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindows())
         {
-            return new KeyValuePair<string, string>(checkResult, version);
-        }
+            var wasVerified = false;
 
-        var wasVerified = false;
-
-        var bChecked = NativeMethods.StrongNameSignatureVerificationEx(filePath, fForceVerification: true, ref wasVerified);
-        if (bChecked)
-        {
-            checkResult += wasVerified ? "[S:OK]" : "[S:NG]";
-        }
-        else
-        {
-            checkResult += "[S:NF]";
+            var bChecked = NativeMethods.StrongNameSignatureVerificationEx(filePath, fForceVerification: true, ref wasVerified);
+            if (bChecked)
+            {
+                checkResult += wasVerified ? checkSignOK : checkSignNG;
+            }
+            else
+            {
+                checkResult += checkSignNF;
+            }
         }
 
         return new KeyValuePair<string, string>(checkResult, version);

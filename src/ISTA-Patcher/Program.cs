@@ -9,11 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 internal static class Program
 {
-    public static ITransactionTracer? Transaction { get; private set; }
-
     public static Task<int> Main(string[] args)
     {
-        ServiceProviderFactory.Instance.GetServices<IStartupTask>()
+        Global.ServicesProvider.GetServices<IStartupTask>()
             .ToList()
             .ForEach(startupTask => startupTask.Execute());
 
@@ -24,15 +22,15 @@ internal static class Program
             iLeanHandler.Execute);
 
         var parseResult = command.Parse(args);
-        Transaction = SentrySdk.StartTransaction("ISTA-Patcher", parseResult.CommandResult.Command.ToString());
-        Transaction.SetExtra("args", args);
+        Global.Transaction = SentrySdk.StartTransaction("ISTA-Patcher", parseResult.CommandResult.Command.ToString());
+        Global.Transaction.SetExtra("args", args);
         try
         {
             return parseResult.InvokeAsync();
         }
         finally
         {
-            Transaction.Finish();
+            Global.Transaction.Finish();
         }
     }
 }
