@@ -48,60 +48,49 @@ public static class ResourceUtils
 
     public static void UpdateResource(ModuleDefMD module, string resourceName, string fileName, Func<DictionaryEntry, byte[]> handler)
     {
-        var resourceFound = false;
-        var fileFound = false;
-        foreach (var resource in module.Resources)
-        {
-            if (resource is not EmbeddedResource embeddedResource || resource.Name != resourceName)
-            {
-                continue;
-            }
-
-            resourceFound = true;
-
-            using var resourceStream = embeddedResource.CreateReader().AsStream();
-            using var resourceReader = new ResourceReader(resourceStream);
-
-            using var updatedResourceStream = new MemoryStream();
-            using var resourceWriter = new ResourceWriter(updatedResourceStream);
-
-            foreach (DictionaryEntry entry in resourceReader)
-            {
-                var key = entry.Key.ToString()!;
-                if (string.Equals(key, fileName, StringComparison.Ordinal))
-                {
-                    fileFound = true;
-                    resourceWriter.AddResource(key, handler(entry));
-                }
-                else
-                {
-                    if (entry.Value is Stream stream)
-                    {
-                        using var valueStream = new MemoryStream();
-                        stream.CopyTo(valueStream);
-                        resourceWriter.AddResource(key, valueStream.ToArray());
-                    }
-                    else
-                    {
-                        resourceWriter.AddResource(key, entry.Value);
-                    }
-                }
-            }
-
-            resourceWriter.Generate();
-            updatedResourceStream.Position = 0;
-            var updatedResource = new EmbeddedResource(resource.Name, updatedResourceStream.ToArray(), ManifestResourceAttributes.Public);
-
-            module.Resources.Remove(resource);
-            module.Resources.Add(updatedResource);
-            break;
-        }
-
-        if (!resourceFound)
+        if (module.Resources.FirstOrDefault(r => r.Name == resourceName) is not EmbeddedResource embeddedResource)
         {
             Log.Error($"Resource {resourceName} not found.");
             return;
         }
+
+        using var resourceStream = embeddedResource.CreateReader().AsStream();
+        using var resourceReader = new ResourceReader(resourceStream);
+
+        using var updatedResourceStream = new MemoryStream();
+        using var resourceWriter = new ResourceWriter(updatedResourceStream);
+
+        var fileFound = false;
+
+        foreach (DictionaryEntry entry in resourceReader)
+        {
+            var key = entry.Key.ToString()!;
+            if (string.Equals(key, fileName, StringComparison.Ordinal))
+            {
+                fileFound = true;
+                resourceWriter.AddResource(key, handler(entry));
+            }
+            else
+            {
+                if (entry.Value is Stream stream)
+                {
+                    using var valueStream = new MemoryStream();
+                    stream.CopyTo(valueStream);
+                    resourceWriter.AddResource(key, valueStream.ToArray());
+                }
+                else
+                {
+                    resourceWriter.AddResource(key, entry.Value);
+                }
+            }
+        }
+
+        resourceWriter.Generate();
+        updatedResourceStream.Position = 0;
+        var updatedResource = new EmbeddedResource(embeddedResource.Name, updatedResourceStream.ToArray(), embeddedResource.Attributes);
+
+        module.Resources.Remove(embeddedResource);
+        module.Resources.Add(updatedResource);
 
         if (!fileFound)
         {
