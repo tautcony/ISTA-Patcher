@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2024 TautCony
 
-namespace ISTA_Patcher.Handlers;
+namespace ISTAPatcher.Handlers;
 
 using ISTAlter;
 using ISTAlter.Core;
@@ -13,7 +13,10 @@ public static class PatchHandler
 {
     public static Task<int> Execute(ISTAOptions.PatchOptions opts)
     {
+        using var transaction = new TransactionHandler("ISTA-Patcher", "patch");
+        opts.Transaction = transaction;
         Global.LevelSwitch.MinimumLevel = opts.Verbosity;
+
         var guiBasePath = Constants.TesterGUIPath.Aggregate(opts.TargetPath, Path.Join);
         var psdzBasePath = Constants.PSdZPath.Aggregate(opts.TargetPath, Path.Join);
 

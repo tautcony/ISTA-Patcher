@@ -1,15 +1,15 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
 
-namespace ISTA_Patcher;
+namespace ISTAPatcher;
 
-using ISTA_Patcher.Handlers;
-using ISTA_Patcher.Tasks;
+using ISTAPatcher.Handlers;
+using ISTAPatcher.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 internal static class Program
 {
-    public static Task<int> Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         Global.ServicesProvider.GetServices<IStartupTask>()
             .ToList()
@@ -22,15 +22,6 @@ internal static class Program
             iLeanHandler.Execute);
 
         var parseResult = command.Parse(args);
-        Global.Transaction = SentrySdk.StartTransaction("ISTA-Patcher", parseResult.CommandResult.Command.ToString());
-        Global.Transaction.SetExtra("args", args);
-        try
-        {
-            return parseResult.InvokeAsync();
-        }
-        finally
-        {
-            Global.Transaction.Finish();
-        }
+        return await parseResult.InvokeAsync().ConfigureAwait(false);
     }
 }

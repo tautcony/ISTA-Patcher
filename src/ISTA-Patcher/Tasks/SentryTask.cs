@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2024 TautCony
 
-namespace ISTA_Patcher.Tasks;
+namespace ISTAPatcher.Tasks;
 
 using LibGit2Sharp;
 using Serilog;

@@ -108,6 +108,7 @@ public static partial class Patch
             }
 
             // Patch and print result
+            using var child = new SpanHandler(options.Transaction, pendingPatchItem);
             var result = patcher.Patches.Select(patch =>
             {
                 var libraryList = IPatcher.ExtractLibrariesConfigFromAttribute(patch.Method);

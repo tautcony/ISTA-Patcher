@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2024 TautCony
 
-namespace ISTA_Patcher.Handlers;
+namespace ISTAPatcher.Handlers;
 
 using System.Drawing;
 using BetterConsoles.Tables;
@@ -17,7 +17,10 @@ public static class DecryptHandler
 {
     public static async Task<int> Execute(ISTAOptions.DecryptOptions opts)
     {
+        using var transaction = new TransactionHandler("ISTA-Patcher", "decrypt");
+        opts.Transaction = transaction;
         Global.LevelSwitch.MinimumLevel = opts.Verbosity;
+
         var encryptedFileList = ISTAlter.Utils.Constants.EncCnePath.Aggregate(opts.TargetPath, Path.Join);
         var basePath = Path.Join(opts.TargetPath, ISTAlter.Utils.Constants.TesterGUIPath[0]);
         if (!File.Exists(encryptedFileList))

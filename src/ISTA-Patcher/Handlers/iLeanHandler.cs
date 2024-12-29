@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2024 TautCony
 
-namespace ISTA_Patcher.Handlers;
+namespace ISTAPatcher.Handlers;
 
 using System.Diagnostics.CodeAnalysis;
 using ISTAlter;
@@ -14,7 +14,10 @@ public static class iLeanHandler
     [SuppressMessage("Interoperability", "CA1416", Justification = "SupportedOSPlatform attribute is used")]
     public static async Task<int> Execute(ISTAOptions.ILeanOptions opts)
     {
+        using var transaction = new TransactionHandler("ISTA-Patcher", "ilean");
+        opts.Transaction = transaction;
         Global.LevelSwitch.MinimumLevel = opts.Verbosity;
+
         var isSupportedPlatform = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux();
 
         if (opts.ShowMachineInfo)

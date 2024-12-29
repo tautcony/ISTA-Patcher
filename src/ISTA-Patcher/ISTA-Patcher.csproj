@@ -20,7 +20,7 @@ Released under the GNU GPLv3+.</Copyright>
     <StripSymbols>false</StripSymbols>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-    <RootNamespace>ISTA_Patcher</RootNamespace>
+    <RootNamespace>ISTAPatcher</RootNamespace>
     <OutputType>Exe</OutputType>
     <PublishSingleFile>true</PublishSingleFile>
     <ApplicationIcon>patcher-icon.ico</ApplicationIcon>

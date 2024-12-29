@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2024 TautCony
 
+using ISTAlter.Utils;
+
 namespace ISTAlter;
 
 // ReSharper disable PropertyCanBeMadeInitOnly.Global, NotNullOrRequiredMemberIsNotInitialized
@@ -27,6 +29,8 @@ public class ISTAOptions
     public class BaseOptions
     {
         public Serilog.Events.LogEventLevel Verbosity { get; set; }
+
+        public TransactionHandler Transaction { get; set; }
 
         public bool Restore { get; set; }
     }

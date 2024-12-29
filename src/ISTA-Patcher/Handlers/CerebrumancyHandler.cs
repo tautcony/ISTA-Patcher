@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2024 TautCony
 
-namespace ISTA_Patcher.Handlers;
+namespace ISTAPatcher.Handlers;
 
 using System.Security.Cryptography;
 using System.Text;
@@ -10,12 +10,15 @@ using ISTAlter.Core;
 using ISTAlter.Core.Patcher;
 using ISTAlter.Models.Rheingold.LicenseManagement;
 using ISTAlter.Models.Rheingold.LicenseManagement.CoreFramework;
+using ISTAlter.Utils;
 using Serilog;
 
 public static class CerebrumancyHandler
 {
     public static async Task<int> Execute(ISTAOptions.CerebrumancyOptions opts)
     {
+        using var transaction = new TransactionHandler("ISTA-Patcher", "cerebrumancy");
+        opts.Transaction = transaction;
         Global.LevelSwitch.MinimumLevel = opts.Verbosity;
 
         if (!string.IsNullOrEmpty(opts.Mentalysis))

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
 
-namespace ISTA_Patcher;
+namespace ISTAPatcher;
 
 using System.CommandLine;
 using System.Text;
