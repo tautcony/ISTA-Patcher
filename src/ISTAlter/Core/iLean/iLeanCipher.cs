@@ -67,22 +67,12 @@ public sealed class iLeanCipher : IDisposable
             return string.Empty;
         }
 
-        try
-        {
-            using var memoryStream = new MemoryStream();
-            var cryptoStream = new CryptoStream(memoryStream, this.aesInstance.CreateEncryptor(), CryptoStreamMode.Write);
-            var bytes = Encoding.UTF8.GetBytes(toEncrypt);
-            cryptoStream.Write(bytes, 0, bytes.Length);
-            cryptoStream.FlushFinalBlock();
-            return Convert.ToBase64String(memoryStream.ToArray());
-        }
-        catch (CryptographicException ex)
-        {
-            Log.Information("MachineGuid: {MachineGuid}, VolumeSerialNumber: {VolumeSerialNumber}", this.machineGuid, this.volumeSerialNumber);
-            Log.Error(ex, "iLean Encryption failed.");
-        }
-
-        return string.Empty;
+        using var memoryStream = new MemoryStream();
+        var cryptoStream = new CryptoStream(memoryStream, this.aesInstance.CreateEncryptor(), CryptoStreamMode.Write);
+        var bytes = Encoding.UTF8.GetBytes(toEncrypt);
+        cryptoStream.Write(bytes, 0, bytes.Length);
+        cryptoStream.FlushFinalBlock();
+        return Convert.ToBase64String(memoryStream.ToArray());
     }
 
     public string Decrypt(string toDecrypt)
@@ -92,22 +82,12 @@ public sealed class iLeanCipher : IDisposable
             return string.Empty;
         }
 
-        try
-        {
-            using var memoryStream = new MemoryStream();
-            var cryptoStream = new CryptoStream(memoryStream, this.aesInstance.CreateDecryptor(), CryptoStreamMode.Write);
-            var bytes = Convert.FromBase64String(toDecrypt);
-            cryptoStream.Write(bytes, 0, bytes.Length);
-            cryptoStream.FlushFinalBlock();
-            return Encoding.UTF8.GetString(memoryStream.ToArray());
-        }
-        catch (CryptographicException ex)
-        {
-            Log.Information("MachineGuid: {MachineGuid}, VolumeSerialNumber: {VolumeSerialNumber}", this.machineGuid, this.volumeSerialNumber);
-            Log.Error(ex, "iLean Decryption failed.");
-        }
-
-        return string.Empty;
+        using var memoryStream = new MemoryStream();
+        var cryptoStream = new CryptoStream(memoryStream, this.aesInstance.CreateDecryptor(), CryptoStreamMode.Write);
+        var bytes = Convert.FromBase64String(toDecrypt);
+        cryptoStream.Write(bytes, 0, bytes.Length);
+        cryptoStream.FlushFinalBlock();
+        return Encoding.UTF8.GetString(memoryStream.ToArray());
     }
 
     private static string ReverseString(string value)

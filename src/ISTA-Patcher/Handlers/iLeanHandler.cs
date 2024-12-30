@@ -59,28 +59,37 @@ public static class iLeanHandler
             return -1;
         }
 
-        using var encryption = new iLeanCipher(opts.MachineGuid, opts.VolumeSerialNumber);
-        if (!string.IsNullOrEmpty(opts.Encrypt))
+        try
         {
-            var content = File.Exists(opts.Encrypt)
-                ? await File.ReadAllTextAsync(opts.Encrypt).ConfigureAwait(false)
-                : opts.Encrypt;
-            var encrypted = encryption.Encrypt(content);
-            Log.Information("Encrypted: \n{Encrypted}\n", encrypted);
-            return 0;
-        }
+            using var encryption = new iLeanCipher(opts.MachineGuid, opts.VolumeSerialNumber);
+            if (!string.IsNullOrEmpty(opts.Encrypt))
+            {
+                var content = File.Exists(opts.Encrypt)
+                    ? await File.ReadAllTextAsync(opts.Encrypt).ConfigureAwait(false)
+                    : opts.Encrypt;
+                var encrypted = encryption.Encrypt(content);
+                Log.Information("Encrypted: \n{Encrypted}\n", encrypted);
+                return 0;
+            }
 
-        if (!string.IsNullOrEmpty(opts.Decrypt))
+            if (!string.IsNullOrEmpty(opts.Decrypt))
+            {
+                var content = File.Exists(opts.Decrypt)
+                    ? await File.ReadAllTextAsync(opts.Decrypt).ConfigureAwait(false)
+                    : opts.Decrypt;
+                var decrypted = encryption.Decrypt(content);
+                Log.Information("Decrypted: \n{Decrypted}\n", decrypted);
+                return 0;
+            }
+        }
+        catch (Exception ex)
         {
-            var content = File.Exists(opts.Decrypt)
-                ? await File.ReadAllTextAsync(opts.Decrypt).ConfigureAwait(false)
-                : opts.Decrypt;
-            var decrypted = encryption.Decrypt(content);
-            Log.Information("Decrypted: \n{Decrypted}\n", decrypted);
-            return 0;
+            Log.Information("MachineGuid: {MachineGuid}, VolumeSerialNumber: {VolumeSerialNumber}", opts.MachineGuid, opts.VolumeSerialNumber);
+            Log.Error(ex, "iLean Encryption/Decryption failed.");
+            return -1;
         }
 
         Log.Warning("No operation matched, exiting...");
-        return 1;
+        return -1;
     }
 }
