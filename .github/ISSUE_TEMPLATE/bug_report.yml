@@ -1,0 +1,57 @@
+name: Bug Report
+description: File a bug report
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before clicking `Submit new issue`, try the latest build [![build](https://img.shields.io/github/actions/workflow/status/tautcony/ISTA-Patcher/build.yml?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/actions)
+  - type: input
+    id: ista-patcher-version
+    attributes:
+      label: ISTA-Patcher version
+      placeholder: 6.3.0
+    validations:
+      required: true
+  - type: input
+    id: ista-version
+    attributes:
+      label: ISTA version
+      placeholder: 4.50.40
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug/crash is.
+    validations:
+      required: true
+  - type: textarea
+    id: how_to_reproduce
+    attributes:
+      label: How To Reproduce
+      description: The detailed steps on how to reproduce the bug or crash.
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: Describe the result that you expect to get after performing the steps.
+    validations:
+      required: true
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: Actual Behavior
+      description: Describe the actual behavior that you observed after performing the steps.
+    validations:
+      required: true
+  - type: textarea
+    id: added-context
+    attributes:
+      label: Additional Context
+      description: Any other information that may help fix the issue goes here. This includes any files required to reproduce this issue, like screenshot, log files.
+    validations:
+      required: false

@@ -1,0 +1,14 @@
+name: Other
+description: Anything else which doesn't fit into the other templates
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before clicking `Submit new issue`, try the latest build [![build](https://img.shields.io/github/actions/workflow/status/tautcony/ISTA-Patcher/build.yml?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/actions)
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please describe your issue/question.
+    validations:
+      required: true
