@@ -68,7 +68,7 @@ public sealed class iLeanCipher : IDisposable
         }
 
         using var memoryStream = new MemoryStream();
-        var cryptoStream = new CryptoStream(memoryStream, this.aesInstance.CreateEncryptor(), CryptoStreamMode.Write);
+        using var cryptoStream = new CryptoStream(memoryStream, this.aesInstance.CreateEncryptor(), CryptoStreamMode.Write);
         var bytes = Encoding.UTF8.GetBytes(toEncrypt);
         cryptoStream.Write(bytes, 0, bytes.Length);
         cryptoStream.FlushFinalBlock();
@@ -83,7 +83,7 @@ public sealed class iLeanCipher : IDisposable
         }
 
         using var memoryStream = new MemoryStream();
-        var cryptoStream = new CryptoStream(memoryStream, this.aesInstance.CreateDecryptor(), CryptoStreamMode.Write);
+        using var cryptoStream = new CryptoStream(memoryStream, this.aesInstance.CreateDecryptor(), CryptoStreamMode.Write);
         var bytes = Convert.FromBase64String(toDecrypt);
         cryptoStream.Write(bytes, 0, bytes.Length);
         cryptoStream.FlushFinalBlock();

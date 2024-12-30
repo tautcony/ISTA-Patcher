@@ -47,13 +47,10 @@ public static class CerebrumancyHandler
                 return -1;
             }
 
-            var fs = File.OpenRead(opts.LoadPrimamind);
-            await using (fs.ConfigureAwait(false))
-            {
-                using var sr = new StreamReader(fs, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-                primamindXml = await sr.ReadToEndAsync().ConfigureAwait(false);
-                Log.Debug("Loaded primamind from {Primamind}", opts.LoadPrimamind);
-            }
+            await using var fs = File.OpenRead(opts.LoadPrimamind);
+            using var sr = new StreamReader(fs, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            primamindXml = await sr.ReadToEndAsync().ConfigureAwait(false);
+            Log.Debug("Loaded primamind from {Primamind}", opts.LoadPrimamind);
         }
 
         string? solicitationXml = null;
@@ -110,7 +107,7 @@ public static class CerebrumancyHandler
                 return -1;
             }
 
-            var rsaCryptoServiceProvider = new RSACryptoServiceProvider(opts.primamindIntensity);
+            using var rsaCryptoServiceProvider = new RSACryptoServiceProvider(opts.primamindIntensity);
             rsaCryptoServiceProvider.FromXmlString(primamindXml);
 
             var parameters = rsaCryptoServiceProvider.ExportParameters(includePrivateParameters: true);
@@ -141,17 +138,10 @@ public static class CerebrumancyHandler
         {
             var privateKey = rsa.ToXmlString(includePrivateParameters: true);
 
-            var fs = new FileStream(carvedPrimamindPath, FileMode.Create);
-            await using (fs.ConfigureAwait(false))
-            {
-                var sw = new StreamWriter(fs);
-                await using (sw.ConfigureAwait(false))
-                {
-                    await sw.WriteAsync(privateKey).ConfigureAwait(false);
-
-                    Log.Information("Generated key pair located at {CarvedPrimamindPath}", carvedPrimamindPath);
-                }
-            }
+            await using var fs = new FileStream(carvedPrimamindPath, FileMode.Create);
+            await using var sw = new StreamWriter(fs);
+            await sw.WriteAsync(privateKey).ConfigureAwait(false);
+            Log.Information("Generated key pair located at {CarvedPrimamindPath}", carvedPrimamindPath);
         }
         finally
         {
@@ -206,11 +196,8 @@ public static class CerebrumancyHandler
         var signedLicense = LicenseInfoSerializer.ToByteArray(license);
         if (opts.Manifestation != null)
         {
-            var fileStream = File.Create(opts.Manifestation);
-            await using (fileStream.ConfigureAwait(false))
-            {
-                await fileStream.WriteAsync(signedLicense).ConfigureAwait(false);
-            }
+            await using var fileStream = File.Create(opts.Manifestation);
+            await fileStream.WriteAsync(signedLicense).ConfigureAwait(false);
         }
         else
         {

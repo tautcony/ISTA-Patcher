@@ -42,7 +42,7 @@ internal sealed class iLeanPasswordCipher : IDisposable
         {
             using MemoryStream memoryStream = new();
             var bytes = Encoding.UTF8.GetBytes(toEncrypt);
-            CryptoStream cryptoStream = new(memoryStream, this.aesInstance.CreateEncryptor(), CryptoStreamMode.Write);
+            using CryptoStream cryptoStream = new(memoryStream, this.aesInstance.CreateEncryptor(), CryptoStreamMode.Write);
             cryptoStream.Write(bytes, 0, bytes.Length);
             cryptoStream.FlushFinalBlock();
             return Convert.ToBase64String(memoryStream.ToArray());
@@ -66,7 +66,7 @@ internal sealed class iLeanPasswordCipher : IDisposable
         try
         {
             using MemoryStream memoryStream = new();
-            CryptoStream cryptoStream = new(memoryStream, this.aesInstance.CreateDecryptor(), CryptoStreamMode.Write);
+            using CryptoStream cryptoStream = new(memoryStream, this.aesInstance.CreateDecryptor(), CryptoStreamMode.Write);
             var array = Convert.FromBase64String(toDecrypt);
             cryptoStream.Write(array, 0, array.Length);
             cryptoStream.FlushFinalBlock();
