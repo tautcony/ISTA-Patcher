@@ -23,9 +23,9 @@ public static partial class PatchUtils
             "()System.Boolean",
             DnlibUtils.ReturnTrueMethod
          ) + module.PatchFunction(
-            "BMW.Rheingold.ISTAGUI.ViewModels.OperationFinishedListViewModel",
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.OperationFinishedListViewModel",
             "PerformAcceptOperation",
-            "(BMW.ISPI.IstaServices.Contract.PUK.Data.TransactionMetaData)System.Void",
+            "(\u0042\u004d\u0057.ISPI.IstaServices.Contract.PUK.Data.TransactionMetaData)System.Void",
             RemoveIsProgrammingEnabledCheck
         );
 

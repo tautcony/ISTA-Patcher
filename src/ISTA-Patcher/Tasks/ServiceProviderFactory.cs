@@ -38,7 +38,7 @@ public static class ServiceProviderFactory
 }
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-internal class ServiceProviderAttribute(params Type[] taskType) : Attribute
+internal sealed class ServiceProviderAttribute(params Type[] taskType) : Attribute
 {
     public Type[] TaskType { get; } = taskType;
 }

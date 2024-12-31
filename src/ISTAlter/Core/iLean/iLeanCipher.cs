@@ -7,14 +7,9 @@ using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Text;
 using ISTAlter.Utils;
-using Serilog;
 
 public sealed class iLeanCipher : IDisposable
 {
-    private readonly string machineGuid;
-
-    private readonly string volumeSerialNumber;
-
     private readonly Aes aesInstance;
 
     [SupportedOSPlatform("Windows")]
@@ -22,9 +17,9 @@ public sealed class iLeanCipher : IDisposable
     [SupportedOSPlatform("Linux")]
     public iLeanCipher()
     {
-        this.machineGuid = NativeMethods.GetMachineUUID();
-        this.volumeSerialNumber = NativeMethods.GetVolumeSerialNumber();
-        this.aesInstance = InitializeAesProvider(this.machineGuid, this.volumeSerialNumber);
+        var machineGuid = NativeMethods.GetMachineUUID();
+        var volumeSerialNumber = NativeMethods.GetVolumeSerialNumber();
+        this.aesInstance = InitializeAesProvider(machineGuid, volumeSerialNumber);
     }
 
     public iLeanCipher(string machineGuid, string volumeSerialNumber)
@@ -34,9 +29,7 @@ public sealed class iLeanCipher : IDisposable
             throw new InvalidOperationException("MachineGuid and VolumeSerialNumber must be 32 and 8 characters long.");
         }
 
-        this.machineGuid = machineGuid;
-        this.volumeSerialNumber = volumeSerialNumber;
-        this.aesInstance = InitializeAesProvider(this.machineGuid, this.volumeSerialNumber);
+        this.aesInstance = InitializeAesProvider(machineGuid, volumeSerialNumber);
     }
 
     internal static Aes InitializeAesProvider(string machineGuid, string volumeSerialNumber)

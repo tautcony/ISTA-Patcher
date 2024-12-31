@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2024 TautCony
 
-using ISTAlter.Utils;
-
 namespace ISTAlter;
+
+using ISTAlter.Utils;
 
 // ReSharper disable PropertyCanBeMadeInitOnly.Global, NotNullOrRequiredMemberIsNotInitialized
 public class ISTAOptions
