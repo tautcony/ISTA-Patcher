@@ -74,6 +74,11 @@ public class DefaultPatcher : IPatcher
         {
             this.Patches.AddRange(IPatcher.GetPatches(typeof(DisableFakeFSCRejectPatchAttribute)));
         }
+
+        if (opts.EnableAirClient)
+        {
+            this.Patches.AddRange(IPatcher.GetPatches(typeof(EnableAirClientPatchAttribute)));
+        }
     }
 
     public DefaultPatcher(ISTAOptions.PatchOptions opts)

@@ -66,6 +66,12 @@ public static class ProgramArgs
         Description = "Enable skip fake FSC reject functionality.",
     };
 
+    private static readonly CliOption<bool> EnableSkipAirClientOption = new("--enable-air-client")
+    {
+        DefaultValueFactory = _ => false,
+        Description = "Enable AIR Client functionality.",
+    };
+
     private static readonly CliOption<ISTAOptions.ModeType> ModeOption = new("--mode")
     {
         DefaultValueFactory = _ => ISTAOptions.ModeType.Standalone,
@@ -134,6 +140,7 @@ public static class ProgramArgs
             MarketLanguageOption,
             EnableSkipSyncClientConfigOption,
             EnableSkipFakeFSCRejectOption,
+            EnableSkipAirClientOption,
             MaxDegreeOfParallelismOption,
             generateRegFileOption,
             skipLibraryOption,
@@ -150,6 +157,7 @@ public static class ProgramArgs
             var enableDataNotSendValue = result.GetValue(EnableDataNotSendOption);
             var enableSyncClientConfigValue = result.GetValue(EnableSkipSyncClientConfigOption);
             var enableSkipFakeFSCRejectValue = result.GetValue(EnableSkipFakeFSCRejectOption);
+            var enableAirClientValue = result.GetValue(EnableSkipAirClientOption);
             var typeValue = result.GetValue(typeOption);
             var modeValue = result.GetValue(ModeOption);
             var patchUserAuthValue = result.GetValue(PatchUserAuthOption);
@@ -169,18 +177,19 @@ public static class ProgramArgs
                 FinishedOperations = enableFinishedOpValue,
                 SkipRequirementsCheck = enableSkipRequirementsCheckValue,
                 DataNotSend = enableDataNotSendValue,
+                SkipSyncClientConfig = enableSyncClientConfigValue,
+                SkipFakeFSCReject = enableSkipFakeFSCRejectValue,
+                EnableAirClient = enableAirClientValue,
                 Mode = modeValue,
                 UserAuthEnv = patchUserAuthValue,
                 MarketLanguage = marketLanguageValue,
-                SkipSyncClientConfig = enableSyncClientConfigValue,
                 PatchType = typeValue,
+                MaxDegreeOfParallelism = maxDegreeOfParallelismValue,
                 GenerateMockRegFile = generateRegFileValue,
                 Deobfuscate = deobfuscateValue,
                 Force = forceValue,
                 SkipLibrary = skipLibraryValue,
                 TargetPath = targetPathValue,
-                MaxDegreeOfParallelism = maxDegreeOfParallelismValue,
-                SkipFakeFSCReject = enableSkipFakeFSCRejectValue,
             };
             return Task.FromResult(handler(options));
         });

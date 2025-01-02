@@ -9,13 +9,15 @@ using Serilog.Sinks.SystemConsole.Themes;
 
 public class LoggerTask : IStartupTask
 {
+    public const string LOGFILE = "ista-patcher.log";
+
     public void Execute()
     {
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.ControlledBy(Global.LevelSwitch)
             .WriteTo.Console(theme: AnsiConsoleTheme.Code)
-            .WriteTo.File("ista-patcher.log", rollingInterval: RollingInterval.Day)
+            .WriteTo.File(LOGFILE, rollingInterval: RollingInterval.Day)
             .WriteTo.Sentry(LogEventLevel.Error, LogEventLevel.Debug)
             .CreateLogger();
     }

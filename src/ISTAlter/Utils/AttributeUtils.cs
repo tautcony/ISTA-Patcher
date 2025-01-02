@@ -32,6 +32,8 @@ internal sealed class EnableOfflinePatchAttribute : ISTAPatchAttribute;
 
 internal sealed class DisableFakeFSCRejectPatchAttribute : ISTAPatchAttribute;
 
+internal sealed class EnableAirClientPatchAttribute : ISTAPatchAttribute;
+
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersionAttribute(string version) : Attribute
 {

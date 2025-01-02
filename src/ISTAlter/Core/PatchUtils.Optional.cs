@@ -357,4 +357,40 @@ public static partial class PatchUtils
             ldcI4One.OpCode = OpCodes.Ldc_I4_0;
         }
     }
+
+    [EnableAirClientPatch]
+    public static int PatchMainWindowIconBarViewModel(ModuleDefMD module)
+    {
+        return module.PatcherGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.MainWindowIconBarViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    public static int PatchAirForkServicesWrapper(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldISPINext.AIR.AirForkServicesWrapper",
+            "GetAirLauncher",
+            "(\u0042\u004d\u0057.ISPI.IstaServices.Contract.ICS.IIstaIcsService)\u0042\u004d\u0057.ISPI.AIR.AIRClient.AirForkServices.IAirLauncher",
+            ReplaceCondition);
+
+        void ReplaceCondition(MethodDef method)
+        {
+            var callIsILeanActive = method.FindInstruction(OpCodes.Call, "System.Boolean \u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings::get_IsILeanActive()");
+            if (callIsILeanActive == null)
+            {
+                Log.Warning("Required instructions not found, can not patch AirForkServicesWrapper::GetAirLauncher");
+                return;
+            }
+
+            var instructions = method.Body.Instructions;
+            var indexOfCallIsILeanActive = instructions.IndexOf(callIsILeanActive);
+            var instruction = instructions[indexOfCallIsILeanActive];
+            instruction.OpCode = OpCodes.Ldc_I4_1;
+            instruction.Operand = null;
+        }
+    }
 }

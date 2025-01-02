@@ -56,6 +56,8 @@ public class ISTAOptions
         public int MaxDegreeOfParallelism { get; set; }
 
         public bool SkipFakeFSCReject { get; set; }
+
+        public bool EnableAirClient { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions
