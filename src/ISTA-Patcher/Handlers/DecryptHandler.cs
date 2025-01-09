@@ -3,15 +3,11 @@
 
 namespace ISTAPatcher.Handlers;
 
-using System.Drawing;
-using BetterConsoles.Tables;
-using BetterConsoles.Tables.Builders;
-using BetterConsoles.Tables.Configuration;
-using BetterConsoles.Tables.Models;
 using ISTAlter;
 using ISTAlter.Core;
 using ISTAlter.Utils;
 using Serilog;
+using Spectre.Console;
 
 public static class DecryptHandler
 {
@@ -35,22 +31,12 @@ public static class DecryptHandler
             return -1;
         }
 
-        var headerFormat = new CellFormat
-        {
-            Alignment = Alignment.Center,
-            ForegroundColor = Color.Chocolate,
-        };
-
-        var table = new TableBuilder(headerFormat)
-            .AddColumn("FilePath").RowsFormat()
-            .ForegroundColor(Color.Teal)
-            .AddColumn("Hash(SHA256)").RowsFormat()
-            .ForegroundColor(Color.Aqua)
-            .AddColumn("Integrity").RowsFormat()
-            .ForegroundColor(Color.DarkTurquoise)
-            .Alignment(Alignment.Center)
-            .Build();
-        table.Config = TableConfig.Unicode();
+        var table = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Green)
+            .AddColumn(new TableColumn("[u]FilePath[/]").NoWrap())
+            .AddColumn(new TableColumn("[u]Hash(SHA256)[/]").NoWrap())
+            .AddColumn(new TableColumn("[u]Integrity[/]").NoWrap());
 
         foreach (var fileInfo in fileList)
         {
@@ -66,18 +52,19 @@ public static class DecryptHandler
             }
         }
 
-        Log.Information("Result:{NewLine}{Table}", Environment.NewLine, table.ToString());
+        AnsiConsole.Write(table);
         return 0;
     }
 
     private static async Task<KeyValuePair<string, string>> CheckFileIntegrity(string basePath, HashFileInfo fileInfo)
     {
-        const string checkNF = "[404]";
-        const string checkOK = "[OK]";
-        const string checkNG = "[NG]";
-        const string checkSignOK = "[SIGN:OK]";
-        const string checkSignNG = "[SIGN:NG]";
-        const string checkSignNF = "[SIGN:404]";
+        const string checkNG = "[red]NG[/]";
+        const string checkNF = "[yellow]404[/]";
+        const string checkOK = "[green]OK[/]";
+        const string checkEmpty = "[gray]???[/]";
+        const string checkSignNG = "|[red]SIGN:NG[/]";
+        const string checkSignNF = "|[yellow]SIGN:404[/]";
+        const string checkSignOK = "|[green]SIGN:OK[/]";
 
         string? checkResult;
         var version = string.Empty;
@@ -99,7 +86,7 @@ public static class DecryptHandler
 
         if (fileInfo.Hash == string.Empty)
         {
-            checkResult = "[EMPTY]";
+            checkResult = checkEmpty;
         }
         else
         {

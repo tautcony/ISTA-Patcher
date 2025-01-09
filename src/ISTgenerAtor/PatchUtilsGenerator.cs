@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2025 TautCony
 
-
 namespace ISTgenerAtor;
 
 using System;
@@ -9,8 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 [Generator]
 public class PatchUtilsGenerator : IIncrementalGenerator
@@ -95,7 +94,7 @@ public static partial class PatchUtils
 ";
     }
 
-    private static double[] Solve(double[,] a, double[] b)
+    private static double[] SolveLinearSystem(double[,] a, double[] b)
     {
         var n = b.Length;
         var x = new double[n];
@@ -121,17 +120,17 @@ public static partial class PatchUtils
         var n = data.Length;
         var x = Enumerable.Range(0, n).Select(i => (double)i).ToArray();
         var y = data.Select(b => (double)b).ToArray();
-        var a = new double[n, n];
-        var b = new double[n];
-
-        a[0, 0] = 1;
-        a[n - 1, n - 1] = 1;
-
         var h = new double[x.Length - 1];
         for (var i = 0; i < x.Length - 1; i++)
         {
             h[i] = x[i + 1] - x[i];
         }
+
+        var a = new double[n, n];
+        var b = new double[n];
+
+        a[0, 0] = 1;
+        a[n - 1, n - 1] = 1;
 
         for (var i = 1; i < n - 1; i++)
         {
@@ -141,7 +140,7 @@ public static partial class PatchUtils
             b[i] = 3 * (((y[i + 1] - y[i]) / h[i]) - ((y[i] - y[i - 1]) / h[i - 1]));
         }
 
-        var c = Solve(a, b);
+        var c = SolveLinearSystem(a, b);
 
         var coefficients = new List<int[]>();
         for (var i = 0; i < n - 1; i++)
