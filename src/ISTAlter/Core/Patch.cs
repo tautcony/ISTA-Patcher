@@ -5,10 +5,10 @@ namespace ISTAlter.Core;
 
 using System.Diagnostics;
 using System.Globalization;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using dnlib.DotNet;
 using ISTAlter.Core.Patcher;
+using ISTAlter.Core.Patcher.Provider;
 using ISTAlter.Utils;
 using Serilog;
 
@@ -20,22 +20,21 @@ public static partial class Patch
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
     public static string BakDirName { get; set; } = "@ista-backup";
 
-    public static void PatchISTA(IPatcher patcher, ISTAOptions.PatchOptions options)
+    public static void PatchISTA(IPatcherProvider patcherProvider, ISTAOptions.PatchOptions options)
     {
         Log.Information("=== ISTA Patch Begin ===");
         var timer = Stopwatch.StartNew();
 
         var guiBasePath = Constants.TesterGUIPath.Aggregate(options.TargetPath, Path.Join);
-        var pendingPatchList = patcher.GeneratePatchList(options.TargetPath);
+        var pendingPatchList = patcherProvider.GeneratePatchList(options.TargetPath);
         var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
-        var patchAppliedCount = new int[patcher.Patches.Count];
 
         var cts = new CancellationTokenSource();
         var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
-        var tasks = pendingPatchList.Select(item => factory.StartNew(() => PatchSingleFile(item, patchAppliedCount, guiBasePath, indentLength, patcher, options), cts.Token));
+        var tasks = pendingPatchList.Select(item => factory.StartNew(() => PatchSingleFile(item, guiBasePath, indentLength, patcherProvider, options), cts.Token));
         Task.WaitAll(tasks, cts.Token);
 
-        foreach (var line in BuildIndicator(patcher.Patches, patchAppliedCount))
+        foreach (var line in BuildIndicator(patcherProvider.Patches))
         {
             Log.Information("{Indent}{Line}", new string(' ', indentLength), line);
         }
@@ -50,7 +49,7 @@ public static partial class Patch
         Log.Information(@"=== ISTA Patch Done in {Time:mm\:ss\.fff} ===", timer.Elapsed);
     }
 
-    private static void PatchSingleFile(string pendingPatchItem, int[] patchAppliedCount, string guiBasePath, int indentLength, IPatcher patcher, ISTAOptions.PatchOptions options)
+    private static void PatchSingleFile(string pendingPatchItem, string guiBasePath, int indentLength, IPatcherProvider patcherProvider, ISTAOptions.PatchOptions options)
     {
         var pendingPatchItemFullPath = pendingPatchItem.StartsWith('!')
             ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!'))
@@ -74,7 +73,7 @@ public static partial class Patch
                 "{Item}{Indent}{Result} [404]",
                 pendingPatchItem,
                 indent,
-                string.Concat(Enumerable.Repeat("*", patcher.Patches.Count)));
+                string.Concat(Enumerable.Repeat("*", patcherProvider.Patches.Count)));
             return;
         }
 
@@ -98,26 +97,26 @@ public static partial class Patch
                     "{Item}{Indent}{Result} [VER: {Version}]",
                     pendingPatchItem,
                     indent,
-                    string.Concat(Enumerable.Repeat("*", patcher.Patches.Count)),
+                    string.Concat(Enumerable.Repeat("*", patcherProvider.Patches.Count)),
                     patcherVersion);
                 return;
             }
 
             // Patch and print result
             using var child = new SpanHandler(options.Transaction, pendingPatchItem);
-            var result = patcher.Patches.Select(patch =>
+            var result = patcherProvider.Patches.Select(patch =>
             {
-                var libraryList = IPatcher.ExtractLibrariesConfigFromAttribute(patch.Method);
+                var libraryList = IPatcherProvider.ExtractLibrariesConfigFromAttribute(patch.Method);
                 if (options.SkipLibrary.Intersect(libraryList, StringComparer.Ordinal).Any())
                 {
                     return 0;
                 }
 
                 PatchUtils.CheckPatchVersion(module, patch.Method);
-                return patch.Delegater(module);
+                var patchedCount = patch.Delegator(module);
+                patch.AppliedCount += patchedCount;
+                return patchedCount;
             }).ToList();
-            result.Select((item, index) => (item, index)).ToList()
-                  .ForEach(patch => patchAppliedCount[patch.index] += patch.item);
 
             isPatched = result.Exists(i => i > 0);
             var resultStr = string.Concat(result.Select(i => i > 0 ? i.ToString("X", CultureInfo.CurrentCulture) : "-"));
@@ -168,7 +167,7 @@ public static partial class Patch
                 "{Item}{Indent}{Result} [failed]: {Reason}",
                 pendingPatchItem,
                 indent,
-                string.Concat(Enumerable.Repeat("*", patcher.Patches.Count)),
+                string.Concat(Enumerable.Repeat("*", patcherProvider.Patches.Count)),
                 ex.Message);
             Log.Debug("ExceptionType: {ExceptionType}, StackTrace: {StackTrace}", ex.GetType().FullName, ex.StackTrace);
 
@@ -179,17 +178,17 @@ public static partial class Patch
         }
     }
 
-    private static IEnumerable<string> BuildIndicator(List<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> patches, int[] counting)
+    private static IEnumerable<string> BuildIndicator(List<PatchInfo> patches)
     {
         return patches
-               .Select(p => FormatName(p.Delegater))
+               .Select(p => (Name: FormatName(p.Delegator), Count: p.AppliedCount))
                .Reverse()
-               .Select((name, idx) =>
+               .Select((item, idx) =>
                {
                    var revIdx = patches.Count - 1 - idx;
                    var verticalBars = new string('│', revIdx);
                    var horizontalBars = new string('─', idx);
-                   return $"{verticalBars}└{horizontalBars}>[{name}: {counting[revIdx]}]";
+                   return $"{verticalBars}└{horizontalBars}>[{item.Name}: {item.Count}]";
                });
 
         string FormatName(Func<ModuleDefMD, int> func)

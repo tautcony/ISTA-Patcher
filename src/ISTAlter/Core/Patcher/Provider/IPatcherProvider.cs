@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
 
-namespace ISTAlter.Core.Patcher;
+namespace ISTAlter.Core.Patcher.Provider;
 
 using System.Reflection;
 using System.Text.Json;
@@ -9,9 +9,9 @@ using dnlib.DotNet;
 using ISTAlter.Utils;
 using Serilog;
 
-public interface IPatcher
+public interface IPatcherProvider
 {
-    public List<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> Patches { get; set; }
+    public List<PatchInfo> Patches { get; set; }
 
     public string[] GeneratePatchList(string basePath);
 
@@ -43,12 +43,12 @@ public interface IPatcher
         return null;
     }
 
-    public static List<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> GetPatches(params Type[] attributes)
+    public static List<PatchInfo> GetPatches(params Type[] attributes)
     {
         return typeof(PatchUtils)
             .GetMethods()
             .Where(m => Array.Exists(attributes, attribute => m.GetCustomAttributes(attribute, inherit: false).Length > 0))
-            .Select(m => ((Func<ModuleDefMD, int>)Delegate.CreateDelegate(typeof(Func<ModuleDefMD, int>), m), m))
+            .Select(m => new PatchInfo((Func<ModuleDefMD, int>)Delegate.CreateDelegate(typeof(Func<ModuleDefMD, int>), m), m, 0))
             .ToList();
     }
 

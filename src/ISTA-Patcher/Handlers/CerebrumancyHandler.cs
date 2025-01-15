@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using ISTAlter;
 using ISTAlter.Core;
-using ISTAlter.Core.Patcher;
+using ISTAlter.Core.Patcher.Provider;
 using ISTAlter.Models.Rheingold.LicenseManagement;
 using ISTAlter.Models.Rheingold.LicenseManagement.CoreFramework;
 using ISTAlter.Utils;
@@ -115,7 +115,7 @@ public static class CerebrumancyHandler
             var modulus = Convert.ToBase64String(parameters.Modulus);
             var exponent = Convert.ToBase64String(parameters.Exponent);
 
-            Patch.PatchISTA(new DefaultSolicitationPatcher(modulus, exponent, opts), new ISTAOptions.PatchOptions
+            Patch.PatchISTA(new DefaultSolicitationPatcherProvider(modulus, exponent, opts), new ISTAOptions.PatchOptions
             {
                 Restore = opts.Restore,
                 Verbosity = opts.Verbosity,

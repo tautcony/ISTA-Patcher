@@ -1,31 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2023-2024 TautCony
 
-namespace ISTAlter.Core.Patcher;
+namespace ISTAlter.Core.Patcher.Provider;
 
-using System.Reflection;
-using dnlib.DotNet;
 using ISTAlter.Utils;
 using Serilog;
 
-public class DefaultPatcher : IPatcher
+public class DefaultPatcherProvider : IPatcherProvider
 {
-    public List<(Func<ModuleDefMD, int> Delegater, MethodInfo Method)> Patches { get; set; } =
-        IPatcher.GetPatches(typeof(EssentialPatchAttribute));
+    public List<PatchInfo> Patches { get; set; } = IPatcherProvider.GetPatches(typeof(EssentialPatchAttribute));
 
-    private DefaultPatcher()
+    private DefaultPatcherProvider()
     {
         Log.Debug("Loaded patches: {Patches}", string.Join(", ", this.Patches.Select(p => p.Method.Name)));
     }
 
-    protected DefaultPatcher(ISTAOptions.OptionalPatchOptions opts)
+    protected DefaultPatcherProvider(ISTAOptions.OptionalPatchOptions opts)
         : this()
     {
         switch (opts.Mode)
         {
             case ISTAOptions.ModeType.Standalone:
-                this.Patches.AddRange(IPatcher.GetPatches(typeof(ValidationPatchAttribute)));
-                this.Patches.AddRange(IPatcher.GetPatches(typeof(EnableOfflinePatchAttribute)));
+                this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(ValidationPatchAttribute)));
+                this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(EnableOfflinePatchAttribute)));
                 break;
             case ISTAOptions.ModeType.iLean:
             default:
@@ -34,54 +31,55 @@ public class DefaultPatcher : IPatcher
 
         if (opts.ENET)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(ENETPatchAttribute)));
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(ENETPatchAttribute)));
         }
 
         if (opts.FinishedOperations)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(FinishedOPPatchAttribute)));
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(FinishedOPPatchAttribute)));
         }
 
         if (opts.SkipRequirementsCheck)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(RequirementsPatchAttribute)));
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(RequirementsPatchAttribute)));
         }
 
         if (opts.DataNotSend)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(NotSendPatchAttribute)));
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(NotSendPatchAttribute)));
         }
 
         if (opts.UserAuthEnv)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(UserAuthPatchAttribute)));
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(UserAuthPatchAttribute)));
         }
 
         if (opts.MarketLanguage != null)
         {
-            this.Patches.Add((
+            this.Patches.Add(new PatchInfo(
                 PatchUtils.PatchCommonServiceWrapper_GetMarketLanguage(opts.MarketLanguage),
-                ((Delegate)PatchUtils.PatchCommonServiceWrapper_GetMarketLanguage).Method
+                ((Delegate)PatchUtils.PatchCommonServiceWrapper_GetMarketLanguage).Method,
+                0
             ));
         }
 
         if (opts.SkipSyncClientConfig)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(SyncClientConfigAttribute)));
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(SyncClientConfigAttribute)));
         }
 
         if (opts.SkipFakeFSCReject)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(DisableFakeFSCRejectPatchAttribute)));
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(DisableFakeFSCRejectPatchAttribute)));
         }
 
         if (opts.EnableAirClient)
         {
-            this.Patches.AddRange(IPatcher.GetPatches(typeof(EnableAirClientPatchAttribute)));
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(EnableAirClientPatchAttribute)));
         }
     }
 
-    public DefaultPatcher(ISTAOptions.PatchOptions opts)
+    public DefaultPatcherProvider(ISTAOptions.PatchOptions opts)
         : this((ISTAOptions.OptionalPatchOptions)opts)
     {
     }
@@ -105,7 +103,7 @@ public class DefaultPatcher : IPatcher
         // or from directory ./TesterGUI/bin/Release
         if (fileList.Length == 0)
         {
-            fileList = IPatcher.LoadFileList(basePath);
+            fileList = IPatcherProvider.LoadFileList(basePath);
         }
 
         return fileList;
@@ -114,7 +112,7 @@ public class DefaultPatcher : IPatcher
     public string[] GeneratePatchList(string basePath)
     {
         var fileList = LoadFileList(basePath);
-        var patchConfig = IPatcher.LoadConfigFile();
+        var patchConfig = IPatcherProvider.LoadConfigFile();
         var excludeList = patchConfig?.Exclude ?? [];
         var includeList = patchConfig?.Include ?? [];
 
