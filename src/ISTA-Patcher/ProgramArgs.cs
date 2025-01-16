@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
 
 namespace ISTAPatcher;
 
@@ -103,11 +103,6 @@ public static class ProgramArgs
             DefaultValueFactory = _ => false,
             Description = "Generate a registry file.",
         };
-        var deobfuscateOption = new CliOption<bool>("-d", "--deobfuscate")
-        {
-            DefaultValueFactory = _ => false,
-            Description = "Run deobfuscator for the application and libraries.",
-        };
         var forceOption = new CliOption<bool>("-f", "--force")
         {
             DefaultValueFactory = _ => false,
@@ -129,7 +124,6 @@ public static class ProgramArgs
             typeOption,
             VerbosityOption,
             RestoreOption,
-            deobfuscateOption,
             forceOption,
             ModeOption,
             EnableEnetOption,
@@ -164,7 +158,6 @@ public static class ProgramArgs
             var marketLanguageValue = result.GetValue(MarketLanguageOption);
             var maxDegreeOfParallelismValue = result.GetValue(MaxDegreeOfParallelismOption);
             var generateRegFileValue = result.GetValue(generateRegFileOption);
-            var deobfuscateValue = result.GetValue(deobfuscateOption);
             var forceValue = result.GetValue(forceOption);
             var skipLibraryValue = result.GetValue(skipLibraryOption);
             var targetPathValue = result.GetValue(targetPathArgument);
@@ -186,7 +179,6 @@ public static class ProgramArgs
                 PatchType = typeValue,
                 MaxDegreeOfParallelism = maxDegreeOfParallelismValue,
                 GenerateMockRegFile = generateRegFileValue,
-                Deobfuscate = deobfuscateValue,
                 Force = forceValue,
                 SkipLibrary = skipLibraryValue,
                 TargetPath = targetPathValue,
@@ -253,11 +245,6 @@ public static class ProgramArgs
             DefaultValueFactory = _ => false,
             Description = "Invoke mystical forces to compel mentacorrosion.",
         };
-        var specialisRevelioOption = new CliOption<bool>("--specialis-revelio")
-        {
-            DefaultValueFactory = _ => false,
-            Description = "Initiate the spell 'Specialis Revelio' to unveil mysteries.",
-        };
 
         var cerebrumancyCommand = new CliCommand("cerebrumancy", "Initiate operations related to the manipulation of consciousness.")
         {
@@ -280,7 +267,6 @@ public static class ProgramArgs
             manifestationOption,
             base64Option,
             compulsionOption,
-            specialisRevelioOption,
         };
 
         cerebrumancyCommand.SetAction((result, _) =>
@@ -304,7 +290,6 @@ public static class ProgramArgs
             var manifestationValue = result.GetValue(manifestationOption);
             var base64Value = result.GetValue(base64Option);
             var compulsionValue = result.GetValue(compulsionOption);
-            var specialisRevelioValue = result.GetValue(specialisRevelioOption);
 
             var options = new ISTAOptions.CerebrumancyOptions
             {
@@ -327,7 +312,6 @@ public static class ProgramArgs
                 Manifestation = manifestationValue,
                 Base64 = base64Value,
                 Compulsion = compulsionValue,
-                SpecialisRevelio = specialisRevelioValue,
             };
             return Task.FromResult(handler(options));
         });
@@ -449,7 +433,7 @@ public static class ProgramArgs
     {
         var rootCommand = new CliRootCommand
         {
-            Description = "Copyright (C) 2022-2024 TautCony.\n" +
+            Description = "Copyright (C) 2022-2025 TautCony.\n" +
                           $"Repo: {Encoding.UTF8.GetString(PatchUtils.Source)}\n" +
                           "Released under the GNU GPLv3+.",
         };
@@ -459,7 +443,7 @@ public static class ProgramArgs
         var decryptCommand = buildDecryptCommand(decryptHandler);
         var iLeanCommand = buildILeanCommand(iLeanHandler);
 
-        if (PatchUtils.Source.Length != 40 || string.IsNullOrEmpty(PatchUtils.Config))
+        if (PatchUtils.Source.Length != PatchUtils.GetSourceCoefficients()[4][3] || PatchUtils.Config.Length == PatchUtils.GetCoefficients()[2][3])
         {
             return rootCommand;
         }

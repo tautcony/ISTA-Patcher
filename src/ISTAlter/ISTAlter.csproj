@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Version>2.3.3</Version>
     <InformationalVersion>2.3.3</InformationalVersion>
-    <Copyright>Copyright (C) 2022-2024 TautCony.
+    <Copyright>Copyright (C) 2022-2025 TautCony.
 Released under the GNU GPLv3+.</Copyright>
     <Title>$(AssemblyName)</Title>
     <Authors>TautCony</Authors>
@@ -45,5 +45,9 @@ Released under the GNU GPLv3+.</Copyright>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Management" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ISTgenerAtor\ISTgenerAtor.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

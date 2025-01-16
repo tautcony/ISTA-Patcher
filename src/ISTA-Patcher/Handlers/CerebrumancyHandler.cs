@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2024-2025 TautCony
 
 namespace ISTAPatcher.Handlers;
 
@@ -121,7 +121,6 @@ public static class CerebrumancyHandler
                 Verbosity = opts.Verbosity,
                 TargetPath = opts.Mentacorrosion,
                 Force = opts.Compulsion,
-                Deobfuscate = opts.SpecialisRevelio,
             });
 
             return 0;
@@ -173,7 +172,7 @@ public static class CerebrumancyHandler
             return 0;
         }
 
-        license.Comment = $"{PatchUtils.Config} ({Encoding.UTF8.GetString(PatchUtils.Source)})";
+        license.Comment = $"{Encoding.UTF8.GetString(PatchUtils.Config)} ({Encoding.UTF8.GetString(PatchUtils.Source)})";
         license.Expiration = DateTime.MaxValue;
         if (license.SubLicenses != null)
         {

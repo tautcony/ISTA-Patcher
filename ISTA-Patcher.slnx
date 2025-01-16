@@ -1,4 +1,5 @@
 ﻿<Solution>
   <Project Path="src\ISTA-Patcher\ISTA-Patcher.csproj" Type="Classic C#" />
   <Project Path="src\ISTAlter\ISTAlter.csproj" Type="Classic C#" />
+  <Project Path="src\ISTgenerAtor\ISTgenerAtor.csproj" Type="Classic C#" />
 </Solution>

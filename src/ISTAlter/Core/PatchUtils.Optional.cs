@@ -22,35 +22,20 @@ public static partial class PatchUtils
             "get_IsProgrammingSession",
             "()System.Boolean",
             DnlibUtils.ReturnTrueMethod
-         ) + module.PatchFunction(
+         ) + module.PatchAsyncFunction(
             "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.OperationFinishedListViewModel",
             "PerformAcceptOperation",
             "(\u0042\u004d\u0057.ISPI.IstaServices.Contract.PUK.Data.TransactionMetaData)System.Void",
             RemoveIsProgrammingEnabledCheck
         );
 
-        void RemoveIsProgrammingEnabledCheck(MethodDef def)
+        void RemoveIsProgrammingEnabledCheck(MethodDef method)
         {
-            const string patchTargetName = "OperationFinishedListViewModel::PerformAcceptOperation";
-
-            if (def.CustomAttributes.FirstOrDefault() is not { ConstructorArguments: [{ Value: ValueTypeSig stateMachineType }] })
-            {
-                Log.Warning($"Attribute not found, can not patch {patchTargetName}");
-                return;
-            }
-
-            var typeDef = stateMachineType.TypeDefOrRef.ResolveTypeDef();
-            if (typeDef?.Methods.FirstOrDefault(m => m.Name == "MoveNext" && m.HasOverrides) is not { } method)
-            {
-                Log.Warning($"Method not found, can not patch {patchTargetName}");
-                return;
-            }
-
             if (method.Body.Instructions.FirstOrDefault(inst =>
                     inst.OpCode == OpCodes.Call && inst.Operand is IMethod methodOperand &&
                     methodOperand.Name == "IsProgrammingEnabled") is not { } instruction)
             {
-                Log.Warning($"Required instruction not found, can not patch {patchTargetName}");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -88,7 +73,7 @@ public static partial class PatchUtils
 
             if (dictionaryCtorRef == null)
             {
-                Log.Warning("Required instructions not found, can not patch IstaInstallationRequirements::CheckSystemRequirements");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -159,7 +144,7 @@ public static partial class PatchUtils
 
             if (get_CurrentOperation == null || setIsSendOBFCMDataIsForbidden == null || onPropertyChanged == null)
             {
-                Log.Warning("Required instructions not found, can not patch MultisessionLogic::SetNotSendOBFCMData");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -196,7 +181,7 @@ public static partial class PatchUtils
 
             if (get_CurrentOperation == null || get_DataContext == null || get_VecInfo == null || set_IsSendFastaDataForbidden == null || setIsSendFastaDataIsForbidden == null || onPropertyChanged == null)
             {
-                Log.Warning("Required instructions not found, can not patch MultisessionLogic::SetNotSendFastData");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -316,7 +301,7 @@ public static partial class PatchUtils
             var requestSwtAction = method.FindInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
             if (requestSwtAction == null)
             {
-                Log.Warning("Required instructions not found, can not patch RetrieveActualSwtInfoState::Handle");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -324,7 +309,7 @@ public static partial class PatchUtils
             var ldcI4One = instructions[indexOfRequestSwtAction - 1];
             if (!ldcI4One.IsLdcI4())
             {
-                Log.Warning("Required instructions not found, can not patch RetrieveActualSwtInfoState::Handle");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -348,7 +333,7 @@ public static partial class PatchUtils
             var requestSwtAction = method.FindInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
             if (requestSwtAction == null)
             {
-                Log.Warning("Required instructions not found, can not patch RetrieveActualSwtEnablingCodesState::Handle");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -356,7 +341,7 @@ public static partial class PatchUtils
             var ldcI4One = instructions[indexOfRequestSwtAction - 1];
             if (!ldcI4One.IsLdcI4())
             {
-                Log.Warning("Required instructions not found, can not patch RetrieveActualSwtEnablingCodesState::Handle");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -388,7 +373,7 @@ public static partial class PatchUtils
             var callIsILeanActive = method.FindInstruction(OpCodes.Call, "System.Boolean \u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings::get_IsILeanActive()");
             if (callIsILeanActive == null)
             {
-                Log.Warning("Required instructions not found, can not patch AirForkServicesWrapper::GetAirLauncher");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 

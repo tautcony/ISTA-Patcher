@@ -27,6 +27,11 @@ public class SentryTask : IStartupTask
             try
             {
                 var repoPath = Repository.Discover(AppDomain.CurrentDomain.BaseDirectory);
+                if (repoPath == null)
+                {
+                    return;
+                }
+
                 using var repo = new Repository(repoPath);
                 var username = repo.Config.Get<string>("user.name");
                 var email = repo.Config.Get<string>("user.email");
@@ -47,9 +52,13 @@ public class SentryTask : IStartupTask
             {
                 // ignored
             }
+            catch (ArgumentNullException)
+            {
+                // ignored
+            }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to initialize VSC Config");
+                Log.Error(ex, "Failed to initialize Config");
             }
         });
     }

@@ -1,10 +1,13 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISTA-Patcher", "src\ISTA-Patcher\ISTA-Patcher.csproj", "{63BA1CBE-6D74-4467-B19D-45C0D3D4EEB7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ISTAlter", "src\ISTAlter\ISTAlter.csproj", "{213DE8D6-DB04-4BD8-AFAA-C3DB1E65FE77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISTgenerAtor", "src\ISTgenerAtor\ISTgenerAtor.csproj", "{9D396B13-DE74-420F-B08E-885E7157735E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,13 +23,15 @@ Global
 		{213DE8D6-DB04-4BD8-AFAA-C3DB1E65FE77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{213DE8D6-DB04-4BD8-AFAA-C3DB1E65FE77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{213DE8D6-DB04-4BD8-AFAA-C3DB1E65FE77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D396B13-DE74-420F-B08E-885E7157735E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D396B13-DE74-420F-B08E-885E7157735E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D396B13-DE74-420F-B08E-885E7157735E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D396B13-DE74-420F-B08E-885E7157735E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D74EB0B2-8913-4343-9AB9-F03E05783ECC}
+		SolutionGuid = {EE8E9569-91AA-48A9-94F7-74517097F99B}
 	EndGlobalSection
 EndGlobal

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Version>2.3.3</Version>
     <InformationalVersion>2.3.3</InformationalVersion>
-    <Copyright>Copyright (C) 2022-2024 TautCony.
+    <Copyright>Copyright (C) 2022-2025 TautCony.
 Released under the GNU GPLv3+.</Copyright>
     <Title>$(AssemblyName)</Title>
     <Authors>TautCony</Authors>
@@ -23,7 +23,7 @@ Released under the GNU GPLv3+.</Copyright>
     <RootNamespace>ISTAPatcher</RootNamespace>
     <OutputType>Exe</OutputType>
     <PublishSingleFile>true</PublishSingleFile>
-    <ApplicationIcon>patcher-icon.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\assets\logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -52,13 +52,13 @@ Released under the GNU GPLv3+.</Copyright>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="patch-config.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <!--EmbeddedResource Include="Resources\**\*" Type="Non-Resx" WithCulture="false" /-->
+    <ProjectReference Include="..\ISTAlter\ISTAlter.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ISTAlter\ISTAlter.csproj" />
+    <None Update="Assets\patch-config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>patch-config.json</Link>
+    </None>
   </ItemGroup>
 </Project>

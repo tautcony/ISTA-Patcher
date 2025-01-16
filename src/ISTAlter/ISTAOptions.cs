@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2024-2025 TautCony
 
 namespace ISTAlter;
 
@@ -66,8 +66,6 @@ public class ISTAOptions
 
         public bool GenerateMockRegFile { get; set; }
 
-        public bool Deobfuscate { get; set; }
-
         public bool Force { get; set; }
 
         public string[] SkipLibrary { get; set; }
@@ -98,8 +96,6 @@ public class ISTAOptions
         public bool Base64 { get; set; }
 
         public bool Compulsion { get; set; }
-
-        public bool SpecialisRevelio { get; set; }
     }
 
     public class DecryptOptions : BaseOptions

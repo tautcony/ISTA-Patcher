@@ -68,15 +68,17 @@ public static class ResourceUtils
             if (string.Equals(key, fileName, StringComparison.Ordinal))
             {
                 fileFound = true;
-                resourceWriter.AddResource(key, handler(entry));
+                var newValue = handler(entry);
+                var newValueStream = new MemoryStream(newValue);
+                resourceWriter.AddResource(key, newValueStream, closeAfterWrite: true);
             }
             else
             {
                 if (entry.Value is Stream stream)
                 {
-                    using var valueStream = new MemoryStream();
+                    var valueStream = new MemoryStream();
                     stream.CopyTo(valueStream);
-                    resourceWriter.AddResource(key, valueStream.ToArray());
+                    resourceWriter.AddResource(key, valueStream, closeAfterWrite: true);
                 }
                 else
                 {

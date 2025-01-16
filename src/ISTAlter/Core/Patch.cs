@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using de4dot.code;
 using dnlib.DotNet;
 using ISTAlter.Core.Patcher;
 using ISTAlter.Utils;
@@ -30,8 +29,6 @@ public static partial class Patch
         var pendingPatchList = patcher.GeneratePatchList(options.TargetPath);
         var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
         var patchAppliedCount = new int[patcher.Patches.Count];
-
-        TheAssemblyResolver.Instance.AddSearchDirectory(guiBasePath);
 
         var cts = new CancellationTokenSource();
         var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
@@ -93,7 +90,6 @@ public static partial class Patch
             }
 
             var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
-            TheAssemblyResolver.Instance.AddModule(module);
             var patcherVersion = PatchUtils.HavePatchedMark(module);
             var isPatched = patcherVersion != null;
             if (isPatched && !options.Force)
@@ -144,7 +140,7 @@ public static partial class Patch
                     {
                         if (entry.Value is Stream stream)
                         {
-                            return ResourceUtils.AddWatermark(stream, PatchUtils.Config[..PatchUtils.Config.LastIndexOf(' ')]);
+                            return ResourceUtils.AddWatermark(stream, PatchUtils.GetCoefficients().GetString(12));
                         }
 
                         return null;
@@ -163,15 +159,7 @@ public static partial class Patch
 
             Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
             var patchedFunctionCount = result.Aggregate(0, (c, i) => c + i);
-
-            // Check if assembly need to be deobfuscated
-            if (!options.Deobfuscate)
-            {
-                Log.Information("{Item}{Indent}{Result} [FNC: {PatchedFunctionCount:00}]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
-                return;
-            }
-
-            DeObfuscateSingleFile(pendingPatchItem, patchedFileFullPath, patchedFunctionCount, indent, resultStr);
+            Log.Information("{Item}{Indent}{Result} [FNC: {PatchedFunctionCount:00}]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
         }
         catch (Exception ex)
         {
@@ -188,50 +176,6 @@ public static partial class Patch
             {
                 File.Delete(patchedFileFullPath);
             }
-        }
-    }
-
-    private static void DeObfuscateSingleFile(string pendingPatchItem, string patchedFileFullPath, int patchedFunctionCount, string indent, string resultStr)
-    {
-        try
-        {
-            var deobfTimer = Stopwatch.StartNew();
-
-            var deobfPath = patchedFileFullPath + ".deobf";
-            PatchUtils.DeObfuscation(patchedFileFullPath, deobfPath);
-            if (File.Exists(patchedFileFullPath))
-            {
-                File.Delete(patchedFileFullPath);
-            }
-
-            File.Move(deobfPath, patchedFileFullPath);
-
-            deobfTimer.Stop();
-            var timeStr = deobfTimer.ElapsedTicks > Stopwatch.Frequency
-                ? $" in {deobfTimer.Elapsed:mm\\:ss}"
-                : string.Empty;
-            Log.Information(
-                "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate success{Time}]",
-                pendingPatchItem,
-                indent,
-                resultStr,
-                patchedFunctionCount,
-                timeStr);
-        }
-        catch (ApplicationException ex)
-        {
-            if (!string.Equals(ex.Message, "Could not detect obfuscator!", StringComparison.Ordinal))
-            {
-                SentrySdk.CaptureException(ex);
-            }
-
-            Log.Information(
-                "{Item}{Indent}{Result} [{PatchedFunctionCount} func patched][deobfuscate skipped]: {Reason}",
-                pendingPatchItem,
-                indent,
-                resultStr,
-                patchedFunctionCount,
-                ex.Message);
         }
     }
 

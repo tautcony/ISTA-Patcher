@@ -1,7 +1,7 @@
 <div align="center">
-<img alt="LOGO" src="assets/patcher-icon.png" width="256" height="256" />
+<img alt="LOGO" src="assets/logo.png" width="256" height="256" />
 
-# $$\mathbf{ISTA\ Patcher}^{\color{orange}overdose}$$ <br/> [![License: GPL v3](https://img.shields.io/github/license/tautcony/ISTA-Patcher?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0) [![build](https://img.shields.io/github/actions/workflow/status/tautcony/ISTA-Patcher/build.yml?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/actions) [![Latest release](https://img.shields.io/github/v/release/tautcony/ISTA-Patcher?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/releases/latest) [![](https://img.shields.io/github/downloads/tautcony/ISTA-Patcher/total.svg?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/releases) 
+# $$\mathbf{ISTA\ Patcher}^{\color{orange}overdose}$$ <br/> [![License: GPL v3](https://img.shields.io/github/license/tautcony/ISTA-Patcher?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0) [![build](https://img.shields.io/github/actions/workflow/status/tautcony/ISTA-Patcher/build.yml?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/actions) [![Latest release](https://img.shields.io/github/v/release/tautcony/ISTA-Patcher?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/releases/latest) [![](https://img.shields.io/github/downloads/tautcony/ISTA-Patcher/total.svg?style=flat-square)](https://github.com/tautcony/ISTA-Patcher/releases)
 
 An IL patcher for ISTA-P from scratch, a product of learning about [dnlib](https://github.com/0xd4d/dnlib).
 
@@ -64,5 +64,5 @@ Icon credit: [comboo](https://twitter.com/comboo28).
 
 > [!CAUTION]
 > This repository has been created for educational purposes only. Use it at your own risk.
-> 
+>
 > It must be made clear that ISTA-Patcher is an independent project and does not provide support for the installation or usage of ISTA. Any individual or organization redistributing it or its derivatives is not affiliated with this project.

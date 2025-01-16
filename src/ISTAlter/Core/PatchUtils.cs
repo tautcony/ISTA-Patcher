@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
 
 namespace ISTAlter.Core;
 
@@ -86,7 +86,7 @@ public static partial class PatchUtils
     }
 
     [ValidationPatch]
-    [LibraryName("CommonServices")]
+    [LibraryName("CommonServices.dll")]
     public static int PatchSecureAccessHelper(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -109,7 +109,7 @@ public static partial class PatchUtils
     }
 
     [ValidationPatch]
-    [LibraryName("CommonServices")]
+    [LibraryName("CommonServices.dll")]
     public static int PatchActivationCertificateHelper(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -157,7 +157,7 @@ public static partial class PatchUtils
             if (getBaseService == null || getPSdZProperties == null || setPSdZProperties == null || putProperty == null ||
                 stringImplicit == null)
             {
-                Log.Warning("Required instructions not found, can not patch ConfigurationService::SetPsdzProperties");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -166,7 +166,7 @@ public static partial class PatchUtils
                 var property = method.GetLocalByType("java.util.Properties");
                 if (property == null || method.Body.Variables.Count == 0)
                 {
-                    Log.Warning("Properties not found, can not patch ConfigurationService::SetPsdzProperties");
+                    Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                     return;
                 }
 
@@ -249,6 +249,10 @@ public static partial class PatchUtils
             "VerifyStrongName",
             "(System.String,System.Boolean)System.Boolean",
             DnlibUtils.ReturnTrueMethod
+        ) + module.PatcherGetter(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
+            "Title",
+            DnlibUtils.EmptyingMethod
         );
     }
 
@@ -269,7 +273,7 @@ public static partial class PatchUtils
             var invalidOperationException = method.FindOperand<MemberRef>(OpCodes.Newobj, "System.Void System.InvalidOperationException::.ctor(System.String)");
             if (getProcessesByName == null || firstOrDefault == null || invalidOperationException == null)
             {
-                Log.Warning("Required instructions not found, can not patch IstaIcsServiceClient::ValidateHost");
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -318,7 +322,6 @@ public static partial class PatchUtils
         );
     }
 
-    // ReSharper disable once UnusedMethodReturnValue.Global
     public static int PatchInteractionModel(ModuleDefMD module)
     {
         return module.PatcherGetter(
@@ -346,7 +349,7 @@ public static partial class PatchUtils
 
                     OpCodes.Ldarg_0.ToInstruction(),
                     OpCodes.Ldfld.ToInstruction(titleField),
-                    OpCodes.Ldstr.ToInstruction("ISTA-Patcher"),
+                    OpCodes.Ldstr.ToInstruction(GetCoefficients().GetString(12)),
                     OpCodes.Callvirt.ToInstruction(containsDef),
                     OpCodes.Brfalse_S.ToInstruction(label),
 
@@ -357,7 +360,7 @@ public static partial class PatchUtils
                     label,
                     OpCodes.Ldarg_0.ToInstruction(),
                     OpCodes.Ldfld.ToInstruction(titleField),
-                    OpCodes.Ldstr.ToInstruction($" ({Config ?? Encoding.UTF8.GetString(Source)})"),
+                    OpCodes.Ldstr.ToInstruction($" ({Encoding.UTF8.GetString(Config)})"),
                     OpCodes.Call.ToInstruction(concatRef),
                     OpCodes.Ret.ToInstruction(),
                 };
@@ -390,7 +393,7 @@ public static partial class PatchUtils
                 }
                 else
                 {
-                    Log.Warning("instruction ldstr count not match, can not patch LicenseStatusChecker");
+                    Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 }
             }
         };

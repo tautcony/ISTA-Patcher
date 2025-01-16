@@ -1,34 +1,28 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
+
+using System.Reflection;
 
 namespace ISTAlter.Core;
 
 using System.Globalization;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using de4dot.code;
-using de4dot.code.AssemblyClient;
-using de4dot.code.deobfuscators;
-using de4dot.code.deobfuscators.Dotfuscator;
 using dnlib.DotNet;
+using dnlib.DotNet.Emit;
 using dnlib.DotNet.Writer;
-using ISTAlter.Models.Rheingold.DatabaseProvider;
-using ISTAlter.Models.Rheingold.LicenseManagement.CoreFramework;
 using ISTAlter.Utils;
 using Serilog;
+using static System.Reflection.CustomAttributeExtensions;
 
 /// <summary>
 /// A utility class for patching files and directories.
-/// Contains helper functions and variables.
 /// </summary>
 public static partial class PatchUtils
 {
     private static readonly string Timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.CurrentCulture);
-    private static readonly ModuleContext ModCtx = new(TheAssemblyResolver.Instance);
-    private static readonly IDeobfuscatorContext DeobfuscatorContext = new DeobfuscatorContext();
-    private static readonly NewProcessAssemblyClientFactory ProcessAssemblyClientFactory = new();
+    private static readonly ModuleContext ModCtx = new();
 
     private static byte[] Version
     {
@@ -59,17 +53,6 @@ public static partial class PatchUtils
         }
     }
 
-    public static string Config => Encoding.UTF8.GetString(((byte[])[
-        0x50, 0x6f, 0x77, 0x65, 0x72, 0x65, 0x64, 0x20, 0x62, 0x79, 0x20, 0x49, 0x53, 0x54, 0x41, 0x2d, 0x50, 0x61, 0x74,
-        0x63, 0x68, 0x65, 0x72, 0x20,
-    ]).Concat(Version).ToArray());
-
-    public static byte[] Source => [
-        0x68, 0x74, 0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
-        0x2f, 0x74, 0x61, 0x75, 0x74, 0x63, 0x6f, 0x6e, 0x79, 0x2f, 0x49, 0x53, 0x54, 0x41, 0x2d, 0x50, 0x61, 0x74,
-        0x63, 0x68, 0x65, 0x72,
-    ];
-
     /// <summary>
     /// Loads a module from the specified file.
     /// </summary>
@@ -86,13 +69,18 @@ public static partial class PatchUtils
     /// Saves the given assembly module to a file with the specified filename.
     /// </summary>
     /// <param name="module">The <see cref="dnlib.DotNet.ModuleDef"/> to be saved.</param>
-    /// <param name="newFilename">The path to the module file will be saved.</param>
-    public static void SaveModule(ModuleDefMD module, string newFilename)
+    /// <param name="fileName">The path to the module file will be saved.</param>
+    public static void SaveModule(ModuleDefMD module, string fileName)
     {
+        if (HavePatchedMark(module) == null)
+        {
+            return;
+        }
+
         if (module.IsILOnly)
         {
             var writerOptions = new ModuleWriterOptions(module);
-            module.Write(newFilename, writerOptions);
+            module.Write(fileName, writerOptions);
         }
         else
         {
@@ -101,7 +89,7 @@ public static partial class PatchUtils
                 KeepExtraPEData = true,
                 KeepWin32Resources = true,
             };
-            module.NativeWrite(newFilename, writerOptions);
+            module.NativeWrite(fileName, writerOptions);
         }
     }
 
@@ -113,8 +101,8 @@ public static partial class PatchUtils
     /// <param name="name">The name of the method.</param>
     /// <param name="desc">The description of the method.</param>
     /// <param name="operation">The action representing the patch operation to be applied to the method.</param>
-    /// <param name="memberName">The name of the function applying the patch.</param>
-    /// <returns>The number of functions patched.</returns>
+    /// <param name="memberName">The name of the method applying the patch.</param>
+    /// <returns>The number of methods patched.</returns>
     public static int PatchFunction(
         this ModuleDefMD module,
         string type,
@@ -123,14 +111,57 @@ public static partial class PatchUtils
         Action<MethodDef> operation,
         [CallerMemberName] string memberName = "")
     {
-        var function = module.GetMethod(type, name, desc);
-        Log.Verbose("Applying patch {PatchName} => {Name} <= {Module}: {Result}", memberName, name, module, function != null);
-        if (function == null)
+        var method = module.GetMethod(type, name, desc);
+        Log.Verbose("Applying patch {PatchName} => {Name} <= {Module}: {Result}", memberName, name, module, method != null);
+        if (method == null)
         {
             return 0;
         }
 
-        operation(function);
+        operation(method);
+        return 1;
+    }
+
+    /// <summary>
+    /// Applies a patch to an async method in the specified assembly.
+    /// </summary>
+    /// <param name="module">The <see cref="dnlib.DotNet.ModuleDefMD"/> to apply the patch to.</param>
+    /// <param name="type">The full name of the type containing the method.</param>
+    /// <param name="name">The name of the method.</param>
+    /// <param name="desc">The description of the method.</param>
+    /// <param name="operation">The action representing the patch operation to be applied to the method.</param>
+    /// <param name="memberName">The name of the method applying the patch.</param>
+    /// <returns>The number of methods patched.</returns>
+    public static int PatchAsyncFunction(
+        this ModuleDefMD module,
+        string type,
+        string name,
+        string desc,
+        Action<MethodDef> operation,
+        [CallerMemberName] string memberName = "")
+    {
+        var method = module.GetMethod(type, name, desc);
+        Log.Verbose("Applying patch {PatchName} => {Name} <= {Module}: {Result}", memberName, name, module, method != null);
+        if (method == null)
+        {
+            return 0;
+        }
+
+        var asyncStateMachineAttribute = method.CustomAttributes.FirstOrDefault(i => string.Equals(i.TypeFullName, "System.Runtime.CompilerServices.AsyncStateMachineAttribute", StringComparison.Ordinal));
+        if (asyncStateMachineAttribute is not { ConstructorArguments: [{ Value: ValueTypeSig stateMachineType }] })
+        {
+            Log.Warning("Required attribute not found, can not patch {Method}", method.FullName);
+            return 0;
+        }
+
+        var typeDef = stateMachineType.TypeDefOrRef.ResolveTypeDef();
+        if (typeDef?.Methods.FirstOrDefault(m => m.Name == "MoveNext" && m.HasOverrides) is not { } generateMethod)
+        {
+            Log.Warning("Required attribute not found, can not patch {Method}", method.FullName);
+            return 0;
+        }
+
+        operation(generateMethod);
         return 1;
     }
 
@@ -141,8 +172,8 @@ public static partial class PatchUtils
     /// <param name="type">The full name of the type containing the method.</param>
     /// <param name="propertyName">The name of the property.</param>
     /// <param name="operation">The action representing the patch operation to be applied to the method.</param>
-    /// <param name="memberName">The name of the function applying the patch.</param>
-    /// <returns>The number of functions patched.</returns>
+    /// <param name="memberName">The name of the method applying the patch.</param>
+    /// <returns>The number of methods patched.</returns>
     public static int PatcherGetter(
         this ModuleDefMD module,
         string type,
@@ -175,11 +206,25 @@ public static partial class PatchUtils
     /// <returns>ture for assembly has been patched.</returns>
     public static string? HavePatchedMark(ModuleDefMD module)
     {
-        var attribute = module.Assembly.CustomAttributes.FirstOrDefault(attribute =>
-            attribute.AttributeType.Name == nameof(AssemblyMetadataAttribute) &&
-            attribute.ConstructorArguments.Count == 2 &&
+        var attributeNeo = module.Assembly.CustomAttributes.FirstOrDefault(attr =>
+            attr.AttributeType.Name == "PatchedAttribute" &&
+            attr.ConstructorArguments.Count == 2 &&
             string.Equals(
-                attribute.ConstructorArguments[0].Value.ToString(),
+                attr.ConstructorArguments[0].Value.ToString(),
+                "Version",
+                StringComparison.Ordinal
+            )
+        );
+        if (attributeNeo != null)
+        {
+            return attributeNeo.ConstructorArguments[1].Value.ToString();
+        }
+
+        var attribute = module.Assembly.CustomAttributes.FirstOrDefault(attr =>
+            attr.AttributeType.Name == nameof(System.Reflection.AssemblyMetadataAttribute) &&
+            attr.ConstructorArguments.Count == 2 &&
+            string.Equals(
+                attr.ConstructorArguments[0].Value.ToString(),
                 "Patched.Version",
                 StringComparison.Ordinal
                 )
@@ -211,101 +256,65 @@ public static partial class PatchUtils
             return;
         }
 
-        var assemblyTitleAttributeTypeDef = module.CorLibTypes.GetTypeRef("System.Reflection", "AssemblyMetadataAttribute").ResolveTypeDef();
-
-        if (assemblyTitleAttributeTypeDef != null)
+        var patchedAttribute = AddPatchedAttribute(module);
+        var ctor = patchedAttribute.FindConstructors().First();
+        var attributes = new List<CustomAttribute>
         {
-            var ctor = module.Import(assemblyTitleAttributeTypeDef.FindConstructors().First());
-            var attributes = new List<CustomAttribute>
-            {
-                new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.By"), new CAArgument(module.CorLibTypes.String, "ISTA-Patcher") } },
-                new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.At"), new CAArgument(module.CorLibTypes.String, Timestamp) } },
-                new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Repo"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Source)) } },
-                new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Patched.Version"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Version)) } },
-            };
-            foreach (var attribute in attributes)
-            {
-                module.Assembly.CustomAttributes.Add(attribute);
-            }
-        }
-        else
+            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "By"), new CAArgument(module.CorLibTypes.String, "ISTA-Patcher") } },
+            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "At"), new CAArgument(module.CorLibTypes.String, Timestamp) } },
+            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Repo"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Source)) } },
+            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Version"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Version)) } },
+        };
+        foreach (var attribute in attributes)
         {
-            var patchedType = new TypeDefUser(
-                "Patched.By",
-                "TC",
-                module.CorLibTypes.Object.TypeDefOrRef)
-            {
-                Attributes = dnlib.DotNet.TypeAttributes.Class | dnlib.DotNet.TypeAttributes.NestedPrivate,
-            };
-            var dateField = new FieldDefUser(
-                "date",
-                new FieldSig(module.CorLibTypes.String),
-                dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
-            )
-            {
-                Constant = new ConstantUser(Timestamp),
-            };
-            var urlField = new FieldDefUser(
-                "repo",
-                new FieldSig(module.CorLibTypes.String),
-                dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
-            )
-            {
-                Constant = new ConstantUser(Encoding.UTF8.GetString(Source)),
-            };
-            var versionField = new FieldDefUser(
-                "version",
-                new FieldSig(module.CorLibTypes.String),
-                dnlib.DotNet.FieldAttributes.Private | dnlib.DotNet.FieldAttributes.Static
-            )
-            {
-                Constant = new ConstantUser(Encoding.UTF8.GetString(Version)),
-            };
-
-            patchedType.Fields.Add(dateField);
-            patchedType.Fields.Add(urlField);
-            patchedType.Fields.Add(versionField);
-            module.Types.Add(patchedType);
-
-            // var runtimeVersion = module.Assembly.ManifestModule.RuntimeVersion;
+            module.Assembly.CustomAttributes.Add(attribute);
         }
 
-        var description = module.Assembly.CustomAttributes.FirstOrDefault(attribute =>
-            attribute.AttributeType.Name == nameof(AssemblyDescriptionAttribute));
+        var description = module.Assembly.CustomAttributes.FirstOrDefault(attr => attr.AttributeType.Name == nameof(System.Reflection.AssemblyDescriptionAttribute));
         if (description is { HasConstructorArguments: true })
         {
-            description.ConstructorArguments[0] = new CAArgument(module.CorLibTypes.String, Config);
+            description.ConstructorArguments[0] = new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Config));
         }
 
         PatchInteractionModel(module);
     }
 
     /// <summary>
-    /// Performs deobfuscation on an obfuscated file and saves the result to a new file.
+    /// Add a patched attribute to the module.
     /// </summary>
-    /// <param name="fileName">The path to the obfuscated file.</param>
-    /// <param name="newFileName">The path to save the deobfuscated file.</param>
-    public static void DeObfuscation(string fileName, string newFileName)
+    /// <param name="module">module to add.</param>
+    /// <returns>The added attribute.</returns>
+    public static TypeDefUser AddPatchedAttribute(ModuleDefMD module)
     {
-        var deobfuscatorInfo = new DeobfuscatorInfo();
+        var attributeType = new TypeDefUser("ISTAttributes", "PatchedAttribute", module.CorLibTypes.GetTypeRef("System", "Attribute"));
+        module.Types.Add(attributeType);
 
-        using var file = new ObfuscatedFile(
-            new ObfuscatedFile.Options
-            {
-                ControlFlowDeobfuscation = true,
-                Filename = fileName,
-                NewFilename = newFileName,
-                StringDecrypterType = DecrypterType.Static,
-            },
-            ModCtx,
-            ProcessAssemblyClientFactory);
-        file.DeobfuscatorContext = DeobfuscatorContext;
+        var keyField = new FieldDefUser("key", new FieldSig(module.CorLibTypes.String), FieldAttributes.Public);
+        attributeType.Fields.Add(keyField);
 
-        file.Load(new List<IDeobfuscator> { deobfuscatorInfo.CreateDeobfuscator() });
-        file.DeobfuscateBegin();
-        file.Deobfuscate();
-        file.DeobfuscateEnd();
-        file.Save();
+        var valueField = new FieldDefUser("value", new FieldSig(module.CorLibTypes.String), FieldAttributes.Public);
+        attributeType.Fields.Add(valueField);
+
+        var ctor = new MethodDefUser(
+            ".ctor",
+            MethodSig.CreateInstance(module.CorLibTypes.Void, module.CorLibTypes.String, module.CorLibTypes.String),
+            MethodImplAttributes.IL | MethodImplAttributes.Managed,
+            MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+        attributeType.Methods.Add(ctor);
+
+        var body = new CilBody();
+        ctor.Body = body;
+        body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+        body.Instructions.Add(OpCodes.Call.ToInstruction(new MemberRefUser(module, ".ctor", MethodSig.CreateInstance(module.CorLibTypes.Void), module.CorLibTypes.GetTypeRef("System", "Attribute"))));
+        body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+        body.Instructions.Add(OpCodes.Ldarg_1.ToInstruction());
+        body.Instructions.Add(OpCodes.Stfld.ToInstruction(keyField));
+        body.Instructions.Add(OpCodes.Ldarg_0.ToInstruction());
+        body.Instructions.Add(OpCodes.Ldarg_2.ToInstruction());
+        body.Instructions.Add(OpCodes.Stfld.ToInstruction(valueField));
+        body.Instructions.Add(OpCodes.Ret.ToInstruction());
+
+        return attributeType;
     }
 
     public static void CheckPatchVersion(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
