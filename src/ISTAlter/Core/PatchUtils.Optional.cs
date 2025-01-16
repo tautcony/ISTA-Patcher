@@ -97,6 +97,8 @@ public static partial class PatchUtils
     }
 
     [RequirementsPatch]
+    [LibraryName("RheingoldCoreBootstrap.dll")]
+    [UntilVersion("4.46")]
     public static int PatchRuntimeEnvironment(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -133,6 +135,8 @@ public static partial class PatchUtils
     }
 
     [NotSendPatch]
+    [LibraryName("ISTAGUI.exe")]
+    [UntilVersion("4.46")]
     public static int PatchMultisessionLogic(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -253,7 +257,9 @@ public static partial class PatchUtils
     }
 
     [UserAuthPatch]
-    [FromVersion("4.44.1x")]
+    [LibraryName("RheingoldPresentationFramework.dll")]
+    [FromVersion("4.44")]
+    [UntilVersion("4.45")]
     public static int PatchUserEnvironmentProvider(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -270,7 +276,7 @@ public static partial class PatchUtils
     }
 
     [UserAuthPatch]
-    [FromVersion("4.48.x")]
+    [FromVersion("4.48")]
     public static int PatchLoginOptionsProvider(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -282,8 +288,8 @@ public static partial class PatchUtils
     }
 
     [SyncClientConfig]
-    [LibraryName("CommonServices")]
-    [FromVersion("4.46.3x")]
+    [LibraryName("CommonServices.dll")]
+    [FromVersion("4.46")]
     public static int PatchClientConfigurationManager(ModuleDefMD module)
     {
         return module.PatchFunction(

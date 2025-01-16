@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2023-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2023-2025 TautCony
 
 namespace ISTAlter.Core;
 
@@ -46,7 +46,7 @@ public static partial class Patch
         if (options.GenerateMockRegFile)
         {
             Log.Information("=== Registry file generating ===");
-            PatchUtils.GenerateMockRegFile(guiBasePath, options.Force);
+            RegistryUtils.GenerateMockRegFile(guiBasePath, options.Force);
         }
 
         timer.Stop();
@@ -112,7 +112,13 @@ public static partial class Patch
             var result = patcher.Patches.Select(patch =>
             {
                 var libraryList = IPatcher.ExtractLibrariesConfigFromAttribute(patch.Method);
-                return options.SkipLibrary.Intersect(libraryList, StringComparer.Ordinal).Any() ? 0 : patch.Delegater(module);
+                if (options.SkipLibrary.Intersect(libraryList, StringComparer.Ordinal).Any())
+                {
+                    return 0;
+                }
+
+                PatchUtils.CheckPatchVersion(module, patch.Method);
+                return patch.Delegater(module);
             }).ToList();
             result.Select((item, index) => (item, index)).ToList()
                   .ForEach(patch => patchAppliedCount[patch.index] += patch.item);
