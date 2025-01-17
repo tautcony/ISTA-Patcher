@@ -18,7 +18,7 @@ internal static class Program
         var command = ProgramArgs.BuildCommandLine(
             PatchHandler.Execute,
             CerebrumancyHandler.Execute,
-            DecryptHandler.Execute,
+            CryptoHandler.Execute,
             iLeanHandler.Execute);
 
         var parseResult = command.Parse(args);

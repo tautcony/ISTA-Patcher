@@ -318,9 +318,14 @@ public static class ProgramArgs
         return cerebrumancyCommand;
     }
 
-    public static CliCommand buildDecryptCommand(Func<ISTAOptions.DecryptOptions, Task<int>> handler)
+    public static CliCommand buildCryptoCommand(Func<ISTAOptions.CryptoOptions, Task<int>> handler)
     {
         // Decrypt options
+        var decryptOption = new CliOption<bool>("-d", "--decrypt")
+        {
+            DefaultValueFactory = _ => false,
+            Description = "Decrypt the integrity checklist.",
+        };
         var integrityOption = new CliOption<bool>("-i", "--integrity")
         {
             DefaultValueFactory = _ => false,
@@ -332,26 +337,36 @@ public static class ProgramArgs
             Description = "Specify the path for ISTA-P.",
         };
 
-        var decryptCommand = new CliCommand("decrypt", "Decrypt the integrity checklist.")
+        // keyPair options
+        var createKeyPairOption = new CliOption<bool>("-k", "--create-key-pair")
+        {
+            DefaultValueFactory = _ => false,
+            Description = "Create a key pair.",
+        };
+
+        var decryptCommand = new CliCommand("crypto", "Perform cryptographic operations.")
         {
             VerbosityOption,
-            RestoreOption,
+            decryptOption,
             integrityOption,
             targetPathArgument,
+            createKeyPairOption,
         };
 
         decryptCommand.SetAction((result, _) =>
         {
             var verbosityValue = result.GetValue(VerbosityOption);
-            var restoreValue = result.GetValue(RestoreOption);
+            var decryptValue = result.GetValue(decryptOption);
             var integrityValue = result.GetValue(integrityOption);
+            var createKeyPairValue = result.GetValue(createKeyPairOption);
             var targetPathValue = result.GetValue(targetPathArgument);
 
-            var options = new ISTAOptions.DecryptOptions
+            var options = new ISTAOptions.CryptoOptions
             {
                 Verbosity = verbosityValue,
-                Restore = restoreValue,
+                Decrypt = decryptValue,
                 Integrity = integrityValue,
+                CreateKeyPair = createKeyPairValue,
                 TargetPath = targetPathValue,
             };
             return handler(options);
@@ -427,7 +442,7 @@ public static class ProgramArgs
     public static CliRootCommand BuildCommandLine(
         Func<ISTAOptions.PatchOptions, Task<int>> patchHandler,
         Func<ISTAOptions.CerebrumancyOptions, Task<int>> licenseHandler,
-        Func<ISTAOptions.DecryptOptions, Task<int>> decryptHandler,
+        Func<ISTAOptions.CryptoOptions, Task<int>> decryptHandler,
         Func<ISTAOptions.ILeanOptions, Task<int>> iLeanHandler
         )
     {
@@ -440,7 +455,7 @@ public static class ProgramArgs
 
         var patchCommand = buildPatchCommand(patchHandler);
         var cerebrumancyCommand = buildCerebrumancyCommand(licenseHandler);
-        var decryptCommand = buildDecryptCommand(decryptHandler);
+        var decryptCommand = buildCryptoCommand(decryptHandler);
         var iLeanCommand = buildILeanCommand(iLeanHandler);
 
         if (PatchUtils.Source.Length != PatchUtils.GetSourceCoefficients()[4][3] || PatchUtils.Config.Length == PatchUtils.GetCoefficients()[2][3])

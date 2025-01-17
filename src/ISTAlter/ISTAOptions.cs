@@ -98,11 +98,15 @@ public class ISTAOptions
         public bool Compulsion { get; set; }
     }
 
-    public class DecryptOptions : BaseOptions
+    public class CryptoOptions : BaseOptions
     {
+        public bool Decrypt { get; set; }
+
         public bool Integrity { get; set; }
 
         public string? TargetPath { get; set; }
+
+        public bool CreateKeyPair { get; set; }
     }
 
     public class ILeanOptions : BaseOptions

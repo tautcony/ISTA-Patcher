@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>2.3.3</Version>
-    <InformationalVersion>2.3.3</InformationalVersion>
+    <Version>2.3.4-dev</Version>
+    <InformationalVersion>2.3.4-dev</InformationalVersion>
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>

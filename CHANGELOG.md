@@ -1,5 +1,14 @@
 ﻿# Changelog
 
+## 2.3.4-dev / 2025-xx-xx
+
+- Feat - Add enable AIR Client with `--enable-air-client` flag
+- Feat - Add keypair generator
+- Fix - Fix patcher for finished operations
+- Fix - Minor bugs and usability improvements
+- Chore - Upgrade dependencies
+- Chore - Refactor project structure, remove de4dot
+
 ## 2.3.3 / 2024-12-12
 
 - Feat - Upgrade to .NET 9.0
