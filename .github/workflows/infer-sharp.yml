@@ -12,7 +12,7 @@ env:
 
 jobs:
   infer:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         configuration: [ 'Debug' ]
@@ -38,6 +38,7 @@ jobs:
       run: |
         dotnet build src/ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --no-self-contained
         rm -f 'src/ISTA-Patcher/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/LibGit2Sharp.dll'
+        rm -f 'src/ISTA-Patcher/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/Spectre.Console.dll'
 
     - name: Run Infer#
       uses: microsoft/infersharpaction@v1.5
@@ -49,6 +50,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: report-${{ matrix.runtime-identifier }}-${{ matrix.configuration }}
+        retention-days: 7
         path: |
           infer-out/report.txt
           infer-out/report.sarif
