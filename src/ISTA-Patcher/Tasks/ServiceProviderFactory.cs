@@ -35,6 +35,11 @@ public static class ServiceProviderFactory
 
         return serviceCollection.BuildServiceProvider();
     }
+
+    public static void Run(this IEnumerable<IStartupTask> tasks)
+    {
+        tasks.ToList().ForEach(startupTask => startupTask.Execute());
+    }
 }
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]

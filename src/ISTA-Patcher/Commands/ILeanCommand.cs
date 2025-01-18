@@ -1,16 +1,58 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2024-2025 TautCony
 
-namespace ISTAPatcher.Handlers;
+namespace ISTAPatcher.Commands;
 
 using System.Diagnostics.CodeAnalysis;
+using DotMake.CommandLine;
 using ISTAlter;
 using ISTAlter.Core.iLean;
 using ISTAlter.Utils;
 using Serilog;
 
-public static class iLeanHandler
+[CliCommand(
+    Name = "ilean",
+    Description = "Perform operations related to iLean.",
+    NameCasingConvention = CliNameCasingConvention.KebabCase,
+    NamePrefixConvention = CliNamePrefixConvention.DoubleHyphen,
+    ShortFormAutoGenerate = false,
+    Parent = typeof(RootCommand)
+)]
+public class ILeanCommand
 {
+    [CliOption(Description = "Specify the verbosity level of the output.")]
+    public Serilog.Events.LogEventLevel Verbosity { get; set; } = Serilog.Events.LogEventLevel.Information;
+
+    [CliOption(Description = "Specify the machine GUID.")]
+    public string? MachineGuid { get; set; }
+
+    [CliOption(Description = "Specify the volume serial number.")]
+    public string? VolumeSerialNumber { get; set; }
+
+    [CliOption(Description = "Show the machine information.")]
+    public bool ShowMachineInfo { get; set; }
+
+    [CliOption(Description = "Encrypt the provided file.")]
+    public string? Encrypt { get; set; }
+
+    [CliOption(Description = "Decrypt the provided file.")]
+    public string? Decrypt { get; set; }
+
+    public void Run()
+    {
+        var opts = new ISTAOptions.ILeanOptions
+        {
+            Verbosity = this.Verbosity,
+            MachineGuid = this.MachineGuid,
+            VolumeSerialNumber = this.VolumeSerialNumber,
+            ShowMachineInfo = this.ShowMachineInfo,
+            Encrypt = this.Encrypt,
+            Decrypt = this.Decrypt,
+        };
+
+        Execute(opts).Wait();
+    }
+
     [SuppressMessage("Interoperability", "CA1416", Justification = "SupportedOSPlatform attribute is used")]
     public static async Task<int> Execute(ISTAOptions.ILeanOptions opts)
     {

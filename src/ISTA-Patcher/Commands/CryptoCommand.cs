@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2024-2025 TautCony
 
-namespace ISTAPatcher.Handlers;
+namespace ISTAPatcher.Commands;
 
+using DotMake.CommandLine;
 using ISTAlter;
 using ISTAlter.Core;
 using ISTAlter.Utils;
@@ -19,8 +20,45 @@ using Org.BouncyCastle.X509;
 using Serilog;
 using Spectre.Console;
 
-public static class CryptoHandler
+[CliCommand(
+    Name = "crypto",
+    Description = "Perform cryptographic operations.",
+    NameCasingConvention = CliNameCasingConvention.KebabCase,
+    NamePrefixConvention = CliNamePrefixConvention.DoubleHyphen,
+    ShortFormAutoGenerate = false,
+    Parent = typeof(RootCommand)
+)]
+public class CryptoCommand
 {
+    [CliOption(Description = "Specify the verbosity level of the output.")]
+    public Serilog.Events.LogEventLevel Verbosity { get; set; } = Serilog.Events.LogEventLevel.Information;
+
+    [CliOption(Description = "Decrypt the integrity checklist.")]
+    public bool Decrypt { get; set; }
+
+    [CliOption(Description = "Verify the integrity of the checklist.")]
+    public bool Integrity { get; set; }
+
+    [CliArgument(Description = "Specify the path for ISTA-P.", Required = true)]
+    public string? TargetPath { get; set; }
+
+    [CliOption(Description = "Create a key pair.")]
+    public bool CreateKeyPair { get; set; }
+
+    public void Run()
+    {
+        var opts = new ISTAOptions.CryptoOptions
+        {
+            Verbosity = this.Verbosity,
+            Decrypt = this.Decrypt,
+            Integrity = this.Integrity,
+            CreateKeyPair = this.CreateKeyPair,
+            TargetPath = this.TargetPath,
+        };
+
+        Execute(opts).Wait();
+    }
+
     public static async Task<int> Execute(ISTAOptions.CryptoOptions opts)
     {
         using var transaction = new TransactionHandler("ISTA-Patcher", "crypto");

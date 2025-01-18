@@ -8,6 +8,12 @@
         "resolved": "2.5.0",
         "contentHash": "rc7vRCq/KD3GtIwSgRtjanGaBwTb9nLenFDZnEcauWlssuuEoxcbMfWA3QWWho6QDMSOSkWjs657McdHzEtEcw=="
       },
+      "DotMake.CommandLine": {
+        "type": "Direct",
+        "requested": "[1.8.8, )",
+        "resolved": "1.8.8",
+        "contentHash": "FRJ7zh/M9H75JdeRORoKQPRat0sEaW2LgAaKDXVFWjW7+Y6D0amlERdOrONGRTGvYVd/QJ2lU1+GIV4hJiviqg=="
+      },
       "LibGit2Sharp": {
         "type": "Direct",
         "requested": "[0.31.0, )",

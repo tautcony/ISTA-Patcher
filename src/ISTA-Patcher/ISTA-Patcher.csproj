@@ -32,6 +32,7 @@ Released under the GNU GPLv3+.</Copyright>
 
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.0" />
+    <PackageReference Include="DotMake.CommandLine" Version="1.8.8" />
     <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
     <PackageReference Include="Meziantou.Analyzer" Version="2.0.186">
       <PrivateAssets>all</PrivateAssets>

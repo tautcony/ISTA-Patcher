@@ -22,7 +22,7 @@ public static partial class Patch
 
     public static void PatchISTA(IPatcherProvider patcherProvider, ISTAOptions.PatchOptions options)
     {
-        Log.Information("=== ISTA Patch Begin ===");
+        Log.Information("=== ISTA Patch Begin at {Time:yyyy-MM-ddTHH:mm:ss.fff} ===", DateTime.Now);
         var timer = Stopwatch.StartNew();
 
         var guiBasePath = Constants.TesterGUIPath.Aggregate(options.TargetPath, Path.Join);

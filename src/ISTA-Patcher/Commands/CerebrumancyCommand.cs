@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2024-2025 TautCony
 
-namespace ISTAPatcher.Handlers;
+namespace ISTAPatcher.Commands;
 
 using System.Security.Cryptography;
 using System.Text;
+using DotMake.CommandLine;
 using ISTAlter;
 using ISTAlter.Core;
 using ISTAlter.Core.Patcher.Provider;
@@ -13,8 +14,97 @@ using ISTAlter.Models.Rheingold.LicenseManagement.CoreFramework;
 using ISTAlter.Utils;
 using Serilog;
 
-public static class CerebrumancyHandler
+[CliCommand(
+    Name = "cerebrumancy",
+    Description = "Perform cerebrumancy operations.",
+    NameCasingConvention = CliNameCasingConvention.KebabCase,
+    NamePrefixConvention = CliNamePrefixConvention.DoubleHyphen,
+    ShortFormAutoGenerate = false,
+    Parent = typeof(RootCommand)
+)]
+public class CerebrumancyCommand : OptionalCommandBase
 {
+    [CliOption(Description = "Specify the verbosity level of the output.")]
+    public Serilog.Events.LogEventLevel Verbosity { get; set; } = Serilog.Events.LogEventLevel.Information;
+
+    [CliOption(Description = "Restore the patched files to their original state.")]
+    public bool Restore { get; set; }
+
+    [CliOption(Description = "Specify the maximum degree of parallelism for patching.")]
+    public int MaxDegreeOfParallelism { get; set; } = Environment.ProcessorCount;
+
+    [CliOption(Name = "--type", Description = "Specify the patch type.")]
+    public ISTAOptions.PatchType PatchType { get; set; } = ISTAOptions.PatchType.B;
+
+    [CliOption(Description = "Force patching on application and libraries.")]
+    public bool Force { get; set; }
+
+    [CliOption(Description = "Specify the libraries to skip patching.")]
+    public string[] SkipLibrary { get; set; } = [];
+
+    [CliArgument(Description = "Specify the path for ISTA-P.", Required = true)]
+    public string? TargetPath { get; set; }
+
+    [CliOption(Description = "Conduct mentalysing on the mystical stream.")]
+    public string? Mentalysis { get; set; }
+
+    [CliOption(Description = "Initiate the crafting ritual to sculpt a Primamind.")]
+    public bool CarvingPrimamind { get; set; }
+
+    [CliOption(Description = "Channel the arcane essence to summon and infuse the Primamind. Specify the conduit path.")]
+    public string? LoadPrimamind { get; set; }
+
+    [CliOption(Description = "Initiate the ritual to materialize a Primamind entity.")]
+    public bool ConcretizePrimamind { get; set; }
+
+    [CliOption(Description = "Designate the path for the solicitation, or supply base64-encoded mystical essence.")]
+    public string? Solicitation { get; set; }
+
+    [CliOption(Description = "Designate the destination for the manifestation.")]
+    public string? Manifestation { get; set; }
+
+    [CliOption(Description = "Infuse the creation with an arcane essence, naming it SyntheticEnv.")]
+    public bool SyntheticEnv { get; set; }
+
+    [CliOption(Description = "Interpret the solicitation request as base64-encoded mystical content.")]
+    public bool Base64 { get; set; }
+
+    [CliOption(Description = "Invoke mentacorrosion upon the chosen target.")]
+    public string? Mentacorrosion { get; set; }
+
+    [CliOption(Description = "Invoke mystical forces to compel mentacorrosion.")]
+    public bool Compulsion { get; set; }
+
+    [CliOption(Description = "The arcane potency of the carved Primamind, measured in bits.")]
+    public int PrimamindIntensity { get; set; } = 1024;
+
+    public void Run()
+    {
+        var opts = new ISTAOptions.CerebrumancyOptions
+        {
+            Verbosity = this.Verbosity,
+            Restore = this.Restore,
+            ENET = this.Enet,
+            FinishedOperations = this.FinishedOperations,
+            SkipRequirementsCheck = this.SkipRequirementsCheck,
+            DataNotSend = this.DataNotSend,
+            Mode = ISTAOptions.ModeType.Standalone,
+            CarvingPrimamind = this.CarvingPrimamind,
+            primamindIntensity = this.PrimamindIntensity,
+            Mentacorrosion = this.Mentacorrosion,
+            ConcretizePrimamind = this.ConcretizePrimamind,
+            Mentalysis = this.Mentalysis!,
+            LoadPrimamind = this.LoadPrimamind,
+            Solicitation = this.Solicitation,
+            SyntheticEnv = this.SyntheticEnv,
+            Manifestation = this.Manifestation,
+            Base64 = this.Base64,
+            Compulsion = this.Compulsion,
+        };
+
+        Execute(opts).Wait();
+    }
+
     public static async Task<int> Execute(ISTAOptions.CerebrumancyOptions opts)
     {
         using var transaction = new TransactionHandler("ISTA-Patcher", "cerebrumancy");
@@ -90,13 +180,13 @@ public static class CerebrumancyHandler
 
         if (opts.CarvingPrimamind)
         {
-            await CarvingPrimamind(carvedPrimamindPath, opts.primamindIntensity).ConfigureAwait(false);
+            await PerformCarvingPrimamind(carvedPrimamindPath, opts.primamindIntensity).ConfigureAwait(false);
             return 0;
         }
 
         if (opts.ConcretizePrimamind && primamindXml != null && solicitationXml != null)
         {
-            return await ConcretizePrimamind(primamindXml, solicitationXml, opts).ConfigureAwait(false);
+            return await PerformConcretizePrimamind(primamindXml, solicitationXml, opts).ConfigureAwait(false);
         }
 
         if (primamindXml != null && opts.Mentacorrosion != null)
@@ -130,7 +220,7 @@ public static class CerebrumancyHandler
         return 1;
     }
 
-    private static async Task CarvingPrimamind(string carvedPrimamindPath, int primamindIntensity)
+    private static async Task PerformCarvingPrimamind(string carvedPrimamindPath, int primamindIntensity)
     {
         using var rsa = new RSACryptoServiceProvider(primamindIntensity);
         try
@@ -149,7 +239,7 @@ public static class CerebrumancyHandler
         }
     }
 
-    private static async Task<int> ConcretizePrimamind(string primamindXml, string solicitationXml, ISTAOptions.CerebrumancyOptions opts)
+    private static async Task<int> PerformConcretizePrimamind(string primamindXml, string solicitationXml, ISTAOptions.CerebrumancyOptions opts)
     {
         var license = LicenseInfoSerializer.FromString<LicenseInfo>(solicitationXml);
         if (license == null)

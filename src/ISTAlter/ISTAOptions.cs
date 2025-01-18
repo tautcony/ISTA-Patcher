@@ -57,7 +57,7 @@ public class ISTAOptions
 
         public bool SkipFakeFSCReject { get; set; }
 
-        public bool EnableAirClient { get; set; }
+        public bool AirClient { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions

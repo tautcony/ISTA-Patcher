@@ -73,7 +73,7 @@ public class DefaultPatcherProvider : IPatcherProvider
             this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(DisableFakeFSCRejectPatchAttribute)));
         }
 
-        if (opts.EnableAirClient)
+        if (opts.AirClient)
         {
             this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(EnableAirClientPatchAttribute)));
         }

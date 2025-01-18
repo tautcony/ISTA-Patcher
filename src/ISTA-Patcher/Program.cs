@@ -1,9 +1,10 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
 
 namespace ISTAPatcher;
 
-using ISTAPatcher.Handlers;
+using DotMake.CommandLine;
+using ISTAPatcher.Commands;
 using ISTAPatcher.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,17 +12,7 @@ internal static class Program
 {
     public static async Task<int> Main(string[] args)
     {
-        Global.ServicesProvider.GetServices<IStartupTask>()
-            .ToList()
-            .ForEach(startupTask => startupTask.Execute());
-
-        var command = ProgramArgs.BuildCommandLine(
-            PatchHandler.Execute,
-            CerebrumancyHandler.Execute,
-            CryptoHandler.Execute,
-            iLeanHandler.Execute);
-
-        var parseResult = command.Parse(args);
-        return await parseResult.InvokeAsync().ConfigureAwait(false);
+        Global.ServicesProvider.GetServices<IStartupTask>().Run();
+        return await Cli.RunAsync<RootCommand>(args, new CliSettings { Theme = CliTheme.Default });
     }
 }
