@@ -113,13 +113,14 @@ public class DefaultPatcherProvider : IPatcherProvider
     {
         var fileList = LoadFileList(basePath);
         var patchConfig = IPatcherProvider.LoadConfigFile();
+
         var excludeList = patchConfig?.Exclude ?? [];
         var includeList = patchConfig?.Include ?? [];
 
         var patchList = includeList
-                        .Union(fileList.Except(excludeList, StringComparer.Ordinal), StringComparer.Ordinal)
-                        .Distinct(StringComparer.Ordinal)
-                        .Order(StringComparer.Ordinal)
+                        .Union(fileList.Except(excludeList, StringComparer.OrdinalIgnoreCase), StringComparer.OrdinalIgnoreCase)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Order(StringComparer.OrdinalIgnoreCase)
                         .ToArray();
         return patchList;
     }
