@@ -8,8 +8,8 @@ using ISTAlter;
 using ISTAlter.Core;
 using ISTAlter.Core.Patcher.Provider;
 using ISTAlter.Utils;
+using ISTAPatcher.Commands.Options;
 using Serilog;
-using Serilog.Events;
 
 [CliCommand(
     Name="patch",
@@ -19,40 +19,32 @@ using Serilog.Events;
     ShortFormAutoGenerate = false,
     Parent = typeof(RootCommand)
 )]
-public class PatchCommand : OptionalCommandBase
+public class PatchCommand : OptionalPatchOption, ICommonPatchOption
 {
-    [CliOption(Description = "Specify the verbosity level of the output.")]
-    public LogEventLevel Verbosity { get; set; } = LogEventLevel.Information;
+    public RootCommand? ParentCommand { get; set; }
 
-    [CliOption(Description = "Restore the patched files to their original state.")]
     public bool Restore { get; set; }
 
-    [CliOption(Description = "Specify the mode type.")]
-    public ISTAOptions.ModeType Mode { get; set; } = ISTAOptions.ModeType.Standalone;
-
-    [CliOption(Description = "Specify the maximum degree of parallelism for patching.")]
     public int MaxDegreeOfParallelism { get; set; } = Environment.ProcessorCount;
 
-    [CliOption(Name="--type", Description = "Specify the patch type.")]
     public ISTAOptions.PatchType PatchType { get; set; } = ISTAOptions.PatchType.B;
+
+    public ISTAOptions.ModeType Mode { get; set; } = ISTAOptions.ModeType.Standalone;
+
+    public bool Force { get; set; }
+
+    public string[] SkipLibrary { get; set; } = [];
+
+    public string? TargetPath { get; set; }
 
     [CliOption(Description = "Generate a registry file.")]
     public bool GenerateMockRegFile { get; set; }
-
-    [CliOption(Description = "Force patching on application and libraries.")]
-    public bool Force { get; set; }
-
-    [CliOption(Description = "Specify the libraries to skip patching.")]
-    public string[] SkipLibrary { get; set; } = [];
-
-    [CliArgument(Description = "Specify the path for ISTA-P.", Required = true)]
-    public string? TargetPath { get; set; }
 
     public void Run()
     {
         var opts = new ISTAOptions.PatchOptions
         {
-            Verbosity = this.Verbosity,
+            Verbosity = this.ParentCommand!.Verbosity,
             Restore = this.Restore,
             ENET = this.Enet,
             FinishedOperations = this.FinishedOperations,

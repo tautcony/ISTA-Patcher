@@ -12,6 +12,7 @@ using ISTAlter.Core.Patcher.Provider;
 using ISTAlter.Models.Rheingold.LicenseManagement;
 using ISTAlter.Models.Rheingold.LicenseManagement.CoreFramework;
 using ISTAlter.Utils;
+using ISTAPatcher.Commands.Options;
 using Serilog;
 
 [CliCommand(
@@ -22,27 +23,22 @@ using Serilog;
     ShortFormAutoGenerate = false,
     Parent = typeof(RootCommand)
 )]
-public class CerebrumancyCommand : OptionalCommandBase
+public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
 {
-    [CliOption(Description = "Specify the verbosity level of the output.")]
-    public Serilog.Events.LogEventLevel Verbosity { get; set; } = Serilog.Events.LogEventLevel.Information;
+    public RootCommand ParentCommand { get; set; }
 
-    [CliOption(Description = "Restore the patched files to their original state.")]
     public bool Restore { get; set; }
 
-    [CliOption(Description = "Specify the maximum degree of parallelism for patching.")]
     public int MaxDegreeOfParallelism { get; set; } = Environment.ProcessorCount;
 
-    [CliOption(Name = "--type", Description = "Specify the patch type.")]
     public ISTAOptions.PatchType PatchType { get; set; } = ISTAOptions.PatchType.B;
 
-    [CliOption(Description = "Force patching on application and libraries.")]
+    public ISTAOptions.ModeType Mode { get; set; } = ISTAOptions.ModeType.Standalone;
+
     public bool Force { get; set; }
 
-    [CliOption(Description = "Specify the libraries to skip patching.")]
     public string[] SkipLibrary { get; set; } = [];
 
-    [CliArgument(Description = "Specify the path for ISTA-P.", Required = true)]
     public string? TargetPath { get; set; }
 
     [CliOption(Description = "Conduct mentalysing on the mystical stream.")]
@@ -82,7 +78,7 @@ public class CerebrumancyCommand : OptionalCommandBase
     {
         var opts = new ISTAOptions.CerebrumancyOptions
         {
-            Verbosity = this.Verbosity,
+            Verbosity = this.ParentCommand.Verbosity,
             Restore = this.Restore,
             ENET = this.Enet,
             FinishedOperations = this.FinishedOperations,

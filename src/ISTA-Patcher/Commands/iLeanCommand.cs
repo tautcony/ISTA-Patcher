@@ -18,10 +18,9 @@ using Serilog;
     ShortFormAutoGenerate = false,
     Parent = typeof(RootCommand)
 )]
-public class ILeanCommand
+public class iLeanCommand
 {
-    [CliOption(Description = "Specify the verbosity level of the output.")]
-    public Serilog.Events.LogEventLevel Verbosity { get; set; } = Serilog.Events.LogEventLevel.Information;
+    public RootCommand? ParentCommand { get; set; }
 
     [CliOption(Description = "Specify the machine GUID.")]
     public string? MachineGuid { get; set; }
@@ -32,21 +31,20 @@ public class ILeanCommand
     [CliOption(Description = "Show the machine information.")]
     public bool ShowMachineInfo { get; set; }
 
-    [CliOption(Description = "Encrypt the provided file.")]
+    [CliOption(Description = "Encrypt the provided file/content.")]
     public string? Encrypt { get; set; }
 
-    [CliOption(Description = "Decrypt the provided file.")]
+    [CliOption(Description = "Decrypt the provided file/content.")]
     public string? Decrypt { get; set; }
 
     public void Run()
     {
         var opts = new ISTAOptions.ILeanOptions
         {
-            Verbosity = this.Verbosity,
+            Verbosity = this.ParentCommand!.Verbosity,
             MachineGuid = this.MachineGuid,
             VolumeSerialNumber = this.VolumeSerialNumber,
             ShowMachineInfo = this.ShowMachineInfo,
-            Encrypt = this.Encrypt,
             Decrypt = this.Decrypt,
         };
 

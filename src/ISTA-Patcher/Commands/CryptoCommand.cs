@@ -30,8 +30,7 @@ using Spectre.Console;
 )]
 public class CryptoCommand
 {
-    [CliOption(Description = "Specify the verbosity level of the output.")]
-    public Serilog.Events.LogEventLevel Verbosity { get; set; } = Serilog.Events.LogEventLevel.Information;
+    public RootCommand? ParentCommand { get; set; }
 
     [CliOption(Description = "Decrypt the integrity checklist.")]
     public bool Decrypt { get; set; }
@@ -49,7 +48,7 @@ public class CryptoCommand
     {
         var opts = new ISTAOptions.CryptoOptions
         {
-            Verbosity = this.Verbosity,
+            Verbosity = this.ParentCommand!.Verbosity,
             Decrypt = this.Decrypt,
             Integrity = this.Integrity,
             CreateKeyPair = this.CreateKeyPair,

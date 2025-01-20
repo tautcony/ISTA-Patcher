@@ -13,6 +13,14 @@ internal static class Program
     public static async Task<int> Main(string[] args)
     {
         Global.ServicesProvider.GetServices<IStartupTask>().Run();
-        return await Cli.RunAsync<RootCommand>(args, new CliSettings { Theme = CliTheme.Default });
+        var theme = new CliTheme
+        {
+            DefaultColor = ConsoleColor.White,
+            DefaultBgColor = null,
+            HeadingColor = ConsoleColor.Blue,
+            FirstColumnColor = ConsoleColor.Cyan,
+            SecondColumnColor = ConsoleColor.Green,
+        };
+        return await Cli.RunAsync<RootCommand>(args, new CliSettings { Theme = theme });
     }
 }
