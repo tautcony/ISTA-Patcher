@@ -26,6 +26,6 @@ public interface ICommonPatchOption
     [CliOption(Description = "Specify the libraries to skip patching.")]
     public string[] SkipLibrary { get; set; }
 
-    [CliArgument(Description = "Specify the path for ISTA-P.", Required = true)]
+    [CliArgument(Description = "Specify the path for ISTA.", Required = true)]
     public string? TargetPath { get; set; }
 }

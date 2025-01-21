@@ -38,7 +38,7 @@ public class CryptoCommand
     [CliOption(Description = "Verify the integrity of the checklist.")]
     public bool Integrity { get; set; }
 
-    [CliArgument(Description = "Specify the path for ISTA-P.", Required = true)]
+    [CliArgument(Description = "Specify the path for ISTA.", Required = true)]
     public string? TargetPath { get; set; }
 
     [CliOption(Description = "Create a key pair.")]
