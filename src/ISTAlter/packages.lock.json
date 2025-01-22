@@ -48,9 +48,9 @@
       },
       "SixLabors.Fonts": {
         "type": "Direct",
-        "requested": "[2.0.9, )",
-        "resolved": "2.0.9",
-        "contentHash": "30HQtY6cJnmnhx56l/YR71CRtGR/CI+xM0IisC/Uk4goo0nldT00kxFnBw0cEbDit5iPiCgQIGvKOADmG5evPg=="
+        "requested": "[2.1.0, )",
+        "resolved": "2.1.0",
+        "contentHash": "NHpGNZqjciKmEeQ2O+yfpBV3uUwrmVrl8+lAvBgv13mxRXwjYDbw4NkwyRtN3htwSbDM+ubnPlCUEIZNMGxN2Q=="
       },
       "SixLabors.ImageSharp": {
         "type": "Direct",

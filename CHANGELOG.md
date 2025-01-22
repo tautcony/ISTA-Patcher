@@ -4,6 +4,8 @@
 
 - Feat - Add enable AIR Client with `--enable-air-client` flag
 - Feat - Add keypair generator
+- Feat - New cli parser implement
+- Feat - Add Unit tests
 - Fix - Fix patcher for finished operations
 - Fix - Minor bugs and usability improvements
 - Chore - Upgrade dependencies

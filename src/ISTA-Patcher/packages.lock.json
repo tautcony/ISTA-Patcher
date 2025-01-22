@@ -183,8 +183,8 @@
       },
       "SixLabors.Fonts": {
         "type": "Transitive",
-        "resolved": "2.0.9",
-        "contentHash": "30HQtY6cJnmnhx56l/YR71CRtGR/CI+xM0IisC/Uk4goo0nldT00kxFnBw0cEbDit5iPiCgQIGvKOADmG5evPg=="
+        "resolved": "2.1.0",
+        "contentHash": "NHpGNZqjciKmEeQ2O+yfpBV3uUwrmVrl8+lAvBgv13mxRXwjYDbw4NkwyRtN3htwSbDM+ubnPlCUEIZNMGxN2Q=="
       },
       "SixLabors.ImageSharp": {
         "type": "Transitive",
@@ -238,7 +238,7 @@
           "Sentry.Profiling": "[5.0.1, )",
           "Sentry.Serilog": "[5.0.1, )",
           "Serilog": "[4.2.0, )",
-          "SixLabors.Fonts": "[2.0.9, )",
+          "SixLabors.Fonts": "[2.1.0, )",
           "SixLabors.ImageSharp": "[3.1.6, )",
           "SixLabors.ImageSharp.Drawing": "[2.1.5, )",
           "System.Management": "[9.0.1, )",
