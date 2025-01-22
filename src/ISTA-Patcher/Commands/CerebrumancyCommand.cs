@@ -25,7 +25,7 @@ using Serilog;
 )]
 public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
 {
-    public RootCommand ParentCommand { get; set; }
+    public RootCommand? ParentCommand { get; set; }
 
     public bool Restore { get; set; }
 
@@ -78,7 +78,7 @@ public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
     {
         var opts = new ISTAOptions.CerebrumancyOptions
         {
-            Verbosity = this.ParentCommand.Verbosity,
+            Verbosity = this.ParentCommand!.Verbosity,
             Restore = this.Restore,
             ENET = this.Enet,
             FinishedOperations = this.FinishedOperations,

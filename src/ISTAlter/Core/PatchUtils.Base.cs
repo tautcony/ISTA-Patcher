@@ -1,8 +1,6 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
 
-using System.Reflection;
-
 namespace ISTAlter.Core;
 
 using System.Globalization;
@@ -28,7 +26,7 @@ public static partial class PatchUtils
     {
         get
         {
-            var infoVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            var infoVersion = System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>();
             var version = string.Empty;
             if (infoVersion != null)
             {
@@ -46,7 +44,7 @@ public static partial class PatchUtils
 
             if (string.IsNullOrEmpty(version))
             {
-                version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
+                version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
             }
 
             return Encoding.UTF8.GetBytes(version);

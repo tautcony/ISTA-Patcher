@@ -27,7 +27,7 @@ public static partial class Patch
 
         var guiBasePath = Constants.TesterGUIPath.Aggregate(options.TargetPath, Path.Join);
         var pendingPatchList = patcherProvider.GeneratePatchList(options.TargetPath);
-        var indentLength = pendingPatchList.Select(i => i.Length).Max() + 1;
+        var indentLength = pendingPatchList.Max(i => i.Length) + 1;
 
         var cts = new CancellationTokenSource();
         var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
@@ -104,7 +104,7 @@ public static partial class Patch
 
             // Patch and print result
             using var child = new SpanHandler(options.Transaction, pendingPatchItem);
-            var result = patcherProvider.Patches.Select(patch =>
+            var result = patcherProvider.Patches.ConvertAll(patch =>
             {
                 var libraryList = IPatcherProvider.ExtractLibrariesConfigFromAttribute(patch.Method);
                 if (options.SkipLibrary.Intersect(libraryList, StringComparer.Ordinal).Any())
@@ -116,7 +116,7 @@ public static partial class Patch
                 var patchedCount = patch.Delegator(module);
                 patch.AppliedCount += patchedCount;
                 return patchedCount;
-            }).ToList();
+            });
 
             isPatched = result.Exists(i => i > 0);
             var resultStr = string.Concat(result.Select(i => i > 0 ? i.ToString("X", CultureInfo.CurrentCulture) : "-"));

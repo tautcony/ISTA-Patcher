@@ -9,7 +9,7 @@ using ISTAlter.Models.Rheingold.DatabaseProvider;
 using ISTAlter.Models.Rheingold.LicenseManagement.CoreFramework;
 using Serilog;
 
-public class RegistryUtils
+public static class RegistryUtils
 {
     private static DealerMasterData buildDealerData()
     {

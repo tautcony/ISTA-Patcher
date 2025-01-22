@@ -6,7 +6,7 @@ namespace ISTAlter;
 using ISTAlter.Utils;
 
 // ReSharper disable PropertyCanBeMadeInitOnly.Global, NotNullOrRequiredMemberIsNotInitialized
-public class ISTAOptions
+public static class ISTAOptions
 {
     public enum PatchType
     {

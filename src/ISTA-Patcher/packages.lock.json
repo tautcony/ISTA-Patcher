@@ -35,6 +35,12 @@
         "resolved": "9.0.1",
         "contentHash": "BKFAkdhUUJivAoKuSWcT23WH9E+AWQMJootzt9X+lnesOD2a2yNIe1ZQFtxB8H3ayskLBD5gYyIbj5GIfw7rZg=="
       },
+      "Roslynator.Analyzers": {
+        "type": "Direct",
+        "requested": "[4.12.10, )",
+        "resolved": "4.12.10",
+        "contentHash": "Wecq3nfhTvnJPxX87hKbjMdX1xeCAMJf9rdBX3nQLTntQs9v0fFbUB2eQSSOArXMuFh7MxjLWaL4+b6XMi1NDA=="
+      },
       "Sentry": {
         "type": "Direct",
         "requested": "[5.0.1, )",

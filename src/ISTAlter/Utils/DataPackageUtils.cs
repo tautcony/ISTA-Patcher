@@ -54,18 +54,18 @@ public partial class DataPackageUtils
     [GeneratedRegex(@"_[\d\-]+(?=\.|$)", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
     private static partial Regex ICOMVersionPattern();
 
-    [GeneratedRegex(@"ICOM-FW|ICOM-Next-FW", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
+    [GeneratedRegex("ICOM-FW|ICOM-Next-FW", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
     private static partial Regex IcomFwPattern();
 
-    [GeneratedRegex(@"ISTA-META(?!_SDP)", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
+    [GeneratedRegex("ISTA-META(?!_SDP)", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
     private static partial Regex IstaMetaPattern();
 
-    [GeneratedRegex(@"ISTA_FULL-SDP_|ISTA-SDP_FULL_", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
+    [GeneratedRegex("ISTA_FULL-SDP_|ISTA-SDP_FULL_", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
     private static partial Regex IstaFullSdpPattern();
 
-    [GeneratedRegex(@"ISTA_DELTA-SDP_|ISTA-SDP_DELTA_|ISTA_SDP-MR_|ISTA_SDP-RSU_", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
+    [GeneratedRegex("ISTA_DELTA-SDP_|ISTA-SDP_DELTA_|ISTA_SDP-MR_|ISTA_SDP-RSU_", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
     private static partial Regex IstaSdpPattern();
 
-    [GeneratedRegex(@"ISTA-META_SDP|ISTA-META_SDP-MR|ISTA-META_SDP-RSU", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
+    [GeneratedRegex("ISTA-META_SDP|ISTA-META_SDP-MR|ISTA-META_SDP-RSU", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
     private static partial Regex IstaMetaSdpPattern();
 }
