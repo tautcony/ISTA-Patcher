@@ -26,7 +26,8 @@ public static partial class PatchUtils
     {
         get
         {
-            var infoVersion = System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>();
+            var executingAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+            var infoVersion = executingAssembly.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>();
             var version = string.Empty;
             if (infoVersion != null)
             {
@@ -44,7 +45,7 @@ public static partial class PatchUtils
 
             if (string.IsNullOrEmpty(version))
             {
-                version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
+                version = executingAssembly.GetName().Version?.ToString() ?? "0.0.0.0";
             }
 
             return Encoding.UTF8.GetBytes(version);

@@ -28,7 +28,7 @@ public class OptionalPatchOption
     [CliOption(Name = "--enable-air-client", Description = "Enable AIR Client functionality.")]
     public bool AirClient { get; set; }
 
-    [CliOption(Name = "--market-language", Description = "Specify the market language.")]
+    [CliOption(Name = "--market-language", Description = "Specify the market language.", Required = false)]
     public string? MarketLanguage { get; set; }
 
     [CliOption(Name = "--patch-user-auth", Description = "Patch the user authentication environment.")]
