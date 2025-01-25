@@ -33,6 +33,10 @@ public static class ISTAOptions
         public TransactionHandler Transaction { get; set; }
 
         public bool Restore { get; set; }
+
+        public string[]? Include { get; set; }
+
+        public string[]? Exclude { get; set; }
     }
 
     public class OptionalPatchOptions : BaseOptions

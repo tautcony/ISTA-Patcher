@@ -1,19 +1,30 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
 
 namespace ISTAlter.Core.Patcher.Provider;
 
 using System.Reflection;
-using System.Text.Json;
 using dnlib.DotNet;
 using ISTAlter.Utils;
-using Serilog;
 
 public interface IPatcherProvider
 {
     public List<PatchInfo> Patches { get; set; }
 
-    public string[] GeneratePatchList(string basePath);
+    public string[] GeneratePatchList(ISTAOptions.PatchOptions options)
+    {
+        var fileList = IPatcherProvider.LoadFileList(options.TargetPath);
+
+        var excludeList = options.Exclude ?? [];
+        var includeList = options.Include ?? [];
+
+        var patchList = includeList
+            .Union(fileList.Except(excludeList, StringComparer.OrdinalIgnoreCase), StringComparer.OrdinalIgnoreCase)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        return patchList;
+    }
 
     public static string?[] LoadFileList(string basePath)
     {
@@ -21,26 +32,6 @@ public interface IPatcherProvider
                                 .Where(f => f.EndsWith(".exe", StringComparison.Ordinal) || f.EndsWith("dll", StringComparison.Ordinal))
                                 .Select(Path.GetFileName).ToArray();
         return fileList;
-    }
-
-    public static PatchConfig? LoadConfigFile()
-    {
-        var cwd = Path.GetDirectoryName(AppContext.BaseDirectory)!;
-        try
-        {
-            using FileStream stream = new(Path.Join(cwd, "patch-config.json"), FileMode.Open, FileAccess.Read);
-            var patchConfig = JsonSerializer.Deserialize(stream, PatchConfigSourceGenerationContext.Default.PatchConfig);
-            return patchConfig;
-        }
-        catch (Exception ex) when (
-            ex is FileNotFoundException or IOException or JsonException
-        )
-        {
-            SentrySdk.CaptureException(ex);
-            Log.Fatal(ex, "Failed to load config file: {Reason}", ex.Message);
-        }
-
-        return null;
     }
 
     public static List<PatchInfo> GetPatches(params Type[] attributes)

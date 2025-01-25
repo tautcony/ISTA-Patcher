@@ -38,6 +38,9 @@ Released under the GNU GPLv3+.</Copyright>
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.1" />
     <PackageReference Include="Roslynator.Analyzers" Version="4.12.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -62,9 +65,9 @@ Released under the GNU GPLv3+.</Copyright>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\patch-config.json">
+    <None Update="Assets\appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>patch-config.json</Link>
+      <Link>appsettings.json</Link>
     </None>
   </ItemGroup>
 </Project>

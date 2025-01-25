@@ -100,7 +100,7 @@ jobs:
     - name: Copy files
       run: |
         cp -f src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/LICENSE src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/LICENSE
-        cp -f src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/patch-config.json src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/patch-config.json
+        cp -f src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/appsettings.json src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/appsettings.json
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

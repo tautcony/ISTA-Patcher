@@ -26,7 +26,7 @@ public static partial class Patch
         var timer = Stopwatch.StartNew();
 
         var guiBasePath = Constants.TesterGUIPath.Aggregate(options.TargetPath, Path.Join);
-        var pendingPatchList = patcherProvider.GeneratePatchList(options.TargetPath);
+        var pendingPatchList = patcherProvider.GeneratePatchList(options);
         var indentLength = pendingPatchList.Max(i => i.Length) + 1;
 
         var cts = new CancellationTokenSource();

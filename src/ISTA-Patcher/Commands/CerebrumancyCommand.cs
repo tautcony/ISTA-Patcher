@@ -13,6 +13,7 @@ using ISTAlter.Models.Rheingold.LicenseManagement;
 using ISTAlter.Models.Rheingold.LicenseManagement.CoreFramework;
 using ISTAlter.Utils;
 using ISTAPatcher.Commands.Options;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 
 [CliCommand(
@@ -97,6 +98,9 @@ public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
             Base64 = this.Base64,
             Compulsion = this.Compulsion,
         };
+
+        opts.Include = Global.Config.GetSection("Settings:Default:Include").Get<string[]?>() ?? [];
+        opts.Exclude = Global.Config.GetSection("Settings:Default:Exclude").Get<string[]?>() ?? [];
 
         Execute(opts).Wait();
     }

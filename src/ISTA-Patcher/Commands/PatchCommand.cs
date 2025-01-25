@@ -9,6 +9,7 @@ using ISTAlter.Core;
 using ISTAlter.Core.Patcher.Provider;
 using ISTAlter.Utils;
 using ISTAPatcher.Commands.Options;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 
 [CliCommand(
@@ -63,6 +64,21 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
             SkipLibrary = this.SkipLibrary,
             TargetPath = this.TargetPath,
         };
+
+        switch (opts.PatchType)
+        {
+            case ISTAOptions.PatchType.B:
+                opts.Include = Global.Config.GetSection("Settings:Default:Include").Get<string[]?>() ?? [];
+                opts.Exclude = Global.Config.GetSection("Settings:Default:Exclude").Get<string[]?>() ?? [];
+                break;
+            case ISTAOptions.PatchType.T:
+                opts.Include = Global.Config.GetSection("Settings:Toyota:Include").Get<string[]?>() ?? [];
+                opts.Exclude = Global.Config.GetSection("Settings:Toyota:Exclude").Get<string[]?>() ?? [];
+                break;
+            default:
+                Log.Error("Patch type not supported: {PatchType}", opts.PatchType);
+                break;
+        }
 
         Execute(opts).Wait();
     }

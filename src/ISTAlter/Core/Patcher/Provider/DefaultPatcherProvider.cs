@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2023-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2023-2025 TautCony
 
 namespace ISTAlter.Core.Patcher.Provider;
 
@@ -107,21 +107,5 @@ public class DefaultPatcherProvider : IPatcherProvider
         }
 
         return fileList;
-    }
-
-    public string[] GeneratePatchList(string basePath)
-    {
-        var fileList = LoadFileList(basePath);
-        var patchConfig = IPatcherProvider.LoadConfigFile();
-
-        var excludeList = patchConfig?.Exclude ?? [];
-        var includeList = patchConfig?.Include ?? [];
-
-        var patchList = includeList
-                        .Union(fileList.Except(excludeList, StringComparer.OrdinalIgnoreCase), StringComparer.OrdinalIgnoreCase)
-                        .Distinct(StringComparer.OrdinalIgnoreCase)
-                        .Order(StringComparer.OrdinalIgnoreCase)
-                        .ToArray();
-        return patchList;
     }
 }
