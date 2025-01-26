@@ -23,9 +23,9 @@ public interface ICommonPatchOption
     [CliOption(Description = "Force patching on application and libraries.")]
     public bool Force { get; set; }
 
-    [CliOption(Description = "Specify the libraries to skip patching.")]
+    [CliOption(Description = "Specify the libraries to skip patching.", Required = false)]
     public string[] SkipLibrary { get; set; }
 
-    [CliArgument(Description = "Specify the path for ISTA.", Required = true)]
+    [CliArgument(Description = "Specify the path for ISTA.", Required = true, ValidationRules = CliValidationRules.ExistingDirectory)]
     public string? TargetPath { get; set; }
 }

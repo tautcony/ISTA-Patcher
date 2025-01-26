@@ -22,6 +22,7 @@ using Serilog;
     NameCasingConvention = CliNameCasingConvention.KebabCase,
     NamePrefixConvention = CliNamePrefixConvention.DoubleHyphen,
     ShortFormAutoGenerate = false,
+    Hidden = true,
     Parent = typeof(RootCommand)
 )]
 public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
@@ -66,7 +67,7 @@ public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
     [CliOption(Description = "Interpret the solicitation request as base64-encoded mystical content.")]
     public bool Base64 { get; set; }
 
-    [CliOption(Description = "Invoke mentacorrosion upon the chosen target.")]
+    [CliOption(Description = "Invoke mentacorrosion upon the chosen target.", ValidationRules = CliValidationRules.ExistingDirectory)]
     public string? Mentacorrosion { get; set; }
 
     [CliOption(Description = "Invoke mystical forces to compel mentacorrosion.")]

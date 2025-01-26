@@ -13,7 +13,7 @@ public interface IPatcherProvider
 
     public string[] GeneratePatchList(ISTAOptions.PatchOptions options)
     {
-        var fileList = IPatcherProvider.LoadFileList(options.TargetPath);
+        var fileList = this.LoadFileList(options.TargetPath);
 
         var excludeList = options.Exclude ?? [];
         var includeList = options.Include ?? [];
@@ -26,11 +26,13 @@ public interface IPatcherProvider
         return patchList;
     }
 
-    public static string?[] LoadFileList(string basePath)
+    public string?[] LoadFileList(string basePath);
+
+    public static string?[] DefaultLoadFileList(string basePath)
     {
         var fileList = Directory.GetFiles(Constants.TesterGUIPath.Aggregate(basePath, Path.Join))
-                                .Where(f => f.EndsWith(".exe", StringComparison.Ordinal) || f.EndsWith("dll", StringComparison.Ordinal))
-                                .Select(Path.GetFileName).ToArray();
+            .Where(f => f.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+            .Select(Path.GetFileName).ToArray();
         return fileList;
     }
 

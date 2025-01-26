@@ -9,4 +9,9 @@ public class ToyotaPatcherProvider : IPatcherProvider
 {
     public List<PatchInfo> Patches { get; set; } =
         IPatcherProvider.GetPatches(typeof(EssentialPatchAttribute), typeof(ValidationPatchAttribute), typeof(ToyotaPatchAttribute));
+
+    public string?[] LoadFileList(string basePath)
+    {
+        return IPatcherProvider.DefaultLoadFileList(basePath);
+    }
 }

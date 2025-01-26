@@ -38,7 +38,7 @@ public class CryptoCommand
     [CliOption(Description = "Verify the integrity of the checklist.")]
     public bool Integrity { get; set; }
 
-    [CliArgument(Description = "Specify the path for ISTA.", Required = true)]
+    [CliArgument(Description = "Specify the path for ISTA.", Required = true, ValidationRules = CliValidationRules.ExistingDirectory)]
     public string? TargetPath { get; set; }
 
     [CliOption(Description = "Create a key pair.")]
@@ -64,6 +64,12 @@ public class CryptoCommand
         opts.Transaction = transaction;
         Global.LevelSwitch.MinimumLevel = opts.Verbosity;
         var basePath = Path.Join(opts.TargetPath, ISTAlter.Utils.Constants.TesterGUIPath[0]);
+
+        if (!Directory.Exists(basePath))
+        {
+            Log.Fatal("Folder structure does not match under: {TargetPath}, please check options", opts.TargetPath);
+            return -1;
+        }
 
         if (opts.CreateKeyPair)
         {

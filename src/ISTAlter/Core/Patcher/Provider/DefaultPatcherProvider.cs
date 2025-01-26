@@ -84,7 +84,7 @@ public class DefaultPatcherProvider : IPatcherProvider
     {
     }
 
-    private static string[] LoadFileList(string basePath)
+    public string[] LoadFileList(string basePath)
     {
         var encryptedFileList = Constants.EncCnePath.Aggregate(basePath, Path.Join);
 
@@ -103,7 +103,7 @@ public class DefaultPatcherProvider : IPatcherProvider
         // or from directory ./TesterGUI/bin/Release
         if (fileList.Length == 0)
         {
-            fileList = IPatcherProvider.LoadFileList(basePath);
+            fileList = IPatcherProvider.DefaultLoadFileList(basePath);
         }
 
         return fileList;
