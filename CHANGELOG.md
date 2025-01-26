@@ -1,15 +1,18 @@
 ﻿# Changelog
 
-## 2.3.4-dev / 2025-xx-xx
+## 2.3.4 / 2025-01-26
 
-- Feat - Add enable AIR Client with `--enable-air-client` flag
-- Feat - Add keypair generator
+- Feat - Add enable AIR Client with `patch --enable-air-client` flag
+- Feat - Add keypair generator with `crypto --create-key-pair` flag
+- Feat - Add warning for invalid patches
+- Feat - Add unit tests project
 - Feat - New cli parser implement
-- Feat - Add Unit tests
-- Fix - Fix patcher for finished operations
+- Feat - New config file format
+- Fix - Patcher for finished operations
 - Fix - Minor bugs and usability improvements
 - Chore - Upgrade dependencies
-- Chore - Refactor project structure, remove de4dot
+- Chore - Refactor project structure
+- Chore - Remove de4dot
 
 ## 2.3.3 / 2024-12-12
 

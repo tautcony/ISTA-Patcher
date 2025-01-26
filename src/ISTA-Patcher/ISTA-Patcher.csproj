@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>2.3.4-dev</Version>
-    <InformationalVersion>2.3.4-dev</InformationalVersion>
+    <Version>2.3.4</Version>
+    <InformationalVersion>2.3.4</InformationalVersion>
     <Copyright>Copyright (C) 2022-2025 TautCony.
 Released under the GNU GPLv3+.</Copyright>
     <Title>$(AssemblyName)</Title>
     <Authors>TautCony</Authors>
     <PackageProjectUrl>https://github.com/tautcony/ISTA-Patcher</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/tautcony/ISTA-Patcher/</RepositoryUrl>
+    <RepositoryUrl>https://github.com/tautcony/ISTA-Patcher</RepositoryUrl>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>13</LangVersion>
