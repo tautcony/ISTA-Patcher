@@ -22,19 +22,19 @@ public class iLeanCommand
 {
     public RootCommand? ParentCommand { get; set; }
 
-    [CliOption(Description = "Specify the machine GUID.")]
+    [CliOption(Description = "Specify the machine GUID.", Required = false)]
     public string? MachineGuid { get; set; }
 
-    [CliOption(Description = "Specify the volume serial number.")]
+    [CliOption(Description = "Specify the volume serial number.", Required = false)]
     public string? VolumeSerialNumber { get; set; }
 
     [CliOption(Description = "Show the machine information.")]
     public bool ShowMachineInfo { get; set; }
 
-    [CliOption(Description = "Encrypt the provided file/content.")]
+    [CliOption(Description = "Encrypt the provided file/content.", Required = false)]
     public string? Encrypt { get; set; }
 
-    [CliOption(Description = "Decrypt the provided file/content.")]
+    [CliOption(Description = "Decrypt the provided file/content.", Required = false)]
     public string? Decrypt { get; set; }
 
     public void Run()
@@ -45,6 +45,7 @@ public class iLeanCommand
             MachineGuid = this.MachineGuid,
             VolumeSerialNumber = this.VolumeSerialNumber,
             ShowMachineInfo = this.ShowMachineInfo,
+            Encrypt = this.Encrypt,
             Decrypt = this.Decrypt,
         };
 
