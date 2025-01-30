@@ -16,9 +16,9 @@
       },
       "Roslynator.Analyzers": {
         "type": "Direct",
-        "requested": "[4.12.10, )",
-        "resolved": "4.12.10",
-        "contentHash": "Wecq3nfhTvnJPxX87hKbjMdX1xeCAMJf9rdBX3nQLTntQs9v0fFbUB2eQSSOArXMuFh7MxjLWaL4+b6XMi1NDA=="
+        "requested": "[4.12.11, )",
+        "resolved": "4.12.11",
+        "contentHash": "yvsRYT5EVtcT+V8ZW+5cxd1O9Sgf8PbC7DlQL/T5NA4g5yjaFe+WQ7evpy92Lj29m2E+XayBsO2TnCWKZlPWaA=="
       },
       "Sentry": {
         "type": "Direct",
@@ -54,9 +54,9 @@
       },
       "SixLabors.Fonts": {
         "type": "Direct",
-        "requested": "[2.1.0, )",
-        "resolved": "2.1.0",
-        "contentHash": "NHpGNZqjciKmEeQ2O+yfpBV3uUwrmVrl8+lAvBgv13mxRXwjYDbw4NkwyRtN3htwSbDM+ubnPlCUEIZNMGxN2Q=="
+        "requested": "[2.1.1, )",
+        "resolved": "2.1.1",
+        "contentHash": "t1SlJ3z3OgER//wwD7I7RaoKH13D53lrOAEjZqlddAqaayB4f9gJAT73k6w6OaPfLikSM9Bu6b0vlMRzGv3o/Q=="
       },
       "SixLabors.ImageSharp": {
         "type": "Direct",
