@@ -8,8 +8,8 @@ using ISTAPatcher.Tasks;
 TaskProvider.GatherTasks<IStartupTask>().Run();
 var theme = new CliTheme
 {
-    DefaultColor = ConsoleColor.White,
-    DefaultBgColor = null,
+    DefaultColor = ConsoleColor.DarkGray,
+    DefaultBgColor = (ConsoleColor)(-1),
     HeadingColor = ConsoleColor.Blue,
     FirstColumnColor = ConsoleColor.Cyan,
     SecondColumnColor = ConsoleColor.Green,
