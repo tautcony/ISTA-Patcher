@@ -9,7 +9,7 @@ TaskProvider.GatherTasks<IStartupTask>().Run();
 var theme = new CliTheme
 {
     DefaultColor = ConsoleColor.DarkGray,
-    DefaultBgColor = (ConsoleColor)(-1),
+    DefaultBgColor = OperatingSystem.IsWindows() ? ConsoleColor.Black : (ConsoleColor)(-1),
     HeadingColor = ConsoleColor.Blue,
     FirstColumnColor = ConsoleColor.Cyan,
     SecondColumnColor = ConsoleColor.Green,
