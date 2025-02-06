@@ -5,7 +5,7 @@ using DotMake.CommandLine;
 using ISTAPatcher.Commands;
 using ISTAPatcher.Tasks;
 
-TaskProvider.GatherTasks<IStartupTask>().Run();
+TaskProvider.GatherTasks<IStartupTask>().Run(args);
 var theme = new CliTheme
 {
     DefaultColor = ConsoleColor.DarkGray,

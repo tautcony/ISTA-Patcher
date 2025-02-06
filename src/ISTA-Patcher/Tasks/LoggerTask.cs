@@ -11,7 +11,7 @@ public class LoggerTask : IStartupTask
 {
     public const string LOGFILE = "ista-patcher.log";
 
-    public void Execute()
+    public void Execute(object?[]? parameters)
     {
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()

@@ -16,13 +16,13 @@ public static class TaskProvider
             );
     }
 
-    public static void Run(this IEnumerable<Type> tasks)
+    public static void Run<T>(this IEnumerable<Type> tasks, T?[] parameters)
     {
         tasks.ToList().ForEach(startupTask =>
         {
             var startupTaskInstance = Activator.CreateInstance(startupTask);
             var executeMethod = startupTask.GetMethod("Execute");
-            executeMethod?.Invoke(startupTaskInstance, parameters: null);
+            executeMethod?.Invoke(startupTaskInstance, parameters: [parameters]);
         });
     }
 }

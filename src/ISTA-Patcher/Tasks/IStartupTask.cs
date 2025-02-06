@@ -5,5 +5,5 @@ namespace ISTAPatcher.Tasks;
 
 public interface IStartupTask
 {
-    void Execute();
+    void Execute(object?[]? parameters);
 }

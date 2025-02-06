@@ -8,7 +8,7 @@ using Serilog;
 
 public class SentryTask : IStartupTask
 {
-    public void Execute()
+    public void Execute(object?[]? parameters)
     {
         SentrySdk.Init(options =>
         {
@@ -24,6 +24,10 @@ public class SentryTask : IStartupTask
         });
         SentrySdk.ConfigureScope(scope =>
         {
+            scope.Contexts["Startup"] = new
+            {
+                Parameters = parameters,
+            };
             try
             {
                 var repoPath = Repository.Discover(AppDomain.CurrentDomain.BaseDirectory);
@@ -59,6 +63,7 @@ public class SentryTask : IStartupTask
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to initialize Config");
+                scope.SetTag("git.not_found", "true");
             }
         });
     }
