@@ -58,6 +58,7 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
             MaxDegreeOfParallelism = this.MaxDegreeOfParallelism,
             SkipFakeFSCReject = this.SkipFakeFSCReject,
             AirClient = this.AirClient,
+            SkipBrandCompatibleCheck = this.SkipBrandCompatibleCheck,
             PatchType = this.PatchType,
             GenerateMockRegFile = this.GenerateMockRegFile,
             Force = this.Force,

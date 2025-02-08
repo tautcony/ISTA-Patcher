@@ -33,4 +33,7 @@ public class OptionalPatchOption
 
     [CliOption(Name = "--patch-user-auth", Description = "Patch the user authentication environment.")]
     public bool UserAuthEnv { get; set; }
+
+    [CliOption(Name = "--enable-skip-brand-compatible-check", Description = "Enable skip brand compatible check functionality.")]
+    public bool SkipBrandCompatibleCheck { get; set; }
 }

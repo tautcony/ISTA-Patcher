@@ -77,6 +77,11 @@ public class DefaultPatcherProvider : IPatcherProvider
         {
             this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(EnableAirClientPatchAttribute)));
         }
+
+        if (opts.SkipBrandCompatibleCheck)
+        {
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(DisableBrandCompatibleCheckPatchAttribute)));
+        }
     }
 
     public DefaultPatcherProvider(ISTAOptions.PatchOptions opts)

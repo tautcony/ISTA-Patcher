@@ -62,6 +62,8 @@ public static class ISTAOptions
         public bool SkipFakeFSCReject { get; set; }
 
         public bool AirClient { get; set; }
+
+        public bool SkipBrandCompatibleCheck { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions

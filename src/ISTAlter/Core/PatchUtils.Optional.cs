@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
 
 namespace ISTAlter.Core;
 
@@ -383,5 +383,15 @@ public static partial class PatchUtils
             instruction.OpCode = OpCodes.Ldc_I4_1;
             instruction.Operand = null;
         }
+    }
+
+    [DisableBrandCompatibleCheckPatch]
+    public static int PatchBrandMapping(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Dealer.BrandMapping",
+            "IsVehicleInRange", // isSelectedBrandCompatible
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.UiBrand,\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Vehicle)System.Boolean",
+            DnlibUtils.ReturnTrueMethod);
     }
 }
