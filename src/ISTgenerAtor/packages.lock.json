@@ -4,9 +4,9 @@
     ".NETStandard,Version=v2.0": {
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.186, )",
-        "resolved": "2.0.186",
-        "contentHash": "PE8c9opHuUWLNqnZTN/KQC9oIfD/ZtsQ25sHF7/og4KfIRVnN4mgiyYw5NwCp8YPGapLoduIxuyQAcic6Eqcjg=="
+        "requested": "[2.0.187, )",
+        "resolved": "2.0.187",
+        "contentHash": "s35YCC7rnWZnxtpdihrkdrGSAuzhdc+1kUMmO+UgVoogw3HAMmPO9BrSkxfU/KwhncK0Hr+nHFuAqOl+mGS01Q=="
       },
       "Microsoft.CodeAnalysis.Analyzers": {
         "type": "Direct",
@@ -43,9 +43,9 @@
       },
       "Roslynator.Analyzers": {
         "type": "Direct",
-        "requested": "[4.12.11, )",
-        "resolved": "4.12.11",
-        "contentHash": "yvsRYT5EVtcT+V8ZW+5cxd1O9Sgf8PbC7DlQL/T5NA4g5yjaFe+WQ7evpy92Lj29m2E+XayBsO2TnCWKZlPWaA=="
+        "requested": "[4.13.0, )",
+        "resolved": "4.13.0",
+        "contentHash": "SSYEq2tPT4nmElTGJvpDsLmEw1mWY+Z+CM+H7gO49fSq4VyFivrmHyCeP3gWcDmgqMg77h2tLYRoZ0cjgnKmuA=="
       },
       "StyleCop.Analyzers": {
         "type": "Direct",

@@ -20,7 +20,7 @@ Released under the GNU GPLv3+.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.186">
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.187">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -29,7 +29,7 @@ Released under the GNU GPLv3+.</Copyright>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.12.11">
+    <PackageReference Include="Roslynator.Analyzers" Version="4.13.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
