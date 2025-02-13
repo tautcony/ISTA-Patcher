@@ -97,7 +97,7 @@ public static class RegistryUtils
         var licenseFile = Path.Join(basePath, "license.reg");
         if (File.Exists(licenseFile) && !force)
         {
-            Log.Information("Registry file already exists");
+            Log.Information("Registry file already exists: {Path}", licenseFile);
             return;
         }
 
@@ -127,9 +127,9 @@ public static class RegistryUtils
             ],
         };
         var value = licenseInfo.Serialize();
-        const string template = "Windows Registry Editor Version 50\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\\u0042\u004d\u0057Group\\ISPI\\Rheingold]\n\"License\"=\"{}\"";
+        const string template = "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\\u0042\u004d\u0057Group\\ISPI\\Rheingold]\n\"License\"=\"{}\"";
         File.WriteAllText(licenseFile, template.Replace("{}", ToLiteral(value), StringComparison.Ordinal));
-        Log.Information("=== Registry file generated ===");
+        Log.Information("Registry file generated: {Path}", licenseFile);
     }
 
     private static string ToLiteral(string valueTextForCompiler)

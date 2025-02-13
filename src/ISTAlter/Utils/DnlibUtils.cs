@@ -31,7 +31,7 @@ public static class DnlibUtils
 
         if (set)
         {
-            sb.Length -= 1;
+            sb.Length--;
         }
 
         sb.Append(')');

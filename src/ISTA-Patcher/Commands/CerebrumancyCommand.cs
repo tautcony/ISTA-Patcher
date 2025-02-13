@@ -98,10 +98,9 @@ public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
             Manifestation = this.Manifestation,
             Base64 = this.Base64,
             Compulsion = this.Compulsion,
+            Include = Global.Config.GetSection("Settings:Default:Include").Get<string[]?>() ?? [],
+            Exclude = Global.Config.GetSection("Settings:Default:Exclude").Get<string[]?>() ?? [],
         };
-
-        opts.Include = Global.Config.GetSection("Settings:Default:Include").Get<string[]?>() ?? [];
-        opts.Exclude = Global.Config.GetSection("Settings:Default:Exclude").Get<string[]?>() ?? [];
 
         Execute(opts).Wait();
     }

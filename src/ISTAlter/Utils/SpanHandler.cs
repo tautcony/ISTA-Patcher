@@ -19,11 +19,15 @@ public class SpanHandler(TransactionHandler transaction, string operation) : IDi
 
     public void Finish()
     {
-        this._span.Finish();
+        if (!this._span.IsFinished)
+        {
+            this._span.Finish();
+        }
     }
 
     public void Dispose()
     {
-        this._span.Finish();
+        this.Finish();
+        GC.SuppressFinalize(this);
     }
 }

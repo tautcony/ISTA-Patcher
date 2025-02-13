@@ -19,11 +19,15 @@ public class TransactionHandler(string name, string operation) : IDisposable
 
     public void Finish()
     {
-        this._transaction.Finish();
+        if (!this._transaction.IsFinished)
+        {
+            this._transaction.Finish();
+        }
     }
 
     public void Dispose()
     {
-        this._transaction.Finish();
+        this.Finish();
+        GC.SuppressFinalize(this);
     }
 }

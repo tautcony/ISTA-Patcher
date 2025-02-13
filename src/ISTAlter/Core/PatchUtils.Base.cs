@@ -325,7 +325,7 @@ public static partial class PatchUtils
         }
 
         var libraryNames = patcher.GetCustomAttribute<LibraryNameAttribute>()?.FileName;
-        if (libraryNames == null || !libraryNames.Contains(module.FullName, StringComparer.Ordinal))
+        if (libraryNames?.Contains(module.FullName, StringComparer.Ordinal) != true)
         {
             return;
         }
