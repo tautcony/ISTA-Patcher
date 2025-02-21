@@ -10,39 +10,39 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.187, )",
-        "resolved": "2.0.187",
-        "contentHash": "s35YCC7rnWZnxtpdihrkdrGSAuzhdc+1kUMmO+UgVoogw3HAMmPO9BrSkxfU/KwhncK0Hr+nHFuAqOl+mGS01Q=="
+        "requested": "[2.0.188, )",
+        "resolved": "2.0.188",
+        "contentHash": "2S5o86NsBhGUWXIyxUfqfd0Eo7Tk+3d8bXm9qiaa/N53l9lkyIMiBINyz+MKW0Qrg1Psq7TW35J4PeK73OHYrA=="
       },
       "Roslynator.Analyzers": {
         "type": "Direct",
-        "requested": "[4.13.0, )",
-        "resolved": "4.13.0",
-        "contentHash": "SSYEq2tPT4nmElTGJvpDsLmEw1mWY+Z+CM+H7gO49fSq4VyFivrmHyCeP3gWcDmgqMg77h2tLYRoZ0cjgnKmuA=="
+        "requested": "[4.13.1, )",
+        "resolved": "4.13.1",
+        "contentHash": "KZpLy6ZlCebMk+d/3I5KU2R7AOb4LNJ6tPJqPtvFXmO8bEBHQvCIAvJOnY2tu4C9/aVOROTDYUFADxFqw1gh/g=="
       },
       "Sentry": {
         "type": "Direct",
-        "requested": "[5.1.1, )",
-        "resolved": "5.1.1",
-        "contentHash": "FvdRStUwxXtt9g4fHaGQ5/a9otA6RiLznyTdkyCzIoUbOupwS4WNGF8CGvqDJifkltCJZj+4J8K4/f2RqFVuzg=="
+        "requested": "[5.2.0, )",
+        "resolved": "5.2.0",
+        "contentHash": "b3aZSOU2CjlIIFRtPRbXParKQ+9PF+JOqkSD7Gxq6PiR07t1rnK+crPtdrWMXfW6PVo/s67trCJ+fuLsgTeADw=="
       },
       "Sentry.Profiling": {
         "type": "Direct",
-        "requested": "[5.1.1, )",
-        "resolved": "5.1.1",
-        "contentHash": "vZS6vBXNTPlmmOKwiERhXb99cbw2uihpX8Bv/ZVpJ4cljlNNPQlOoTARGlv7sGedqFvbcZ0agQzVKTFinVR+rA==",
+        "requested": "[5.2.0, )",
+        "resolved": "5.2.0",
+        "contentHash": "N/cnwoOlDbTnzHfbE6j0d+ABVjYZStBAAJpGbC9vrw9Hzwa1tty6uLILxaHQq8U6p14peIalx0c3HJCw8I2VmQ==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "5.1.1"
+          "Sentry": "5.2.0"
         }
       },
       "Sentry.Serilog": {
         "type": "Direct",
-        "requested": "[5.1.1, )",
-        "resolved": "5.1.1",
-        "contentHash": "VNEu06ZXhzOi3LC69wecAMnjkEweHVg2okfg0opGSZP/19KjlovxIVA7q6ttaLTUYChflEdgvij86ScAy3pLIA==",
+        "requested": "[5.2.0, )",
+        "resolved": "5.2.0",
+        "contentHash": "TbmdFgc6PY23zBglAfG6joOEQ/qJbHs66t+vK5ife7B37+EJpulPIlcT/8ujIyt/tNlVBJ/YWnBsnm7rcgG5gw==",
         "dependencies": {
-          "Sentry": "5.1.1",
+          "Sentry": "5.2.0",
           "Serilog": "2.10.0"
         }
       },

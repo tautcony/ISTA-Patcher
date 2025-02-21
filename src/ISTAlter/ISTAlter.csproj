@@ -20,7 +20,7 @@ Released under the GNU GPLv3+.</Copyright>
     <StripSymbols>false</StripSymbols>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -29,17 +29,17 @@ Released under the GNU GPLv3+.</Copyright>
 
   <ItemGroup>
     <PackageReference Include="dnlib" Version="4.4.0" />
-    <PackageReference Include="Meziantou.Analyzer" Version="2.0.187">
+    <PackageReference Include="Meziantou.Analyzer" Version="2.0.188">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Roslynator.Analyzers" Version="4.13.0">
+    <PackageReference Include="Roslynator.Analyzers" Version="4.13.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Sentry" Version="5.1.1" />
-    <PackageReference Include="Sentry.Profiling" Version="5.1.1" />
-    <PackageReference Include="Sentry.Serilog" Version="5.1.1" />
+    <PackageReference Include="Sentry" Version="5.2.0" />
+    <PackageReference Include="Sentry.Profiling" Version="5.2.0" />
+    <PackageReference Include="Sentry.Serilog" Version="5.2.0" />
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="SixLabors.Fonts" Version="2.1.2" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />

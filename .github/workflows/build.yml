@@ -32,6 +32,8 @@ jobs:
         cache-dependency-path: |
           src/ISTA-Patcher/packages.lock.json
           src/ISTAlter/packages.lock.json
+          src/ISTestA/packages.lock.json
+          src/ISTgenerAtor/packages.lock.json
 
     - name: Restore dependencies
       run: |
