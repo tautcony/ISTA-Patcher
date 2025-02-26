@@ -394,4 +394,67 @@ public static partial class PatchUtils
             "(\u0042\u004d\u0057.Rheingold.CoreFramework.UiBrand,\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Vehicle)System.Boolean",
             DnlibUtils.ReturnTrueMethod);
     }
+
+    [FixDS2VehicleIdentificationPatch]
+    public static int PatchFixDS2VehicleIdent(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
+            "doVehicleShortTest",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.IProgressMonitor)System.Boolean",
+            FixCondition);
+
+        void FixCondition(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+
+            var handleMissingEcusInstructions = method.FindInstructions(OpCodes.Call, "System.Void \u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent::HandleMissingEcus(System.Boolean)");
+            var handleMissingEcusProcessed = false;
+            foreach (var handleMissingEcus in handleMissingEcusInstructions)
+            {
+                var indexOfHandleMissingEcus = instructions.IndexOf(handleMissingEcus);
+
+                // make sure statement is `HandleMissingEcus(false)` and remove it
+                if (instructions[indexOfHandleMissingEcus - 1].OpCode == OpCodes.Ldc_I4_0)
+                {
+                    instructions[indexOfHandleMissingEcus] = OpCodes.Nop.ToInstruction();
+                    instructions[indexOfHandleMissingEcus - 1] = OpCodes.Nop.ToInstruction();
+                    instructions[indexOfHandleMissingEcus - 2] = OpCodes.Nop.ToInstruction();
+                    handleMissingEcusProcessed = true;
+                    break;
+                }
+            }
+
+            if (!handleMissingEcusProcessed)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var setIdentSuccessfully = method.FindInstruction(OpCodes.Callvirt, "System.Void \u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.ECU::set_IDENT_SUCCESSFULLY(System.Boolean)");
+            var getVecInfo = method.FindInstruction(OpCodes.Call, "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Vehicle \u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent::get_VecInfo()");
+            var getBNType = method.FindInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.BNType \u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle::get_BNType()");
+            if (setIdentSuccessfully == null || getVecInfo == null || getBNType == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // set IDENT_SUCCESSFULLY only if BNType is BNType.IBUS
+            var indexOfSetIdentSuccessfully = instructions.IndexOf(setIdentSuccessfully);
+            Instruction[] ifConditions =
+            [
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Call.ToInstruction(getVecInfo.Operand as MethodDef),
+                OpCodes.Callvirt.ToInstruction(getBNType.Operand as MemberRef),
+                OpCodes.Ldc_I4.ToInstruction(2),
+                OpCodes.Beq_S.ToInstruction(instructions[indexOfSetIdentSuccessfully + 1]),
+            ];
+
+            foreach (var instruction in ifConditions.Reverse())
+            {
+                instructions.Insert(indexOfSetIdentSuccessfully - 2, instruction);
+            }
+        }
+    }
 }

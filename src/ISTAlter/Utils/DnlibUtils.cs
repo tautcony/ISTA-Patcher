@@ -157,6 +157,19 @@ public static class DnlibUtils
     }
 
     /// <summary>
+    /// Finds all instructions in the body of the <see cref="dnlib.DotNet.MethodDef"/> that match the specified opcode and operand name.
+    /// </summary>
+    /// <param name="method">The <see cref="dnlib.DotNet.MethodDef"/> to search for the instruction.</param>
+    /// <param name="opCode">The opcode of the instruction to find.</param>
+    /// <param name="operandName">The full name of the operand to match.</param>
+    /// <returns>A list of <see cref="dnlib.DotNet.Emit.Instruction"/> objects that match the specified opcode and operand name.</returns>
+    public static List<Instruction> FindInstructions(this MethodDef method, OpCode opCode, string operandName)
+    {
+        return method.Body.Instructions.Where(instruction =>
+            instruction.OpCode == opCode && string.Equals((instruction.Operand as IMethod)?.FullName, operandName, StringComparison.Ordinal)).ToList();
+    }
+
+    /// <summary>
     /// Finds the operand of the first instruction in the body of the <see cref="dnlib.DotNet.MethodDef"/> that matches the specified opcode and operand name.
     /// </summary>
     /// <typeparam name="T">The type of the operand to retrieve.</typeparam>

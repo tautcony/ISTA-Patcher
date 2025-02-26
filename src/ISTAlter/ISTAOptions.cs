@@ -64,6 +64,8 @@ public static class ISTAOptions
         public bool AirClient { get; set; }
 
         public bool SkipBrandCompatibleCheck { get; set; }
+
+        public bool FixDS2VehicleIdentification { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions

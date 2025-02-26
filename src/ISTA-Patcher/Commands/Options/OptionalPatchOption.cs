@@ -36,4 +36,7 @@ public class OptionalPatchOption
 
     [CliOption(Name = "--enable-skip-brand-compatible-check", Description = "Enable skip brand compatible check functionality.")]
     public bool SkipBrandCompatibleCheck { get; set; }
+
+    [CliOption(Name = "--enable-fix-ds2-vehicle-identification", Description = "Enable fix DS2 vehicle identification functionality.")]
+    public bool FixDS2VehicleIdentification { get; set; }
 }

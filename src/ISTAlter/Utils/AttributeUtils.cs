@@ -35,6 +35,8 @@ internal sealed class EnableAirClientPatchAttribute : ISTAPatchAttribute;
 
 internal sealed class DisableBrandCompatibleCheckPatchAttribute : ISTAPatchAttribute;
 
+internal sealed class FixDS2VehicleIdentificationPatchAttribute : ISTAPatchAttribute;
+
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersionAttribute(string version) : Attribute
 {

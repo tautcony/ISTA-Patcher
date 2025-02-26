@@ -12,7 +12,11 @@ public class DefaultPatcherProvider : IPatcherProvider
 
     private DefaultPatcherProvider()
     {
-        Log.Debug("Loaded patches: {Patches}", string.Join(", ", this.Patches.Select(p => p.Method.Name)));
+    }
+
+    public DefaultPatcherProvider(ISTAOptions.PatchOptions opts)
+        : this((ISTAOptions.OptionalPatchOptions)opts)
+    {
     }
 
     protected DefaultPatcherProvider(ISTAOptions.OptionalPatchOptions opts)
@@ -82,11 +86,13 @@ public class DefaultPatcherProvider : IPatcherProvider
         {
             this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(DisableBrandCompatibleCheckPatchAttribute)));
         }
-    }
 
-    public DefaultPatcherProvider(ISTAOptions.PatchOptions opts)
-        : this((ISTAOptions.OptionalPatchOptions)opts)
-    {
+        if (opts.FixDS2VehicleIdentification)
+        {
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(FixDS2VehicleIdentificationPatchAttribute)));
+        }
+
+        Log.Debug("Loaded patches: {Patches}", string.Join(", ", this.Patches.Select(p => p.Method.Name)));
     }
 
     public string[] LoadFileList(string basePath)
