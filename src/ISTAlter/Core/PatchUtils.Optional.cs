@@ -297,16 +297,14 @@ public static partial class PatchUtils
 
         void SetPeriodicalCheck(MethodDef method)
         {
-            var instructions = method.Body.Instructions;
-            var requestSwtAction = method.FindInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
-            if (requestSwtAction == null)
+            var indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
+            if (indexOfRequestSwtAction == -1)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
-            var indexOfRequestSwtAction = instructions.IndexOf(requestSwtAction);
-            var ldcI4One = instructions[indexOfRequestSwtAction - 1];
+            var ldcI4One = method.Body.Instructions[indexOfRequestSwtAction - 1];
             if (!ldcI4One.IsLdcI4())
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
@@ -370,16 +368,14 @@ public static partial class PatchUtils
 
         void ReplaceCondition(MethodDef method)
         {
-            var callIsILeanActive = method.FindInstruction(OpCodes.Call, "System.Boolean \u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings::get_IsILeanActive()");
-            if (callIsILeanActive == null)
+            var indexOfCallIsILeanActive = method.FindIndexOfInstruction(OpCodes.Call, "System.Boolean \u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings::get_IsILeanActive()");
+            if (indexOfCallIsILeanActive == -1)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
-            var instructions = method.Body.Instructions;
-            var indexOfCallIsILeanActive = instructions.IndexOf(callIsILeanActive);
-            var instruction = instructions[indexOfCallIsILeanActive];
+            var instruction = method.Body.Instructions[indexOfCallIsILeanActive];
             instruction.OpCode = OpCodes.Ldc_I4_1;
             instruction.Operand = null;
         }
@@ -396,6 +392,8 @@ public static partial class PatchUtils
     }
 
     [FixDS2VehicleIdentificationPatch]
+    [LibraryName("RheingoldDiagnostics.dll")]
+    [FromVersion("4.49")]
     public static int PatchFixDS2VehicleIdent(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -431,22 +429,21 @@ public static partial class PatchUtils
                 return;
             }
 
-            var setIdentSuccessfully = method.FindInstruction(OpCodes.Callvirt, "System.Void \u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.ECU::set_IDENT_SUCCESSFULLY(System.Boolean)");
-            var getVecInfo = method.FindInstruction(OpCodes.Call, "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Vehicle \u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent::get_VecInfo()");
-            var getBNType = method.FindInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.BNType \u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle::get_BNType()");
-            if (setIdentSuccessfully == null || getVecInfo == null || getBNType == null)
+            var indexOfSetIdentSuccessfully = method.FindIndexOfInstruction(OpCodes.Callvirt, "System.Void \u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.ECU::set_IDENT_SUCCESSFULLY(System.Boolean)");
+            var getVecInfo = method.FindOperand<MethodDef>(OpCodes.Call, "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Vehicle \u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent::get_VecInfo()");
+            var getBNType = method.FindOperand<MemberRef>(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.BNType \u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle::get_BNType()");
+            if (indexOfSetIdentSuccessfully == -1 || getVecInfo == null || getBNType == null)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
             // set IDENT_SUCCESSFULLY only if BNType is BNType.IBUS
-            var indexOfSetIdentSuccessfully = instructions.IndexOf(setIdentSuccessfully);
             Instruction[] ifConditions =
             [
                 OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Call.ToInstruction(getVecInfo.Operand as MethodDef),
-                OpCodes.Callvirt.ToInstruction(getBNType.Operand as MemberRef),
+                OpCodes.Call.ToInstruction(getVecInfo),
+                OpCodes.Callvirt.ToInstruction(getBNType),
                 OpCodes.Ldc_I4.ToInstruction(2),
                 OpCodes.Beq_S.ToInstruction(instructions[indexOfSetIdentSuccessfully + 1]),
             ];
