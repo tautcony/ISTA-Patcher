@@ -161,7 +161,7 @@ public class CryptoCommand
             version = "Native";
         }
 
-        if (fileInfo.Hash?.Length == 0)
+        if (fileInfo.Hash.Length == 0)
         {
             checkResult = checkEmpty;
         }

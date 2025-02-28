@@ -22,11 +22,17 @@ public class iLeanCommand
 {
     public RootCommand? ParentCommand { get; set; }
 
+    [CliOption(Description = "Specify the cipher type.", Required = false)]
+    public ISTAOptions.CipherEnum CipherType { get; set; } = ISTAOptions.CipherEnum.DefaultCipher;
+
     [CliOption(Description = "Specify the machine GUID.", Required = false)]
     public string? MachineGuid { get; set; }
 
     [CliOption(Description = "Specify the volume serial number.", Required = false)]
     public string? VolumeSerialNumber { get; set; }
+
+    [CliOption(Description = "Specify the password.", Required = false)]
+    public string? Password { get; set; }
 
     [CliOption(Description = "Show the machine information.")]
     public bool ShowMachineInfo { get; set; }
@@ -42,8 +48,10 @@ public class iLeanCommand
         var opts = new ISTAOptions.ILeanOptions
         {
             Verbosity = this.ParentCommand!.Verbosity,
+            CipherType = this.CipherType,
             MachineGuid = this.MachineGuid,
             VolumeSerialNumber = this.VolumeSerialNumber,
+            Password = this.Password,
             ShowMachineInfo = this.ShowMachineInfo,
             Encrypt = this.Encrypt,
             Decrypt = this.Decrypt,
@@ -78,31 +86,59 @@ public class iLeanCommand
 
         if (string.IsNullOrEmpty(opts.Encrypt) && string.IsNullOrEmpty(opts.Decrypt))
         {
-            Log.Warning("No operation matched, exiting...");
-            return 1;
-        }
-
-        if (string.IsNullOrEmpty(opts.MachineGuid) && isSupportedPlatform)
-        {
-            Log.Information("MachineGuid is not provided, read from system...");
-            opts.MachineGuid = NativeMethods.GetMachineUUID();
-        }
-
-        if (string.IsNullOrEmpty(opts.VolumeSerialNumber) && isSupportedPlatform)
-        {
-            Log.Information("VolumeSerialNumber is not provided, read from system...");
-            opts.VolumeSerialNumber = NativeMethods.GetVolumeSerialNumber();
-        }
-
-        if (string.IsNullOrEmpty(opts.MachineGuid) || string.IsNullOrEmpty(opts.VolumeSerialNumber))
-        {
-            Log.Error("MachineGuid or VolumeSerialNumber is not available, exiting...");
+            Log.Warning("No operation provided, please provide Encrypt or Decrypt option.");
             return -1;
         }
 
+        if (!string.IsNullOrEmpty(opts.Encrypt) && !string.IsNullOrEmpty(opts.Decrypt))
+        {
+            Log.Warning("Both Encrypt and Decrypt options are provided, please provide only one.");
+            return -1;
+        }
+
+        if (opts.CipherType == ISTAOptions.CipherEnum.DefaultCipher)
+        {
+            if (string.IsNullOrEmpty(opts.MachineGuid) && isSupportedPlatform)
+            {
+                Log.Information("MachineGuid is not provided, read from system...");
+                opts.MachineGuid = NativeMethods.GetMachineUUID();
+            }
+
+            if (string.IsNullOrEmpty(opts.VolumeSerialNumber) && isSupportedPlatform)
+            {
+                Log.Information("VolumeSerialNumber is not provided, read from system...");
+                opts.VolumeSerialNumber = NativeMethods.GetVolumeSerialNumber();
+            }
+
+            if (string.IsNullOrEmpty(opts.MachineGuid) || string.IsNullOrEmpty(opts.VolumeSerialNumber))
+            {
+                Log.Error("MachineGuid or VolumeSerialNumber is not provided, please provide both.");
+                return -1;
+            }
+
+            return await iLeanCipherHandler(opts);
+        }
+
+        if (opts.CipherType == ISTAOptions.CipherEnum.PasswordCipher)
+        {
+            if (string.IsNullOrEmpty(opts.Password))
+            {
+                Log.Error("Password is not provided, please provide a password.");
+                return -1;
+            }
+
+            return await iLeanCipherPasswordHandler(opts);
+        }
+
+        Log.Error("No operation matched, exiting...");
+        return -1;
+    }
+
+    private static async Task<int> iLeanCipherHandler(ISTAOptions.ILeanOptions opts)
+    {
         try
         {
-            using var encryption = new iLeanCipher(opts.MachineGuid, opts.VolumeSerialNumber);
+            using var encryption = new iLeanCipher(opts.MachineGuid!, opts.VolumeSerialNumber!);
             if (!string.IsNullOrEmpty(opts.Encrypt))
             {
                 var content = File.Exists(opts.Encrypt)
@@ -127,10 +163,42 @@ public class iLeanCommand
         {
             Log.Information("MachineGuid: {MachineGuid}, VolumeSerialNumber: {VolumeSerialNumber}", opts.MachineGuid, opts.VolumeSerialNumber);
             Log.Error(ex, "iLean Encryption/Decryption failed.");
-            return -1;
         }
 
-        Log.Warning("No operation matched, exiting...");
+        return -1;
+    }
+
+    private static async Task<int> iLeanCipherPasswordHandler(ISTAOptions.ILeanOptions opts)
+    {
+        try
+        {
+            using var encryption = new iLeanPasswordCipher(opts.Password!);
+            if (!string.IsNullOrEmpty(opts.Encrypt))
+            {
+                var content = File.Exists(opts.Encrypt)
+                    ? await File.ReadAllTextAsync(opts.Encrypt).ConfigureAwait(false)
+                    : opts.Encrypt;
+                var encrypted = encryption.Encrypt(content);
+                Log.Information("Encrypted: \n{Encrypted}\n", encrypted);
+                return 0;
+            }
+
+            if (!string.IsNullOrEmpty(opts.Decrypt))
+            {
+                var content = File.Exists(opts.Decrypt)
+                    ? await File.ReadAllTextAsync(opts.Decrypt).ConfigureAwait(false)
+                    : opts.Decrypt;
+                var decrypted = encryption.Decrypt(content);
+                Log.Information("Decrypted: \n{Decrypted}\n", decrypted);
+                return 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Information("Password: {Password}", opts.Password);
+            Log.Error(ex, "iLean Password Encryption/Decryption failed.");
+        }
+
         return -1;
     }
 }

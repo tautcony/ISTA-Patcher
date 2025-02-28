@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Serilog;
 
-internal sealed class iLeanPasswordCipher : IDisposable
+public sealed class iLeanPasswordCipher : IDisposable
 {
     private readonly string password;
 

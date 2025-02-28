@@ -119,9 +119,13 @@ public static class ISTAOptions
 
     public class ILeanOptions : BaseOptions
     {
+        public CipherEnum CipherType { get; set; }
+
         public string? MachineGuid { get; set; }
 
         public string? VolumeSerialNumber { get; set; }
+
+        public string? Password { get; set; }
 
         public bool ShowMachineInfo { get; set; }
 

@@ -6,7 +6,7 @@ namespace ISTAlter.Utils;
 using System.Text.RegularExpressions;
 using ISTAlter.Models.iLean;
 
-public partial class DataPackageUtils
+public static partial class DataPackageUtils
 {
     public static DataPackage DeterminePackageDetails(string fileName)
     {
