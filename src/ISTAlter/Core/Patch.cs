@@ -113,7 +113,12 @@ public static partial class Patch
                     return 0;
                 }
 
-                if (!PatchUtils.CheckPatchVersion(module, patch.Method))
+                if (!PatchUtils.IsPatchApplicableToLibrary(module, patch.Method))
+                {
+                    return 0;
+                }
+
+                if (!PatchUtils.IsPatchApplicableToVersion(module, patch.Method))
                 {
                     return 0;
                 }

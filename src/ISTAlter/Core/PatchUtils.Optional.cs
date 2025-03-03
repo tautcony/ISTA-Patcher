@@ -15,6 +15,7 @@ using Serilog;
 public static partial class PatchUtils
 {
     [FinishedOPPatch]
+    [LibraryName("IstaServicesContract.dll")]
     public static int PatchIsProgrammingSession(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -22,7 +23,15 @@ public static partial class PatchUtils
             "get_IsProgrammingSession",
             "()System.Boolean",
             DnlibUtils.ReturnTrueMethod
-         ) + module.PatchAsyncFunction(
+        );
+    }
+
+    [FinishedOPPatch]
+    [LibraryName("ISTAGUI.exe")]
+    [UntilVersion("4.52")]
+    public static int PatchOperationFinishedListViewModel(ModuleDefMD module)
+    {
+        return module.PatchAsyncFunction(
             "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.OperationFinishedListViewModel",
             "PerformAcceptOperation",
             "(\u0042\u004d\u0057.ISPI.IstaServices.Contract.PUK.Data.TransactionMetaData)System.Void",
@@ -45,6 +54,7 @@ public static partial class PatchUtils
     }
 
     [ENETPatch]
+    [LibraryName("RheingoldProgramming.dll")]
     public static int PatchTherapyPlanCalculated(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -56,6 +66,8 @@ public static partial class PatchUtils
     }
 
     [RequirementsPatch]
+    [LibraryName("ISTAGUI.exe")]
+    [UntilVersion("4.52")]
     public static int PatchIstaInstallationRequirements(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -217,6 +229,7 @@ public static partial class PatchUtils
     }
 
     [MarketLanguagePatch]
+    [LibraryName("RheingoldISPINext.dll")]
     public static Func<ModuleDefMD, int> PatchCommonServiceWrapper_GetMarketLanguage(string marketLanguage)
     {
         return module => module.PatchFunction(
@@ -228,17 +241,23 @@ public static partial class PatchUtils
     }
 
     [EnableOfflinePatch]
+    [LibraryName("RheingoldCoreFramework.dll")]
     public static int PatchConfigSettings(ModuleDefMD module)
     {
-        return module.PatcherGetter(
+        return module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
             "IsILeanActive",
             DnlibUtils.ReturnFalseMethod
-        ) + module.PatcherGetter(
+        ) + module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
             "IsOssModeActive",
             DnlibUtils.ReturnFalseMethod
-        ) + module.PatcherGetter(
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
+            "ShouldUseIdentNuget",
+            "(System.Boolean)System.Boolean",
+            DnlibUtils.ReturnFalseMethod
+        ) + module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
             "PsdzWebserviceEnabled",
             DnlibUtils.ReturnFalseMethod
@@ -305,6 +324,7 @@ public static partial class PatchUtils
     }
 
     [DisableFakeFSCRejectPatch]
+    [LibraryName("RheingoldProgramming.dll")]
     public static int PatchRetrieveActualSwtInfoState(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -335,6 +355,7 @@ public static partial class PatchUtils
     }
 
     [DisableFakeFSCRejectPatch]
+    [LibraryName("RheingoldProgramming.dll")]
     public static int PatchRetrieveActualSwtEnablingCodesState(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -367,9 +388,10 @@ public static partial class PatchUtils
     }
 
     [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
     public static int PatchMainWindowIconBarViewModel(ModuleDefMD module)
     {
-        return module.PatcherGetter(
+        return module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.MainWindowIconBarViewModel",
             "IsAirActive",
             DnlibUtils.ReturnTrueMethod
@@ -377,6 +399,7 @@ public static partial class PatchUtils
     }
 
     [EnableAirClientPatch]
+    [LibraryName("RheingoldISPINext.dll")]
     public static int PatchAirForkServicesWrapper(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -401,6 +424,7 @@ public static partial class PatchUtils
     }
 
     [DisableBrandCompatibleCheckPatch]
+    [LibraryName("RheingoldCoreFramework.dll")]
     public static int PatchBrandMapping(ModuleDefMD module)
     {
         return module.PatchFunction(

@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
 
 namespace ISTAlter.Core;
 
@@ -37,7 +37,7 @@ public static partial class PatchUtils
     [ToyotaPatch]
     public static int PatchGTSLicenseManager(ModuleDefMD module)
     {
-        return module.PatcherGetter(
+        return module.PatchGetter(
             "Toyota.GTS.ForIsta.GTSLicenseManager",
             "LicenseStatus",
             DnlibUtils.ReturnZeroMethod);

@@ -75,6 +75,7 @@ public static partial class PatchUtils
     }
 
     [ValidationPatch]
+    [LibraryName("RheingoldISPINext.dll")]
     public static int PatchCommonServiceWrapper_VerifyLicense(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -98,6 +99,7 @@ public static partial class PatchUtils
     }
 
     [ValidationPatch]
+    [LibraryName("ISTAGUI.exe")]
     public static int PatchMainWindowViewModel(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -126,6 +128,7 @@ public static partial class PatchUtils
     }
 
     [ValidationPatch]
+    [LibraryName("RheingoldExternalToolLicense.dll")]
     public static int PatchServiceProgramCompilerLicense(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -254,7 +257,7 @@ public static partial class PatchUtils
             "VerifyStrongName",
             "(System.String,System.Boolean)System.Boolean",
             DnlibUtils.ReturnTrueMethod
-        ) + module.PatcherGetter(
+        ) + module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
             "Title",
             DnlibUtils.EmptyingMethod
@@ -262,6 +265,7 @@ public static partial class PatchUtils
     }
 
     [EssentialPatch]
+    [LibraryName("IstaServicesClient.dll")]
     public static int PatchIstaIcsServiceClient(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -306,6 +310,7 @@ public static partial class PatchUtils
     }
 
     [EssentialPatch]
+    [LibraryName("RheingoldCoreFramework.dll")]
     public static int PatchIstaProcessStarter(ModuleDefMD module)
     {
         return module.PatchFunction(
@@ -329,7 +334,7 @@ public static partial class PatchUtils
 
     public static int PatchInteractionModel(ModuleDefMD module)
     {
-        return module.PatcherGetter(
+        return module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
             "Title",
             method =>

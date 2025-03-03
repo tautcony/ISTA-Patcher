@@ -173,7 +173,7 @@ public static partial class PatchUtils
     /// <param name="operation">The action representing the patch operation to be applied to the method.</param>
     /// <param name="memberName">The name of the method applying the patch.</param>
     /// <returns>The number of methods patched.</returns>
-    public static int PatcherGetter(
+    public static int PatchGetter(
         this ModuleDefMD module,
         string type,
         string propertyName,
@@ -322,20 +322,38 @@ public static partial class PatchUtils
     /// <param name="module">module to check.</param>
     /// <param name="patcher">patcher to check.</param>
     /// <returns>true for valid.</returns>
-    public static bool CheckPatchVersion(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
+    public static bool IsPatchApplicableToLibrary(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
+    {
+        var libraryNames = patcher?.GetCustomAttribute<LibraryNameAttribute>()?.FileName;
+
+        if (libraryNames == null)
+        {
+            Log.Debug("Skip library check for {PatchName} due to no library name is set", patcher?.Name);
+            return true;
+        }
+
+        if (!libraryNames.Contains(module.FullName, StringComparer.Ordinal))
+        {
+            Log.Debug("{PatcherName} is not valid for library: {Library}", patcher.Name, module.FullName);
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Check if the patcher is valid for the assembly.
+    /// </summary>
+    /// <param name="module">module to check.</param>
+    /// <param name="patcher">patcher to check.</param>
+    /// <returns>true for valid.</returns>
+    public static bool IsPatchApplicableToVersion(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
     {
         var untilVersion = patcher?.GetCustomAttribute<UntilVersionAttribute>()?.Version;
         var fromVersion = patcher?.GetCustomAttribute<FromVersionAttribute>()?.Version;
         if (untilVersion == null && fromVersion == null)
         {
             Log.Debug("No version check for {PatcherName} has been set", patcher?.Name);
-            return true;
-        }
-
-        var libraryNames = patcher.GetCustomAttribute<LibraryNameAttribute>()?.FileName;
-        if (libraryNames?.Contains(module.FullName, StringComparer.Ordinal) != true)
-        {
-            Log.Debug("Skip version check for {PatchName} due to library name is not match", patcher.Name);
             return true;
         }
 
