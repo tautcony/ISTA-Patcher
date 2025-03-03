@@ -20,10 +20,17 @@ public static class ISTAOptions
         iLean = 1,
     }
 
-    public enum CipherEnum
+    public enum CipherType
     {
         DefaultCipher = 0,
         PasswordCipher = 1,
+    }
+
+    public enum FormatterType
+    {
+        Default = 0,
+        JSON = 1,
+        XML = 2,
     }
 
     public class BaseOptions
@@ -119,7 +126,7 @@ public static class ISTAOptions
 
     public class ILeanOptions : BaseOptions
     {
-        public CipherEnum CipherType { get; set; }
+        public CipherType CipherType { get; set; }
 
         public string? MachineGuid { get; set; }
 
@@ -132,5 +139,9 @@ public static class ISTAOptions
         public string? Encrypt { get; set; }
 
         public string? Decrypt { get; set; }
+
+        public string? Output { get; set; }
+
+        public FormatterType Formatter { get; set; }
     }
 }

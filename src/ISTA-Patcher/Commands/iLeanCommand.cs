@@ -4,6 +4,8 @@
 namespace ISTAPatcher.Commands;
 
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
+using System.Xml;
 using DotMake.CommandLine;
 using ISTAlter;
 using ISTAlter.Core.iLean;
@@ -23,7 +25,7 @@ public class iLeanCommand
     public RootCommand? ParentCommand { get; set; }
 
     [CliOption(Description = "Specify the cipher type.", Required = false)]
-    public ISTAOptions.CipherEnum CipherType { get; set; } = ISTAOptions.CipherEnum.DefaultCipher;
+    public ISTAOptions.CipherType CipherType { get; set; } = ISTAOptions.CipherType.DefaultCipher;
 
     [CliOption(Description = "Specify the machine GUID.", Required = false)]
     public string? MachineGuid { get; set; }
@@ -42,6 +44,12 @@ public class iLeanCommand
 
     [CliOption(Description = "Decrypt the provided file/content.", Required = false)]
     public string? Decrypt { get; set; }
+
+    [CliOption(Description = "Output the result to a file.", Required = false)]
+    public string? Output { get; set; }
+
+    [CliOption(Description = "Specify the formatter type.", Required = false)]
+    public ISTAOptions.FormatterType Formatter { get; set; } = ISTAOptions.FormatterType.Default;
 
     public void Run()
     {
@@ -96,7 +104,9 @@ public class iLeanCommand
             return -1;
         }
 
-        if (opts.CipherType == ISTAOptions.CipherEnum.DefaultCipher)
+        string result = null;
+
+        if (opts.CipherType == ISTAOptions.CipherType.DefaultCipher)
         {
             if (string.IsNullOrEmpty(opts.MachineGuid) && isSupportedPlatform)
             {
@@ -116,10 +126,10 @@ public class iLeanCommand
                 return -1;
             }
 
-            return await iLeanCipherHandler(opts);
+            result = await iLeanCipherHandler(opts);
         }
 
-        if (opts.CipherType == ISTAOptions.CipherEnum.PasswordCipher)
+        if (opts.CipherType == ISTAOptions.CipherType.PasswordCipher)
         {
             if (string.IsNullOrEmpty(opts.Password))
             {
@@ -127,14 +137,59 @@ public class iLeanCommand
                 return -1;
             }
 
-            return await iLeanCipherPasswordHandler(opts);
+            result = await iLeanCipherPasswordHandler(opts);
         }
 
-        Log.Error("No operation matched, exiting...");
-        return -1;
+        if (result == null)
+        {
+            Log.Error("No operation matched or failed, please check the provided options.");
+            return -1;
+        }
+
+        if (opts.Decrypt is { Length: > 0 })
+        {
+            switch (opts.Formatter)
+            {
+                case ISTAOptions.FormatterType.JSON:
+                {
+                    var jsonElement = JsonSerializer.Deserialize<JsonElement>(result);
+                    result = JsonSerializer.Serialize(jsonElement, new JsonSerializerOptions { WriteIndented = true });
+                    break;
+                }
+
+                case ISTAOptions.FormatterType.XML:
+                {
+                    var xmlDoc = new XmlDocument();
+                    xmlDoc.LoadXml(result);
+                    await using var stringWriter = new StringWriter();
+                    await using var xmlTextWriter = XmlWriter.Create(stringWriter, new XmlWriterSettings { Indent = true });
+                    xmlDoc.WriteTo(xmlTextWriter);
+                    await xmlTextWriter.FlushAsync();
+                    result = stringWriter.GetStringBuilder().ToString();
+
+                    break;
+                }
+
+                case ISTAOptions.FormatterType.Default:
+                default:
+                    break;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(opts.Output))
+        {
+            await File.WriteAllTextAsync(opts.Output, result).ConfigureAwait(false);
+            Log.Information("Result is written to {Output}", opts.Output);
+        }
+        else
+        {
+            Log.Information("Result:\n {Result}", result);
+        }
+
+        return 0;
     }
 
-    private static async Task<int> iLeanCipherHandler(ISTAOptions.ILeanOptions opts)
+    private static async Task<string?> iLeanCipherHandler(ISTAOptions.ILeanOptions opts)
     {
         try
         {
@@ -144,9 +199,7 @@ public class iLeanCommand
                 var content = File.Exists(opts.Encrypt)
                     ? await File.ReadAllTextAsync(opts.Encrypt).ConfigureAwait(false)
                     : opts.Encrypt;
-                var encrypted = encryption.Encrypt(content);
-                Log.Information("Encrypted: \n{Encrypted}\n", encrypted);
-                return 0;
+                return encryption.Encrypt(content);
             }
 
             if (!string.IsNullOrEmpty(opts.Decrypt))
@@ -154,9 +207,7 @@ public class iLeanCommand
                 var content = File.Exists(opts.Decrypt)
                     ? await File.ReadAllTextAsync(opts.Decrypt).ConfigureAwait(false)
                     : opts.Decrypt;
-                var decrypted = encryption.Decrypt(content);
-                Log.Information("Decrypted: \n{Decrypted}\n", decrypted);
-                return 0;
+                return encryption.Decrypt(content);
             }
         }
         catch (Exception ex)
@@ -165,10 +216,10 @@ public class iLeanCommand
             Log.Error(ex, "iLean Encryption/Decryption failed.");
         }
 
-        return -1;
+        return null;
     }
 
-    private static async Task<int> iLeanCipherPasswordHandler(ISTAOptions.ILeanOptions opts)
+    private static async Task<string?> iLeanCipherPasswordHandler(ISTAOptions.ILeanOptions opts)
     {
         try
         {
@@ -178,9 +229,7 @@ public class iLeanCommand
                 var content = File.Exists(opts.Encrypt)
                     ? await File.ReadAllTextAsync(opts.Encrypt).ConfigureAwait(false)
                     : opts.Encrypt;
-                var encrypted = encryption.Encrypt(content);
-                Log.Information("Encrypted: \n{Encrypted}\n", encrypted);
-                return 0;
+                return encryption.Encrypt(content);
             }
 
             if (!string.IsNullOrEmpty(opts.Decrypt))
@@ -188,9 +237,7 @@ public class iLeanCommand
                 var content = File.Exists(opts.Decrypt)
                     ? await File.ReadAllTextAsync(opts.Decrypt).ConfigureAwait(false)
                     : opts.Decrypt;
-                var decrypted = encryption.Decrypt(content);
-                Log.Information("Decrypted: \n{Decrypted}\n", decrypted);
-                return 0;
+                return encryption.Decrypt(content);
             }
         }
         catch (Exception ex)
@@ -199,6 +246,6 @@ public class iLeanCommand
             Log.Error(ex, "iLean Password Encryption/Decryption failed.");
         }
 
-        return -1;
+        return null;
     }
 }
