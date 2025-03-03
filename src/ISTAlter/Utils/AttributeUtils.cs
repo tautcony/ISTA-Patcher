@@ -40,7 +40,7 @@ internal sealed class FixDS2VehicleIdentificationPatchAttribute : ISTAPatchAttri
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersionAttribute(string version) : Attribute
 {
-    public string? Version { get; } = version;
+    public Version? Version { get; } = new(version);
 }
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]

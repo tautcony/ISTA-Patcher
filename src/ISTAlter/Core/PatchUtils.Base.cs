@@ -325,21 +325,32 @@ public static partial class PatchUtils
     public static bool CheckPatchVersion(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
     {
         var untilVersion = patcher?.GetCustomAttribute<UntilVersionAttribute>()?.Version;
-        if (untilVersion == null)
+        var fromVersion = patcher?.GetCustomAttribute<FromVersionAttribute>()?.Version;
+        if (untilVersion == null && fromVersion == null)
         {
+            Log.Debug("No version check for {PatcherName} has been set", patcher?.Name);
             return true;
         }
 
         var libraryNames = patcher.GetCustomAttribute<LibraryNameAttribute>()?.FileName;
         if (libraryNames?.Contains(module.FullName, StringComparer.Ordinal) != true)
         {
+            Log.Debug("Skip version check for {PatchName} due to library name is not match", patcher.Name);
             return true;
         }
 
         var moduleVersion = module.Assembly.Version;
-        if (moduleVersion.Major == untilVersion.Major && moduleVersion > untilVersion)
+
+        // A valid patcher should match the version range: moduleVersion ∈ [fromVersion, untilVersion)
+        if (fromVersion != null && moduleVersion.Major == fromVersion.Major && moduleVersion < fromVersion)
         {
-            Log.Warning("{PatcherName} is no longer valid for version {Assembly}({Version})", patcher.Name, module.Assembly.Name, module.Assembly.Version);
+            Log.Warning("{PatcherName} is not valid for assembly yet: {Assembly}({Version})", patcher.Name, module.Assembly.Name, module.Assembly.Version);
+            return false;
+        }
+
+        if (untilVersion != null && moduleVersion.Major == untilVersion.Major && moduleVersion >= untilVersion)
+        {
+            Log.Warning("{PatcherName} is no longer valid for assembly: {Assembly}({Version})", patcher.Name, module.Assembly.Name, module.Assembly.Version);
             return false;
         }
 
