@@ -261,11 +261,26 @@ public static partial class PatchUtils
     }
 
     [UserAuthPatch]
+    [LibraryName("RheingoldPresentationFramework.dll")]
     [FromVersion("4.48")]
+    [UntilVersion("4.51")]
     public static int PatchLoginOptionsProvider(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.PresentationFramework.AuthenticationRefactored.Services.LoginOptionsProvider",
+            "IsLoginEnabled",
+            "()System.Boolean",
+            DnlibUtils.ReturnFalseMethod
+        );
+    }
+
+    [UserAuthPatch]
+    [LibraryName("RheingoldPresentationFramework.dll")]
+    [FromVersion("4.52")]
+    public static int LoginEnabledOptionProvider(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.PresentationFramework.AuthenticationRefactored.Services.LoginEnabledOptionProvider",
             "IsLoginEnabled",
             "()System.Boolean",
             DnlibUtils.ReturnFalseMethod

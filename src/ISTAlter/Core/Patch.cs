@@ -109,10 +109,15 @@ public static partial class Patch
                 var libraryList = IPatcherProvider.ExtractLibrariesConfigFromAttribute(patch.Method);
                 if (options.SkipLibrary.Intersect(libraryList, StringComparer.Ordinal).Any())
                 {
+                    Log.Warning("Skip patch {PatchName} due to library filter", patch.Method.Name);
                     return 0;
                 }
 
-                PatchUtils.CheckPatchVersion(module, patch.Method);
+                if (!PatchUtils.CheckPatchVersion(module, patch.Method))
+                {
+                    return 0;
+                }
+
                 var patchedCount = patch.Delegator(module);
                 patch.AppliedCount += patchedCount;
                 return patchedCount;

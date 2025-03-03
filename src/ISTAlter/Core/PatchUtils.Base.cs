@@ -316,25 +316,34 @@ public static partial class PatchUtils
         return attributeType;
     }
 
-    public static void CheckPatchVersion(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
+    /// <summary>
+    /// Check if the patcher is valid for the assembly.
+    /// </summary>
+    /// <param name="module">module to check.</param>
+    /// <param name="patcher">patcher to check.</param>
+    /// <returns>true for valid.</returns>
+    public static bool CheckPatchVersion(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
     {
         var untilVersion = patcher?.GetCustomAttribute<UntilVersionAttribute>()?.Version;
         if (untilVersion == null)
         {
-            return;
+            return true;
         }
 
         var libraryNames = patcher.GetCustomAttribute<LibraryNameAttribute>()?.FileName;
         if (libraryNames?.Contains(module.FullName, StringComparer.Ordinal) != true)
         {
-            return;
+            return true;
         }
 
         var moduleVersion = module.Assembly.Version;
         if (moduleVersion.Major == untilVersion.Major && moduleVersion > untilVersion)
         {
             Log.Warning("{PatcherName} is no longer valid for version {Assembly}({Version})", patcher.Name, module.Assembly.Name, module.Assembly.Version);
+            return false;
         }
+
+        return true;
     }
 
     [GeneratedRegex(@"(?<version>\d+\.\d+\.\d+)\+(?<hash>[a-f0-9]+)", RegexOptions.Compiled, matchTimeoutMilliseconds: 1000)]
