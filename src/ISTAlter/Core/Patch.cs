@@ -199,7 +199,7 @@ public static partial class Patch
         string FormatName(Func<ModuleDefMD, int> func)
         {
             var match = ActionNamePattern().Match(func.Method.Name);
-            return match.Success ? match.Groups["name"].Value : func.Method.Name;
+            return (match.Success ? match.Groups["name"].Value : func.Method.Name).Replace("_", "::", StringComparison.Ordinal);
         }
     }
 

@@ -238,6 +238,10 @@ public static partial class PatchUtils
             "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
             "IsOssModeActive",
             DnlibUtils.ReturnFalseMethod
+        ) + module.PatcherGetter(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
+            "PsdzWebserviceEnabled",
+            DnlibUtils.ReturnFalseMethod
         );
     }
 
