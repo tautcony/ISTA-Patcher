@@ -137,12 +137,18 @@ public static partial class PatchUtils
     }
 
     [ValidationPatch]
+    [LibraryName("PsdzServiceImpl.dll")]
     public static int PatchConfigurationService(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.Psdz.Services.ConfigurationService",
             "SetPsdzProperties",
             "(System.String,System.String,System.String,System.String)System.Void",
+            RewriteProperties
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.Psdz.Services.ConfigurationService",
+            "SetPsdzProperties",
+            "(System.String,System.String,System.String,System.String,System.String)System.Void",
             RewriteProperties
         );
 
@@ -174,59 +180,58 @@ public static partial class PatchUtils
                 method.Body.Variables.Add(property);
             }
 
-            var patchedMethod = new[]
+            var patchedMethod = new List<Instruction>
             {
                 // Properties pSdZProperties = base.BaseService.getPSdZProperties();
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Call.ToInstruction(getBaseService),
                 OpCodes.Callvirt.ToInstruction(getPSdZProperties),
                 OpCodes.Stloc_0.ToInstruction(),
+            };
 
-                // PutProperty(pSdZProperties, String.op_Implicit("DealerID"), String.op_Implicit("1234"));
-                OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Ldloc_0.ToInstruction(),
-                OpCodes.Ldstr.ToInstruction("DealerID"),
-                OpCodes.Call.ToInstruction(stringImplicit),
-                OpCodes.Ldstr.ToInstruction("1234"),
-                OpCodes.Call.ToInstruction(stringImplicit),
-                OpCodes.Call.ToInstruction(putProperty),
+            // PutProperty(pSdZProperties, String.op_Implicit("DealerID"), String.op_Implicit("1234"));
+            patchedMethod.AddRange(PutProperty("DealerID", OpCodes.Ldstr.ToInstruction("1234")));
 
-                // PutProperty(pSdZProperties, String.op_Implicit("PlantID"), String.op_Implicit("0"));
-                OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Ldloc_0.ToInstruction(),
-                OpCodes.Ldstr.ToInstruction("PlantID"),
-                OpCodes.Call.ToInstruction(stringImplicit),
-                OpCodes.Ldstr.ToInstruction("0"),
-                OpCodes.Call.ToInstruction(stringImplicit),
-                OpCodes.Call.ToInstruction(putProperty),
+            // PutProperty(pSdZProperties, String.op_Implicit("PlantID"), String.op_Implicit("0"));
+            patchedMethod.AddRange(PutProperty("PlantID", OpCodes.Ldstr.ToInstruction("0")));
 
-                // PutProperty(pSdZProperties, String.op_Implicit("ProgrammierGeraeteSeriennummer"), String.op_Implicit(programmierGeraeteSeriennummer));
-                OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Ldloc_0.ToInstruction(),
-                OpCodes.Ldstr.ToInstruction("ProgrammierGeraeteSeriennummer"),
-                OpCodes.Call.ToInstruction(stringImplicit),
-                OpCodes.Ldarg_3.ToInstruction(),
-                OpCodes.Call.ToInstruction(stringImplicit),
-                OpCodes.Call.ToInstruction(putProperty),
+            // PutProperty(pSdZProperties, String.op_Implicit("ProgrammierGeraeteSeriennummer"), String.op_Implicit(programmierGeraeteSeriennummer));
+            patchedMethod.AddRange(PutProperty("ProgrammierGeraeteSeriennummer", OpCodes.Ldarg_3.ToInstruction()));
 
-                // PutProperty(pSdZProperties, String.op_Implicit("Testereinsatzkennung"), String.op_Implicit(testerEinsatzKennung));
-                OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Ldloc_0.ToInstruction(),
-                OpCodes.Ldstr.ToInstruction("Testereinsatzkennung"),
-                OpCodes.Call.ToInstruction(stringImplicit),
-                OpCodes.Ldarg_S.ToInstruction(method.Parameters[4]),
-                OpCodes.Call.ToInstruction(stringImplicit),
-                OpCodes.Call.ToInstruction(putProperty),
+            // PutProperty(pSdZProperties, String.op_Implicit("Testereinsatzkennung"), String.op_Implicit(testerEinsatzKennung));
+            patchedMethod.AddRange(PutProperty("Testereinsatzkennung", OpCodes.Ldarg_S.ToInstruction(method.Parameters[4])));
 
-                // base.BaseService.setPSdZProperties(pSdZProperties);
+            if (method.Parameters.Count == 6)
+            {
+                // PutProperty(psdZProperties, "ProgrammingSequenceUseCase", programmingSequenceUseCase);
+                patchedMethod.AddRange(PutProperty("ProgrammingSequenceUseCase", OpCodes.Ldarg_S.ToInstruction(method.Parameters[5])));
+            }
+
+            // base.BaseService.setPSdZProperties(pSdZProperties);
+            patchedMethod.AddRange([
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Call.ToInstruction(getBaseService),
                 OpCodes.Ldloc_0.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(setPSdZProperties),
                 OpCodes.Ret.ToInstruction(),
-            };
+            ]);
 
             method.ReplaceWith(patchedMethod);
+            return;
+
+            Instruction[] PutProperty(string propertyName, Instruction valueInstruction)
+            {
+                return
+                [
+                    OpCodes.Ldarg_0.ToInstruction(),
+                    OpCodes.Ldloc_0.ToInstruction(),
+                    OpCodes.Ldstr.ToInstruction(propertyName),
+                    OpCodes.Call.ToInstruction(stringImplicit),
+                    valueInstruction,
+                    OpCodes.Call.ToInstruction(stringImplicit),
+                    OpCodes.Call.ToInstruction(putProperty),
+                ];
+            }
         }
     }
 
