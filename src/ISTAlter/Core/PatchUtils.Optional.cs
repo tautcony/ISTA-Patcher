@@ -265,10 +265,16 @@ public static partial class PatchUtils
 
         void ReturnNullableFalse(MethodDef method)
         {
-            var nullableBoolean = DnlibUtils.CreateNullableCtor(module, module.CorLibTypes.Boolean);
+            var ctor = method.FindOperand<MemberRef>(OpCodes.Newobj, "System.Void System.Nullable`1<System.Boolean>::.ctor(System.Boolean)");
+            if (ctor == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
             method.ReplaceWith([
                 OpCodes.Ldc_I4_0.ToInstruction(),
-                OpCodes.Newobj.ToInstruction(nullableBoolean),
+                OpCodes.Newobj.ToInstruction(ctor),
                 OpCodes.Ret.ToInstruction(),
             ]);
             method.Body.Variables.Clear();
