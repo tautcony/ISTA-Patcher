@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
 
 namespace ISTAlter.Utils;
 
@@ -81,7 +81,7 @@ public static class DnlibUtils
         body.Variables.Clear();
         body.ExceptionHandlers.Clear();
         body.Instructions.Clear();
-        body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        body.Instructions.Add(OpCodes.Ret.ToInstruction());
     }
 
     /// <summary>
@@ -254,28 +254,24 @@ public static class DnlibUtils
             throw new ArgumentNullException($"{method.FullName}.Body null!");
         }
 
-        body.Variables.Clear();
-        body.ExceptionHandlers.Clear();
-        body.Instructions.Clear();
-
         var instruction = value switch
         {
-            byte b => Instruction.Create(OpCodes.Ldc_I4, b),
-            int i => Instruction.Create(OpCodes.Ldc_I4, i),
-            uint i => Instruction.Create(OpCodes.Ldc_I4, (int)i),
+            byte b => Instruction.CreateLdcI4(b),
+            int i => Instruction.CreateLdcI4(i),
+            uint i => Instruction.CreateLdcI4((int)i),
             long l => Instruction.Create(OpCodes.Ldc_I8, l),
-            bool b => Instruction.Create(OpCodes.Ldc_I4, b ? 1 : 0),
+            bool b => Instruction.CreateLdcI4(b ? 1 : 0),
             string s => Instruction.Create(OpCodes.Ldstr, s),
             MemberRef m => Instruction.Create(OpCodes.Newobj, m),
             _ => !Equals(value, default(T)) ? throw new ArgumentException($"Unknown type {value.GetType().FullName}!", paramName: nameof(value)) : null,
         };
 
-        if (instruction != null)
-        {
-            body.Instructions.Add(instruction);
-        }
-
-        body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        method.ReplaceWith([
+            instruction,
+            OpCodes.Ret.ToInstruction(),
+        ]);
+        body.Variables.Clear();
+        body.ExceptionHandlers.Clear();
     }
 
     /// <summary>
@@ -321,5 +317,38 @@ public static class DnlibUtils
     public static Local? GetLocalByType(this MethodDef method, string fullTypeName)
     {
         return method.Body.Variables.FirstOrDefault(variable => string.Equals(variable.Type.FullName, fullTypeName, StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="dnlib.DotNet.MemberRef"/> representing the constructor of a generic type.
+    /// </summary>
+    /// <param name="module">The <see cref="dnlib.DotNet.ModuleDef"/> to create the member reference in.</param>
+    /// <param name="namespace">The namespace of the generic type.</param>
+    /// <param name="name">The name of the generic type.</param>
+    /// <param name="argType">The type of the argument of the constructor.</param>
+    /// <param name="genArgs">The generic arguments of the generic type.</param>
+    /// <returns>The created <see cref="dnlib.DotNet.MemberRef"/> object representing the constructor of the nullable type.</returns>
+    public static MemberRef CreateGenericCtor(ModuleDef module, string @namespace, string name, TypeSig? argType, params TypeSig[] genArgs)
+    {
+        var corLibTypes = module.CorLibTypes;
+        var typeRef = corLibTypes.GetTypeRef(@namespace, name);
+        var genericType = typeRef.ToTypeSig() as ClassOrValueTypeSig;
+        var genericInst = new GenericInstSig(genericType, genArgs);
+
+        var methodSig = argType == null ? MethodSig.CreateInstance(corLibTypes.Void) : MethodSig.CreateInstance(corLibTypes.Void, argType);
+
+        var memberRef = new MemberRefUser(module, ".ctor", methodSig, genericInst.ToTypeDefOrRef());
+        return memberRef;
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="dnlib.DotNet.MemberRef"/> representing the constructor of the <see cref="System.Nullable{T}"/> type.
+    /// </summary>
+    /// <param name="module">The <see cref="dnlib.DotNet.ModuleDef"/> to create the member reference in.</param>
+    /// <param name="type">The types of the nullable value.</param>
+    /// <returns>The created <see cref="dnlib.DotNet.MemberRef"/> object representing the constructor of the nullable type.</returns>
+    public static MemberRef CreateNullableCtor(ModuleDef module, TypeSig type)
+    {
+        return CreateGenericCtor(module, "System", "Nullable`1", type, type);
     }
 }

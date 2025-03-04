@@ -265,20 +265,13 @@ public static partial class PatchUtils
 
         void ReturnNullableFalse(MethodDef method)
         {
-            var ctor = method.FindOperand<MemberRef>(OpCodes.Newobj, "System.Void System.Nullable`1<System.Boolean>::.ctor(System.Boolean)");
-            if (ctor == null)
-            {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
-                return;
-            }
-
+            var nullableBoolean = DnlibUtils.CreateNullableCtor(module, module.CorLibTypes.Boolean);
+            method.ReplaceWith([
+                OpCodes.Ldc_I4_0.ToInstruction(),
+                OpCodes.Newobj.ToInstruction(nullableBoolean),
+                OpCodes.Ret.ToInstruction(),
+            ]);
             method.Body.Variables.Clear();
-            method.Body.Instructions.Clear();
-            method.Body.ExceptionHandlers.Clear();
-
-            method.Body.Instructions.Add(OpCodes.Ldc_I4_0.ToInstruction());
-            method.Body.Instructions.Add(OpCodes.Newobj.ToInstruction(ctor));
-            method.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
         }
     }
 
@@ -424,7 +417,13 @@ public static partial class PatchUtils
             "\u0042\u004d\u0057.Rheingold.RheingoldISPINext.AIR.AirForkServicesWrapper",
             "GetAirLauncher",
             "(\u0042\u004d\u0057.ISPI.IstaServices.Contract.ICS.IIstaIcsService)\u0042\u004d\u0057.ISPI.AIR.AIRClient.AirForkServices.IAirLauncher",
-            ReplaceCondition);
+            ReplaceCondition) +
+        module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldISPINext.AIR.AirForkServicesWrapper",
+            "GetAirLauncher",
+            "(\u0042\u004d\u0057.ISPI.IstaServices.Contract.ICS.IIstaIcsService)\u0042\u004d\u0057.ISPI.TRIC.ISTA.AiRForkServices.IAirLauncher",
+            ReplaceCondition
+        );
 
         void ReplaceCondition(MethodDef method)
         {
