@@ -101,13 +101,13 @@ public sealed class iLeanPasswordCipher : IDisposable
         }
 
         var array = MD5.HashData(Encoding.UTF8.GetBytes(input));
-        var stringBuilder = new StringBuilder();
+        var sb = new StringBuilder(32);
         foreach (var b in array)
         {
-            stringBuilder.Append(b.ToString("x2", CultureInfo.InvariantCulture));
+            sb.Append(b.ToString("x2", CultureInfo.InvariantCulture));
         }
 
-        return stringBuilder.ToString();
+        return sb.ToString();
     }
 
     public void Dispose()

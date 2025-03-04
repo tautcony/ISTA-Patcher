@@ -18,20 +18,19 @@ public static class DnlibUtils
     /// <returns>The description of the method as a string.</returns>
     public static string DescriptionOf(MethodDef md)
     {
-        var sb = new StringBuilder();
+        var parameters = md.MethodSig.Params;
+
+        var sb = new StringBuilder(64);
         sb.Append('(');
 
-        var set = false;
-        foreach (var param in md.MethodSig.Params)
+        if (parameters.Count > 0)
         {
-            sb.Append(param.FullName);
-            sb.Append(',');
-            set = true;
-        }
-
-        if (set)
-        {
-            sb.Length--;
+            sb.Append(parameters[0].FullName);
+            for (var i = 1; i < parameters.Count; i++)
+            {
+                sb.Append(',');
+                sb.Append(parameters[i].FullName);
+            }
         }
 
         sb.Append(')');
@@ -314,6 +313,12 @@ public static class DnlibUtils
         return null;
     }
 
+    /// <summary>
+    /// Gets the <see cref="dnlib.DotNet.Emit.Local"/> variable in the given <paramref name="method"/> by its type.
+    /// </summary>
+    /// <param name="method">The <see cref="dnlib.DotNet.MethodDef"/> to search in.</param>
+    /// <param name="fullTypeName">The full name of the type of the local variable to find.</param>
+    /// <returns>The <see cref="dnlib.DotNet.Emit.Local"/> variable found, or <see langword="null"/> if the variable was not found.</returns>
     public static Local? GetLocalByType(this MethodDef method, string fullTypeName)
     {
         return method.Body.Variables.FirstOrDefault(variable => string.Equals(variable.Type.FullName, fullTypeName, StringComparison.Ordinal));
