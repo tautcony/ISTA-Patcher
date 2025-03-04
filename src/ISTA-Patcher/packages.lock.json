@@ -138,17 +138,17 @@
       },
       "System.CommandLine": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.25072.1, )",
-        "resolved": "2.0.0-beta4.25072.1",
-        "contentHash": "u2Gkp23Rh7eIjPzthoTvMf9GXVjOacy24osqUke0FUcPV67ELmYHGlJtzR8H0z2bv+f23b4e6V4z4Mlu7B6Ojw=="
+        "requested": "[2.0.0-beta4.25153.1, )",
+        "resolved": "2.0.0-beta4.25153.1",
+        "contentHash": "nZwPBQxa/Dsss4M0VoHQ4aZejalWYAcKKlY+3hkPcohgbJbutniyXvx1cUIdMhK+CcCJBkuOR6VcN19z9fvyfg=="
       },
       "System.CommandLine.NamingConventionBinder": {
         "type": "Direct",
-        "requested": "[2.0.0-beta4.25072.1, )",
-        "resolved": "2.0.0-beta4.25072.1",
-        "contentHash": "gQYg+3IlvCnQ4RW4xIC77MnG6ZKkirvsdwGr1IP5LAnVN/1xR4SuIwltQTvbVFl8aPSs7lTAcZHOftuhHehq8g==",
+        "requested": "[2.0.0-beta4.25153.1, )",
+        "resolved": "2.0.0-beta4.25153.1",
+        "contentHash": "9yBvJ8oeES9uoI1M5FoiL9i9aRt9D7D1RuJcoNVmLyCmDs95LosAoOr+bday75H8ZFI+kmEw9ajXEEBePbJKRw==",
         "dependencies": {
-          "System.CommandLine": "2.0.0-beta4.25072.1"
+          "System.CommandLine": "2.0.0-beta4.25153.1"
         }
       },
       "dnlib": {
