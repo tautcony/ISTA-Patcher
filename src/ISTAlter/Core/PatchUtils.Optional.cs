@@ -260,8 +260,26 @@ public static partial class PatchUtils
         ) + module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
             "PsdzWebserviceEnabled",
-            DnlibUtils.ReturnFalseMethod
+            ReturnNullableFalse
         );
+
+        void ReturnNullableFalse(MethodDef method)
+        {
+            var ctor = method.FindOperand<MemberRef>(OpCodes.Newobj, "System.Void System.Nullable`1<System.Boolean>::.ctor(System.Boolean)");
+            if (ctor == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            method.Body.Variables.Clear();
+            method.Body.Instructions.Clear();
+            method.Body.ExceptionHandlers.Clear();
+
+            method.Body.Instructions.Add(OpCodes.Ldc_I4_0.ToInstruction());
+            method.Body.Instructions.Add(OpCodes.Newobj.ToInstruction(ctor));
+            method.Body.Instructions.Add(OpCodes.Ret.ToInstruction());
+        }
     }
 
     [UserAuthPatch]
