@@ -192,24 +192,24 @@
       },
       "Sentry": {
         "type": "Transitive",
-        "resolved": "5.2.0",
-        "contentHash": "b3aZSOU2CjlIIFRtPRbXParKQ+9PF+JOqkSD7Gxq6PiR07t1rnK+crPtdrWMXfW6PVo/s67trCJ+fuLsgTeADw=="
+        "resolved": "5.3.0",
+        "contentHash": "zlBIP7YmYxySwcgapLMj1gdxPEz9rwdrOa4Yjub/TzcAaMQXusRH9hY4CE6pu0EIibZ7C7Hhjhr6xOTlyK8gFQ=="
       },
       "Sentry.Profiling": {
         "type": "Transitive",
-        "resolved": "5.2.0",
-        "contentHash": "N/cnwoOlDbTnzHfbE6j0d+ABVjYZStBAAJpGbC9vrw9Hzwa1tty6uLILxaHQq8U6p14peIalx0c3HJCw8I2VmQ==",
+        "resolved": "5.3.0",
+        "contentHash": "3ELudu8b6rEz1VgiQjP/joOpiEYnbB6rX5LF5KPiEr0roaq/AKVWaIdFSk6M1EMAbABzCnP7guP2mPIOLSdc6g==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "5.2.0"
+          "Sentry": "5.3.0"
         }
       },
       "Sentry.Serilog": {
         "type": "Transitive",
-        "resolved": "5.2.0",
-        "contentHash": "TbmdFgc6PY23zBglAfG6joOEQ/qJbHs66t+vK5ife7B37+EJpulPIlcT/8ujIyt/tNlVBJ/YWnBsnm7rcgG5gw==",
+        "resolved": "5.3.0",
+        "contentHash": "k5VcYTj3+WV/Tuu0JJct9/Q0hooXfwPxdrXpKr+TYNqgyDwDfqUsMnFi/avSM1IjhC6gIQs5dbJRKdCHhgkPWw==",
         "dependencies": {
-          "Sentry": "5.2.0",
+          "Sentry": "5.3.0",
           "Serilog": "2.10.0"
         }
       },
@@ -225,8 +225,8 @@
       },
       "SixLabors.ImageSharp": {
         "type": "Transitive",
-        "resolved": "3.1.6",
-        "contentHash": "dHQ5jugF9v+5/LCVHCWVzaaIL6WOehqJy6eju/0VFYFPEj2WtqkGPoEV9EVQP83dHsdoqYaTuWpZdwAd37UwfA=="
+        "resolved": "3.1.7",
+        "contentHash": "9fIOOAsyLFid6qKypM2Iy0Z3Q9yoanV8VoYAHtI2sYGMNKzhvRTjgFDHonIiVe+ANtxIxM6SuqUzj0r91nItpA=="
       },
       "SixLabors.ImageSharp.Drawing": {
         "type": "Transitive",
@@ -239,8 +239,8 @@
       },
       "System.CodeDom": {
         "type": "Transitive",
-        "resolved": "9.0.2",
-        "contentHash": "VnlzS7afE8LaXXwKdHOe2D6FcDekqThzU1E67CONV7gp71q3zposqcSeXH+PxARMXC5j31efwXrxP8VGvD70Ug=="
+        "resolved": "9.0.3",
+        "contentHash": "KeFk4+is5IB3FCjFmPjtFYaTSYhFA/l6ZOeWBQo6CVVQchpvl6vv+3kPPfNttkEoA/Gq78FsJFMu4Eej/ln44Q=="
       },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
@@ -252,10 +252,10 @@
       },
       "System.Management": {
         "type": "Transitive",
-        "resolved": "9.0.2",
-        "contentHash": "U6SXFe1kfJySAvcPPdbdb+fycaY+3c/KV0PwTjurvrALMnlSm37s5z8zcoI7qbkV2kYhxiLfsZRGiF0XeSsqSQ==",
+        "resolved": "9.0.3",
+        "contentHash": "Wsb47+pRN1xnCxKOXcj+80FZ5OYQK2Dr8nnS8CHS1LVB+MXdzyK90sEmDYs/ux+btrxpE1N56FZo5rDbzpd1HA==",
         "dependencies": {
-          "System.CodeDom": "9.0.2"
+          "System.CodeDom": "9.0.3"
         }
       },
       "System.Reflection.Metadata": {
@@ -271,14 +271,14 @@
       "istalter": {
         "type": "Project",
         "dependencies": {
-          "Sentry": "[5.2.0, )",
-          "Sentry.Profiling": "[5.2.0, )",
-          "Sentry.Serilog": "[5.2.0, )",
+          "Sentry": "[5.3.0, )",
+          "Sentry.Profiling": "[5.3.0, )",
+          "Sentry.Serilog": "[5.3.0, )",
           "Serilog": "[4.2.0, )",
           "SixLabors.Fonts": "[2.1.2, )",
-          "SixLabors.ImageSharp": "[3.1.6, )",
+          "SixLabors.ImageSharp": "[3.1.7, )",
           "SixLabors.ImageSharp.Drawing": "[2.1.5, )",
-          "System.Management": "[9.0.2, )",
+          "System.Management": "[9.0.3, )",
           "dnlib": "[4.4.0, )"
         }
       }

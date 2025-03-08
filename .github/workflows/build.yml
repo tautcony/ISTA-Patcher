@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         configuration: [ 'Release' ]
-        runtime-identifier: [ 'win-x64', 'linux-x64', 'osx-x64', 'osx-arm64' ]
+        runtime-identifier: [ 'win-x64', 'linux-x64', 'linux-arm64', 'osx-x64', 'osx-arm64' ]
 
     steps:
     - uses: actions/checkout@v4
@@ -38,7 +38,6 @@ jobs:
     - name: Restore dependencies
       run: |
         dotnet restore src/ISTA-Patcher/ISTA-Patcher.csproj --locked-mode
-        dotnet restore src/ISTAlter/ISTAlter.csproj --locked-mode
 
     - name: Update version info
       if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
@@ -113,3 +112,10 @@ jobs:
           src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*
           !src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*.pdb
           !src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*.dwarf
+
+    - name: 'Remove temporary artifacts'
+      uses: geekyeggo/delete-artifact@v5
+      with:
+        name: |
+          ISTA-Patcher-osx-arm64-Release
+          ISTA-Patcher-osx-x64-Release
