@@ -63,6 +63,7 @@ public class iLeanCommand
             ShowMachineInfo = this.ShowMachineInfo,
             Encrypt = this.Encrypt,
             Decrypt = this.Decrypt,
+            Output = this.Output,
         };
 
         Execute(opts).Wait();
