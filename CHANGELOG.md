@@ -1,5 +1,17 @@
 ﻿# Changelog
 
+## 2.3.5 / 2025-03-13
+
+- Feat - Add enable skip brand compatible check with `patch --enable-skip-brand-compatible-check` flag
+- Feat - Add fix DS2 vehicle identification with `patch --enable-fix-ds2-vehicle-identification` flag
+- Feat - Improve iLean command with new output & formatter flag
+- Feat - Add support for `SetPsdzProperties` with new default arguments in `ConfigurationService`
+- Feat - Set `PsdzWebserviceEnabled` & `ShouldUseIdentNuget` to false in standalone mode
+- Fix - iLean encryption/decryption command
+- Fix - Console background color
+- Fix - Minor bugs and usability improvements
+- Chore - Upgrade dependencies
+
 ## 2.3.4 / 2025-01-26
 
 - Feat - Add enable AIR Client with `patch --enable-air-client` flag
