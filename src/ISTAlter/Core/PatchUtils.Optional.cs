@@ -283,7 +283,7 @@ public static partial class PatchUtils
     [UserAuthPatch]
     [LibraryName("RheingoldPresentationFramework.dll")]
     [FromVersion("4.44")]
-    [UntilVersion("4.51")]
+    [UntilVersion("4.52")]
     public static int PatchUserEnvironmentProvider(ModuleDefMD module)
     {
         return module.PatchFunction(
