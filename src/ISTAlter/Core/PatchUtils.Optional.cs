@@ -28,7 +28,6 @@ public static partial class PatchUtils
 
     [FinishedOPPatch]
     [LibraryName("ISTAGUI.exe")]
-    [UntilVersion("4.52")]
     public static int PatchOperationFinishedListViewModel(ModuleDefMD module)
     {
         return module.PatchAsyncFunction(
