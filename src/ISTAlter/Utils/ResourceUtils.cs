@@ -50,7 +50,7 @@ public static class ResourceUtils
     {
         if (module.Resources.FirstOrDefault(r => r.Name == resourceName) is not EmbeddedResource embeddedResource)
         {
-            Log.Error($"Resource {resourceName} not found.");
+            Log.Error("Resource {ResourceName} not found.", resourceName);
             return;
         }
 
@@ -96,7 +96,7 @@ public static class ResourceUtils
 
         if (!fileFound)
         {
-            Log.Error($"File {fileName} in resource {resourceName} not found.");
+            Log.Error("File {FileName} in resource {ResourceName} not found.", fileName, resourceName);
         }
     }
 

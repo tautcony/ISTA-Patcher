@@ -173,45 +173,45 @@ internal static partial class CoreFoundation
             {
                 var valueInteriorPointer = CFStringGetCStringPtr(value, CFStringBuiltInEncodings.kCFStringEncodingUTF8);
                 var valueString = valueInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(valueInteriorPointer)! : "<null string>";
-                Log.Information($"{keyString}: {valueString}");
+                Log.Information("{KeyString}: {ValueString}", keyString, valueString);
             }
             else if (typeId == CFNumberGetTypeID())
             {
                 if (CFNumberGetValue(value, CFNumberType.kCFNumberIntType, out var intValue))
                 {
-                    Log.Information($"{keyString}: {intValue}");
+                    Log.Information("{KeyString}: {IntValue}", keyString, intValue);
                 }
             }
             else if (typeId == CFBooleanGetTypeID())
             {
                 var boolValue = CFBooleanGetValue(value);
-                Log.Information($"{keyString}: {boolValue}");
+                Log.Information("{KeyString}: {BoolValue}", keyString, boolValue);
             }
             else if (typeId == CFUUIDGetTypeID())
             {
                 using var uuidCFString = CFUUIDCreateString(IntPtr.Zero, value);
                 var valueInteriorPointer = CFStringGetCStringPtr(uuidCFString.DangerousGetHandle(), CFStringBuiltInEncodings.kCFStringEncodingUTF8);
                 var uuidString = valueInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(valueInteriorPointer)! : "<null uuid>";
-                Log.Information($"{keyString}: {uuidString}");
+                Log.Information("{KeyString}: {UuidString}", keyString, uuidString);
             }
             else if (typeId == CFArrayGetTypeID())
             {
-                Log.Information($"{keyString}: <array>");
+                Log.Information("{KeyString}: <array>", keyString);
             }
             else if (typeId == CFDictionaryGetTypeID())
             {
-                Log.Information($"{keyString}: <dictionary>");
+                Log.Information("{KeyString}: <dictionary>", keyString);
             }
             else if (typeId == CFURLGetTypeID())
             {
                 var urlString = CFURLGetString(value);
                 var urlInteriorPointer = CFStringGetCStringPtr(urlString, CFStringBuiltInEncodings.kCFStringEncodingUTF8);
                 var url = urlInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(urlInteriorPointer)! : "<null url>";
-                Log.Information($"{keyString}: {url}");
+                Log.Information("{KeyString}: {Url}", keyString, url);
             }
             else
             {
-                Log.Information($"{keyString}: <unknown type>, type ID: {typeId}");
+                Log.Information("{KeyString}: <unknown type>, type ID: {TypeId}", keyString, typeId);
             }
         }
     }

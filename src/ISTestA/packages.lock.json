@@ -10,9 +10,9 @@
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
-        "requested": "[2.0.188, )",
-        "resolved": "2.0.188",
-        "contentHash": "2S5o86NsBhGUWXIyxUfqfd0Eo7Tk+3d8bXm9qiaa/N53l9lkyIMiBINyz+MKW0Qrg1Psq7TW35J4PeK73OHYrA=="
+        "requested": "[2.0.196, )",
+        "resolved": "2.0.196",
+        "contentHash": "2vqL2iokFYGGezJF/bdP7SW6bnwFSzSeQjwD5wjuZvoPnu8ZcWf4gzIF5Uk/30axvunOImqK6DIRsJmI5LgWUw=="
       },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
@@ -32,9 +32,9 @@
       },
       "NUnit.Analyzers": {
         "type": "Direct",
-        "requested": "[4.6.0, )",
-        "resolved": "4.6.0",
-        "contentHash": "uK1TEViVBugOO6uDou1amu7CoNhrd2sEUFr/iaEmVfoeY8qq/zzWCCUZi97aCCSZmjnHKCCWKh3RucU27qPlKg=="
+        "requested": "[4.7.0, )",
+        "resolved": "4.7.0",
+        "contentHash": "1AjtK0uoJgxyobNtNwjQLlEs2X+9mgfWbWXiIktquTvpOhSXMf56TZF43+q2lIIYhV4IrfS82/pfo4uPUYka4w=="
       },
       "NUnit3TestAdapter": {
         "type": "Direct",
@@ -192,24 +192,24 @@
       },
       "Sentry": {
         "type": "Transitive",
-        "resolved": "5.4.0",
-        "contentHash": "fXjF+bn7uOSPjrALfY+GQGhaeXFXfAX8XrSWeUJOek/hhIss1hhi/l2AJPefjVdaNWyb1muJAdUUZnBofZjlvw=="
+        "resolved": "5.5.1",
+        "contentHash": "p93BeSvZrbs/Y+bHShFv3MV6lGCJ/H+A1OFLylMhv8ADWvkz4P7NTEJ2m1JUEKd6kaY69PP06mxVQROgTm3qhA=="
       },
       "Sentry.Profiling": {
         "type": "Transitive",
-        "resolved": "5.4.0",
-        "contentHash": "/UNtkUUkgfDQIxzQlPgt05nYPHb0oeXwceJHxMwcIL1V7wD4IcwOG7Qn2B3DkA1ufQtvZpDta5pmCPuse9vz0Q==",
+        "resolved": "5.5.1",
+        "contentHash": "f6dXnInmH7QE5putKGSUMYhNzjnHKEcXuquHbpPwnmoDnPjwZ38kMP8JcsLDzQz94Y09+i6ebYD8R0v4ATWNZg==",
         "dependencies": {
           "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "5.4.0"
+          "Sentry": "5.5.1"
         }
       },
       "Sentry.Serilog": {
         "type": "Transitive",
-        "resolved": "5.4.0",
-        "contentHash": "v85LZz4DeCAtCXssI9h4JhjJE236VqTPOYQJrN3goIj2krZO9SWSH6JvKMda5x8T8U8gJizL1n08ZrHh1UaRTA==",
+        "resolved": "5.5.1",
+        "contentHash": "B9Nxpvc4jP4kl/WZCnp9XRj2JaMgIctcFY51dMOLCA11bnm3zjJEf4IJ46W2EpL1iiU53nl4pZgEKFsKkDuc1g==",
         "dependencies": {
-          "Sentry": "5.4.0",
+          "Sentry": "5.5.1",
           "Serilog": "2.10.0"
         }
       },
@@ -239,8 +239,8 @@
       },
       "System.CodeDom": {
         "type": "Transitive",
-        "resolved": "9.0.3",
-        "contentHash": "KeFk4+is5IB3FCjFmPjtFYaTSYhFA/l6ZOeWBQo6CVVQchpvl6vv+3kPPfNttkEoA/Gq78FsJFMu4Eej/ln44Q=="
+        "resolved": "9.0.4",
+        "contentHash": "aJdv7Z87PoPW8ijvGIincocooYRbH3Umtlz7OrJKf6GDInbdu1bvk5X1fFlmbl7WP+9ntoIBd7NjKz+siVFdHA=="
       },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
@@ -252,10 +252,10 @@
       },
       "System.Management": {
         "type": "Transitive",
-        "resolved": "9.0.3",
-        "contentHash": "Wsb47+pRN1xnCxKOXcj+80FZ5OYQK2Dr8nnS8CHS1LVB+MXdzyK90sEmDYs/ux+btrxpE1N56FZo5rDbzpd1HA==",
+        "resolved": "9.0.4",
+        "contentHash": "MfY9+SrkSvchAoFiChTkhQYCAjBaQQ9u3LwiKmho7oTbujucnxCzORlPgLhId/ChLSptsQ/1UmtPGLZaKYVdsA==",
         "dependencies": {
-          "System.CodeDom": "9.0.3"
+          "System.CodeDom": "9.0.4"
         }
       },
       "System.Reflection.Metadata": {
@@ -271,14 +271,14 @@
       "istalter": {
         "type": "Project",
         "dependencies": {
-          "Sentry": "[5.4.0, )",
-          "Sentry.Profiling": "[5.4.0, )",
-          "Sentry.Serilog": "[5.4.0, )",
+          "Sentry": "[5.5.1, )",
+          "Sentry.Profiling": "[5.5.1, )",
+          "Sentry.Serilog": "[5.5.1, )",
           "Serilog": "[4.2.0, )",
           "SixLabors.Fonts": "[2.1.2, )",
           "SixLabors.ImageSharp": "[3.1.7, )",
           "SixLabors.ImageSharp.Drawing": "[2.1.5, )",
-          "System.Management": "[9.0.3, )",
+          "System.Management": "[9.0.4, )",
           "dnlib": "[4.4.0, )"
         }
       }
