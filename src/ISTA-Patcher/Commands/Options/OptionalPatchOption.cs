@@ -39,4 +39,7 @@ public class OptionalPatchOption
 
     [CliOption(Name = "--enable-fix-ds2-vehicle-identification", Description = "Enable fix DS2 vehicle identification functionality.")]
     public bool FixDS2VehicleIdentification { get; set; }
+
+    [CliOption(Name = "--enable-force-icom-next", Description = "Force the detection of ICOM as ICOM-Next functionality.")]
+    public bool ForceICOMNext { get; set; }
 }

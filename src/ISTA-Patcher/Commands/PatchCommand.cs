@@ -60,6 +60,7 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
             AirClient = this.AirClient,
             SkipBrandCompatibleCheck = this.SkipBrandCompatibleCheck,
             FixDS2VehicleIdentification = this.FixDS2VehicleIdentification,
+            ForceICOMNext = this.ForceICOMNext,
             PatchType = this.PatchType,
             GenerateMockRegFile = this.GenerateMockRegFile,
             Force = this.Force,
