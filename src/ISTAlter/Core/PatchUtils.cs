@@ -8,6 +8,7 @@ using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using ISTAlter.Utils;
 using Serilog;
+using ZLinq;
 
 /// <summary>
 /// A utility class for patching files and directories.
@@ -339,8 +340,15 @@ public static partial class PatchUtils
             "Title",
             method =>
             {
-                var containsDef = module.Types.SelectMany(t => t.Methods).Where(m => m.HasBody).SelectMany(m => m.Body.Instructions).FirstOrDefault(i => i.OpCode == OpCodes.Callvirt && string.Equals((i.Operand as MemberRef)?.FullName, "System.Boolean System.String::Contains(System.String)", StringComparison.Ordinal))?.Operand as MemberRef;
-                var titleField = method.DeclaringType.Fields.FirstOrDefault(field => string.Equals(field.FullName, "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title", StringComparison.Ordinal));
+                var containsDef = module.Types
+                    .AsValueEnumerable()
+                    .SelectMany(t => t.Methods)
+                    .Where(m => m.HasBody)
+                    .SelectMany(m => m.Body.Instructions)
+                    .FirstOrDefault(i => i.OpCode == OpCodes.Callvirt && string.Equals((i.Operand as MemberRef)?.FullName, "System.Boolean System.String::Contains(System.String)", StringComparison.Ordinal))?.Operand as MemberRef;
+                var titleField = method.DeclaringType.Fields
+                    .AsValueEnumerable()
+                    .FirstOrDefault(field => string.Equals(field.FullName, "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title", StringComparison.Ordinal));
 
                 if (containsDef == null || titleField == null)
                 {

@@ -260,6 +260,11 @@ public static partial class PatchUtils
             "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
             "PsdzWebserviceEnabled",
             ReturnNullableFalse
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
+            "GetActivateSdpOnlinePatch",
+            "()System.Boolean",
+            DnlibUtils.ReturnFalseMethod
         );
 
         void ReturnNullableFalse(MethodDef method)
@@ -540,6 +545,7 @@ public static partial class PatchUtils
 
     [ForceICOMNextPatch]
     [LibraryName("RheingoldxVM.dll")]
+    [UntilVersion("4.53")]
     public static int PatchSLP(ModuleDefMD module)
     {
         return module.PatchFunction(
