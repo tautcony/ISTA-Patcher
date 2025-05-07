@@ -545,14 +545,18 @@ public static partial class PatchUtils
 
     [ForceICOMNextPatch]
     [LibraryName("RheingoldxVM.dll")]
-    [UntilVersion("4.53")]
+    [UntilVersion("4.54")]
     public static int PatchSLP(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.xVM.SLP",
             "ScanDeviceFromAttrList",
             "(BMW.Rheingold.xVM.SLPAttrRply,System.String[])BMW.Rheingold.CoreFramework.DatabaseProvider.VCIDevice",
-            ReplaceDeviceType);
+            ReplaceDeviceType) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.xVM.SLP",
+            "IsIcomUnsupported",
+            "(System.Collections.Generic.Dictionary`2<System.String,System.String>)System.Boolean",
+            DnlibUtils.ReturnFalseMethod);
 
         void ReplaceDeviceType(MethodDef method)
         {
