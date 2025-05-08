@@ -189,9 +189,9 @@ public class CryptoCommand
         return new KeyValuePair<string, string>(checkResult, version);
     }
 
-    private static readonly byte[] KeyPairConfig = [0x47, 0x23, 0x38, 0x78, 0x21, 0x39, 0x73, 0x44, 0x32, 0x40, 0x71, 0x5a, 0x36, 0x26, 0x6c, 0x46, 0x31];
+    public static readonly byte[] KeyPairConfig = [0x47, 0x23, 0x38, 0x78, 0x21, 0x39, 0x73, 0x44, 0x32, 0x40, 0x71, 0x5a, 0x36, 0x26, 0x6c, 0x46, 0x31];
 
-    private static Pkcs12Store GenerateKeyStore()
+    public static Pkcs12Store GenerateKeyStore()
     {
         var keyPairGenerator = new ECKeyPairGenerator("ECDSA");
         keyPairGenerator.Init(new ECKeyGenerationParameters(SecObjectIdentifiers.SecP384r1, new SecureRandom()));
