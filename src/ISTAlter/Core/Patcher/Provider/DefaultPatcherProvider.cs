@@ -92,6 +92,11 @@ public class DefaultPatcherProvider : IPatcherProvider
             this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(FixDS2VehicleIdentificationPatchAttribute)));
         }
 
+        if (opts.ForceICOMNext)
+        {
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(ForceICOMNextPatchAttribute)));
+        }
+
         Log.Debug("Loaded patches: {Patches}", string.Join(", ", this.Patches.Select(p => p.Method.Name)));
     }
 

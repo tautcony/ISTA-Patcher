@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-202 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
+
 namespace ISTAlter.Utils;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
@@ -36,6 +37,8 @@ internal sealed class EnableAirClientPatchAttribute : ISTAPatchAttribute;
 internal sealed class DisableBrandCompatibleCheckPatchAttribute : ISTAPatchAttribute;
 
 internal sealed class FixDS2VehicleIdentificationPatchAttribute : ISTAPatchAttribute;
+
+internal sealed class ForceICOMNextPatchAttribute : ISTAPatchAttribute;
 
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersionAttribute(string version) : Attribute

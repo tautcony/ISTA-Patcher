@@ -6,6 +6,7 @@ namespace ISTAlter.Core.Patcher.Provider;
 using System.Reflection;
 using dnlib.DotNet;
 using ISTAlter.Utils;
+using ZLinq;
 
 public interface IPatcherProvider
 {
@@ -31,6 +32,7 @@ public interface IPatcherProvider
     public static string?[] DefaultLoadFileList(string basePath)
     {
         var fileList = Directory.GetFiles(Constants.TesterGUIPath.Aggregate(basePath, Path.Join))
+            .AsValueEnumerable()
             .Where(f => f.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
             .Select(Path.GetFileName).ToArray();
         return fileList;
@@ -40,6 +42,7 @@ public interface IPatcherProvider
     {
         return typeof(PatchUtils)
             .GetMethods()
+            .AsValueEnumerable()
             .Where(m => Array.Exists(attributes, attribute => m.GetCustomAttributes(attribute, inherit: false).Length > 0))
             .Select(m => new PatchInfo((Func<ModuleDefMD, int>)Delegate.CreateDelegate(typeof(Func<ModuleDefMD, int>), m), m, 0))
             .ToList();

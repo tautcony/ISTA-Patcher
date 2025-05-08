@@ -73,6 +73,8 @@ public static class ISTAOptions
         public bool SkipBrandCompatibleCheck { get; set; }
 
         public bool FixDS2VehicleIdentification { get; set; }
+
+        public bool ForceICOMNext { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions

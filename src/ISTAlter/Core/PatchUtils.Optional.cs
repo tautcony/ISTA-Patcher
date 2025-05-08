@@ -260,6 +260,11 @@ public static partial class PatchUtils
             "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
             "PsdzWebserviceEnabled",
             ReturnNullableFalse
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings",
+            "GetActivateSdpOnlinePatch",
+            "()System.Boolean",
+            DnlibUtils.ReturnFalseMethod
         );
 
         void ReturnNullableFalse(MethodDef method)
@@ -534,6 +539,43 @@ public static partial class PatchUtils
             foreach (var instruction in ifConditions.Reverse())
             {
                 instructions.Insert(indexOfSetIdentSuccessfully - 2, instruction);
+            }
+        }
+    }
+
+    [ForceICOMNextPatch]
+    [LibraryName("RheingoldxVM.dll")]
+    [UntilVersion("4.54")]
+    public static int PatchSLP(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.xVM.SLP",
+            "ScanDeviceFromAttrList",
+            "(BMW.Rheingold.xVM.SLPAttrRply,System.String[])BMW.Rheingold.CoreFramework.DatabaseProvider.VCIDevice",
+            ReplaceDeviceType) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.xVM.SLP",
+            "IsIcomUnsupported",
+            "(System.Collections.Generic.Dictionary`2<System.String,System.String>)System.Boolean",
+            DnlibUtils.ReturnFalseMethod);
+
+        void ReplaceDeviceType(MethodDef method)
+        {
+            const string targetOperand = "System.String System.Collections.Generic.Dictionary`2<System.String,System.String>::get_Item(System.String)";
+            var instructions = method.FindInstructions(OpCodes.Ldstr, "DevTypeExt");
+            foreach (var instruction in instructions)
+            {
+                var idx = method.Body.Instructions.IndexOf(instruction);
+                var prevInstruction = method.Body.Instructions[idx - 1];
+                var nextInstruction = method.Body.Instructions[idx + 1];
+                if (
+                    prevInstruction.OpCode == OpCodes.Ldloc_0 &&
+                    nextInstruction.OpCode == OpCodes.Callvirt && string.Equals((nextInstruction.Operand as IMethod)?.FullName, targetOperand, StringComparison.Ordinal))
+                {
+                    instruction.Operand = "ICOM_Next_A";
+                    method.Body.Instructions.Remove(prevInstruction);
+                    method.Body.Instructions.Remove(nextInstruction);
+                    break;
+                }
             }
         }
     }
