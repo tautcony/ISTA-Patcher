@@ -51,6 +51,8 @@ public class iLeanCommand
     [CliOption(Description = "Specify the formatter type.", Required = false)]
     public ISTAOptions.FormatterType Formatter { get; set; } = ISTAOptions.FormatterType.Default;
 
+    private static readonly JsonSerializerOptions DefaultJsonSerializerOption = new() { WriteIndented = true };
+
     public void Run()
     {
         var opts = new ISTAOptions.ILeanOptions
@@ -154,7 +156,7 @@ public class iLeanCommand
                 case ISTAOptions.FormatterType.JSON:
                 {
                     var jsonElement = JsonSerializer.Deserialize<JsonElement>(result);
-                    result = JsonSerializer.Serialize(jsonElement, new JsonSerializerOptions { WriteIndented = true });
+                    result = JsonSerializer.Serialize(jsonElement, DefaultJsonSerializerOption);
                     break;
                 }
 
