@@ -545,7 +545,7 @@ public static partial class PatchUtils
 
     [ForceICOMNextPatch]
     [LibraryName("RheingoldxVM.dll")]
-    [UntilVersion("4.54")]
+    [UntilVersion("4.55")]
     public static int PatchSLP(ModuleDefMD module)
     {
         return module.PatchFunction(
