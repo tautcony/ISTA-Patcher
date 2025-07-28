@@ -21,7 +21,7 @@ using Serilog;
     Description = "Perform cerebrumancy operations.",
     NameCasingConvention = CliNameCasingConvention.KebabCase,
     NamePrefixConvention = CliNamePrefixConvention.DoubleHyphen,
-    ShortFormAutoGenerate = false,
+    ShortFormAutoGenerate = CliNameAutoGenerate.None,
     Hidden = true,
     Parent = typeof(RootCommand)
 )]

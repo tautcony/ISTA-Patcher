@@ -17,7 +17,7 @@ using Serilog;
     Description = "Perform operations related to iLean.",
     NameCasingConvention = CliNameCasingConvention.KebabCase,
     NamePrefixConvention = CliNamePrefixConvention.DoubleHyphen,
-    ShortFormAutoGenerate = false,
+    ShortFormAutoGenerate = CliNameAutoGenerate.None,
     Parent = typeof(RootCommand)
 )]
 public class iLeanCommand

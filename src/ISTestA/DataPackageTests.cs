@@ -48,12 +48,12 @@ public class DataPackageTests
         foreach (var data in testData)
         {
             var ret = DataPackageUtils.DeterminePackageDetails(data.FileName);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(ret.System, Is.EqualTo(data.System));
                 Assert.That(ret.Name, Is.EqualTo(data.Name));
                 Assert.That(ret.Version, Is.EqualTo(data.Version));
-            });
+            }
         }
     }
 }

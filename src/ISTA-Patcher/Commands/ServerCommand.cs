@@ -21,7 +21,7 @@ using Serilog;
     Description = "Perform server-related operations.",
     NameCasingConvention = CliNameCasingConvention.KebabCase,
     NamePrefixConvention = CliNamePrefixConvention.DoubleHyphen,
-    ShortFormAutoGenerate = false,
+    ShortFormAutoGenerate = CliNameAutoGenerate.None,
     Parent = typeof(RootCommand)
 )]
 public class ServerCommand

@@ -17,7 +17,7 @@ using Serilog;
     Description = "Perform patching on application and libraries.",
     NameCasingConvention = CliNameCasingConvention.KebabCase,
     NamePrefixConvention = CliNamePrefixConvention.DoubleHyphen,
-    ShortFormAutoGenerate = false,
+    ShortFormAutoGenerate = CliNameAutoGenerate.None,
     Parent = typeof(RootCommand)
 )]
 public class PatchCommand : OptionalPatchOption, ICommonPatchOption

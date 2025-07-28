@@ -9,7 +9,7 @@ using Serilog.Events;
 [CliCommand(
     NameCasingConvention = CliNameCasingConvention.KebabCase,
     NamePrefixConvention = CliNamePrefixConvention.DoubleHyphen,
-    ShortFormAutoGenerate = false
+    ShortFormAutoGenerate = CliNameAutoGenerate.None
 )]
 public class RootCommand
 {
