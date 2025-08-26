@@ -61,6 +61,7 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
             SkipBrandCompatibleCheck = this.SkipBrandCompatibleCheck,
             FixDS2VehicleIdentification = this.FixDS2VehicleIdentification,
             ForceICOMNext = this.ForceICOMNext,
+            MotorbikeClamp15Fix = this.MotorbikeClamp15Fix,
             PatchType = this.PatchType,
             GenerateMockRegFile = this.GenerateMockRegFile,
             Force = this.Force,

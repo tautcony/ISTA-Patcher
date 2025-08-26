@@ -597,4 +597,65 @@ public static partial class PatchUtils
             }
         }
     }
+
+    [MotorbikeClamp15Patch]
+    [LibraryName("RheingoldDiagnostics.dll")]
+    public static int PatchMotorbikeClamp15(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
+            "ClearAndReadErrorInfoMemory",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.IJobServices)System.Void",
+            PatchClamp15Check
+        );
+
+        void PatchClamp15Check(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+
+            // Transform the logic from:
+            // Original: if (flag && (!clamp.HasValue || clamp < 0.1)) { RegisterMessage(); return; }
+            // To: if (flag && (clamp.HasValue && clamp < 0.1)) { RegisterMessage(); return; }
+
+            // First find the HasValue call
+            var hasValueCall = method.FindInstruction(OpCodes.Call, "System.Boolean System.Nullable`1<System.Double>::get_HasValue()");
+            if (hasValueCall == null)
+            {
+                Log.Warning("HasValue call not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var hasValueIndex = instructions.IndexOf(hasValueCall);
+            if (hasValueIndex == -1 || hasValueIndex >= instructions.Count - 1)
+            {
+                Log.Warning("HasValue call index invalid, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // The next instruction after HasValue call should be brfalse.s
+            var brfalseInstruction = instructions[hasValueIndex + 1];
+            if (brfalseInstruction.OpCode != OpCodes.Brfalse_S)
+            {
+                Log.Warning("Expected brfalse.s instruction not found after HasValue call, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Find the instruction that skips the RegisterMessage block (IL_012d in the original)
+            // This should be the target of the second brfalse.s instruction after the value comparison
+            var valueComparisonBrfalse = instructions.Skip(hasValueIndex + 2)
+                .FirstOrDefault(inst => inst.OpCode == OpCodes.Brfalse_S);
+
+            if (valueComparisonBrfalse == null)
+            {
+                Log.Warning("Value comparison brfalse instruction not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Change the first brfalse target to point to the same target as the value comparison brfalse
+            // This transforms (!clamp.HasValue || clamp < 0.1) to (clamp.HasValue && clamp < 0.1)
+            brfalseInstruction.Operand = valueComparisonBrfalse.Operand;
+
+            Log.Information("Successfully patched motorcycle clamp15 check in {Method}", method.FullName);
+        }
+    }
 }

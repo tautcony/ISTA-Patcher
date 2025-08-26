@@ -40,6 +40,8 @@ internal sealed class FixDS2VehicleIdentificationPatchAttribute : ISTAPatchAttri
 
 internal sealed class ForceICOMNextPatchAttribute : ISTAPatchAttribute;
 
+internal sealed class MotorbikeClamp15PatchAttribute : ISTAPatchAttribute;
+
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersionAttribute(string version) : Attribute
 {

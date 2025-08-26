@@ -75,6 +75,8 @@ public static class ISTAOptions
         public bool FixDS2VehicleIdentification { get; set; }
 
         public bool ForceICOMNext { get; set; }
+
+        public bool MotorbikeClamp15Fix { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions

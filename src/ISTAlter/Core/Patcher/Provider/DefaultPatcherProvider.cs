@@ -97,6 +97,11 @@ public class DefaultPatcherProvider : IPatcherProvider
             this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(ForceICOMNextPatchAttribute)));
         }
 
+        if (opts.MotorbikeClamp15Fix)
+        {
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(MotorbikeClamp15PatchAttribute)));
+        }
+
         Log.Debug("Loaded patches: {Patches}", string.Join(", ", this.Patches.Select(p => p.Method.Name)));
     }
 

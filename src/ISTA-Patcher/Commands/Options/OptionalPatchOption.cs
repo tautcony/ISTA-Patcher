@@ -42,4 +42,7 @@ public class OptionalPatchOption
 
     [CliOption(Name = "--enable-force-icom-next", Description = "Force the detection of ICOM as ICOM-Next functionality.")]
     public bool ForceICOMNext { get; set; }
+
+    [CliOption(Name = "--enable-motorbike-clamp15-fix", Description = "Enable patch for motorbike Clamp15 error memory clear.")]
+    public bool MotorbikeClamp15Fix { get; set; }
 }
