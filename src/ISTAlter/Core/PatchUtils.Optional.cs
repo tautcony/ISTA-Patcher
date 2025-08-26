@@ -289,7 +289,7 @@ public static partial class PatchUtils
     [LibraryName("RheingoldPresentationFramework.dll")]
     [FromVersion("4.44")]
     [UntilVersion("4.52")]
-    public static int PatchUserEnvironmentProvider(ModuleDefMD module)
+    public static int PatchUserEnvironmentProviderFrom444(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
@@ -307,7 +307,8 @@ public static partial class PatchUtils
     [UserAuthPatch]
     [LibraryName("\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.dll")]
     [FromVersion("4.52")]
-    public static int PatchLoginUserEnvironmentProvider(ModuleDefMD module)
+    [UntilVersion("4.55")]
+    public static int PatchUserEnvironmentProviderFrom452(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider",
@@ -318,6 +319,24 @@ public static partial class PatchUtils
             "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider",
             "GetCurrentNetworkType",
             "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.LoginRepository.Entities.NetworkType",
+            DnlibUtils.ReturnUInt32Method(1) // LAN
+        );
+    }
+
+    [UserAuthPatch]
+    [LibraryName("\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.dll")]
+    [FromVersion("4.55")]
+    public static int PatchUserEnvironmentProviderFrom455(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider",
+            "GetCurrentUserEnvironment",
+            "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.UserLogin.UserEnvironment",
+            DnlibUtils.ReturnUInt32Method(2) // PROD
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider",
+            "GetCurrentNetworkType",
+            "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.UserLogin.NetworkType",
             DnlibUtils.ReturnUInt32Method(1) // LAN
         );
     }
@@ -545,7 +564,6 @@ public static partial class PatchUtils
 
     [ForceICOMNextPatch]
     [LibraryName("RheingoldxVM.dll")]
-    [UntilVersion("4.55")]
     public static int PatchSLP(ModuleDefMD module)
     {
         return module.PatchFunction(
