@@ -37,7 +37,7 @@ public static partial class PatchUtils
             RemoveIsProgrammingEnabledCheck
         );
 
-        void RemoveIsProgrammingEnabledCheck(MethodDef method)
+        static void RemoveIsProgrammingEnabledCheck(MethodDef method)
         {
             if (method.Body.Instructions.FirstOrDefault(inst =>
                     inst.OpCode == OpCodes.Call && inst.Operand is IMethod methodOperand &&
@@ -76,7 +76,7 @@ public static partial class PatchUtils
             RemoveRequirementsCheck
         );
 
-        void RemoveRequirementsCheck(MethodDef method)
+        static void RemoveRequirementsCheck(MethodDef method)
         {
             var dictionaryCtorRef = method.FindOperand<MemberRef>(
                 OpCodes.Newobj,
@@ -104,7 +104,7 @@ public static partial class PatchUtils
             RemoveHypervisorFlag
         );
 
-        void RemoveHypervisorFlag(MethodDef method)
+        static void RemoveHypervisorFlag(MethodDef method)
         {
             var instructions = method.Body.Instructions;
             instructions.RemoveAt(instructions.Count - 1);
@@ -267,7 +267,7 @@ public static partial class PatchUtils
             DnlibUtils.ReturnFalseMethod
         );
 
-        void ReturnNullableFalse(MethodDef method)
+        static void ReturnNullableFalse(MethodDef method)
         {
             var ctor = method.FindOperand<MemberRef>(OpCodes.Newobj, "System.Void System.Nullable`1<System.Boolean>::.ctor(System.Boolean)");
             if (ctor == null)
@@ -392,7 +392,7 @@ public static partial class PatchUtils
             SetPeriodicalCheck
         );
 
-        void SetPeriodicalCheck(MethodDef method)
+        static void SetPeriodicalCheck(MethodDef method)
         {
             var indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
             if (indexOfRequestSwtAction == -1)
@@ -423,7 +423,7 @@ public static partial class PatchUtils
             SetPeriodicalCheck
         );
 
-        void SetPeriodicalCheck(MethodDef method)
+        static void SetPeriodicalCheck(MethodDef method)
         {
             var instructions = method.Body.Instructions;
             var requestSwtAction = method.FindInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
@@ -472,7 +472,7 @@ public static partial class PatchUtils
             ReplaceCondition
         );
 
-        void ReplaceCondition(MethodDef method)
+        static void ReplaceCondition(MethodDef method)
         {
             var indexOfCallIsILeanActive = method.FindIndexOfInstruction(OpCodes.Call, "System.Boolean \u0042\u004d\u0057.Rheingold.CoreFramework.ConfigSettings::get_IsILeanActive()");
             if (indexOfCallIsILeanActive == -1)
@@ -509,7 +509,7 @@ public static partial class PatchUtils
             "(\u0042\u004d\u0057.Rheingold.CoreFramework.IProgressMonitor)System.Boolean",
             FixCondition);
 
-        void FixCondition(MethodDef method)
+        static void FixCondition(MethodDef method)
         {
             var instructions = method.Body.Instructions;
 
@@ -576,7 +576,7 @@ public static partial class PatchUtils
             "(System.Collections.Generic.Dictionary`2<System.String,System.String>)System.Boolean",
             DnlibUtils.ReturnFalseMethod);
 
-        void ReplaceDeviceType(MethodDef method)
+        static void ReplaceDeviceType(MethodDef method)
         {
             const string targetOperand = "System.String System.Collections.Generic.Dictionary`2<System.String,System.String>::get_Item(System.String)";
             var instructions = method.FindInstructions(OpCodes.Ldstr, "DevTypeExt");
@@ -609,7 +609,7 @@ public static partial class PatchUtils
             PatchClamp15Check
         );
 
-        void PatchClamp15Check(MethodDef method)
+        static void PatchClamp15Check(MethodDef method)
         {
             var instructions = method.Body.Instructions;
 
@@ -621,14 +621,14 @@ public static partial class PatchUtils
             var hasValueCall = method.FindInstruction(OpCodes.Call, "System.Boolean System.Nullable`1<System.Double>::get_HasValue()");
             if (hasValueCall == null)
             {
-                Log.Warning("HasValue call not found, can not patch {Method}", method.FullName);
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
             var hasValueIndex = instructions.IndexOf(hasValueCall);
             if (hasValueIndex == -1 || hasValueIndex >= instructions.Count - 1)
             {
-                Log.Warning("HasValue call index invalid, can not patch {Method}", method.FullName);
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -636,7 +636,7 @@ public static partial class PatchUtils
             var brfalseInstruction = instructions[hasValueIndex + 1];
             if (brfalseInstruction.OpCode != OpCodes.Brfalse_S)
             {
-                Log.Warning("Expected brfalse.s instruction not found after HasValue call, can not patch {Method}", method.FullName);
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -647,15 +647,13 @@ public static partial class PatchUtils
 
             if (valueComparisonBrfalse == null)
             {
-                Log.Warning("Value comparison brfalse instruction not found, can not patch {Method}", method.FullName);
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
             // Change the first brfalse target to point to the same target as the value comparison brfalse
             // This transforms (!clamp.HasValue || clamp < 0.1) to (clamp.HasValue && clamp < 0.1)
             brfalseInstruction.Operand = valueComparisonBrfalse.Operand;
-
-            Log.Information("Successfully patched motorcycle clamp15 check in {Method}", method.FullName);
         }
     }
 }

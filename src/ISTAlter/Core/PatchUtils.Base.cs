@@ -331,7 +331,7 @@ public static partial class PatchUtils
         // Validate attribute dependencies
         if ((untilVersion != null || fromVersion != null) && libraryNames == null)
         {
-            Log.Error("Patcher {PatcherName} has version constraints but no LibraryName attribute", patcher?.Name);
+            Log.Error("Patcher {PatcherName} has version constraints but no LibraryName attribute", patcher.Name);
         }
 
         // Check library name first
@@ -339,7 +339,7 @@ public static partial class PatchUtils
         {
             if (!libraryNames.Contains(module.FullName, StringComparer.Ordinal))
             {
-                Log.Debug("{PatcherName} is not valid for library: {Library}", patcher?.Name, module.FullName);
+                Log.Debug("{PatcherName} is not valid for library: {Library}", patcher.Name, module.FullName);
                 return false;
             }
         }
@@ -356,13 +356,13 @@ public static partial class PatchUtils
             // A valid patcher should match the version range: moduleVersion ∈ [fromVersion, untilVersion)
             if (fromVersion != null && moduleVersion < fromVersion)
             {
-                Log.Warning("{PatcherName} is not valid for assembly yet: {Assembly}({Version})", patcher?.Name, module.Assembly.Name, module.Assembly.Version);
+                Log.Warning("{PatcherName} is not valid for assembly yet: {Assembly}({Version})", patcher.Name, module.Assembly.Name, module.Assembly.Version);
                 return false;
             }
 
             if (untilVersion != null && moduleVersion >= untilVersion)
             {
-                Log.Warning("{PatcherName} is no longer valid for assembly: {Assembly}({Version})", patcher?.Name, module.Assembly.Name, module.Assembly.Version);
+                Log.Warning("{PatcherName} is no longer valid for assembly: {Assembly}({Version})", patcher.Name, module.Assembly.Name, module.Assembly.Version);
                 return false;
             }
         }

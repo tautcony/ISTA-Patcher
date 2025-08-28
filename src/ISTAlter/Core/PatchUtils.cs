@@ -276,7 +276,7 @@ public static partial class PatchUtils
             RemovePublicKeyCheck
         );
 
-        void RemovePublicKeyCheck(MethodDef method)
+        static void RemovePublicKeyCheck(MethodDef method)
         {
             var getProcessesByName = method.FindOperand<MemberRef>(OpCodes.Call, "System.Diagnostics.Process[] System.Diagnostics.Process::GetProcessesByName(System.String)");
             var firstOrDefault = method.FindOperand<MethodSpec>(OpCodes.Call, "System.Diagnostics.Process System.Linq.Enumerable::FirstOrDefault<System.Diagnostics.Process>(System.Collections.Generic.IEnumerable`1<System.Diagnostics.Process>)");
