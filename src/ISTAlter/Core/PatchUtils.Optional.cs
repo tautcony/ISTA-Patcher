@@ -507,6 +507,10 @@ public static partial class PatchUtils
             "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
             "doVehicleShortTest",
             "(\u0042\u004d\u0057.Rheingold.CoreFramework.IProgressMonitor)System.Boolean",
+            FixCondition) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
+            "DoVehicleShortTest",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.IProgressMonitor)System.Boolean",
             FixCondition);
 
         static void FixCondition(MethodDef method)
