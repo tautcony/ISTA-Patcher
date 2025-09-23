@@ -457,6 +457,72 @@ public static partial class PatchUtils
     }
 
     [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchFaultPatternViewModel(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.FaultPatternViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchTestPlanViewModel(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.TestPlanViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchTraversableDiagnosisObjectTreeViewModel(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.TraversableDiagnosisObjectTreeViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchHitListViewModel(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.HitListViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchServiceConsultingViewModel(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.ServiceConsultingViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchFaultMemoryViewModelBase(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.FaultMemoryViewModelBase",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
     [LibraryName("RheingoldISPINext.dll")]
     public static int PatchAirForkServicesWrapper(ModuleDefMD module)
     {
