@@ -483,7 +483,7 @@ public static partial class PatchUtils
     public static int PatchTraversableDiagnosisObjectTreeViewModel(ModuleDefMD module)
     {
         return module.PatchGetter(
-            ""\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.TraversableDiagnosisObjectTreeViewModel.TraversableDiagnosisObjectTreeViewModel,
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.TraversableDiagnosisObjectTreeViewModel.TraversableDiagnosisObjectTreeViewModel",
             "IsAirActive",
             DnlibUtils.ReturnTrueMethod
         );
