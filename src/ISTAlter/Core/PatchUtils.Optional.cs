@@ -77,7 +77,7 @@ public static partial class PatchUtils
 
         static void ModifyEnetInitialization(MethodDef method)
         {
-            var apiInitExtCalls = method.FindInstructions(OpCodes.Callvirt, "System.Boolean \u0042\u004d\u0057.Rheingold.VehicleCommunication.ECUKom.IEnetApi::apiInitExt(System.String,System.String,System.String,System.String)");
+            var apiInitExtCalls = method.FindInstructions(OpCodes.Callvirt, "System.Boolean BMW.Rheingold.VehicleCommunication.EdiabasToolbox.API::apiInitExt(System.String,System.String,System.String,System.String)");
 
             if (apiInitExtCalls.Count < 2)
             {
@@ -89,14 +89,14 @@ public static partial class PatchUtils
             var secondApiInitExt = apiInitExtCalls[1];
             var indexOfSecondCall = method.Body.Instructions.IndexOf(secondApiInitExt);
 
-            if (indexOfSecondCall == -1 || indexOfSecondCall < 4)
+            if (indexOfSecondCall == -1 || indexOfSecondCall < 1)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
             // Replace the empty string parameter with the new connection string
-            // The parameter should be 4 instructions before the call: ldstr ""
+            // The parameter should be just before the call: ldstr ""
             var emptyStringInstruction = method.Body.Instructions[indexOfSecondCall - 1];
             if (emptyStringInstruction.OpCode != OpCodes.Ldstr || !string.IsNullOrEmpty(emptyStringInstruction.Operand as string))
             {
@@ -105,7 +105,7 @@ public static partial class PatchUtils
             }
 
             // Find the device parameter load to construct the new string
-            var get_IPAddress = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice::get_IPAddress()");
+            var get_IPAddress = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.String BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice::get_IPAddress()");
             if (get_IPAddress == null)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
