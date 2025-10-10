@@ -64,6 +64,75 @@ public static partial class PatchUtils
          );
     }
 
+    [ENETPatch]
+    [LibraryName("RheingoldVehicleCommunication.dll")]
+    public static int PatchInitializeEnetDevice(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.VehicleCommunication.ECUKom",
+            "InitializeEnetDevice",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice)System.Boolean",
+            ModifyEnetInitialization
+        );
+
+        static void ModifyEnetInitialization(MethodDef method)
+        {
+            var apiInitExtCalls = method.FindInstructions(OpCodes.Callvirt, "System.Boolean \u0042\u004d\u0057.Rheingold.VehicleCommunication.VCI.ENET.IEnetApi::apiInitExt(System.String,System.String,System.String,System.String)");
+            
+            if (apiInitExtCalls.Count < 2)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Find the second apiInitExt call (the one that returns empty string)
+            var secondApiInitExt = apiInitExtCalls[1];
+            var indexOfSecondCall = method.Body.Instructions.IndexOf(secondApiInitExt);
+            
+            if (indexOfSecondCall == -1 || indexOfSecondCall < 4)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Replace the empty string parameter with the new connection string
+            // The parameter should be 4 instructions before the call: ldstr ""
+            var emptyStringInstruction = method.Body.Instructions[indexOfSecondCall - 1];
+            if (emptyStringInstruction.OpCode != OpCodes.Ldstr || !string.IsNullOrEmpty(emptyStringInstruction.Operand as string))
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Find the device parameter load to construct the new string
+            var get_IPAddress = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice::get_IPAddress()");
+            if (get_IPAddress == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Replace the empty string load with construction of the new connection string
+            var newInstructions = new[]
+            {
+                OpCodes.Ldstr.ToInstruction("RemoteHost="),
+                OpCodes.Ldarg_1.ToInstruction(), // device parameter
+                OpCodes.Callvirt.ToInstruction(get_IPAddress),
+                OpCodes.Ldstr.ToInstruction(";DiagnosticPort=6801;ControlPort=6811"),
+                OpCodes.Call.ToInstruction(method.Module.Import(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string) })))
+            };
+
+            // Remove the original empty string instruction
+            method.Body.Instructions.RemoveAt(indexOfSecondCall - 1);
+
+            // Insert the new instructions
+            for (int i = newInstructions.Length - 1; i >= 0; i--)
+            {
+                method.Body.Instructions.Insert(indexOfSecondCall - 1, newInstructions[i]);
+            }
+        }
+    }
+
     [RequirementsPatch]
     [LibraryName("ISTAGUI.exe")]
     [UntilVersion("4.52")]
