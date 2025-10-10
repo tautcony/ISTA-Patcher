@@ -77,8 +77,8 @@ public static partial class PatchUtils
 
         static void ModifyEnetInitialization(MethodDef method)
         {
-            var apiInitExtCalls = method.FindInstructions(OpCodes.Callvirt, "System.Boolean \u0042\u004d\u0057.Rheingold.VehicleCommunication.VCI.ENET.IEnetApi::apiInitExt(System.String,System.String,System.String,System.String)");
-            
+            var apiInitExtCalls = method.FindInstructions(OpCodes.Callvirt, "System.Boolean \u0042\u004d\u0057.Rheingold.VehicleCommunication.ECUKom.IEnetApi::apiInitExt(System.String,System.String,System.String,System.String)");
+
             if (apiInitExtCalls.Count < 2)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
@@ -88,7 +88,7 @@ public static partial class PatchUtils
             // Find the second apiInitExt call (the one that returns empty string)
             var secondApiInitExt = apiInitExtCalls[1];
             var indexOfSecondCall = method.Body.Instructions.IndexOf(secondApiInitExt);
-            
+
             if (indexOfSecondCall == -1 || indexOfSecondCall < 4)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
@@ -119,7 +119,7 @@ public static partial class PatchUtils
                 OpCodes.Ldarg_1.ToInstruction(), // device parameter
                 OpCodes.Callvirt.ToInstruction(get_IPAddress),
                 OpCodes.Ldstr.ToInstruction(";DiagnosticPort=6801;ControlPort=6811"),
-                OpCodes.Call.ToInstruction(method.Module.Import(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string) })))
+                OpCodes.Call.ToInstruction(method.Module.Import(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string) }))),
             };
 
             // Remove the original empty string instruction
