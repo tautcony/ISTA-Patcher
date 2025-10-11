@@ -1,5 +1,26 @@
 ﻿# Changelog
 
+## 2.3.6 / 2025-10-11
+
+- Feat - Add new HTTP server functionality with crypto and iLean API controllers
+- Feat - Add support for ISTA 4.53 and 4.54
+- Feat - Add patch for Clamp15 device with `--enable-clamp15` flag
+- Feat - Add patch to force ICOM Next interface with `--force-icom-next` flag
+- Feat - Add support for `GetCurrentUserEnvironment` and `GetCurrentNetworkType` methods in BMW.ISPI.TRIC.ISTA.LOGIN.dll
+- Feat - Add additional patch methods for user environment provider
+- Feat - Add patch for `DoVehicleShortTest` operation
+- Feat - Update AIR client and ENET device initialization patches
+- Feat - Improve patch applicable check mechanism for better reliability
+- Feat - Refactor and optimize ISTAGUI view models patch methods
+- Fix - Fix SLP (Software Logistics Planning) compatibility for ISTA 4.54
+- Fix - Fix finished operation patch configuration
+- Fix - Restore command-line version compatibility
+- Fix - Refactor JSON serialization for consistency in iLean command
+- Fix - Make patch methods static for better performance
+- Fix - Add grpc_csharp_ext DLLs to exclusion list in appsettings.json
+- Chore - Upgrade dependencies to latest versions
+- Chore - Fix code quality issues
+
 ## 2.3.5 / 2025-03-13
 
 - Feat - Add enable skip brand compatible check with `patch --enable-skip-brand-compatible-check` flag
