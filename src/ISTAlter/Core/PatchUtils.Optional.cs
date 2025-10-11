@@ -64,6 +64,75 @@ public static partial class PatchUtils
          );
     }
 
+    [ENETPatch]
+    [LibraryName("RheingoldVehicleCommunication.dll")]
+    public static int PatchInitializeEnetDevice(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.VehicleCommunication.ECUKom",
+            "InitializeEnetDevice",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice)System.Boolean",
+            ModifyEnetInitialization
+        );
+
+        static void ModifyEnetInitialization(MethodDef method)
+        {
+            var apiInitExtCalls = method.FindInstructions(OpCodes.Callvirt, "System.Boolean BMW.Rheingold.VehicleCommunication.EdiabasToolbox.API::apiInitExt(System.String,System.String,System.String,System.String)");
+
+            if (apiInitExtCalls.Count < 2)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Find the second apiInitExt call (the one that returns empty string)
+            var secondApiInitExt = apiInitExtCalls[1];
+            var indexOfSecondCall = method.Body.Instructions.IndexOf(secondApiInitExt);
+
+            if (indexOfSecondCall == -1 || indexOfSecondCall < 1)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Replace the empty string parameter with the new connection string
+            // The parameter should be just before the call: ldstr ""
+            var emptyStringInstruction = method.Body.Instructions[indexOfSecondCall - 1];
+            if (emptyStringInstruction.OpCode != OpCodes.Ldstr || !string.IsNullOrEmpty(emptyStringInstruction.Operand as string))
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Find the device parameter load to construct the new string
+            var get_IPAddress = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.String BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice::get_IPAddress()");
+            if (get_IPAddress == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Replace the empty string load with construction of the new connection string
+            var newInstructions = new[]
+            {
+                OpCodes.Ldstr.ToInstruction("RemoteHost="),
+                OpCodes.Ldarg_1.ToInstruction(), // device parameter
+                OpCodes.Callvirt.ToInstruction(get_IPAddress),
+                OpCodes.Ldstr.ToInstruction(";DiagnosticPort=6801;ControlPort=6811"),
+                OpCodes.Call.ToInstruction(method.Module.Import(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string) }))),
+            };
+
+            // Remove the original empty string instruction
+            method.Body.Instructions.RemoveAt(indexOfSecondCall - 1);
+
+            // Insert the new instructions
+            for (int i = newInstructions.Length - 1; i >= 0; i--)
+            {
+                method.Body.Instructions.Insert(indexOfSecondCall - 1, newInstructions[i]);
+            }
+        }
+    }
+
     [RequirementsPatch]
     [LibraryName("ISTAGUI.exe")]
     [UntilVersion("4.52")]
@@ -451,6 +520,72 @@ public static partial class PatchUtils
     {
         return module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.MainWindowIconBarViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchFaultPatternViewModel(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.FaultPatternViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchTestPlanViewModel(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.TestPlanViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchTraversableDiagnosisObjectTreeViewModel(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.TraversableDiagnosisObjectTreeViewModel.TraversableDiagnosisObjectTreeViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchHitListViewModel(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.HitListViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchServiceConsultingViewModel(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.ServiceConsultingViewModel",
+            "IsAirActive",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [EnableAirClientPatch]
+    [LibraryName("ISTAGUI.exe")]
+    public static int PatchFaultMemoryViewModelBase(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.FaultMemoryViewModelBase",
             "IsAirActive",
             DnlibUtils.ReturnTrueMethod
         );
