@@ -77,7 +77,7 @@ public static partial class PatchUtils
 
         static void ModifyEnetInitialization(MethodDef method)
         {
-            var apiInitExtCalls = method.FindInstructions(OpCodes.Callvirt, "System.Boolean BMW.Rheingold.VehicleCommunication.EdiabasToolbox.API::apiInitExt(System.String,System.String,System.String,System.String)");
+            var apiInitExtCalls = method.FindInstructions(OpCodes.Callvirt, "System.Boolean \u0042\u004d\u0057.Rheingold.VehicleCommunication.EdiabasToolbox.API::apiInitExt(System.String,System.String,System.String,System.String)");
 
             if (apiInitExtCalls.Count < 2)
             {
@@ -89,7 +89,7 @@ public static partial class PatchUtils
             var secondApiInitExt = apiInitExtCalls[1];
             var indexOfSecondCall = method.Body.Instructions.IndexOf(secondApiInitExt);
 
-            if (indexOfSecondCall == -1 || indexOfSecondCall < 1)
+            if (indexOfSecondCall is -1 or < 1)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
@@ -105,7 +105,7 @@ public static partial class PatchUtils
             }
 
             // Find the device parameter load to construct the new string
-            var get_IPAddress = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.String BMW.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice::get_IPAddress()");
+            var get_IPAddress = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.Vehicle.IVciDevice::get_IPAddress()");
             if (get_IPAddress == null)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
@@ -119,14 +119,14 @@ public static partial class PatchUtils
                 OpCodes.Ldarg_1.ToInstruction(), // device parameter
                 OpCodes.Callvirt.ToInstruction(get_IPAddress),
                 OpCodes.Ldstr.ToInstruction(";DiagnosticPort=6801;ControlPort=6811"),
-                OpCodes.Call.ToInstruction(method.Module.Import(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string) }))),
+                OpCodes.Call.ToInstruction(method.Module.Import(typeof(string).GetMethod("Concat", [typeof(string), typeof(string), typeof(string)]))),
             };
 
             // Remove the original empty string instruction
             method.Body.Instructions.RemoveAt(indexOfSecondCall - 1);
 
             // Insert the new instructions
-            for (int i = newInstructions.Length - 1; i >= 0; i--)
+            for (var i = newInstructions.Length - 1; i >= 0; i--)
             {
                 method.Body.Instructions.Insert(indexOfSecondCall - 1, newInstructions[i]);
             }
@@ -516,79 +516,19 @@ public static partial class PatchUtils
 
     [EnableAirClientPatch]
     [LibraryName("ISTAGUI.exe")]
-    public static int PatchMainWindowIconBarViewModel(ModuleDefMD module)
+    public static int PatchISTAGUIViewModel(ModuleDefMD module)
     {
-        return module.PatchGetter(
-            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.MainWindowIconBarViewModel",
-            "IsAirActive",
-            DnlibUtils.ReturnTrueMethod
-        );
-    }
+        string[] targetTypes = [
+            "MainWindowIconBarViewModel",
+            "FaultPatternViewModel",
+            "TestPlanViewModel",
+            "TraversableDiagnosisObjectTreeViewModel.TraversableDiagnosisObjectTreeViewModel",
+            "HitListViewModel",
+            "ServiceConsultingViewModel",
+            "FaultMemoryViewModelBase"
+        ];
 
-    [EnableAirClientPatch]
-    [LibraryName("ISTAGUI.exe")]
-    public static int PatchFaultPatternViewModel(ModuleDefMD module)
-    {
-        return module.PatchGetter(
-            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.FaultPatternViewModel",
-            "IsAirActive",
-            DnlibUtils.ReturnTrueMethod
-        );
-    }
-
-    [EnableAirClientPatch]
-    [LibraryName("ISTAGUI.exe")]
-    public static int PatchTestPlanViewModel(ModuleDefMD module)
-    {
-        return module.PatchGetter(
-            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.TestPlanViewModel",
-            "IsAirActive",
-            DnlibUtils.ReturnTrueMethod
-        );
-    }
-
-    [EnableAirClientPatch]
-    [LibraryName("ISTAGUI.exe")]
-    public static int PatchTraversableDiagnosisObjectTreeViewModel(ModuleDefMD module)
-    {
-        return module.PatchGetter(
-            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.TraversableDiagnosisObjectTreeViewModel.TraversableDiagnosisObjectTreeViewModel",
-            "IsAirActive",
-            DnlibUtils.ReturnTrueMethod
-        );
-    }
-
-    [EnableAirClientPatch]
-    [LibraryName("ISTAGUI.exe")]
-    public static int PatchHitListViewModel(ModuleDefMD module)
-    {
-        return module.PatchGetter(
-            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.HitListViewModel",
-            "IsAirActive",
-            DnlibUtils.ReturnTrueMethod
-        );
-    }
-
-    [EnableAirClientPatch]
-    [LibraryName("ISTAGUI.exe")]
-    public static int PatchServiceConsultingViewModel(ModuleDefMD module)
-    {
-        return module.PatchGetter(
-            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.ServiceConsultingViewModel",
-            "IsAirActive",
-            DnlibUtils.ReturnTrueMethod
-        );
-    }
-
-    [EnableAirClientPatch]
-    [LibraryName("ISTAGUI.exe")]
-    public static int PatchFaultMemoryViewModelBase(ModuleDefMD module)
-    {
-        return module.PatchGetter(
-            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.FaultMemoryViewModelBase",
-            "IsAirActive",
-            DnlibUtils.ReturnTrueMethod
-        );
+        return targetTypes.Sum(viewModel => module.PatchGetter($"\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.{viewModel}", "IsAirActive", DnlibUtils.ReturnTrueMethod));
     }
 
     [EnableAirClientPatch]
@@ -708,7 +648,7 @@ public static partial class PatchUtils
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.xVM.SLP",
             "ScanDeviceFromAttrList",
-            "(BMW.Rheingold.xVM.SLPAttrRply,System.String[])BMW.Rheingold.CoreFramework.DatabaseProvider.VCIDevice",
+            "(\u0042\u004d\u0057.Rheingold.xVM.SLPAttrRply,System.String[])\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.VCIDevice",
             ReplaceDeviceType) + module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.xVM.SLP",
             "IsIcomUnsupported",
