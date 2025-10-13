@@ -297,6 +297,22 @@ public static partial class PatchUtils
     }
 
     [NotSendPatch]
+    [LibraryName("ISTAGUI.exe")]
+    [FromVersion("4.55")]
+    public static int PatchMultisessionLogic455(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.MultisessionLogic",
+            "IsSendFastaDataForbidden",
+            DnlibUtils.ReturnTrueMethod
+        ) + module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.MultisessionLogic",
+            "IsSendOBFCMDataForbidden",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [NotSendPatch]
     [LibraryName("RheingoldCoreFramework.dll")]
     [FromVersion("4.55")]
     public static int PatchtypeVehicle(ModuleDefMD module)
@@ -336,31 +352,17 @@ public static partial class PatchUtils
 
     [NotSendPatch]
     [LibraryName("RheingoldSessionController.dll")]
+    [FromVersion("4.55")]
     public static int PatchLogic(ModuleDefMD module)
     {
-        return module.PatchFunction(
+        return module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic",
-            "SendFastaDataToFBM",
-            "(System.String,System.Boolean)System.String",
-            method =>
-            {
-                method.ReplaceWith([
-                    OpCodes.Ldnull.ToInstruction(),
-                    OpCodes.Ret.ToInstruction()
-                ]);
-                method.Body.Variables.Clear();
-                method.Body.ExceptionHandlers.Clear();
-            }
-        ) + module.PatchFunction(
+            "IsSendFastaDataForbidden",
+            DnlibUtils.ReturnTrueMethod
+        ) + module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic",
-            "SendObfcmDataToBackend",
-            "(System.Int32,System.Boolean,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.String)System.Void",
-            method =>
-            {
-                method.ReplaceWith([OpCodes.Ret.ToInstruction()]);
-                method.Body.Variables.Clear();
-                method.Body.ExceptionHandlers.Clear();
-            }
+            "IsSendOBFCMDataForbidden",
+            DnlibUtils.ReturnTrueMethod
         );
     }
 
