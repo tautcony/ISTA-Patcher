@@ -342,12 +342,25 @@ public static partial class PatchUtils
             "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic",
             "SendFastaDataToFBM",
             "(System.String,System.Boolean)System.String",
-            DnlibUtils.ReturnStringMethod(null)
+            method =>
+            {
+                method.ReplaceWith([
+                    OpCodes.Ldnull.ToInstruction(),
+                    OpCodes.Ret.ToInstruction()
+                ]);
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+            }
         ) + module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic",
             "SendObfcmDataToBackend",
             "(System.Int32,System.Boolean,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.String)System.Void",
-            DnlibUtils.ReturnStringMethod(null)
+            method =>
+            {
+                method.ReplaceWith([OpCodes.Ret.ToInstruction()]);
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+            }
         );
     }
 
