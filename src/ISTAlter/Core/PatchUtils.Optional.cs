@@ -299,7 +299,7 @@ public static partial class PatchUtils
     [NotSendPatch]
     [LibraryName("RheingoldCoreFramework.dll")]
     [FromVersion("4.55")]
-    public static int PatchMultisessionLogic455(ModuleDefMD module)
+    public static int PatchtypeVehicle(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle",
@@ -331,6 +331,23 @@ public static partial class PatchUtils
                 method.Body.Variables.Clear();
                 method.Body.ExceptionHandlers.Clear();
             }
+        );
+    }
+
+    [NotSendPatch]
+    [LibraryName("RheingoldSessionController.dll")]
+    public static int PatchLogic(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic",
+            "SendFastaDataToFBM",
+            "(System.String,System.Boolean)System.String",
+            DnlibUtils.ReturnStringMethod(null)
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic",
+            "SendObfcmDataToBackend",
+            "(System.Int32,System.Boolean,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.Double,System.String)System.Void",
+            DnlibUtils.ReturnStringMethod(null)
         );
     }
 
