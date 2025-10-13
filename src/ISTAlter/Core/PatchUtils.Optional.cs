@@ -296,6 +296,44 @@ public static partial class PatchUtils
         }
     }
 
+    [NotSendPatch]
+    [LibraryName("RheingoldCoreFramework.dll")]
+    [FromVersion("4.55")]
+    public static int PatchMultisessionLogic455(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle",
+            "get_IsSendFastaDataForbidden",
+            "()System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle",
+            "set_IsSendFastaDataForbidden",
+            "(System.Boolean)System.Void",
+            method =>
+            {
+                method.ReplaceWith([OpCodes.Ret.ToInstruction()]);
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+            }
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle",
+            "get_IsSendOBFCMDataForbidden",
+            "()System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle",
+            "set_IsSendOBFCMDataForbidden",
+            "(System.Boolean)System.Void",
+            method =>
+            {
+                method.ReplaceWith([OpCodes.Ret.ToInstruction()]);
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+            }
+        );
+    }
+
     [MarketLanguagePatch]
     [LibraryName("RheingoldISPINext.dll")]
     public static Func<ModuleDefMD, int> PatchCommonServiceWrapper_GetMarketLanguage(string marketLanguage)
