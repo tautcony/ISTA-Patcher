@@ -407,6 +407,29 @@ public static partial class PatchUtils
         );
     }
 
+    [NotSendPatch]
+    [LibraryName("RheingoldSessionController.dll")]
+    [FromVersion("4.55")]
+    public static int PatchFASTATransferMode(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Core.GlobalSettingsObject",
+            "get_FASTATransferMode",
+            "()\u0042\u004d\u0057.Rheingold.CoreFramework.EnumFASTATransferMode",
+            DnlibUtils.ReturnUInt32Method(1) // Return None (value = 1)
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Core.GlobalSettingsObject",
+            "set_FASTATransferMode",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.EnumFASTATransferMode)System.Void",
+            method =>
+            {
+                method.ReplaceWith([OpCodes.Ret.ToInstruction()]);
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+            }
+        );
+    }
+
     [MarketLanguagePatch]
     [LibraryName("RheingoldISPINext.dll")]
     public static Func<ModuleDefMD, int> PatchCommonServiceWrapper_GetMarketLanguage(string marketLanguage)
