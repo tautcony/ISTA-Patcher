@@ -427,7 +427,44 @@ public static partial class PatchUtils
                 method.Body.Variables.Clear();
                 method.Body.ExceptionHandlers.Clear();
             }
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Core.GlobalSettingsObject",
+            "TryLoadFromRegistry",
+            "()\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Core.GlobalSettingsObject",
+            ChangeFASTATransferModeInitialization
         );
+
+        static void ChangeFASTATransferModeInitialization(MethodDef method)
+        {
+            // Find the instruction: ldc.i4.0 (BITSUpload = 0)
+            // We need to change it to: ldc.i4.1 (None = 1)
+            var instructions = method.Body.Instructions;
+
+            // Look for the pattern where EnumFASTATransferMode is initialized
+            // The variable is typically loaded with ldc.i4.0 and stored
+            for (int i = 0; i < instructions.Count - 1; i++)
+            {
+                var current = instructions[i];
+                var next = instructions[i + 1];
+
+                // Look for ldc.i4.0 followed by stloc (storing to enumFASTATransferMode variable)
+                if (current.OpCode == OpCodes.Ldc_I4_0 &&
+                    (next.OpCode == OpCodes.Stloc_0 || next.OpCode == OpCodes.Stloc_1 ||
+                     next.OpCode == OpCodes.Stloc_2 || next.OpCode == OpCodes.Stloc_3 ||
+                     next.OpCode == OpCodes.Stloc_S || next.OpCode == OpCodes.Stloc))
+                {
+                    // Check if this is near the beginning of the method (within first ~10 instructions after try block)
+                    if (i < 15)
+                    {
+                        // Change BITSUpload (0) to None (1)
+                        current.OpCode = OpCodes.Ldc_I4_1;
+                        return;
+                    }
+                }
+            }
+
+            Log.Warning("Could not find EnumFASTATransferMode initialization pattern in {Method}", method.FullName);
+        }
     }
 
     [MarketLanguagePatch]
