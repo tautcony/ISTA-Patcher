@@ -313,6 +313,47 @@ public static partial class PatchUtils
     }
 
     [NotSendPatch]
+    [LibraryName("ISTAGUI.exe")]
+    [FromVersion("4.55")]
+    public static int PatchSendFileToFbmThroughMultisessionLogic(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.OperationFinishedListViewModel",
+            "SendFileToFbmThroughMultisessionLogic",
+            "(\u0042\u004d\u0057.ISPI.IstaServices.Contract.PUK.Data.TransactionMetaData,System.String,System.IO.FileInfo)System.Void",
+            ChangeSendFastaDataToFBMParameter
+        );
+
+        static void ChangeSendFastaDataToFBMParameter(MethodDef method)
+        {
+            var sendFastaDataToFBMCall = method.FindInstruction(OpCodes.Callvirt, "System.String \u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic::SendFastaDataToFBM(System.String,System.Boolean)");
+            if (sendFastaDataToFBMCall == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var indexOfCall = method.Body.Instructions.IndexOf(sendFastaDataToFBMCall);
+            if (indexOfCall == -1 || indexOfCall < 1)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // The boolean parameter should be just before the call
+            var booleanInstruction = method.Body.Instructions[indexOfCall - 1];
+            if (!booleanInstruction.IsLdcI4())
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Change true (ldc.i4.1) to false (ldc.i4.0)
+            booleanInstruction.OpCode = OpCodes.Ldc_I4_0;
+        }
+    }
+
+    [NotSendPatch]
     [LibraryName("RheingoldCoreFramework.dll")]
     [FromVersion("4.55")]
     public static int PatchtypeVehicle(ModuleDefMD module)
