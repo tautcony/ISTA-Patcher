@@ -299,7 +299,7 @@ public static partial class PatchUtils
     [NotSendPatch]
     [LibraryName("ISTAGUI.exe")]
     [FromVersion("4.55")]
-    public static int PatchMultisessionLogic455(ModuleDefMD module)
+    public static int PatchMultisessionLogicFrom455(ModuleDefMD module)
     {
         return module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.MultisessionLogic",
