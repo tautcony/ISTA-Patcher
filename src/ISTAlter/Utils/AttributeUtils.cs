@@ -42,6 +42,8 @@ internal sealed class ForceICOMNextPatchAttribute : ISTAPatchAttribute;
 
 internal sealed class MotorbikeClamp15PatchAttribute : ISTAPatchAttribute;
 
+internal sealed class ManualClampSwitchPatchAttribute : ISTAPatchAttribute;
+
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersionAttribute(string version) : Attribute
 {

@@ -45,4 +45,7 @@ public class OptionalPatchOption
 
     [CliOption(Name = "--enable-motorbike-clamp15-fix", Description = "Enable patch for motorbike Clamp15 error memory clear.")]
     public bool MotorbikeClamp15Fix { get; set; }
+
+    [CliOption(Name = "--enable-manual-clamp-switch-bypass", Description = "Enable patch for manual clamp switch bypass.")]
+    public bool ManualClampSwitch { get; set; }
 }

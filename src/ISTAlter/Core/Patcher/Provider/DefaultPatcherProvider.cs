@@ -102,6 +102,11 @@ public class DefaultPatcherProvider : IPatcherProvider
             this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(MotorbikeClamp15PatchAttribute)));
         }
 
+        if (opts.ManualClampSwitch)
+        {
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(ManualClampSwitchPatchAttribute)));
+        }
+
         Log.Debug("Loaded patches: {Patches}", string.Join(", ", this.Patches.Select(p => p.Method.Name)));
     }
 
