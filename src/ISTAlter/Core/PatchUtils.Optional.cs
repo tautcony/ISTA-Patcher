@@ -1193,8 +1193,6 @@ public static partial class PatchUtils
                     OpCodes.Newobj.ToInstruction(funcConstructor),    // Create Func<double, bool>
                     OpCodes.Dup.ToInstruction(),                      // Duplicate
                     OpCodes.Stsfld.ToInstruction(lambdaField),        // Store in static field
-
-                    // skipInit marker will be placed here
                 };
             }
 
@@ -1208,27 +1206,19 @@ public static partial class PatchUtils
             // Create the complete IL for the VCIType == 3 block
             var type3Block = new List<Instruction>
             {
-                // Check: if (VCIType != 3) goto skipToOriginalCheck
                 OpCodes.Ldarg_0.ToInstruction(),
                 vehicleInstruction,
                 OpCodes.Callvirt.ToInstruction(getVci),
                 OpCodes.Callvirt.ToInstruction(getVciType),
                 OpCodes.Ldc_I4_3.ToInstruction(),
                 OpCodes.Bne_Un.ToInstruction(skipToOriginalCheck),
-
-                // Log.Info("ClampSwitchVehicle.ManualClampSwitch()", "Start clamp switch to state off.", Array.Empty<object>());
                 OpCodes.Ldstr.ToInstruction("ClampSwitchVehicle.ManualClampSwitch()"),
                 OpCodes.Ldstr.ToInstruction("Start clamp switch to state off."),
                 OpCodes.Call.ToInstruction(arrayEmpty),
                 OpCodes.Call.ToInstruction(logInfo),
-
-                // viModel.Step = InteractionIgnitionStep.IgnitionOff (0)
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Ldc_I4_0.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(setStep),
-
-                // CancellationTokenSource cancellationTokenSource = this.CheckForAutoSkip(viModel, voltage => voltage < 7000.0)
-                // WITH lazy initialization pattern
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldarg_1.ToInstruction(),
             };
@@ -1241,25 +1231,16 @@ public static partial class PatchUtils
             // Continue adding remaining instructions
             type3Block.AddRange(new[]
             {
-                // viModel.WaitForResponse()
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(waitForResponse),
-
-                // cancellationTokenSource.Cancel()
                 OpCodes.Callvirt.ToInstruction(cancel),
-
-                // Log.Info("ClampSwitchVehicle.ManualClampSwitch()", "Clamp switch to state off finished.", Array.Empty<object>());
                 OpCodes.Ldstr.ToInstruction("ClampSwitchVehicle.ManualClampSwitch()"),
                 OpCodes.Ldstr.ToInstruction("Clamp switch to state off finished."),
                 OpCodes.Call.ToInstruction(arrayEmpty),
                 OpCodes.Call.ToInstruction(logInfo),
-
-                // InteractionButtonResponse response = viModel.Response (just load and pop, we don't check it)
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(getResponse),
                 OpCodes.Pop.ToInstruction(),
-
-                // this.interactionService.Register(new InteractionProgressWaitModel(viModel.Title, FormatedData.Localize("#WaitForChangeover"), 10000))
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldfld.ToInstruction(getInteractionService),
                 OpCodes.Ldarg_1.ToInstruction(),
@@ -1269,20 +1250,13 @@ public static partial class PatchUtils
                 OpCodes.Ldc_I4.ToInstruction(10000),
                 OpCodes.Newobj.ToInstruction(progressWaitCtor),
                 OpCodes.Callvirt.ToInstruction(register),
-
-                // Log.Info("ClampSwitchVehicle.ManualClampSwitch()", "Start clamp switch to state on.", Array.Empty<object>());
                 OpCodes.Ldstr.ToInstruction("ClampSwitchVehicle.ManualClampSwitch()"),
                 OpCodes.Ldstr.ToInstruction("Start clamp switch to state on."),
                 OpCodes.Call.ToInstruction(arrayEmpty),
                 OpCodes.Call.ToInstruction(logInfo),
-
-                // viModel.Step = InteractionIgnitionStep.IgnitionOn (1)
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Ldc_I4_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(setStep),
-
-                // CancellationTokenSource cancellationTokenSource2 = this.CheckForAutoSkip(viModel, voltage => voltage > 9000.0)
-                // WITH lazy initialization pattern
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldarg_1.ToInstruction(),
             });
@@ -1295,20 +1269,13 @@ public static partial class PatchUtils
             // Final instructions
             type3Block.AddRange(new[]
             {
-                // viModel.WaitForResponse()
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(waitForResponse),
-
-                // cancellationTokenSource2.Cancel()
                 OpCodes.Callvirt.ToInstruction(cancel),
-
-                // Log.Info("ClampSwitchVehicle.ManualClampSwitch()", "Clamp switch to state on finished.", Array.Empty<object>());
                 OpCodes.Ldstr.ToInstruction("ClampSwitchVehicle.ManualClampSwitch()"),
                 OpCodes.Ldstr.ToInstruction("Clamp switch to state on finished."),
                 OpCodes.Call.ToInstruction(arrayEmpty),
                 OpCodes.Call.ToInstruction(logInfo),
-
-                // InteractionButtonResponse response2 = viModel.Response (just load and pop, we don't check it)
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(getResponse),
                 OpCodes.Pop.ToInstruction(),
