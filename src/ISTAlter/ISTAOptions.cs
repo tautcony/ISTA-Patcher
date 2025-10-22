@@ -77,6 +77,8 @@ public static class ISTAOptions
         public bool ForceICOMNext { get; set; }
 
         public bool MotorbikeClamp15Fix { get; set; }
+
+        public bool ManualClampSwitch { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions

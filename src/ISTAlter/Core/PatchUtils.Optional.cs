@@ -296,6 +296,177 @@ public static partial class PatchUtils
         }
     }
 
+    [NotSendPatch]
+    [LibraryName("ISTAGUI.exe")]
+    [FromVersion("4.55")]
+    public static int PatchMultisessionLogicFrom455(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.MultisessionLogic",
+            "IsSendFastaDataForbidden",
+            DnlibUtils.ReturnTrueMethod
+        ) + module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.MultisessionLogic",
+            "IsSendOBFCMDataForbidden",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [NotSendPatch]
+    [LibraryName("ISTAGUI.exe")]
+    [FromVersion("4.55")]
+    public static int PatchSendFileToFbmThroughMultisessionLogic(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.OperationFinishedListViewModel",
+            "SendFileToFbmThroughMultisessionLogic",
+            "(\u0042\u004d\u0057.ISPI.IstaServices.Contract.PUK.Data.TransactionMetaData,System.String,System.IO.FileInfo)System.Void",
+            ChangeSendFastaDataToFBMParameter
+        );
+
+        static void ChangeSendFastaDataToFBMParameter(MethodDef method)
+        {
+            var sendFastaDataToFBMCall = method.FindInstruction(OpCodes.Callvirt, "System.String \u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic::SendFastaDataToFBM(System.String,System.Boolean)");
+            if (sendFastaDataToFBMCall == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var indexOfCall = method.Body.Instructions.IndexOf(sendFastaDataToFBMCall);
+            if (indexOfCall == -1 || indexOfCall < 1)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // The boolean parameter should be just before the call
+            var booleanInstruction = method.Body.Instructions[indexOfCall - 1];
+            if (!booleanInstruction.IsLdcI4())
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Change true (ldc.i4.1) to false (ldc.i4.0)
+            booleanInstruction.OpCode = OpCodes.Ldc_I4_0;
+        }
+    }
+
+    [NotSendPatch]
+    [LibraryName("RheingoldCoreFramework.dll")]
+    [FromVersion("4.55")]
+    public static int PatchtypeVehicle(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle",
+            "get_IsSendFastaDataForbidden",
+            "()System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle",
+            "set_IsSendFastaDataForbidden",
+            "(System.Boolean)System.Void",
+            method =>
+            {
+                method.ReplaceWith([OpCodes.Ret.ToInstruction()]);
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+            }
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle",
+            "get_IsSendOBFCMDataForbidden",
+            "()System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle",
+            "set_IsSendOBFCMDataForbidden",
+            "(System.Boolean)System.Void",
+            method =>
+            {
+                method.ReplaceWith([OpCodes.Ret.ToInstruction()]);
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+            }
+        );
+    }
+
+    [NotSendPatch]
+    [LibraryName("RheingoldSessionController.dll")]
+    [FromVersion("4.55")]
+    public static int PatchLogic(ModuleDefMD module)
+    {
+        return module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic",
+            "IsSendFastaDataForbidden",
+            DnlibUtils.ReturnTrueMethod
+        ) + module.PatchGetter(
+            "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic",
+            "IsSendOBFCMDataForbidden",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [NotSendPatch]
+    [LibraryName("RheingoldSessionController.dll")]
+    [FromVersion("4.55")]
+    public static int PatchFASTATransferMode(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Core.GlobalSettingsObject",
+            "get_FASTATransferMode",
+            "()\u0042\u004d\u0057.Rheingold.CoreFramework.EnumFASTATransferMode",
+            DnlibUtils.ReturnUInt32Method(1) // Return None (value = 1)
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Core.GlobalSettingsObject",
+            "set_FASTATransferMode",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.EnumFASTATransferMode)System.Void",
+            method =>
+            {
+                method.ReplaceWith([OpCodes.Ret.ToInstruction()]);
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+            }
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Core.GlobalSettingsObject",
+            "TryLoadFromRegistry",
+            "()\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Core.GlobalSettingsObject",
+            ChangeFASTATransferModeInitialization
+        );
+
+        static void ChangeFASTATransferModeInitialization(MethodDef method)
+        {
+            // Find the instruction: ldc.i4.0 (BITSUpload = 0)
+            // We need to change it to: ldc.i4.1 (None = 1)
+            var instructions = method.Body.Instructions;
+
+            // Look for the pattern where EnumFASTATransferMode is initialized
+            // The variable is typically loaded with ldc.i4.0 and stored
+            for (int i = 0; i < instructions.Count - 1; i++)
+            {
+                var current = instructions[i];
+                var next = instructions[i + 1];
+
+                // Look for ldc.i4.0 followed by stloc (storing to enumFASTATransferMode variable)
+                if (current.OpCode == OpCodes.Ldc_I4_0 &&
+                    (next.OpCode == OpCodes.Stloc_0 || next.OpCode == OpCodes.Stloc_1 ||
+                     next.OpCode == OpCodes.Stloc_2 || next.OpCode == OpCodes.Stloc_3 ||
+                     next.OpCode == OpCodes.Stloc_S || next.OpCode == OpCodes.Stloc))
+                {
+                    // Check if this is near the beginning of the method (within first ~10 instructions after try block)
+                    if (i < 15)
+                    {
+                        // Change BITSUpload (0) to None (1)
+                        current.OpCode = OpCodes.Ldc_I4_1;
+                        return;
+                    }
+                }
+            }
+
+            Log.Warning("Could not find EnumFASTATransferMode initialization pattern in {Method}", method.FullName);
+        }
+    }
+
     [MarketLanguagePatch]
     [LibraryName("RheingoldISPINext.dll")]
     public static Func<ModuleDefMD, int> PatchCommonServiceWrapper_GetMarketLanguage(string marketLanguage)
@@ -733,6 +904,408 @@ public static partial class PatchUtils
             // Change the first brfalse target to point to the same target as the value comparison brfalse
             // This transforms (!clamp.HasValue || clamp < 0.1) to (clamp.HasValue && clamp < 0.1)
             brfalseInstruction.Operand = valueComparisonBrfalse.Operand;
+        }
+    }
+
+    [ManualClampSwitchPatch]
+    [LibraryName("RheingoldDiagnostics.dll")]
+    public static int PatchManualClampSwitch(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.Diagnostics.ClampSwitchVehicle",
+            "ManualClampSwitch",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionVehicleIgnitionModel,System.Boolean,System.String)System.Void",
+            ModifyClampSwitchLogic
+        );
+
+        static void ModifyClampSwitchLogic(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+
+            // Find VCIType check pattern
+            int tryStartIdx = -1;
+            object? vehicleAccess = null;
+            IMethod? getVci = null;
+            IMethod? getVciType = null;
+
+            for (int i = 0; i < instructions.Count - 5; i++)
+            {
+                if (instructions[i].OpCode == OpCodes.Ldarg_0 &&
+                    (instructions[i + 1].OpCode == OpCodes.Ldfld || instructions[i + 1].OpCode == OpCodes.Callvirt) &&
+                    instructions[i + 2].OpCode == OpCodes.Callvirt &&
+                    instructions[i + 3].OpCode == OpCodes.Callvirt &&
+                    instructions[i + 4].IsLdcI4() && instructions[i + 4].GetLdcI4Value() == 7 &&
+                    instructions[i + 5].OpCode == OpCodes.Beq)
+                {
+                    tryStartIdx = i;
+                    vehicleAccess = instructions[i + 1].Operand;
+                    getVci = instructions[i + 2].Operand as IMethod;
+                    getVciType = instructions[i + 3].Operand as IMethod;
+                    break;
+                }
+            }
+
+            if (tryStartIdx == -1 || vehicleAccess == null || getVci == null || getVciType == null)
+            {
+                Log.Warning("Could not find VCIType check pattern in {Method}", method.FullName);
+                return;
+            }
+
+            // Create vehicle access instruction
+            Instruction vehicleInstruction = instructions[tryStartIdx + 1].OpCode == OpCodes.Ldfld
+                ? OpCodes.Ldfld.ToInstruction(vehicleAccess as IField)
+                : OpCodes.Callvirt.ToInstruction(vehicleAccess as IMethod);
+
+            // Reuse existing method references
+            var module = method.Module;
+            var arrayEmpty = module.Import(typeof(Array).GetMethod("Empty").MakeGenericMethod(typeof(object)));
+
+            // Scan existing instructions to find the method/field references we need
+            var instructionList = method.Body.Instructions;
+            IMethod logInfo = null;
+            IMethod setStep = null;
+            IMethod waitForResponse = null;
+            IMethod getResponse = null;
+            IMethod cancel = null;
+            IMethod getTitle = null;
+            IMethod localize = null;
+            IMethod progressWaitCtor = null;
+            IMethod register = null;
+            IMethod checkForAutoSkip = null;
+            IField getInteractionService = null;
+
+            foreach (var instr in instructionList)
+            {
+                if (instr.Operand is IMethod m)
+                {
+                    if (m.Name == "Info" && m.DeclaringType?.Name == "Log")
+                    {
+                        logInfo = m;
+                    }
+                    else if (m.Name == "set_Step")
+                    {
+                        setStep = m;
+                    }
+                    else if (m.Name == "WaitForResponse")
+                    {
+                        waitForResponse = m;
+                    }
+                    else if (m.Name == "get_Response")
+                    {
+                        getResponse = m;
+                    }
+                    else if (m.Name == "Cancel" && m.DeclaringType?.Name == "CancellationTokenSource")
+                    {
+                        cancel = m;
+                    }
+                    else if (m.Name == "get_Title")
+                    {
+                        getTitle = m;
+                    }
+                    else if (m.Name == "Localize")
+                    {
+                        localize = m;
+                    }
+                    else if (m.Name == ".ctor" && m.DeclaringType?.Name == "InteractionProgressWaitModel")
+                    {
+                        progressWaitCtor = m;
+                    }
+                    else if (m.Name == "Register")
+                    {
+                        register = m;
+                    }
+                    else if (m.Name == "CheckForAutoSkip")
+                    {
+                        checkForAutoSkip = m;
+                    }
+                }
+                else if (instr.Operand is IField f)
+                {
+                    if (f.Name == "interactionService")
+                    {
+                        getInteractionService = f;
+                    }
+                }
+            }
+
+            if (logInfo == null || setStep == null || waitForResponse == null ||
+                getResponse == null || cancel == null || getTitle == null ||
+                localize == null || progressWaitCtor == null || register == null ||
+                checkForAutoSkip == null || getInteractionService == null)
+            {
+                Log.Warning("Could not find existing method references in {Method}", method.FullName);
+                return;
+            }
+
+            // Find lambda functions and lazy init components
+            IField func7000 = null;
+            IField func9000 = null;
+            IField singletonField = null;
+            IMethod lambda7000Method = null;
+            IMethod lambda9000Method = null;
+            IMethod funcConstructor = null;
+
+            // Find lambda fields
+            foreach (var instr in instructions)
+            {
+                if (instr.OpCode == OpCodes.Ldsfld && instr.Operand is IField f)
+                {
+                    var fieldSig = f.FieldSig;
+                    if (fieldSig?.Type?.TypeName?.Contains("Func") == true)
+                    {
+                        if (func7000 == null)
+                        {
+                            func7000 = f;
+                        }
+                        else if (func9000 == null)
+                        {
+                            func9000 = f;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (func7000 == null || func9000 == null)
+            {
+                Log.Warning("Lambda functions for voltage checks not found in {Method}", method.FullName);
+                return;
+            }
+
+            // Find singleton and lambda methods
+            var compilerGeneratedClassDef = func7000.DeclaringType.ResolveTypeDef();
+            if (compilerGeneratedClassDef != null)
+            {
+                foreach (var field in compilerGeneratedClassDef.Fields)
+                {
+                    if (field.IsStatic && field.FieldType.FullName == compilerGeneratedClassDef.FullName)
+                    {
+                        singletonField = field;
+                        break;
+                    }
+                }
+            }
+
+            // Find lambda methods by scanning existing ldftn instructions in CheckForAutoSkip context
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                if (instructions[i].OpCode == OpCodes.Ldftn && instructions[i].Operand is IMethod lambdaMethod)
+                {
+                    // Verify CheckForAutoSkip context
+                    bool isCheckForAutoSkipContext = false;
+                    for (int j = i; j < Math.Min(i + 10, instructions.Count); j++)
+                    {
+                        if (instructions[j].OpCode == OpCodes.Call && instructions[j].Operand is IMethod calledMethod)
+                        {
+                            if (calledMethod.Name == "CheckForAutoSkip")
+                            {
+                                isCheckForAutoSkipContext = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!isCheckForAutoSkipContext)
+                    {
+                        continue;
+                    }
+
+                    // Check signature
+                    var methodSig = lambdaMethod.MethodSig;
+                    if (methodSig != null &&
+                        methodSig.RetType.TypeName == "Boolean" &&
+                        methodSig.Params.Count == 1 &&
+                        methodSig.Params[0].TypeName == "Double")
+                    {
+                        // Analyze lambda body to identify 7000 vs 9000
+                        if (lambdaMethod is MethodDef lambdaMethodDef && lambdaMethodDef.HasBody)
+                        {
+                            var lambdaInstructions = lambdaMethodDef.Body.Instructions;
+                            bool is7000Lambda = false;
+                            bool is9000Lambda = false;
+
+                            foreach (var lambdaInstr in lambdaInstructions)
+                            {
+                                if (lambdaInstr.OpCode == OpCodes.Ldc_R8 && lambdaInstr.Operand is double constValue)
+                                {
+                                    if (Math.Abs(constValue - 7000.0) < 0.1)
+                                    {
+                                        is7000Lambda = true;
+                                    }
+                                    else if (Math.Abs(constValue - 9000.0) < 0.1)
+                                    {
+                                        is9000Lambda = true;
+                                    }
+                                }
+                            }
+
+                            if (is7000Lambda)
+                            {
+                                lambda7000Method = lambdaMethod;
+                            }
+                            else if (is9000Lambda)
+                            {
+                                lambda9000Method = lambdaMethod;
+                            }
+
+                            if (lambda7000Method != null && lambda9000Method != null)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Find Func constructor
+            foreach (var instr in instructions)
+            {
+                if (instr.OpCode == OpCodes.Newobj && instr.Operand is IMethod ctor)
+                {
+                    if (ctor.DeclaringType?.FullName.Contains("System.Func") == true &&
+                        ctor.DeclaringType.FullName.Contains("System.Double") &&
+                        ctor.DeclaringType.FullName.Contains("System.Boolean"))
+                    {
+                        funcConstructor = ctor;
+                        break;
+                    }
+                }
+            }
+
+            // Verify lazy init components
+            if (singletonField == null || lambda7000Method == null || lambda9000Method == null || funcConstructor == null)
+            {
+                Log.Warning("Could not find all required components for lazy initialization in {Method}", method.FullName);
+                return;
+            }
+
+            // Generate lazy init pattern
+            List<Instruction> CreateLazyInitPattern(IField lambdaField, IMethod lambdaMethod, Instruction skipInit)
+            {
+                return new List<Instruction>
+                {
+                    OpCodes.Ldsfld.ToInstruction(lambdaField),       // Load the static field
+                    OpCodes.Dup.ToInstruction(),                      // Duplicate reference
+                    OpCodes.Brtrue_S.ToInstruction(skipInit),         // If not null, skip init
+                    OpCodes.Pop.ToInstruction(),                      // Pop null value
+                    OpCodes.Ldsfld.ToInstruction(singletonField),     // Load singleton instance
+                    OpCodes.Ldftn.ToInstruction(lambdaMethod),        // Load function pointer
+                    OpCodes.Newobj.ToInstruction(funcConstructor),    // Create Func<double, bool>
+                    OpCodes.Dup.ToInstruction(),                      // Duplicate
+                    OpCodes.Stsfld.ToInstruction(lambdaField),        // Store in static field
+                };
+            }
+
+            // Create a marker for skipping to the original check
+            var skipToOriginalCheck = OpCodes.Nop.ToInstruction();
+
+            // Create markers for lambda lazy init
+            var skipInit7000 = OpCodes.Nop.ToInstruction();
+            var skipInit9000 = OpCodes.Nop.ToInstruction();
+
+            // Create the complete IL for the VCIType == 3 block
+            var type3Block = new List<Instruction>
+            {
+                OpCodes.Ldarg_0.ToInstruction(),
+                vehicleInstruction,
+                OpCodes.Callvirt.ToInstruction(getVci),
+                OpCodes.Callvirt.ToInstruction(getVciType),
+                OpCodes.Ldc_I4_3.ToInstruction(),
+                OpCodes.Bne_Un.ToInstruction(skipToOriginalCheck),
+                OpCodes.Ldstr.ToInstruction("ClampSwitchVehicle.ManualClampSwitch()"),
+                OpCodes.Ldstr.ToInstruction("Start clamp switch to state off."),
+                OpCodes.Call.ToInstruction(arrayEmpty),
+                OpCodes.Call.ToInstruction(logInfo),
+                OpCodes.Ldarg_1.ToInstruction(),
+                OpCodes.Ldc_I4_0.ToInstruction(),
+                OpCodes.Callvirt.ToInstruction(setStep),
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Ldarg_1.ToInstruction(),
+            };
+
+            // Add lazy init pattern for func7000
+            type3Block.AddRange(CreateLazyInitPattern(func7000, lambda7000Method, skipInit7000));
+            type3Block.Add(skipInit7000);
+            type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
+
+            // Continue adding remaining instructions
+            type3Block.AddRange(new[]
+            {
+                OpCodes.Ldarg_1.ToInstruction(),
+                OpCodes.Callvirt.ToInstruction(waitForResponse),
+                OpCodes.Callvirt.ToInstruction(cancel),
+                OpCodes.Ldstr.ToInstruction("ClampSwitchVehicle.ManualClampSwitch()"),
+                OpCodes.Ldstr.ToInstruction("Clamp switch to state off finished."),
+                OpCodes.Call.ToInstruction(arrayEmpty),
+                OpCodes.Call.ToInstruction(logInfo),
+                OpCodes.Ldarg_1.ToInstruction(),
+                OpCodes.Callvirt.ToInstruction(getResponse),
+                OpCodes.Pop.ToInstruction(),
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Ldfld.ToInstruction(getInteractionService),
+                OpCodes.Ldarg_1.ToInstruction(),
+                OpCodes.Callvirt.ToInstruction(getTitle),
+                OpCodes.Ldstr.ToInstruction("#WaitForChangeover"),
+                OpCodes.Call.ToInstruction(localize),
+                OpCodes.Ldc_I4.ToInstruction(10000),
+                OpCodes.Newobj.ToInstruction(progressWaitCtor),
+                OpCodes.Callvirt.ToInstruction(register),
+                OpCodes.Ldstr.ToInstruction("ClampSwitchVehicle.ManualClampSwitch()"),
+                OpCodes.Ldstr.ToInstruction("Start clamp switch to state on."),
+                OpCodes.Call.ToInstruction(arrayEmpty),
+                OpCodes.Call.ToInstruction(logInfo),
+                OpCodes.Ldarg_1.ToInstruction(),
+                OpCodes.Ldc_I4_1.ToInstruction(),
+                OpCodes.Callvirt.ToInstruction(setStep),
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Ldarg_1.ToInstruction(),
+            });
+
+            // Add lazy init pattern for func9000
+            type3Block.AddRange(CreateLazyInitPattern(func9000, lambda9000Method, skipInit9000));
+            type3Block.Add(skipInit9000);
+            type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
+
+            // Final instructions
+            type3Block.AddRange(new[]
+            {
+                OpCodes.Ldarg_1.ToInstruction(),
+                OpCodes.Callvirt.ToInstruction(waitForResponse),
+                OpCodes.Callvirt.ToInstruction(cancel),
+                OpCodes.Ldstr.ToInstruction("ClampSwitchVehicle.ManualClampSwitch()"),
+                OpCodes.Ldstr.ToInstruction("Clamp switch to state on finished."),
+                OpCodes.Call.ToInstruction(arrayEmpty),
+                OpCodes.Call.ToInstruction(logInfo),
+                OpCodes.Ldarg_1.ToInstruction(),
+                OpCodes.Callvirt.ToInstruction(getResponse),
+                OpCodes.Pop.ToInstruction(),
+            });
+
+            // Find the leave instruction at the end of try block
+            var leaveInstruction = instructions.FirstOrDefault(i => i.OpCode == OpCodes.Leave || i.OpCode == OpCodes.Leave_S);
+            if (leaveInstruction != null)
+            {
+                type3Block.Add(OpCodes.Leave.ToInstruction(leaveInstruction.Operand as Instruction));
+            }
+
+            // Insert all instructions before the original check
+            for (int i = 0; i < type3Block.Count; i++)
+            {
+                instructions.Insert(tryStartIdx + i, type3Block[i]);
+            }
+
+            // Insert the skip marker right after our new block, before the original VCIType check
+            instructions.Insert(tryStartIdx + type3Block.Count, skipToOriginalCheck);
+
+            // Update try block exception handlers if needed
+            foreach (var eh in method.Body.ExceptionHandlers)
+            {
+                if (eh.TryStart != null && instructions.IndexOf(eh.TryStart) >= tryStartIdx)
+                {
+                    // Try block now starts at the new instructions
+                    eh.TryStart = instructions[tryStartIdx];
+                }
+            }
         }
     }
 }
