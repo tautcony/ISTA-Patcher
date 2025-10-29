@@ -1224,6 +1224,14 @@ public static partial class PatchUtils
             var skipInit7000 = OpCodes.Nop.ToInstruction();
             var skipInit9000 = OpCodes.Nop.ToInstruction();
 
+            // Find the leave instruction at the end of try block
+            var leaveInstruction = instructions.FirstOrDefault(i => i.OpCode == OpCodes.Leave || i.OpCode == OpCodes.Leave_S);
+            if (leaveInstruction == null)
+            {
+                Log.Warning("Could not find leave instruction in {Method}", method.FullName);
+                return;
+            }
+
             // Create the complete IL for the VCIType == 3 block
             var type3Block = new List<Instruction>
             {
@@ -1249,6 +1257,7 @@ public static partial class PatchUtils
             type3Block.Add(skipInit7000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
+            // APPROCHE PILE : Ne pas stocker le CancellationTokenSource
             type3Block.AddRange(new[]
             {
                 OpCodes.Ldarg_1.ToInstruction(),
@@ -1286,6 +1295,7 @@ public static partial class PatchUtils
             type3Block.Add(skipInit9000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
+            // APPROCHE PILE : Ne pas stocker le second CancellationTokenSource
             type3Block.AddRange(new[]
             {
                 OpCodes.Ldarg_1.ToInstruction(),
@@ -1300,12 +1310,8 @@ public static partial class PatchUtils
                 OpCodes.Pop.ToInstruction(),
             });
 
-            // Find the leave instruction at the end of try block
-            var leaveInstruction = instructions.FirstOrDefault(i => i.OpCode == OpCodes.Leave || i.OpCode == OpCodes.Leave_S);
-            if (leaveInstruction != null)
-            {
-                type3Block.Add(OpCodes.Leave.ToInstruction(leaveInstruction.Operand as Instruction));
-            }
+            // Utiliser Leave (forme longue) - sera optimisé automatiquement après
+            type3Block.Add(OpCodes.Leave.ToInstruction(leaveInstruction.Operand as Instruction));
 
             // Insert all instructions before the original check
             for (int i = 0; i < type3Block.Count; i++)
@@ -1324,6 +1330,10 @@ public static partial class PatchUtils
                     eh.TryStart = instructions[tryStartIdx];
                 }
             }
+
+            // Optimiser les branches après modification (convertira Leave en Leave_S automatiquement si possible)
+            method.Body.SimplifyBranches();
+            method.Body.OptimizeBranches();
         }
     }
 }
