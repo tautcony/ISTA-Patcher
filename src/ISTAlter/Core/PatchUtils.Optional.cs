@@ -634,10 +634,20 @@ public static partial class PatchUtils
 
         static void SetPeriodicalCheck(MethodDef method)
         {
-            var indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
+            const string oldSignature = "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)";
+
+            const string newSignature = "RheingoldPsdzWebApi.Adapter.Contracts.Model.Swt.IPsdzSwtAction RheingoldPsdzWebApi.Adapter.Contracts.Services.IProgrammingService::RequestSwtAction(RheingoldPsdzWebApi.Adapter.Contracts.Model.IPsdzConnection,System.Boolean)";
+
+            var indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, oldSignature);
+
             if (indexOfRequestSwtAction == -1)
             {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, newSignature);
+            }
+
+            if (indexOfRequestSwtAction == -1)
+            {
+                Log.Warning("Required instructions not found (neither old nor new signature), can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -666,14 +676,24 @@ public static partial class PatchUtils
         static void SetPeriodicalCheck(MethodDef method)
         {
             var instructions = method.Body.Instructions;
-            var requestSwtAction = method.FindInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
-            if (requestSwtAction == null)
+
+            const string oldSignature = "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)";
+
+            const string newSignature = "RheingoldPsdzWebApi.Adapter.Contracts.Model.Swt.IPsdzSwtAction RheingoldPsdzWebApi.Adapter.Contracts.Services.IProgrammingService::RequestSwtAction(RheingoldPsdzWebApi.Adapter.Contracts.Model.IPsdzConnection,System.Boolean)";
+
+            var indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, oldSignature);
+
+            if (indexOfRequestSwtAction == -1)
             {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, newSignature);
+            }
+
+            if (indexOfRequestSwtAction == -1)
+            {
+                Log.Warning("Required instructions not found (neither old nor new signature), can not patch {Method}", method.FullName);
                 return;
             }
 
-            var indexOfRequestSwtAction = instructions.IndexOf(requestSwtAction);
             var ldcI4One = instructions[indexOfRequestSwtAction - 1];
             if (!ldcI4One.IsLdcI4())
             {
@@ -747,7 +767,8 @@ public static partial class PatchUtils
     [FixDS2VehicleIdentificationPatch]
     [LibraryName("RheingoldDiagnostics.dll")]
     [FromVersion("4.49")]
-    public static int PatchFixDS2VehicleIdent(ModuleDefMD module)
+    [UntilVersion("4.56")]
+    public static int PatchFixDS2VehicleIdentFrom449(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
@@ -1184,15 +1205,15 @@ public static partial class PatchUtils
             {
                 return new List<Instruction>
                 {
-                    OpCodes.Ldsfld.ToInstruction(lambdaField),       // Load the static field
-                    OpCodes.Dup.ToInstruction(),                      // Duplicate reference
-                    OpCodes.Brtrue_S.ToInstruction(skipInit),         // If not null, skip init
-                    OpCodes.Pop.ToInstruction(),                      // Pop null value
-                    OpCodes.Ldsfld.ToInstruction(singletonField),     // Load singleton instance
-                    OpCodes.Ldftn.ToInstruction(lambdaMethod),        // Load function pointer
-                    OpCodes.Newobj.ToInstruction(funcConstructor),    // Create Func<double, bool>
-                    OpCodes.Dup.ToInstruction(),                      // Duplicate
-                    OpCodes.Stsfld.ToInstruction(lambdaField),        // Store in static field
+                    OpCodes.Ldsfld.ToInstruction(lambdaField),
+                    OpCodes.Dup.ToInstruction(),
+                    OpCodes.Brtrue_S.ToInstruction(skipInit),
+                    OpCodes.Pop.ToInstruction(),
+                    OpCodes.Ldsfld.ToInstruction(singletonField),
+                    OpCodes.Ldftn.ToInstruction(lambdaMethod),
+                    OpCodes.Newobj.ToInstruction(funcConstructor),
+                    OpCodes.Dup.ToInstruction(),
+                    OpCodes.Stsfld.ToInstruction(lambdaField),
                 };
             }
 
@@ -1228,7 +1249,8 @@ public static partial class PatchUtils
             type3Block.Add(skipInit7000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
-            // Continue adding remaining instructions
+            // APPROCHE PILE : Ne pas stocker le CancellationTokenSource
+            // Il reste sur la pile et on l'utilise directement pour Cancel()
             type3Block.AddRange(new[]
             {
                 OpCodes.Ldarg_1.ToInstruction(),
@@ -1266,7 +1288,7 @@ public static partial class PatchUtils
             type3Block.Add(skipInit9000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
-            // Final instructions
+            // APPROCHE PILE : Ne pas stocker le second CancellationTokenSource
             type3Block.AddRange(new[]
             {
                 OpCodes.Ldarg_1.ToInstruction(),
@@ -1302,7 +1324,6 @@ public static partial class PatchUtils
             {
                 if (eh.TryStart != null && instructions.IndexOf(eh.TryStart) >= tryStartIdx)
                 {
-                    // Try block now starts at the new instructions
                     eh.TryStart = instructions[tryStartIdx];
                 }
             }

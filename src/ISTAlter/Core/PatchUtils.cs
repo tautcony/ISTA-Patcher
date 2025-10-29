@@ -142,7 +142,8 @@ public static partial class PatchUtils
 
     [ValidationPatch]
     [LibraryName("PsdzServiceImpl.dll")]
-    public static int PatchConfigurationService(ModuleDefMD module)
+    [UntilVersion("4.56")]
+    public static int PatchConfigurationServiceTo455(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.Psdz.Services.ConfigurationService",
@@ -236,6 +237,158 @@ public static partial class PatchUtils
                     OpCodes.Call.ToInstruction(putProperty),
                 ];
             }
+        }
+    }
+
+    [ValidationPatch]
+    [LibraryName("RheingoldPsdzWebApi.Adapter.dll")]
+    [FromVersion("4.56")]
+    public static int PatchConfigurationServiceFrom456(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "RheingoldPsdzWebApi.Adapter.ConfigurationService",
+            "SetPsdzProperties",
+            "(System.String,System.String,System.String,System.String)System.Void",
+            RewriteProperties
+        );
+
+        void RewriteProperties(MethodDef method)
+        {
+            var ctorRequestModel = method.FindOperand<MemberRef>(OpCodes.Newobj, "System.Void RheingoldPsdzWebApi.Adapter.Contracts.TransferObjects.SetPSdZPropertiesRequestModel::.ctor()");
+            var convertDealerIdToHex = method.FindOperand<MethodDef>(OpCodes.Call, "System.String RheingoldPsdzWebApi.Adapter.ConfigurationService::ConvertDealerIdToHex(System.String)");
+            var setDealerId = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void RheingoldPsdzWebApi.Adapter.Contracts.TransferObjects.SetPSdZPropertiesRequestModel::set_DealerId(System.String)");
+            var setPlantId = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void RheingoldPsdzWebApi.Adapter.Contracts.TransferObjects.SetPSdZPropertiesRequestModel::set_PlantId(System.String)");
+            var setProgrammierGeraeteSeriennummer = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void RheingoldPsdzWebApi.Adapter.Contracts.TransferObjects.SetPSdZPropertiesRequestModel::set_ProgrammierGeraeteSeriennummer(System.String)");
+            var setTesterEinsatzKennung = method.FindOperand<MemberRef>(OpCodes.Callvirt, "System.Void RheingoldPsdzWebApi.Adapter.Contracts.TransferObjects.SetPSdZPropertiesRequestModel::set_TesterEinsatzKennung(System.String)");
+
+            FieldDef webCallHandler = null;
+            FieldDef endpointService = null;
+            foreach (var instr in method.Body.Instructions)
+            {
+                if (instr.OpCode == OpCodes.Ldfld && instr.Operand is FieldDef field)
+                {
+                    if (field.Name == "_webCallHandler")
+                    {
+                        webCallHandler = field;
+                    }
+
+                    if (field.Name == "_endpointService")
+                    {
+                        endpointService = field;
+                    }
+                }
+            }
+
+            if (webCallHandler == null)
+            {
+                Log.Warning("webCallHandler NOT FOUND");
+            }
+
+            if (endpointService == null)
+            {
+                Log.Warning("endpointService NOT FOUND");
+            }
+
+            var executeRequest = method.FindOperand<MemberRef>(OpCodes.Callvirt, "RheingoldPsdzWebApi.Adapter.Contracts.ApiResult RheingoldPsdzWebApi.Adapter.Contracts.IWebCallHandler::ExecuteRequest(System.String,System.String,RestSharp.Method,System.Object,System.Collections.Generic.IDictionary`2<System.String,System.String>)");
+
+            if (ctorRequestModel == null || convertDealerIdToHex == null || setDealerId == null ||
+                setPlantId == null || setProgrammierGeraeteSeriennummer == null ||
+                setTesterEinsatzKennung == null || webCallHandler == null ||
+                endpointService == null || executeRequest == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var tryBlock = method.Body.ExceptionHandlers.FirstOrDefault();
+            if (tryBlock == null)
+            {
+                Log.Warning("Try-catch block not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var instructions = method.Body.Instructions;
+            var handlerStartIndex = instructions.IndexOf(tryBlock.HandlerStart);
+            var handlerEndIndex = instructions.IndexOf(tryBlock.HandlerEnd);
+
+            if (handlerStartIndex == -1 || handlerEndIndex == -1 || handlerStartIndex >= handlerEndIndex)
+            {
+                Log.Warning("Invalid catch block boundaries, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var catchInstructions = new List<Instruction>();
+            for (int i = handlerStartIndex; i < handlerEndIndex; i++)
+            {
+                catchInstructions.Add(instructions[i].Clone());
+            }
+
+            if (method.Body.Variables.Count != 2)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var tryInstructions = new List<Instruction>
+            {
+                // SetPSdZPropertiesRequestModel setPSdZPropertiesRequestModel = new SetPSdZPropertiesRequestModel();
+                Instruction.Create(OpCodes.Newobj, ctorRequestModel),
+                Instruction.Create(OpCodes.Dup),
+
+                // setPSdZPropertiesRequestModel.DealerId = "1234";
+                Instruction.Create(OpCodes.Ldstr, "1234"),
+                Instruction.Create(OpCodes.Callvirt, setDealerId),
+                Instruction.Create(OpCodes.Dup),
+
+                // setPSdZPropertiesRequestModel.PlantId = "0";
+                Instruction.Create(OpCodes.Ldstr, "0"),
+                Instruction.Create(OpCodes.Callvirt, setPlantId),
+                Instruction.Create(OpCodes.Dup),
+
+                // setPSdZPropertiesRequestModel.ProgrammierGeraeteSeriennummer = programmierGeraeteSeriennummer;
+                Instruction.Create(OpCodes.Ldarg_3),
+                Instruction.Create(OpCodes.Callvirt, setProgrammierGeraeteSeriennummer),
+                Instruction.Create(OpCodes.Dup),
+
+                // setPSdZPropertiesRequestModel.TesterEinsatzKennung = testerEinsatzKennung;
+                Instruction.Create(OpCodes.Ldarg_S, method.Parameters[4]),
+                Instruction.Create(OpCodes.Callvirt, setTesterEinsatzKennung),
+                Instruction.Create(OpCodes.Stloc_0),
+
+                // this._webCallHandler.ExecuteRequest(this._endpointService, "setpsdzproperties", Method.Post, setPSdZPropertiesRequestModel, null);
+                Instruction.Create(OpCodes.Ldarg_0),
+                Instruction.Create(OpCodes.Ldfld, webCallHandler),
+                Instruction.Create(OpCodes.Ldarg_0),
+                Instruction.Create(OpCodes.Ldfld, endpointService),
+                Instruction.Create(OpCodes.Ldstr, "setpsdzproperties"),
+                Instruction.Create(OpCodes.Ldc_I4_1),
+                Instruction.Create(OpCodes.Ldloc_0),
+                Instruction.Create(OpCodes.Ldnull),
+                Instruction.Create(OpCodes.Callvirt, executeRequest),
+                Instruction.Create(OpCodes.Pop),
+            };
+
+            var leaveInstruction = Instruction.Create(OpCodes.Leave_S, (Instruction)null);
+            tryInstructions.Add(leaveInstruction);
+
+            var retInstruction = Instruction.Create(OpCodes.Ret);
+            leaveInstruction.Operand = retInstruction;
+
+            var allInstructions = new List<Instruction>();
+            allInstructions.AddRange(tryInstructions);
+            allInstructions.AddRange(catchInstructions);
+            allInstructions.Add(retInstruction);
+
+            method.Body.Instructions.Clear();
+            foreach (var instr in allInstructions)
+            {
+                method.Body.Instructions.Add(instr);
+            }
+
+            tryBlock.TryStart = allInstructions[0];
+            tryBlock.TryEnd = catchInstructions[0];
+            tryBlock.HandlerStart = catchInstructions[0];
+            tryBlock.HandlerEnd = retInstruction;
         }
     }
 
