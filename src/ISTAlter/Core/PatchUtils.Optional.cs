@@ -977,7 +977,6 @@ public static partial class PatchUtils
 
             var module = method.Module;
 
-            // CORRECTION : Chercher Array.Empty dans le code existant au lieu de l'importer depuis notre runtime
             var instructionList = method.Body.Instructions;
             IMethod arrayEmpty = null;
             IMethod logInfo = null;
