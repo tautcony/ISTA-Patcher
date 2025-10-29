@@ -833,6 +833,101 @@ public static partial class PatchUtils
         }
     }
 
+    [FixDS2VehicleIdentificationPatch]
+    [LibraryName("RheingoldDiagnostics.dll")]
+    [FromVersion("4.56")]
+    public static int PatchFixDS2VehicleIdentFrom456(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
+            "DoVehicleShortTest",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.IProgressMonitor)System.Boolean",
+            FixDoVehicleShortTest);
+
+        static void FixDoVehicleShortTest(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+
+            // MODIFICATION 1: Supprimer l'appel à HandleMissingEcus()
+            var indexHandleMissingEcusCall = -1;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                if (instructions[i].OpCode == OpCodes.Call &&
+                    instructions[i].Operand is IMethod m &&
+                    m.Name == "HandleMissingEcus" &&
+                    m.MethodSig?.Params.Count == 0)
+                {
+                    indexHandleMissingEcusCall = i;
+                    break;
+                }
+            }
+
+            if (indexHandleMissingEcusCall != -1)
+            {
+                // Replace HandleMissingEcus() call with NOP (ldarg.0 + call)
+                instructions[indexHandleMissingEcusCall] = OpCodes.Nop.ToInstruction();
+                instructions[indexHandleMissingEcusCall - 1] = OpCodes.Nop.ToInstruction();
+            }
+
+            // MODIFICATION 2: Ajouter condition BNType != 2 avant IDENT_SUCCESSFULLY = false
+            var indexSetIdent = -1;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                if (instructions[i].OpCode == OpCodes.Callvirt &&
+                    instructions[i].Operand is IMethod m &&
+                    m.Name == "set_IDENT_SUCCESSFULLY" &&
+                    i >= 2 &&
+                    instructions[i - 1].OpCode == OpCodes.Ldc_I4_0 &&
+                    instructions[i - 2].OpCode == OpCodes.Ldloc_S)
+                {
+                    indexSetIdent = i;
+                    break;
+                }
+            }
+
+            if (indexSetIdent == -1)
+            {
+                Log.Warning("Could not find set_IDENT_SUCCESSFULLY in foreach loop in {Method}", method.FullName);
+                return;
+            }
+
+            // Get required method references
+            var getVecInfo = method.FindOperand<MethodDef>(
+                OpCodes.Call,
+                "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Vehicle \u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent::get_VecInfo()");
+            var getBNType = method.FindOperand<MemberRef>(
+                OpCodes.Callvirt,
+                "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.BNType \u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle::get_BNType()");
+
+            if (getVecInfo == null || getBNType == null)
+            {
+                Log.Warning("Required method references not found in {Method}", method.FullName);
+                return;
+            }
+
+            // Insert: if (this.VecInfo.BNType != 2) before ecu.IDENT_SUCCESSFULLY = false
+            Instruction skipTarget = instructions[indexSetIdent + 1];
+
+            List<Instruction> conditionInstructions = new List<Instruction>
+            {
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Call.ToInstruction(getVecInfo),
+                OpCodes.Callvirt.ToInstruction(getBNType),
+                OpCodes.Ldc_I4_2.ToInstruction(),
+                OpCodes.Beq_S.ToInstruction(skipTarget),
+            };
+
+            int insertIndex = indexSetIdent - 2;
+            foreach (var instr in conditionInstructions.AsEnumerable().Reverse())
+            {
+                instructions.Insert(insertIndex, instr);
+            }
+
+            method.Body.SimplifyBranches();
+            method.Body.OptimizeBranches();
+        }
+    }
+
     [ForceICOMNextPatch]
     [LibraryName("RheingoldxVM.dll")]
     public static int PatchSLP(ModuleDefMD module)
