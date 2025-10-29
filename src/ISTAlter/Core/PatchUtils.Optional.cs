@@ -943,7 +943,6 @@ public static partial class PatchUtils
         {
             var instructions = method.Body.Instructions;
 
-            // Find VCIType check pattern
             int tryStartIdx = -1;
             object? vehicleAccess = null;
             IMethod? getVci = null;
@@ -972,16 +971,13 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Create vehicle access instruction
             Instruction vehicleInstruction = instructions[tryStartIdx + 1].OpCode == OpCodes.Ldfld
                 ? OpCodes.Ldfld.ToInstruction(vehicleAccess as IField)
                 : OpCodes.Callvirt.ToInstruction(vehicleAccess as IMethod);
 
-            // Reuse existing method references
             var module = method.Module;
             var arrayEmpty = module.Import(typeof(Array).GetMethod("Empty").MakeGenericMethod(typeof(object)));
 
-            // Scan existing instructions to find the method/field references we need
             var instructionList = method.Body.Instructions;
             IMethod logInfo = null;
             IMethod setStep = null;
@@ -1058,7 +1054,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Find lambda functions and lazy init components
             IField func7000 = null;
             IField func9000 = null;
             IField singletonField = null;
@@ -1066,7 +1061,6 @@ public static partial class PatchUtils
             IMethod lambda9000Method = null;
             IMethod funcConstructor = null;
 
-            // Find lambda fields
             foreach (var instr in instructions)
             {
                 if (instr.OpCode == OpCodes.Ldsfld && instr.Operand is IField f)
@@ -1093,7 +1087,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Find singleton and lambda methods
             var compilerGeneratedClassDef = func7000.DeclaringType.ResolveTypeDef();
             if (compilerGeneratedClassDef != null)
             {
@@ -1107,12 +1100,10 @@ public static partial class PatchUtils
                 }
             }
 
-            // Find lambda methods by scanning existing ldftn instructions in CheckForAutoSkip context
             for (int i = 0; i < instructions.Count; i++)
             {
                 if (instructions[i].OpCode == OpCodes.Ldftn && instructions[i].Operand is IMethod lambdaMethod)
                 {
-                    // Verify CheckForAutoSkip context
                     bool isCheckForAutoSkipContext = false;
                     for (int j = i; j < Math.Min(i + 10, instructions.Count); j++)
                     {
@@ -1131,14 +1122,12 @@ public static partial class PatchUtils
                         continue;
                     }
 
-                    // Check signature
                     var methodSig = lambdaMethod.MethodSig;
                     if (methodSig != null &&
                         methodSig.RetType.TypeName == "Boolean" &&
                         methodSig.Params.Count == 1 &&
                         methodSig.Params[0].TypeName == "Double")
                     {
-                        // Analyze lambda body to identify 7000 vs 9000
                         if (lambdaMethod is MethodDef lambdaMethodDef && lambdaMethodDef.HasBody)
                         {
                             var lambdaInstructions = lambdaMethodDef.Body.Instructions;
@@ -1178,7 +1167,6 @@ public static partial class PatchUtils
                 }
             }
 
-            // Find Func constructor
             foreach (var instr in instructions)
             {
                 if (instr.OpCode == OpCodes.Newobj && instr.Operand is IMethod ctor)
@@ -1193,14 +1181,12 @@ public static partial class PatchUtils
                 }
             }
 
-            // Verify lazy init components
             if (singletonField == null || lambda7000Method == null || lambda9000Method == null || funcConstructor == null)
             {
                 Log.Warning("Could not find all required components for lazy initialization in {Method}", method.FullName);
                 return;
             }
 
-            // Generate lazy init pattern
             List<Instruction> CreateLazyInitPattern(IField lambdaField, IMethod lambdaMethod, Instruction skipInit)
             {
                 return new List<Instruction>
@@ -1217,14 +1203,11 @@ public static partial class PatchUtils
                 };
             }
 
-            // Create a marker for skipping to the original check
             var skipToOriginalCheck = OpCodes.Nop.ToInstruction();
 
-            // Create markers for lambda lazy init
             var skipInit7000 = OpCodes.Nop.ToInstruction();
             var skipInit9000 = OpCodes.Nop.ToInstruction();
 
-            // Find the leave instruction at the end of try block
             var leaveInstruction = instructions.FirstOrDefault(i => i.OpCode == OpCodes.Leave || i.OpCode == OpCodes.Leave_S);
             if (leaveInstruction == null)
             {
@@ -1232,7 +1215,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Create the complete IL for the VCIType == 3 block
             var type3Block = new List<Instruction>
             {
                 OpCodes.Ldarg_0.ToInstruction(),
@@ -1252,12 +1234,10 @@ public static partial class PatchUtils
                 OpCodes.Ldarg_1.ToInstruction(),
             };
 
-            // Add lazy init pattern for func7000
             type3Block.AddRange(CreateLazyInitPattern(func7000, lambda7000Method, skipInit7000));
             type3Block.Add(skipInit7000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
-            // APPROCHE PILE : Ne pas stocker le CancellationTokenSource
             type3Block.AddRange(new[]
             {
                 OpCodes.Ldarg_1.ToInstruction(),
@@ -1290,12 +1270,10 @@ public static partial class PatchUtils
                 OpCodes.Ldarg_1.ToInstruction(),
             });
 
-            // Add lazy init pattern for func9000
             type3Block.AddRange(CreateLazyInitPattern(func9000, lambda9000Method, skipInit9000));
             type3Block.Add(skipInit9000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
-            // APPROCHE PILE : Ne pas stocker le second CancellationTokenSource
             type3Block.AddRange(new[]
             {
                 OpCodes.Ldarg_1.ToInstruction(),
@@ -1310,19 +1288,15 @@ public static partial class PatchUtils
                 OpCodes.Pop.ToInstruction(),
             });
 
-            // Utiliser Leave (forme longue) - sera optimisé automatiquement après
             type3Block.Add(OpCodes.Leave.ToInstruction(leaveInstruction.Operand as Instruction));
 
-            // Insert all instructions before the original check
             for (int i = 0; i < type3Block.Count; i++)
             {
                 instructions.Insert(tryStartIdx + i, type3Block[i]);
             }
 
-            // Insert the skip marker right after our new block, before the original VCIType check
             instructions.Insert(tryStartIdx + type3Block.Count, skipToOriginalCheck);
 
-            // Update try block exception handlers if needed
             foreach (var eh in method.Body.ExceptionHandlers)
             {
                 if (eh.TryStart != null && instructions.IndexOf(eh.TryStart) >= tryStartIdx)
@@ -1331,7 +1305,6 @@ public static partial class PatchUtils
                 }
             }
 
-            // Optimiser les branches après modification (convertira Leave en Leave_S automatiquement si possible)
             method.Body.SimplifyBranches();
             method.Body.OptimizeBranches();
         }
