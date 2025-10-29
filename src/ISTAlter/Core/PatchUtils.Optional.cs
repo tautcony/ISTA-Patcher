@@ -848,7 +848,6 @@ public static partial class PatchUtils
         {
             var instructions = method.Body.Instructions;
 
-            // MODIFICATION 1: Supprimer l'appel à HandleMissingEcus()
             var indexHandleMissingEcusCall = -1;
             for (int i = 0; i < instructions.Count; i++)
             {
@@ -864,12 +863,10 @@ public static partial class PatchUtils
 
             if (indexHandleMissingEcusCall != -1)
             {
-                // Replace HandleMissingEcus() call with NOP (ldarg.0 + call)
                 instructions[indexHandleMissingEcusCall] = OpCodes.Nop.ToInstruction();
                 instructions[indexHandleMissingEcusCall - 1] = OpCodes.Nop.ToInstruction();
             }
 
-            // MODIFICATION 2: Ajouter condition BNType != 2 avant IDENT_SUCCESSFULLY = false
             var indexSetIdent = -1;
             for (int i = 0; i < instructions.Count; i++)
             {
@@ -891,7 +888,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Get required method references
             var getVecInfo = method.FindOperand<MethodDef>(
                 OpCodes.Call,
                 "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Vehicle \u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent::get_VecInfo()");
@@ -905,7 +901,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Insert: if (this.VecInfo.BNType != 2) before ecu.IDENT_SUCCESSFULLY = false
             Instruction skipTarget = instructions[indexSetIdent + 1];
 
             List<Instruction> conditionInstructions = new List<Instruction>
