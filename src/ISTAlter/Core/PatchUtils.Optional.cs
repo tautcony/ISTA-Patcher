@@ -976,9 +976,10 @@ public static partial class PatchUtils
                 : OpCodes.Callvirt.ToInstruction(vehicleAccess as IMethod);
 
             var module = method.Module;
-            var arrayEmpty = module.Import(typeof(Array).GetMethod("Empty").MakeGenericMethod(typeof(object)));
 
+            // CORRECTION : Chercher Array.Empty dans le code existant au lieu de l'importer depuis notre runtime
             var instructionList = method.Body.Instructions;
+            IMethod arrayEmpty = null;
             IMethod logInfo = null;
             IMethod setStep = null;
             IMethod waitForResponse = null;
@@ -995,7 +996,11 @@ public static partial class PatchUtils
             {
                 if (instr.Operand is IMethod m)
                 {
-                    if (m.Name == "Info" && m.DeclaringType?.Name == "Log")
+                    if (m.Name == "Empty" && m.DeclaringType?.Name == "Array")
+                    {
+                        arrayEmpty = m;
+                    }
+                    else if (m.Name == "Info" && m.DeclaringType?.Name == "Log")
                     {
                         logInfo = m;
                     }
@@ -1045,7 +1050,7 @@ public static partial class PatchUtils
                 }
             }
 
-            if (logInfo == null || setStep == null || waitForResponse == null ||
+            if (arrayEmpty == null || logInfo == null || setStep == null || waitForResponse == null ||
                 getResponse == null || cancel == null || getTitle == null ||
                 localize == null || progressWaitCtor == null || register == null ||
                 checkForAutoSkip == null || getInteractionService == null)
