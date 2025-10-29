@@ -1249,8 +1249,6 @@ public static partial class PatchUtils
             type3Block.Add(skipInit7000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
-            // APPROCHE PILE : Ne pas stocker le CancellationTokenSource
-            // Il reste sur la pile et on l'utilise directement pour Cancel()
             type3Block.AddRange(new[]
             {
                 OpCodes.Ldarg_1.ToInstruction(),
@@ -1288,7 +1286,6 @@ public static partial class PatchUtils
             type3Block.Add(skipInit9000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
-            // APPROCHE PILE : Ne pas stocker le second CancellationTokenSource
             type3Block.AddRange(new[]
             {
                 OpCodes.Ldarg_1.ToInstruction(),
