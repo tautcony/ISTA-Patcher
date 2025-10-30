@@ -331,31 +331,20 @@ public static partial class PatchUtils
 
             var tryInstructions = new List<Instruction>
             {
-                // SetPSdZPropertiesRequestModel setPSdZPropertiesRequestModel = new SetPSdZPropertiesRequestModel();
                 Instruction.Create(OpCodes.Newobj, ctorRequestModel),
                 Instruction.Create(OpCodes.Dup),
-
-                // setPSdZPropertiesRequestModel.DealerId = "1234";
                 Instruction.Create(OpCodes.Ldstr, "1234"),
                 Instruction.Create(OpCodes.Callvirt, setDealerId),
                 Instruction.Create(OpCodes.Dup),
-
-                // setPSdZPropertiesRequestModel.PlantId = "0";
                 Instruction.Create(OpCodes.Ldstr, "0"),
                 Instruction.Create(OpCodes.Callvirt, setPlantId),
                 Instruction.Create(OpCodes.Dup),
-
-                // setPSdZPropertiesRequestModel.ProgrammierGeraeteSeriennummer = programmierGeraeteSeriennummer;
                 Instruction.Create(OpCodes.Ldarg_3),
                 Instruction.Create(OpCodes.Callvirt, setProgrammierGeraeteSeriennummer),
                 Instruction.Create(OpCodes.Dup),
-
-                // setPSdZPropertiesRequestModel.TesterEinsatzKennung = testerEinsatzKennung;
                 Instruction.Create(OpCodes.Ldarg_S, method.Parameters[4]),
                 Instruction.Create(OpCodes.Callvirt, setTesterEinsatzKennung),
                 Instruction.Create(OpCodes.Stloc_0),
-
-                // this._webCallHandler.ExecuteRequest(this._endpointService, "setpsdzproperties", Method.Post, setPSdZPropertiesRequestModel, null);
                 Instruction.Create(OpCodes.Ldarg_0),
                 Instruction.Create(OpCodes.Ldfld, webCallHandler),
                 Instruction.Create(OpCodes.Ldarg_0),
