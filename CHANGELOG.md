@@ -1,5 +1,16 @@
 ﻿# Changelog
 
+## 2.4.0 / 2025-11-22
+- Feat - Upgrade to .NET 10.0
+- Feat - Add validation patches for ISTA 4.56+
+- Feat - Add manual clamp switch bypass patch with `--enable-manual-clamp-switch-bypass` flag #72
+- Feat - Improve patch for `--enable-data-not-send` flag #70
+- Feat - Improve patch for `--enable-skip-fake-fsc-reject` flag
+- Feat - Improve DS2 vehicle identification
+- Feat - Update config for ISTA 4.56+
+- Chore - Upgrade dependencies to latest versions
+- Chore - Update build workflow
+
 ## 2.3.6 / 2025-10-11
 
 - Feat - Add new HTTP server functionality with crypto and iLean API controllers
