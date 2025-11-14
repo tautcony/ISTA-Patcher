@@ -95,7 +95,6 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
         Global.LevelSwitch.MinimumLevel = opts.Verbosity;
 
         var guiBasePath = Constants.TesterGUIPath.Aggregate(opts.TargetPath, Path.Join);
-        var psdzBasePath = Constants.PSdZPath.Aggregate(opts.TargetPath, Path.Join);
 
         if (!Directory.Exists(guiBasePath))
         {
