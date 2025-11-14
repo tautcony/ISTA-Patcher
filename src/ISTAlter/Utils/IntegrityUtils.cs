@@ -29,10 +29,12 @@ public static class IntegrityUtils
             aesManaged.BlockSize = aesManaged.LegalBlockSizes[0].MaxSize;
             aesManaged.KeySize = aesManaged.LegalKeySizes[0].MaxSize;
 
-            using var rfc2898DeriveBytes = new Rfc2898DeriveBytes(_password, _salt, _iterations, HashAlgorithmName.SHA1);
+            var keyBytes = aesManaged.KeySize / 8;
+            var ivBytes = aesManaged.BlockSize / 8;
+            var derived = Rfc2898DeriveBytes.Pbkdf2(_password, _salt, _iterations, HashAlgorithmName.SHA1, keyBytes + ivBytes);
+            aesManaged.Key = derived.AsSpan(0, keyBytes).ToArray();
+            aesManaged.IV = derived.AsSpan(keyBytes, ivBytes).ToArray();
 
-            aesManaged.Key = rfc2898DeriveBytes.GetBytes(aesManaged.KeySize / 8);
-            aesManaged.IV = rfc2898DeriveBytes.GetBytes(aesManaged.BlockSize / 8);
             aesManaged.Mode = CipherMode.CBC;
             var transform = aesManaged.CreateDecryptor(aesManaged.Key, aesManaged.IV);
             using var memoryStream = new MemoryStream();

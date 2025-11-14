@@ -10,7 +10,7 @@ Released under the GNU GPLv3+.</Copyright>
     <PackageProjectUrl>https://github.com/tautcony/ISTA-Patcher</PackageProjectUrl>
     <RepositoryUrl>https://github.com/tautcony/ISTA-Patcher</RepositoryUrl>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>13</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>annotations</Nullable>
@@ -33,19 +33,19 @@ Released under the GNU GPLv3+.</Copyright>
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Sentry" Version="5.16.0" />
-    <PackageReference Include="Sentry.Profiling" Version="5.16.0" />
-    <PackageReference Include="Sentry.Serilog" Version="5.16.0" />
+    <PackageReference Include="Sentry" Version="5.16.2" />
+    <PackageReference Include="Sentry.Profiling" Version="5.16.2" />
+    <PackageReference Include="Sentry.Serilog" Version="5.16.2" />
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="SixLabors.Fonts" Version="2.1.3" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.7" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Management" Version="9.0.9" />
-    <PackageReference Include="ZLinq" Version="1.5.3" />
+    <PackageReference Include="System.Management" Version="10.0.0" />
+    <PackageReference Include="ZLinq" Version="1.5.4" />
   </ItemGroup>
 
   <ItemGroup>
