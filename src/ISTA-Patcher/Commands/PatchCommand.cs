@@ -97,7 +97,7 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
         var guiBasePath = Constants.TesterGUIPath.Aggregate(opts.TargetPath, Path.Join);
         var psdzBasePath = Constants.PSdZPath.Aggregate(opts.TargetPath, Path.Join);
 
-        if (!Directory.Exists(guiBasePath) || !Directory.Exists(psdzBasePath))
+        if (!Directory.Exists(guiBasePath))
         {
             Log.Fatal("Folder structure does not match under: {TargetPath}, please check options", opts.TargetPath);
             return Task.FromResult(-1);

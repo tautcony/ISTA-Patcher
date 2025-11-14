@@ -634,10 +634,20 @@ public static partial class PatchUtils
 
         static void SetPeriodicalCheck(MethodDef method)
         {
-            var indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
+            const string oldSignature = "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)";
+
+            const string newSignature = "RheingoldPsdzWebApi.Adapter.Contracts.Model.Swt.IPsdzSwtAction RheingoldPsdzWebApi.Adapter.Contracts.Services.IProgrammingService::RequestSwtAction(RheingoldPsdzWebApi.Adapter.Contracts.Model.IPsdzConnection,System.Boolean)";
+
+            var indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, oldSignature);
+
             if (indexOfRequestSwtAction == -1)
             {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, newSignature);
+            }
+
+            if (indexOfRequestSwtAction == -1)
+            {
+                Log.Warning("Required instructions not found (neither old nor new signature), can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -666,14 +676,24 @@ public static partial class PatchUtils
         static void SetPeriodicalCheck(MethodDef method)
         {
             var instructions = method.Body.Instructions;
-            var requestSwtAction = method.FindInstruction(OpCodes.Callvirt, "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)");
-            if (requestSwtAction == null)
+
+            const string oldSignature = "\u0042\u004d\u0057.Rheingold.Psdz.Model.Swt.IPsdzSwtAction \u0042\u004d\u0057.Rheingold.Psdz.IProgrammingService::RequestSwtAction(\u0042\u004d\u0057.Rheingold.Psdz.Model.IPsdzConnection,System.Boolean)";
+
+            const string newSignature = "RheingoldPsdzWebApi.Adapter.Contracts.Model.Swt.IPsdzSwtAction RheingoldPsdzWebApi.Adapter.Contracts.Services.IProgrammingService::RequestSwtAction(RheingoldPsdzWebApi.Adapter.Contracts.Model.IPsdzConnection,System.Boolean)";
+
+            var indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, oldSignature);
+
+            if (indexOfRequestSwtAction == -1)
             {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                indexOfRequestSwtAction = method.FindIndexOfInstruction(OpCodes.Callvirt, newSignature);
+            }
+
+            if (indexOfRequestSwtAction == -1)
+            {
+                Log.Warning("Required instructions not found (neither old nor new signature), can not patch {Method}", method.FullName);
                 return;
             }
 
-            var indexOfRequestSwtAction = instructions.IndexOf(requestSwtAction);
             var ldcI4One = instructions[indexOfRequestSwtAction - 1];
             if (!ldcI4One.IsLdcI4())
             {
@@ -747,7 +767,8 @@ public static partial class PatchUtils
     [FixDS2VehicleIdentificationPatch]
     [LibraryName("RheingoldDiagnostics.dll")]
     [FromVersion("4.49")]
-    public static int PatchFixDS2VehicleIdent(ModuleDefMD module)
+    [UntilVersion("4.56")]
+    public static int PatchFixDS2VehicleIdentFrom449(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
@@ -809,6 +830,96 @@ public static partial class PatchUtils
             {
                 instructions.Insert(indexOfSetIdentSuccessfully - 2, instruction);
             }
+        }
+    }
+
+    [FixDS2VehicleIdentificationPatch]
+    [LibraryName("RheingoldDiagnostics.dll")]
+    [FromVersion("4.56")]
+    public static int PatchFixDS2VehicleIdentFrom456(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
+            "DoVehicleShortTest",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.IProgressMonitor)System.Boolean",
+            FixDoVehicleShortTest);
+
+        static void FixDoVehicleShortTest(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+
+            var indexHandleMissingEcusCall = -1;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                if (instructions[i].OpCode == OpCodes.Call &&
+                    instructions[i].Operand is IMethod m &&
+                    m.Name == "HandleMissingEcus" &&
+                    m.MethodSig?.Params.Count == 0)
+                {
+                    indexHandleMissingEcusCall = i;
+                    break;
+                }
+            }
+
+            if (indexHandleMissingEcusCall != -1)
+            {
+                instructions[indexHandleMissingEcusCall] = OpCodes.Nop.ToInstruction();
+                instructions[indexHandleMissingEcusCall - 1] = OpCodes.Nop.ToInstruction();
+            }
+
+            var indexSetIdent = -1;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                if (instructions[i].OpCode == OpCodes.Callvirt &&
+                    instructions[i].Operand is IMethod m &&
+                    m.Name == "set_IDENT_SUCCESSFULLY" &&
+                    i >= 2 &&
+                    instructions[i - 1].OpCode == OpCodes.Ldc_I4_0 &&
+                    instructions[i - 2].OpCode == OpCodes.Ldloc_S)
+                {
+                    indexSetIdent = i;
+                    break;
+                }
+            }
+
+            if (indexSetIdent == -1)
+            {
+                Log.Warning("Could not find set_IDENT_SUCCESSFULLY in foreach loop in {Method}", method.FullName);
+                return;
+            }
+
+            var getVecInfo = method.FindOperand<MethodDef>(
+                OpCodes.Call,
+                "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Vehicle \u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent::get_VecInfo()");
+            var getBNType = method.FindOperand<MemberRef>(
+                OpCodes.Callvirt,
+                "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.BNType \u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.typeVehicle::get_BNType()");
+
+            if (getVecInfo == null || getBNType == null)
+            {
+                Log.Warning("Required method references not found in {Method}", method.FullName);
+                return;
+            }
+
+            Instruction skipTarget = instructions[indexSetIdent + 1];
+
+            List<Instruction> conditionInstructions = new List<Instruction>
+            {
+                OpCodes.Ldarg_0.ToInstruction(),
+                OpCodes.Call.ToInstruction(getVecInfo),
+                OpCodes.Callvirt.ToInstruction(getBNType),
+                OpCodes.Ldc_I4_2.ToInstruction(),
+                OpCodes.Beq_S.ToInstruction(skipTarget),
+            };
+
+            int insertIndex = indexSetIdent - 2;
+            foreach (var instr in conditionInstructions.AsEnumerable().Reverse())
+            {
+                instructions.Insert(insertIndex, instr);
+            }
+
+            method.Body.SimplifyBranches();
+            method.Body.OptimizeBranches();
         }
     }
 
@@ -922,7 +1033,6 @@ public static partial class PatchUtils
         {
             var instructions = method.Body.Instructions;
 
-            // Find VCIType check pattern
             int tryStartIdx = -1;
             object? vehicleAccess = null;
             IMethod? getVci = null;
@@ -951,17 +1061,14 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Create vehicle access instruction
             Instruction vehicleInstruction = instructions[tryStartIdx + 1].OpCode == OpCodes.Ldfld
                 ? OpCodes.Ldfld.ToInstruction(vehicleAccess as IField)
                 : OpCodes.Callvirt.ToInstruction(vehicleAccess as IMethod);
 
-            // Reuse existing method references
             var module = method.Module;
-            var arrayEmpty = module.Import(typeof(Array).GetMethod("Empty").MakeGenericMethod(typeof(object)));
 
-            // Scan existing instructions to find the method/field references we need
             var instructionList = method.Body.Instructions;
+            IMethod arrayEmpty = null;
             IMethod logInfo = null;
             IMethod setStep = null;
             IMethod waitForResponse = null;
@@ -978,7 +1085,11 @@ public static partial class PatchUtils
             {
                 if (instr.Operand is IMethod m)
                 {
-                    if (m.Name == "Info" && m.DeclaringType?.Name == "Log")
+                    if (m.Name == "Empty" && m.DeclaringType?.Name == "Array")
+                    {
+                        arrayEmpty = m;
+                    }
+                    else if (m.Name == "Info" && m.DeclaringType?.Name == "Log")
                     {
                         logInfo = m;
                     }
@@ -1028,7 +1139,7 @@ public static partial class PatchUtils
                 }
             }
 
-            if (logInfo == null || setStep == null || waitForResponse == null ||
+            if (arrayEmpty == null || logInfo == null || setStep == null || waitForResponse == null ||
                 getResponse == null || cancel == null || getTitle == null ||
                 localize == null || progressWaitCtor == null || register == null ||
                 checkForAutoSkip == null || getInteractionService == null)
@@ -1037,7 +1148,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Find lambda functions and lazy init components
             IField func7000 = null;
             IField func9000 = null;
             IField singletonField = null;
@@ -1045,7 +1155,6 @@ public static partial class PatchUtils
             IMethod lambda9000Method = null;
             IMethod funcConstructor = null;
 
-            // Find lambda fields
             foreach (var instr in instructions)
             {
                 if (instr.OpCode == OpCodes.Ldsfld && instr.Operand is IField f)
@@ -1072,7 +1181,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Find singleton and lambda methods
             var compilerGeneratedClassDef = func7000.DeclaringType.ResolveTypeDef();
             if (compilerGeneratedClassDef != null)
             {
@@ -1086,12 +1194,10 @@ public static partial class PatchUtils
                 }
             }
 
-            // Find lambda methods by scanning existing ldftn instructions in CheckForAutoSkip context
             for (int i = 0; i < instructions.Count; i++)
             {
                 if (instructions[i].OpCode == OpCodes.Ldftn && instructions[i].Operand is IMethod lambdaMethod)
                 {
-                    // Verify CheckForAutoSkip context
                     bool isCheckForAutoSkipContext = false;
                     for (int j = i; j < Math.Min(i + 10, instructions.Count); j++)
                     {
@@ -1110,14 +1216,12 @@ public static partial class PatchUtils
                         continue;
                     }
 
-                    // Check signature
                     var methodSig = lambdaMethod.MethodSig;
                     if (methodSig != null &&
                         methodSig.RetType.TypeName == "Boolean" &&
                         methodSig.Params.Count == 1 &&
                         methodSig.Params[0].TypeName == "Double")
                     {
-                        // Analyze lambda body to identify 7000 vs 9000
                         if (lambdaMethod is MethodDef lambdaMethodDef && lambdaMethodDef.HasBody)
                         {
                             var lambdaInstructions = lambdaMethodDef.Body.Instructions;
@@ -1157,7 +1261,6 @@ public static partial class PatchUtils
                 }
             }
 
-            // Find Func constructor
             foreach (var instr in instructions)
             {
                 if (instr.OpCode == OpCodes.Newobj && instr.Operand is IMethod ctor)
@@ -1172,38 +1275,40 @@ public static partial class PatchUtils
                 }
             }
 
-            // Verify lazy init components
             if (singletonField == null || lambda7000Method == null || lambda9000Method == null || funcConstructor == null)
             {
                 Log.Warning("Could not find all required components for lazy initialization in {Method}", method.FullName);
                 return;
             }
 
-            // Generate lazy init pattern
             List<Instruction> CreateLazyInitPattern(IField lambdaField, IMethod lambdaMethod, Instruction skipInit)
             {
                 return new List<Instruction>
                 {
-                    OpCodes.Ldsfld.ToInstruction(lambdaField),       // Load the static field
-                    OpCodes.Dup.ToInstruction(),                      // Duplicate reference
-                    OpCodes.Brtrue_S.ToInstruction(skipInit),         // If not null, skip init
-                    OpCodes.Pop.ToInstruction(),                      // Pop null value
-                    OpCodes.Ldsfld.ToInstruction(singletonField),     // Load singleton instance
-                    OpCodes.Ldftn.ToInstruction(lambdaMethod),        // Load function pointer
-                    OpCodes.Newobj.ToInstruction(funcConstructor),    // Create Func<double, bool>
-                    OpCodes.Dup.ToInstruction(),                      // Duplicate
-                    OpCodes.Stsfld.ToInstruction(lambdaField),        // Store in static field
+                    OpCodes.Ldsfld.ToInstruction(lambdaField),
+                    OpCodes.Dup.ToInstruction(),
+                    OpCodes.Brtrue_S.ToInstruction(skipInit),
+                    OpCodes.Pop.ToInstruction(),
+                    OpCodes.Ldsfld.ToInstruction(singletonField),
+                    OpCodes.Ldftn.ToInstruction(lambdaMethod),
+                    OpCodes.Newobj.ToInstruction(funcConstructor),
+                    OpCodes.Dup.ToInstruction(),
+                    OpCodes.Stsfld.ToInstruction(lambdaField),
                 };
             }
 
-            // Create a marker for skipping to the original check
             var skipToOriginalCheck = OpCodes.Nop.ToInstruction();
 
-            // Create markers for lambda lazy init
             var skipInit7000 = OpCodes.Nop.ToInstruction();
             var skipInit9000 = OpCodes.Nop.ToInstruction();
 
-            // Create the complete IL for the VCIType == 3 block
+            var leaveInstruction = instructions.FirstOrDefault(i => i.OpCode == OpCodes.Leave || i.OpCode == OpCodes.Leave_S);
+            if (leaveInstruction == null)
+            {
+                Log.Warning("Could not find leave instruction in {Method}", method.FullName);
+                return;
+            }
+
             var type3Block = new List<Instruction>
             {
                 OpCodes.Ldarg_0.ToInstruction(),
@@ -1223,12 +1328,10 @@ public static partial class PatchUtils
                 OpCodes.Ldarg_1.ToInstruction(),
             };
 
-            // Add lazy init pattern for func7000
             type3Block.AddRange(CreateLazyInitPattern(func7000, lambda7000Method, skipInit7000));
             type3Block.Add(skipInit7000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
-            // Continue adding remaining instructions
             type3Block.AddRange(new[]
             {
                 OpCodes.Ldarg_1.ToInstruction(),
@@ -1261,12 +1364,10 @@ public static partial class PatchUtils
                 OpCodes.Ldarg_1.ToInstruction(),
             });
 
-            // Add lazy init pattern for func9000
             type3Block.AddRange(CreateLazyInitPattern(func9000, lambda9000Method, skipInit9000));
             type3Block.Add(skipInit9000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
-            // Final instructions
             type3Block.AddRange(new[]
             {
                 OpCodes.Ldarg_1.ToInstruction(),
@@ -1281,31 +1382,25 @@ public static partial class PatchUtils
                 OpCodes.Pop.ToInstruction(),
             });
 
-            // Find the leave instruction at the end of try block
-            var leaveInstruction = instructions.FirstOrDefault(i => i.OpCode == OpCodes.Leave || i.OpCode == OpCodes.Leave_S);
-            if (leaveInstruction != null)
-            {
-                type3Block.Add(OpCodes.Leave.ToInstruction(leaveInstruction.Operand as Instruction));
-            }
+            type3Block.Add(OpCodes.Leave.ToInstruction(leaveInstruction.Operand as Instruction));
 
-            // Insert all instructions before the original check
             for (int i = 0; i < type3Block.Count; i++)
             {
                 instructions.Insert(tryStartIdx + i, type3Block[i]);
             }
 
-            // Insert the skip marker right after our new block, before the original VCIType check
             instructions.Insert(tryStartIdx + type3Block.Count, skipToOriginalCheck);
 
-            // Update try block exception handlers if needed
             foreach (var eh in method.Body.ExceptionHandlers)
             {
                 if (eh.TryStart != null && instructions.IndexOf(eh.TryStart) >= tryStartIdx)
                 {
-                    // Try block now starts at the new instructions
                     eh.TryStart = instructions[tryStartIdx];
                 }
             }
+
+            method.Body.SimplifyBranches();
+            method.Body.OptimizeBranches();
         }
     }
 }
