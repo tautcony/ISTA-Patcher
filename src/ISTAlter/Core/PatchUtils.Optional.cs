@@ -442,7 +442,7 @@ public static partial class PatchUtils
 
             // Look for the pattern where EnumFASTATransferMode is initialized
             // The variable is typically loaded with ldc.i4.0 and stored
-            for (int i = 0; i < instructions.Count - 1; i++)
+            for (var i = 0; i < instructions.Count - 1; i++)
             {
                 var current = instructions[i];
                 var next = instructions[i + 1];
@@ -849,7 +849,7 @@ public static partial class PatchUtils
             var instructions = method.Body.Instructions;
 
             var indexHandleMissingEcusCall = -1;
-            for (int i = 0; i < instructions.Count; i++)
+            for (var i = 0; i < instructions.Count; i++)
             {
                 if (instructions[i].OpCode == OpCodes.Call &&
                     instructions[i].Operand is IMethod m &&
@@ -868,7 +868,7 @@ public static partial class PatchUtils
             }
 
             var indexSetIdent = -1;
-            for (int i = 0; i < instructions.Count; i++)
+            for (var i = 0; i < instructions.Count; i++)
             {
                 if (instructions[i].OpCode == OpCodes.Callvirt &&
                     instructions[i].Operand is IMethod m &&
@@ -901,18 +901,18 @@ public static partial class PatchUtils
                 return;
             }
 
-            Instruction skipTarget = instructions[indexSetIdent + 1];
+            var skipTarget = instructions[indexSetIdent + 1];
 
-            List<Instruction> conditionInstructions = new List<Instruction>
-            {
+            List<Instruction> conditionInstructions =
+            [
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Call.ToInstruction(getVecInfo),
                 OpCodes.Callvirt.ToInstruction(getBNType),
                 OpCodes.Ldc_I4_2.ToInstruction(),
-                OpCodes.Beq_S.ToInstruction(skipTarget),
-            };
+                OpCodes.Beq_S.ToInstruction(skipTarget)
+            ];
 
-            int insertIndex = indexSetIdent - 2;
+            var insertIndex = indexSetIdent - 2;
             foreach (var instr in conditionInstructions.AsEnumerable().Reverse())
             {
                 instructions.Insert(insertIndex, instr);
@@ -1033,12 +1033,12 @@ public static partial class PatchUtils
         {
             var instructions = method.Body.Instructions;
 
-            int tryStartIdx = -1;
+            var tryStartIdx = -1;
             object? vehicleAccess = null;
             IMethod? getVci = null;
             IMethod? getVciType = null;
 
-            for (int i = 0; i < instructions.Count - 5; i++)
+            for (var i = 0; i < instructions.Count - 5; i++)
             {
                 if (instructions[i].OpCode == OpCodes.Ldarg_0 &&
                     (instructions[i + 1].OpCode == OpCodes.Ldfld || instructions[i + 1].OpCode == OpCodes.Callvirt) &&
@@ -1061,11 +1061,9 @@ public static partial class PatchUtils
                 return;
             }
 
-            Instruction vehicleInstruction = instructions[tryStartIdx + 1].OpCode == OpCodes.Ldfld
+            var vehicleInstruction = instructions[tryStartIdx + 1].OpCode == OpCodes.Ldfld
                 ? OpCodes.Ldfld.ToInstruction(vehicleAccess as IField)
                 : OpCodes.Callvirt.ToInstruction(vehicleAccess as IMethod);
-
-            var module = method.Module;
 
             var instructionList = method.Body.Instructions;
             IMethod arrayEmpty = null;
@@ -1083,58 +1081,56 @@ public static partial class PatchUtils
 
             foreach (var instr in instructionList)
             {
-                if (instr.Operand is IMethod m)
+                switch (instr.Operand)
                 {
-                    if (m.Name == "Empty" && m.DeclaringType?.Name == "Array")
-                    {
+                    case IMethod m when m.Name == "Empty" && m.DeclaringType?.Name == "Array":
                         arrayEmpty = m;
-                    }
-                    else if (m.Name == "Info" && m.DeclaringType?.Name == "Log")
-                    {
+                        break;
+                    case IMethod m when m.Name == "Info" && m.DeclaringType?.Name == "Log":
                         logInfo = m;
-                    }
-                    else if (m.Name == "set_Step")
-                    {
+                        break;
+                    case IMethod m when m.Name == "set_Step":
                         setStep = m;
-                    }
-                    else if (m.Name == "WaitForResponse")
-                    {
+                        break;
+                    case IMethod m when m.Name == "WaitForResponse":
                         waitForResponse = m;
-                    }
-                    else if (m.Name == "get_Response")
-                    {
+                        break;
+                    case IMethod m when m.Name == "get_Response":
                         getResponse = m;
-                    }
-                    else if (m.Name == "Cancel" && m.DeclaringType?.Name == "CancellationTokenSource")
-                    {
+                        break;
+                    case IMethod m when m.Name == "Cancel" && m.DeclaringType?.Name == "CancellationTokenSource":
                         cancel = m;
-                    }
-                    else if (m.Name == "get_Title")
-                    {
+                        break;
+                    case IMethod m when m.Name == "get_Title":
                         getTitle = m;
-                    }
-                    else if (m.Name == "Localize")
-                    {
+                        break;
+                    case IMethod m when m.Name == "Localize":
                         localize = m;
-                    }
-                    else if (m.Name == ".ctor" && m.DeclaringType?.Name == "InteractionProgressWaitModel")
-                    {
+                        break;
+                    case IMethod m when m.Name == ".ctor" && m.DeclaringType?.Name == "InteractionProgressWaitModel":
                         progressWaitCtor = m;
-                    }
-                    else if (m.Name == "Register")
-                    {
+                        break;
+                    case IMethod m when m.Name == "Register":
                         register = m;
-                    }
-                    else if (m.Name == "CheckForAutoSkip")
+                        break;
+                    case IMethod m:
                     {
-                        checkForAutoSkip = m;
+                        if (m.Name == "CheckForAutoSkip")
+                        {
+                            checkForAutoSkip = m;
+                        }
+
+                        break;
                     }
-                }
-                else if (instr.Operand is IField f)
-                {
-                    if (f.Name == "interactionService")
+
+                    case IField f:
                     {
-                        getInteractionService = f;
+                        if (f.Name == "interactionService")
+                        {
+                            getInteractionService = f;
+                        }
+
+                        break;
                     }
                 }
             }
@@ -1194,12 +1190,12 @@ public static partial class PatchUtils
                 }
             }
 
-            for (int i = 0; i < instructions.Count; i++)
+            for (var i = 0; i < instructions.Count; i++)
             {
                 if (instructions[i].OpCode == OpCodes.Ldftn && instructions[i].Operand is IMethod lambdaMethod)
                 {
-                    bool isCheckForAutoSkipContext = false;
-                    for (int j = i; j < Math.Min(i + 10, instructions.Count); j++)
+                    var isCheckForAutoSkipContext = false;
+                    for (var j = i; j < Math.Min(i + 10, instructions.Count); j++)
                     {
                         if (instructions[j].OpCode == OpCodes.Call && instructions[j].Operand is IMethod calledMethod)
                         {
@@ -1217,16 +1213,15 @@ public static partial class PatchUtils
                     }
 
                     var methodSig = lambdaMethod.MethodSig;
-                    if (methodSig != null &&
-                        methodSig.RetType.TypeName == "Boolean" &&
+                    if (methodSig?.RetType.TypeName == "Boolean" &&
                         methodSig.Params.Count == 1 &&
                         methodSig.Params[0].TypeName == "Double")
                     {
-                        if (lambdaMethod is MethodDef lambdaMethodDef && lambdaMethodDef.HasBody)
+                        if (lambdaMethod is MethodDef { HasBody: true } lambdaMethodDef)
                         {
                             var lambdaInstructions = lambdaMethodDef.Body.Instructions;
-                            bool is7000Lambda = false;
-                            bool is9000Lambda = false;
+                            var is7000Lambda = false;
+                            var is9000Lambda = false;
 
                             foreach (var lambdaInstr in lambdaInstructions)
                             {
@@ -1281,22 +1276,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            List<Instruction> CreateLazyInitPattern(IField lambdaField, IMethod lambdaMethod, Instruction skipInit)
-            {
-                return new List<Instruction>
-                {
-                    OpCodes.Ldsfld.ToInstruction(lambdaField),
-                    OpCodes.Dup.ToInstruction(),
-                    OpCodes.Brtrue_S.ToInstruction(skipInit),
-                    OpCodes.Pop.ToInstruction(),
-                    OpCodes.Ldsfld.ToInstruction(singletonField),
-                    OpCodes.Ldftn.ToInstruction(lambdaMethod),
-                    OpCodes.Newobj.ToInstruction(funcConstructor),
-                    OpCodes.Dup.ToInstruction(),
-                    OpCodes.Stsfld.ToInstruction(lambdaField),
-                };
-            }
-
             var skipToOriginalCheck = OpCodes.Nop.ToInstruction();
 
             var skipInit7000 = OpCodes.Nop.ToInstruction();
@@ -1332,8 +1311,7 @@ public static partial class PatchUtils
             type3Block.Add(skipInit7000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
-            type3Block.AddRange(new[]
-            {
+            type3Block.AddRange([
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(waitForResponse),
                 OpCodes.Callvirt.ToInstruction(cancel),
@@ -1361,15 +1339,14 @@ public static partial class PatchUtils
                 OpCodes.Ldc_I4_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(setStep),
                 OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Ldarg_1.ToInstruction(),
-            });
+                OpCodes.Ldarg_1.ToInstruction()
+            ]);
 
             type3Block.AddRange(CreateLazyInitPattern(func9000, lambda9000Method, skipInit9000));
             type3Block.Add(skipInit9000);
             type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
 
-            type3Block.AddRange(new[]
-            {
+            type3Block.AddRange([
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(waitForResponse),
                 OpCodes.Callvirt.ToInstruction(cancel),
@@ -1379,12 +1356,12 @@ public static partial class PatchUtils
                 OpCodes.Call.ToInstruction(logInfo),
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(getResponse),
-                OpCodes.Pop.ToInstruction(),
-            });
+                OpCodes.Pop.ToInstruction()
+            ]);
 
             type3Block.Add(OpCodes.Leave.ToInstruction(leaveInstruction.Operand as Instruction));
 
-            for (int i = 0; i < type3Block.Count; i++)
+            for (var i = 0; i < type3Block.Count; i++)
             {
                 instructions.Insert(tryStartIdx + i, type3Block[i]);
             }
@@ -1401,6 +1378,23 @@ public static partial class PatchUtils
 
             method.Body.SimplifyBranches();
             method.Body.OptimizeBranches();
+            return;
+
+            List<Instruction> CreateLazyInitPattern(IField lambdaField, IMethod lambdaMethod, Instruction skipInit)
+            {
+                return
+                [
+                    OpCodes.Ldsfld.ToInstruction(lambdaField),
+                    OpCodes.Dup.ToInstruction(),
+                    OpCodes.Brtrue_S.ToInstruction(skipInit),
+                    OpCodes.Pop.ToInstruction(),
+                    OpCodes.Ldsfld.ToInstruction(singletonField),
+                    OpCodes.Ldftn.ToInstruction(lambdaMethod),
+                    OpCodes.Newobj.ToInstruction(funcConstructor),
+                    OpCodes.Dup.ToInstruction(),
+                    OpCodes.Stsfld.ToInstruction(lambdaField)
+                ];
+            }
         }
     }
 }
