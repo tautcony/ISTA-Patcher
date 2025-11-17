@@ -240,6 +240,76 @@ public static partial class PatchUtils
         }
     }
 
+    [ValidationPatch]
+    [LibraryName("RheingoldISPINext.dll")]
+    [FromVersion("4.56")]
+    public static int CommonServiceWrapper_IsAvailable(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.RheingoldISPINext.ICS.CommonServiceWrapper",
+            "IsAvailable",
+            "()System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
+    [ValidationPatch]
+    [LibraryName("RheingoldCoreFramework.dll")]
+    [FromVersion("4.56")]
+    public static int PatchDealerConstructor(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Dealer.Dealer",
+            ".ctor",
+            "(\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseInfo,System.Action,System.Func`2<\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseInfo,\u0042\u004d\u0057.Rheingold.CoreFramework.LicenseStatus>)System.Void",
+            PatchDealerXmlData
+        );
+
+        static void PatchDealerXmlData(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+            int patchCount = 0;
+
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                if (instructions[i].OpCode == OpCodes.Ldstr &&
+                    instructions[i].Operand is string xmlString &&
+                    xmlString.Contains("distributionPartnerNumber=\"00000\""))
+                {
+                    string patchedXml = xmlString
+                        .Replace("distributionPartnerNumber=\"00000\"", "distributionPartnerNumber=\"12345\"")
+                        .Replace("outletNumber=\"0\"", "outletNumber=\"1\"");
+
+                    instructions[i].Operand = patchedXml;
+                    patchCount++;
+                }
+            }
+
+            if (patchCount == 0)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+            }
+        }
+    }
+
+    [ValidationPatch]
+    [LibraryName("RheingoldCoreFramework.dll")]
+    [FromVersion("4.56")]
+    public static int PatchDealerDataLogic_HasProtectionVehicleService(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Dealer.DealerDataLogic",
+            "HasProtectionVehicleService",
+            "(\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.BrandName,System.String)System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        ) + module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.Dealer.DealerDataLogic",
+            "HasProtectionVehicleService",
+            "()System.Boolean",
+            DnlibUtils.ReturnTrueMethod
+        );
+    }
+
     [EssentialPatch]
     public static int PatchIntegrityManager(ModuleDefMD module)
     {
