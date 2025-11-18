@@ -268,19 +268,19 @@ public static partial class PatchUtils
         static void PatchDealerXmlData(MethodDef method)
         {
             var instructions = method.Body.Instructions;
-            int patchCount = 0;
+            var patchCount = 0;
 
-            for (int i = 0; i < instructions.Count; i++)
+            foreach (var instruction in instructions)
             {
-                if (instructions[i].OpCode == OpCodes.Ldstr &&
-                    instructions[i].Operand is string xmlString &&
+                if (instruction.OpCode == OpCodes.Ldstr &&
+                    instruction.Operand is string xmlString &&
                     xmlString.Contains("distributionPartnerNumber=\"00000\""))
                 {
-                    string patchedXml = xmlString
-                        .Replace("distributionPartnerNumber=\"00000\"", "distributionPartnerNumber=\"12345\"")
-                        .Replace("outletNumber=\"0\"", "outletNumber=\"1\"");
+                    var patchedXml = xmlString
+                        .Replace("distributionPartnerNumber=\"00000\"", "distributionPartnerNumber=\"11451\"")
+                        .Replace("outletNumber=\"0\"", "outletNumber=\"4\"");
 
-                    instructions[i].Operand = patchedXml;
+                    instruction.Operand = patchedXml;
                     patchCount++;
                 }
             }

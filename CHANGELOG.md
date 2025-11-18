@@ -1,6 +1,6 @@
 ﻿# Changelog
 
-## 2.4.0 / 2025-11-22
+## 2.4.0 / 2025-11-18
 - Feat - Upgrade to .NET 10.0
 - Feat - Add validation patches for ISTA 4.56+
 - Feat - Add manual clamp switch bypass patch with `--enable-manual-clamp-switch-bypass` flag #72
