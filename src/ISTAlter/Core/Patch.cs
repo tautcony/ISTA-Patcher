@@ -5,8 +5,8 @@ namespace ISTAlter.Core;
 
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using System.Text.RegularExpressions;
-using dnlib.DotNet;
 using ISTAlter.Core.Patcher;
 using ISTAlter.Core.Patcher.Provider;
 using ISTAlter.Utils;
@@ -186,7 +186,7 @@ public static partial class Patch
     private static IEnumerable<string> BuildIndicator(List<PatchInfo> patches)
     {
         return patches
-               .Select(p => (Name: FormatName(p.Delegator), Count: p.AppliedCount))
+               .Select(p => (Name: FormatName(p.Method), Count: p.AppliedCount))
                .Reverse()
                .Select((item, idx) =>
                {
@@ -196,10 +196,10 @@ public static partial class Patch
                    return $"{verticalBars}└{horizontalBars}>[{item.Name}: {item.Count}]";
                });
 
-        string FormatName(Func<ModuleDefMD, int> func)
+        string FormatName(MethodInfo method)
         {
-            var match = ActionNamePattern().Match(func.Method.Name);
-            return (match.Success ? match.Groups["name"].Value : func.Method.Name).Replace("_", "::", StringComparison.Ordinal);
+            var match = ActionNamePattern().Match(method.Name);
+            return (match.Success ? match.Groups["name"].Value : method.Name).Replace("_", "::", StringComparison.Ordinal);
         }
     }
 

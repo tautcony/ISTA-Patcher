@@ -107,6 +107,14 @@ public class DefaultPatcherProvider : IPatcherProvider
             this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(ManualClampSwitchPatchAttribute)));
         }
 
+        // Load custom patches from configuration
+        if (opts.CustomPatchDefinitions?.Count > 0)
+        {
+            var customPatches = CustomPatchUtils.CreatePatchInfoFromDefinitions(opts.CustomPatchDefinitions);
+            this.Patches.AddRange(customPatches);
+            Log.Information("Loaded {Count} custom patches from configuration", customPatches.Count);
+        }
+
         Log.Debug("Loaded patches: {Patches}", string.Join(", ", this.Patches.Select(p => p.Method.Name)));
     }
 

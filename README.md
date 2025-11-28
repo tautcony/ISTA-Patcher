@@ -10,7 +10,7 @@ An IL patcher for ISTA-P from scratch, a product of learning about [dnlib](https
 ## Usage
 
 > [!IMPORTANT]
-> ISTA-Patcher will back up the original files to the `@ista-backup` folder. However, it is recommended to manually back up the `ISTA\TesterGUI` & `ISTA\PSdZ` folders before patching.
+> ISTA-Patcher will back up the original files to the `@ista-backup` folder. However, it is recommended to manually back up the `ISTA\TesterGUI` & `ISTA\PSdZ` (not valid from version 4.56) folders before patching.
 
 > [!NOTE]
 > *nix users may need the following steps to get ISTA-Patcher working:

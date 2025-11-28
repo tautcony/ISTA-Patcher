@@ -3,6 +3,7 @@
 
 namespace ISTAlter;
 
+using ISTAlter.Models;
 using ISTAlter.Utils;
 
 // ReSharper disable PropertyCanBeMadeInitOnly.Global, NotNullOrRequiredMemberIsNotInitialized
@@ -79,6 +80,8 @@ public static class ISTAOptions
         public bool MotorbikeClamp15Fix { get; set; }
 
         public bool ManualClampSwitch { get; set; }
+
+        public List<CustomPatchDefinition>? CustomPatchDefinitions { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions

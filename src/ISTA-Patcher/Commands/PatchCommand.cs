@@ -7,6 +7,7 @@ using DotMake.CommandLine;
 using ISTAlter;
 using ISTAlter.Core;
 using ISTAlter.Core.Patcher.Provider;
+using ISTAlter.Models;
 using ISTAlter.Utils;
 using ISTAPatcher.Commands.Options;
 using Microsoft.Extensions.Configuration;
@@ -69,6 +70,12 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
             SkipLibrary = this.SkipLibrary,
             TargetPath = this.TargetPath,
         };
+
+        var customPatchConfig = Global.Config.GetSection("CustomPatches").Get<List<CustomPatchDefinition>>();
+        if (customPatchConfig is { Count: > 0 })
+        {
+            opts.CustomPatchDefinitions = customPatchConfig;
+        }
 
         switch (opts.PatchType)
         {
