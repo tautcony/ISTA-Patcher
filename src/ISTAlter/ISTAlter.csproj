@@ -44,9 +44,9 @@ Released under the GNU GPLv3+.</Copyright>
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.0" />
+    <!--PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.0" /-->
     <PackageReference Include="System.Management" Version="10.0.0" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
+    <!--PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" /-->
     <PackageReference Include="ZLinq" Version="1.5.4" />
   </ItemGroup>
 

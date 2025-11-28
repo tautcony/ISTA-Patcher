@@ -19,50 +19,50 @@
       },
       "GenHTTP.Core": {
         "type": "Direct",
-        "requested": "[10.0.0, )",
-        "resolved": "10.0.0",
-        "contentHash": "an/XJMHADpY5kzyIZWW1XYdCPPiCJrATXGavIL/vSPC8nerXqyKyO9Pbk+8UdW5rmJooixkxCXm4+ThwXoI5EA==",
+        "requested": "[10.1.0, )",
+        "resolved": "10.1.0",
+        "contentHash": "9mBW3MgJ6khsodynOR1KQnGAZLeifgW3+ZHaulmV6xnzp9kdeeoCMpDd8wZJ2Mq6hwnALbD/V8g1jfbe/59iEw==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Engine.Internal": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0",
-          "GenHTTP.Modules.Layouting": "10.0.0",
-          "GenHTTP.Modules.Practices": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Engine.Internal": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0",
+          "GenHTTP.Modules.Layouting": "10.1.0",
+          "GenHTTP.Modules.Practices": "10.1.0"
         }
       },
       "GenHTTP.Modules.ApiBrowsing": {
         "type": "Direct",
-        "requested": "[10.0.0, )",
-        "resolved": "10.0.0",
-        "contentHash": "AAkj5xIVmYq5xraO8/yK18QZvHeEbnNSF4unKVYs88DTvMNYYJyE7RNDS0ACY+PvLYZOYWURniLJmfCJLMrtXA==",
+        "requested": "[10.1.0, )",
+        "resolved": "10.1.0",
+        "contentHash": "OqOyohZzPVXUY44tyuwZ7a3HyijC4RugTf8aGi4DdJhxzb1EngMVQpih0CYkLmR9XJWVKSMIzC0RKgmy0FQ02Q==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0",
-          "GenHTTP.Modules.Layouting": "10.0.0",
-          "GenHTTP.Modules.Pages": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0",
+          "GenHTTP.Modules.Layouting": "10.1.0",
+          "GenHTTP.Modules.Pages": "10.1.0"
         }
       },
       "GenHTTP.Modules.Controllers": {
         "type": "Direct",
-        "requested": "[10.0.0, )",
-        "resolved": "10.0.0",
-        "contentHash": "7qfx+v8WUInJ+mRRLOCBukj6ogzjKERf92/+dDLaPQCZnnyntZrciBi6KvMI7dg+Somi2h0pXcHftCOLyQ+Xgg==",
+        "requested": "[10.1.0, )",
+        "resolved": "10.1.0",
+        "contentHash": "x6d5FcvuZ3wmCVvBMMB5+DRXbbrl1iixiN87yC331cogSna02Wm9Tb8hYUVBLKkaHQYhH5Gw24i6r+j4kHzyvg==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.Conversion": "10.0.0",
-          "GenHTTP.Modules.Layouting": "10.0.0",
-          "GenHTTP.Modules.Reflection": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.Conversion": "10.1.0",
+          "GenHTTP.Modules.Layouting": "10.1.0",
+          "GenHTTP.Modules.Reflection": "10.1.0"
         }
       },
       "GenHTTP.Modules.OpenApi": {
         "type": "Direct",
-        "requested": "[10.0.0, )",
-        "resolved": "10.0.0",
-        "contentHash": "ytYbr9eRp7B6eaFiHdswfWDj/cMXn+h2TvFGRJ8CP1Ldys8ZtXYZ9hDTcm9kZ0cIgf9qqar5qHajbQrC2rQOow==",
+        "requested": "[10.1.0, )",
+        "resolved": "10.1.0",
+        "contentHash": "36ewu7g+GHmsLy0xbrzdlpcX+jRrue4QBz/SXV8xYiXjH/Yh8TussPeCI2mQ1UpFusJL8VaUP10+VViD4HZD2g==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.Layouting": "10.0.0",
-          "GenHTTP.Modules.Reflection": "10.0.0",
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.Layouting": "10.1.0",
+          "GenHTTP.Modules.Reflection": "10.1.0",
           "NSwag.Core": "14.6.2",
           "NSwag.Core.Yaml": "14.6.2",
           "NSwag.Generation": "14.6.2"
@@ -70,15 +70,15 @@
       },
       "GenHTTP.Modules.Webservices": {
         "type": "Direct",
-        "requested": "[10.0.0, )",
-        "resolved": "10.0.0",
-        "contentHash": "GE4rZfvFL61BP+Yk6yDggnL2r/0EjyRspfJGOjKKfFVh3VzojkPv1YI1g5696DA9wlKBvg76/HLiZExnxOqOxQ==",
+        "requested": "[10.1.0, )",
+        "resolved": "10.1.0",
+        "contentHash": "BKmBzOVmKGiDO3A3YkFOtJ4e0d6Q4VgriM+lIc2ozw8SDpx9oen9jUkW0v8mEGwb+PQusFvwnsjGtuOmB67Mpw==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.Conversion": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0",
-          "GenHTTP.Modules.Layouting": "10.0.0",
-          "GenHTTP.Modules.Reflection": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.Conversion": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0",
+          "GenHTTP.Modules.Layouting": "10.1.0",
+          "GenHTTP.Modules.Reflection": "10.1.0"
         }
       },
       "LibGit2Sharp": {
@@ -216,132 +216,133 @@
       },
       "GenHTTP.Api": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "XvPUcRftmHdq+fyZmYdVQOLKsKxmQpihANWpPCQij8FA9uhAgoV95KRy27Rv6AR31auqR8j8q6T87kUsuxkm/Q=="
+        "resolved": "10.1.0",
+        "contentHash": "QgOOTxSQK9b/RfeII7r7hJfB3gRX2verBsgN9IFx9qe4lSZiLnlZGlhHB818zHl2STIYYEq01eaT3GKSIfODXg=="
       },
       "GenHTTP.Engine.Internal": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "/CBsaN0vOP915HxRmXRALSrt1Meld3gVKDobwKqkGcqZkBJHpkSf5/PhBeRPtmTufiQufSXri6BbA/WnN5lpug==",
+        "resolved": "10.1.0",
+        "contentHash": "dMTvk6lrFKYO+igvflaSJpDzKJ0hxIiJUENGKYVSyklE9Se+wfMhUtDHCT8iqcLctECC5XGqPmKD0qPEYTNxog==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Engine.Shared": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Engine.Shared": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0",
+          "Microsoft.Extensions.ObjectPool": "10.0.0"
         }
       },
       "GenHTTP.Engine.Shared": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "JBRq/wa84mbG82BLl25z/Mq2DFLD5KkMTOk1KEW2RmG4UWGC/EDnrTqp0+ykJOKyN/YRR9mO7VOgvrJNYy7Mqw==",
+        "resolved": "10.1.0",
+        "contentHash": "oToHzmWH/JxiO6DasPAbeARE4YUZL/yAGYdwDzDW1szgql0UdkM79u/e2KQ1oP1ZGsLyjw0zy7IG1wm80SlFRg==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.ErrorHandling": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.ErrorHandling": "10.1.0"
         }
       },
       "GenHTTP.Modules.ClientCaching": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "mhbh54VG5vIXWgqvQxtE+821YGY9j9zhJ/NusyelRSP13D7zWNDNl4wN8W1sNhmX0S7SxT4BVo61Aez/I6GXdQ==",
+        "resolved": "10.1.0",
+        "contentHash": "gM6oadEQ5U5+2JlinUODbyoD0U6rB9OpVUpwXoPkulxuMbsklDT7U+j2uei3Co+7Ejpp4VQTtkMNGwZDEaIH3Q==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0"
         }
       },
       "GenHTTP.Modules.Compression": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "cNa0JHAFEMZpAAtoHEeDrMNMuLiNU9uEAvsC1DYwEV3EZRJPDKfPpHxXP6zct6snElG1TBj46fbxBe8+RmM1uQ==",
+        "resolved": "10.1.0",
+        "contentHash": "I78rKkFZyhEUbkD884wOkLsGO+9yzZcS8ir9TvDKvCrybrmRpmLRGMCCPdAyU+7BHA/SHjw/OJlg81ld/1syXg==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
+          "GenHTTP.Api": "10.1.0",
           "ZstdSharp.Port": "0.8.6"
         }
       },
       "GenHTTP.Modules.Conversion": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "4tsLJHG3gZGPNFX92LK5XFWyxUwLWCdb0d8XWdT3051gsXWEbQw3AIzhmONiMGyM8iYmTXS4el9Ntr8r1dJxZQ==",
+        "resolved": "10.1.0",
+        "contentHash": "qICbC8R8nIzE56Kfs7rl8EpcExoUzT3LKP5pbPlQXRolrNabGGO+dqwZlUn8ASvHTve1gZEVWpMe8mpzJa7qOw==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0",
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0",
           "YamlDotNet": "16.3.0"
         }
       },
       "GenHTTP.Modules.ErrorHandling": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "L/StYCEBF8yhUJ9E+N9qawRYHp90YOZKE2HZfpGBERv6r8utf4x+g0+RTn5yRG39NQKwmsUVquVi+w+9x2u8aw==",
+        "resolved": "10.1.0",
+        "contentHash": "v/d72O6jFY6JWeTscXY1vHUygoL8FdtCVw36huDFJXm2+qm2RZIWikxJeQL8Slg2o4zIzz3PRHjLzSQBspWEaQ==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.Conversion": "10.0.0",
-          "GenHTTP.Modules.Pages": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.Conversion": "10.1.0",
+          "GenHTTP.Modules.Pages": "10.1.0"
         }
       },
       "GenHTTP.Modules.IO": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "a56aGm6pjLd/9x3Glwf2A0ouSBnr/hTf+NsF6hK4zleQI8E7YcjCAhKfn6GiexnpR52WgId5Fyn30N0QmCOKrQ==",
+        "resolved": "10.1.0",
+        "contentHash": "Az3taFFGNMhkYWm/AZptubfxLp6io1NOhqBUQK7BjldG/9VJlle+2JhMjksuIDG16j2WEAxI5oXeG8QRfP86mw==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0"
+          "GenHTTP.Api": "10.1.0"
         }
       },
       "GenHTTP.Modules.Layouting": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "bl9uWMHg+FTITXbFEElcOHvMrZ2NGiu2o9EzeLBfD0T/f6aAnUpODXFGU+QDyOykigZugHZvvzaANEvZzcdD2A==",
+        "resolved": "10.1.0",
+        "contentHash": "3JmcBNVNTbB8VTzLdyoHAJpSWw38X1afkHhJETqTN0zmy3nQEGrtghYI73qe14lA8BPPZ95BbS7Apx3pkhtCOg==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.Redirects": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.Redirects": "10.1.0"
         }
       },
       "GenHTTP.Modules.Pages": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "jCiLJu2JYKZGwGe1ovH6ZJ8w9Tpr4zoAjtAOa6xTTKVhaV80FxYSprHwNmoF6ZF7VxR+kfD6bXcQQCsPJoDAsA==",
+        "resolved": "10.1.0",
+        "contentHash": "ulmXbvgn0/Jpy9BkZ1+hp49mq5Uumr6WUrTgi3MZ+pwzhB3RiWRUjmri+2WNCSjQtr/1VT8nUDjcIXL4KUkAKg==",
         "dependencies": {
           "Cottle": "2.1.0",
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0"
         }
       },
       "GenHTTP.Modules.Practices": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "WwkyGeS233TBTPOWpXPa5f2bGZWRq2z4t6dktGyA1W8/AzWOLU+FjkHMhl+4yLDTjIHsUYwCQkariQvXCQz0mw==",
+        "resolved": "10.1.0",
+        "contentHash": "B6RRI/R+zKhOy5diKS2JcnVG4t+kazD3HKuL5N3U90DFPDoSxTFTF357ep70o7gsmamLnxzcXC55sLrEw2Lm8A==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.ClientCaching": "10.0.0",
-          "GenHTTP.Modules.Compression": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0",
-          "GenHTTP.Modules.Security": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.ClientCaching": "10.1.0",
+          "GenHTTP.Modules.Compression": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0",
+          "GenHTTP.Modules.Security": "10.1.0"
         }
       },
       "GenHTTP.Modules.Redirects": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "ZDQyDrOpdpYbdDN0bN+Z1hbSm6jgeE7eCnp+evaGXt3DtgdhCoL3J8pf+3VDcfRuy4QuMMhqPyMDiJOSTv30Ow==",
+        "resolved": "10.1.0",
+        "contentHash": "raRXZzEmwZHaNzLvQvbIK9tn8kGGKJkPCRGY9jid2VRogZoO2juCnfM0o78qhMNWgJW46i9XKkyIN0rO6xp1Xw==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0"
         }
       },
       "GenHTTP.Modules.Reflection": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "z1+VG7PRhKIKunQGQUnopqPwjCUnpN/x7EqWcR2DqTHsJRmO+rvLZ6kRtVXE4OhRfOq4tF/0eppPD5qSIM3qcw==",
+        "resolved": "10.1.0",
+        "contentHash": "Xj/8gMXmW/EO9WyCJOBv+9Y5iZug+vqwu9WJApGUEtZAKCllVFpw0dOCer02Ms6erZjiVgE2fdwjvfheW2eSwQ==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.Conversion": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.Conversion": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0"
         }
       },
       "GenHTTP.Modules.Security": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "vQuGJQIGZDZu2NeYXGl1UzNkm7DBmZr0NEf+GKOwLgS15+GTQQaQOTztCHfTOh+jXTEL7ulavmNigj8wW24pug==",
+        "resolved": "10.1.0",
+        "contentHash": "toilU0E3w+RDUpjYkDboMePQX9aEJ15ufxo5+UY9pbP9NmmZEJYnrIg4JHUCW2GQ25F2az9qENVK/j4c1G0ItA==",
         "dependencies": {
-          "GenHTTP.Api": "10.0.0",
-          "GenHTTP.Modules.IO": "10.0.0",
-          "GenHTTP.Modules.Redirects": "10.0.0"
+          "GenHTTP.Api": "10.1.0",
+          "GenHTTP.Modules.IO": "10.1.0",
+          "GenHTTP.Modules.Redirects": "10.1.0"
         }
       },
       "LibGit2Sharp.NativeBinaries": {
@@ -431,6 +432,11 @@
         "type": "Transitive",
         "resolved": "6.0.0",
         "contentHash": "/HggWBbTwy8TgebGSX5DBZ24ndhzi93sHUBDvP1IxbZD7FDokYzdAr6+vbWGjw2XAfR2EJ1sfKUotpjHnFWPxA=="
+      },
+      "Microsoft.Extensions.ObjectPool": {
+        "type": "Transitive",
+        "resolved": "10.0.0",
+        "contentHash": "bpeCq0IYmVLACyEUMzFIOQX+zZUElG1t+nu1lSxthe7B+1oNYking7b91305+jNB6iwojp9fqTY9O+Nh7ULQxg=="
       },
       "Microsoft.Extensions.Options": {
         "type": "Transitive",
@@ -551,8 +557,11 @@
       },
       "System.Diagnostics.DiagnosticSource": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "0KdBK+h7G13PuOSC2R/DalAoFMvdYMznvGRuICtkdcUMXgl/gYXsG6z4yUvTxHSMACorWgHCU1Faq0KUHU6yAQ=="
+        "resolved": "6.0.0",
+        "contentHash": "frQDfv0rl209cKm1lnwTgFPzNigy2EKk1BS3uAvHvlBVKe5cymGyHO+Sj+NLv5VF/AhHsqPIUUwya5oV4CHMUw==",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        }
       },
       "System.Management": {
         "type": "Transitive",
@@ -564,8 +573,8 @@
       },
       "System.Runtime.CompilerServices.Unsafe": {
         "type": "Transitive",
-        "resolved": "6.1.2",
-        "contentHash": "2hBr6zdbIBTDE3EhK7NSVNdX58uTK6iHW/P/Axmm9sl1xoGSLqDvMtpecn226TNwHByFokYwJmt/aQQNlO5CRw=="
+        "resolved": "6.0.0",
+        "contentHash": "/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg=="
       },
       "YamlDotNet": {
         "type": "Transitive",
@@ -587,9 +596,7 @@
           "SixLabors.Fonts": "[2.1.3, )",
           "SixLabors.ImageSharp": "[3.1.12, )",
           "SixLabors.ImageSharp.Drawing": "[2.1.7, )",
-          "System.Diagnostics.DiagnosticSource": "[10.0.0, )",
           "System.Management": "[10.0.0, )",
-          "System.Runtime.CompilerServices.Unsafe": "[6.1.2, )",
           "ZLinq": "[1.5.4, )",
           "dnlib": "[4.5.0, )"
         }
