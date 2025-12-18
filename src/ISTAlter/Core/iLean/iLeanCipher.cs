@@ -40,6 +40,8 @@ public sealed class iLeanCipher : IDisposable
         }
 
         var clientID = ReverseString(machineGuid);
+
+        // ReSharper disable once InlineTemporaryVariable
         var volumeSNr = volumeSerialNumber;
         var volumeSN = ReverseString(volumeSNr);
 

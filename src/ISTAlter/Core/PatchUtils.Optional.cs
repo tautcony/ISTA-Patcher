@@ -334,7 +334,7 @@ public static partial class PatchUtils
             }
 
             var indexOfCall = method.Body.Instructions.IndexOf(sendFastaDataToFBMCall);
-            if (indexOfCall == -1 || indexOfCall < 1)
+            if (indexOfCall is -1 or < 1)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;

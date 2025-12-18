@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2025 TautCony
 
-using System.Reflection;
-
 namespace ISTAlter.Utils;
+
+using System.Reflection;
 
 /// <summary>
 /// A wrapper class for MethodInfo that supports custom attributes and custom name.

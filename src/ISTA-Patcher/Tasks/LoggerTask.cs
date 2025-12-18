@@ -3,10 +3,12 @@
 
 namespace ISTAPatcher.Tasks;
 
+using JetBrains.Annotations;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 
+[UsedImplicitly]
 public class LoggerTask : IStartupTask
 {
     public const string LOGFILE = "ista-patcher.log";

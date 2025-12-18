@@ -404,33 +404,37 @@ public static partial class PatchUtils
         );
     }
 
-    public static int PatchInteractionModel(ModuleDefMD module)
+    public static void ValidatePatchResult(ModuleDefMD module)
     {
-        return module.PatchGetter(
+        module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
-            "Title",
-            method =>
-            {
-                var containsDef = module.Types
+            "\u0054\u0069\u0074\u006c\u0065",
+            ValidateMethodPatchIntegrity
+        );
+        return;
+
+        void ValidateMethodPatchIntegrity(MethodDef method)
+        {
+            var containsDef = module.Types
                     .AsValueEnumerable()
                     .SelectMany(t => t.Methods)
                     .Where(m => m.HasBody)
                     .SelectMany(m => m.Body.Instructions)
                     .FirstOrDefault(i => i.OpCode == OpCodes.Callvirt && string.Equals((i.Operand as MemberRef)?.FullName, "System.Boolean System.String::Contains(System.String)", StringComparison.Ordinal))?.Operand as MemberRef;
-                var titleField = method.DeclaringType.Fields
+            var titleField = method.DeclaringType.Fields
                     .AsValueEnumerable()
                     .FirstOrDefault(field => string.Equals(field.FullName, "System.String \u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel::title", StringComparison.Ordinal));
 
-                if (containsDef == null || titleField == null)
-                {
-                    return;
-                }
+            if (containsDef == null || titleField == null)
+            {
+                return;
+            }
 
-                var stringRef = module.CorLibTypes.String.TypeRef;
-                var concatRef = new MemberRefUser(module,  "Concat", MethodSig.CreateStatic(module.CorLibTypes.String, module.CorLibTypes.String, module.CorLibTypes.String), stringRef);
+            var stringRef = module.CorLibTypes.String.TypeRef;
+            var concatRef = new MemberRefUser(module,  "Concat", MethodSig.CreateStatic(module.CorLibTypes.String, module.CorLibTypes.String, module.CorLibTypes.String), stringRef);
 
-                var label = OpCodes.Nop.ToInstruction();
-                var patchedMethod = new[]
+            var label = OpCodes.Nop.ToInstruction();
+            var patchedMethod = new[]
                 {
                     OpCodes.Ldarg_0.ToInstruction(),
                     OpCodes.Ldfld.ToInstruction(titleField),
@@ -453,11 +457,10 @@ public static partial class PatchUtils
                     OpCodes.Call.ToInstruction(concatRef),
                     OpCodes.Ret.ToInstruction(),
                 };
-                method.Body.Variables.Clear();
-                method.Body.ExceptionHandlers.Clear();
-                method.ReplaceWith(patchedMethod);
-            }
-        );
+            method.Body.Variables.Clear();
+            method.Body.ExceptionHandlers.Clear();
+            method.ReplaceWith(patchedMethod);
+        }
     }
 
     [SignaturePatch]

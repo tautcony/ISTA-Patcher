@@ -274,8 +274,6 @@ public static partial class PatchUtils
         {
             description.ConstructorArguments[0] = new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Config));
         }
-
-        PatchInteractionModel(module);
     }
 
     /// <summary>

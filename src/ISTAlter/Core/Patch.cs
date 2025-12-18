@@ -14,6 +14,22 @@ using Serilog;
 
 public static partial class Patch
 {
+    static Patch()
+    {
+        try
+        {
+            var harmony = new HarmonyLib.Harmony("ISTAlter.Core.Patch");
+            var original = typeof(PatchUtils).GetMethod("SetPatchedMark", BindingFlags.Public | BindingFlags.Static);
+            var postfix = typeof(PatchUtils).GetMethod("ValidatePatchResult", BindingFlags.Public | BindingFlags.Static);
+            harmony.Patch(original, postfix: new HarmonyLib.HarmonyMethod(postfix));
+        }
+        catch (System.ArgumentNullException e)
+        {
+            Log.Error(e, "Failed to initialize patch configuration.");
+            Environment.Exit(1);
+        }
+    }
+
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
     public static string OutputDirName { get; set; } = "@ista-patched";
 

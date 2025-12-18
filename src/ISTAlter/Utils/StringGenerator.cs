@@ -26,5 +26,7 @@ public class StringGenerator(int[][] coefficients)
             yield return (int)result;
             x++;
         }
+
+        // ReSharper disable once IteratorNeverReturns
     }
 }

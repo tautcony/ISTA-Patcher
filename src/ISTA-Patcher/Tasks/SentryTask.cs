@@ -3,9 +3,11 @@
 
 namespace ISTAPatcher.Tasks;
 
+using JetBrains.Annotations;
 using LibGit2Sharp;
 using Serilog;
 
+[UsedImplicitly]
 public class SentryTask : IStartupTask
 {
     public void Execute(object?[]? parameters)

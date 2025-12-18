@@ -5,8 +5,8 @@ namespace ISTAlter.Models.iLean;
 
 public enum DownloadPriority
 {
-    ForeGround = 3,
-    High = 2,
-    Medium = 1,
     Low = 0,
+    Medium = 1,
+    High = 2,
+    ForeGround = 3,
 }
