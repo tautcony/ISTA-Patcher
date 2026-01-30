@@ -19,50 +19,50 @@
       },
       "GenHTTP.Core": {
         "type": "Direct",
-        "requested": "[10.2.0, )",
-        "resolved": "10.2.0",
-        "contentHash": "zBjZNVaAJ3TEjs9fYvVmqe5hjxB8krrFEPvMzcNsNZ9ZlWjZS3pTDa95uSjKJw/BZAgn40UmFLtXTM7pxPA8aA==",
+        "requested": "[10.4.1, )",
+        "resolved": "10.4.1",
+        "contentHash": "/vX2bdOrlwHU7Az7RDIUvl6anjXzfack3C+ld2NCoqCWyQ/ez9sWMaX1onvLYYDuZvvUCBnhxJ+ImgAn9qkB1A==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Engine.Internal": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0",
-          "GenHTTP.Modules.Layouting": "10.2.0",
-          "GenHTTP.Modules.Practices": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Engine.Internal": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1",
+          "GenHTTP.Modules.Layouting": "10.4.1",
+          "GenHTTP.Modules.Practices": "10.4.1"
         }
       },
       "GenHTTP.Modules.ApiBrowsing": {
         "type": "Direct",
-        "requested": "[10.2.0, )",
-        "resolved": "10.2.0",
-        "contentHash": "8Ia41A/dorwD0kqlJZzRpPigOdqkPs8/nzgVkoiqdvpoU2D2wvVyX1VAocPN+uHqjyWFhRMGRsxd0r5D5paDjA==",
+        "requested": "[10.4.1, )",
+        "resolved": "10.4.1",
+        "contentHash": "nWXkz6PE52qi0nwu/WY3QcYzrHTK7fbQMgFL3+X+u6FTQJ/8qSYLMyRuekp9Uq+VguvYoccsVG/msgHqLwnaGA==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0",
-          "GenHTTP.Modules.Layouting": "10.2.0",
-          "GenHTTP.Modules.Pages": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1",
+          "GenHTTP.Modules.Layouting": "10.4.1",
+          "GenHTTP.Modules.Pages": "10.4.1"
         }
       },
       "GenHTTP.Modules.Controllers": {
         "type": "Direct",
-        "requested": "[10.2.0, )",
-        "resolved": "10.2.0",
-        "contentHash": "d0PbczvtYqCaLQAcEQhnvxO1OnqpsILd+eF2GSxv1g6+lC+me4ELw9PUfZn3iwdFNqVqkVPTLwABFG0aY8317g==",
+        "requested": "[10.4.1, )",
+        "resolved": "10.4.1",
+        "contentHash": "QBmGPZbjZsvj0gcqIq77kN0ldMrNbJ8OfjXiNP+SrE8xZdF44LkAeT/Q9IfVhyzzELBLm8DX8fdeTUC5Yy1TjA==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.Conversion": "10.2.0",
-          "GenHTTP.Modules.Layouting": "10.2.0",
-          "GenHTTP.Modules.Reflection": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.Conversion": "10.4.1",
+          "GenHTTP.Modules.Layouting": "10.4.1",
+          "GenHTTP.Modules.Reflection": "10.4.1"
         }
       },
       "GenHTTP.Modules.OpenApi": {
         "type": "Direct",
-        "requested": "[10.2.0, )",
-        "resolved": "10.2.0",
-        "contentHash": "IpDNP0td+zDTZlJDWWpCmTArY/M8oMNeW6espjEL1gOg/OPkO4y9Ehp4oTTEiEPnFxYz1pLFTf1DmMVQ4U2Emw==",
+        "requested": "[10.4.1, )",
+        "resolved": "10.4.1",
+        "contentHash": "O5s5QQ6RLeVtL7X2FC8kpxokr/Fn3IzXR0LxRIgGgF08vgUHFksknIqUNKUnmlIvtOfRTqgr++Z6apyTwFUJbA==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.Layouting": "10.2.0",
-          "GenHTTP.Modules.Reflection": "10.2.0",
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.Layouting": "10.4.1",
+          "GenHTTP.Modules.Reflection": "10.4.1",
           "NSwag.Core": "14.6.3",
           "NSwag.Core.Yaml": "14.6.3",
           "NSwag.Generation": "14.6.3"
@@ -70,15 +70,15 @@
       },
       "GenHTTP.Modules.Webservices": {
         "type": "Direct",
-        "requested": "[10.2.0, )",
-        "resolved": "10.2.0",
-        "contentHash": "db8ksQEsOGhiextc6EhcpU9608ERWE5Hkj2MMMfxd+/bg0Dds1Fpho04CeDaueGE3ptmgEnIlerlEQVFg/qhpw==",
+        "requested": "[10.4.1, )",
+        "resolved": "10.4.1",
+        "contentHash": "E6ex6SIHJfKjp9l3t6kvDmBae/rIF/uMwwTER2wc/zNdNU0NE0nhWe7+G6Q+/ezGoV0a7ibB24i6dcIkrLEEWg==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.Conversion": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0",
-          "GenHTTP.Modules.Layouting": "10.2.0",
-          "GenHTTP.Modules.Reflection": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.Conversion": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1",
+          "GenHTTP.Modules.Layouting": "10.4.1",
+          "GenHTTP.Modules.Reflection": "10.4.1"
         }
       },
       "JetBrains.Annotations": {
@@ -98,40 +98,40 @@
       },
       "Microsoft.Extensions.Configuration.Abstractions": {
         "type": "Direct",
-        "requested": "[10.0.1, )",
-        "resolved": "10.0.1",
-        "contentHash": "kPlU11hql+L9RjrN2N9/0GcRcRcZrNFlLLjadasFWeBORT6pL6OE+RYRk90GGCyVGSxTK+e1/f3dsMj5zpFFiQ==",
+        "requested": "[10.0.2, )",
+        "resolved": "10.0.2",
+        "contentHash": "KC5PslaTDnTuTvyke0KYAVBYdZ7IVTsU3JhHe69BpEbHLcj1YThP3bIGtZNOkZfast2AuLnul5lk4rZKxAdUGQ==",
         "dependencies": {
-          "Microsoft.Extensions.Primitives": "10.0.1"
+          "Microsoft.Extensions.Primitives": "10.0.2"
         }
       },
       "Microsoft.Extensions.Configuration.Binder": {
         "type": "Direct",
-        "requested": "[10.0.1, )",
-        "resolved": "10.0.1",
-        "contentHash": "Lp4CZIuTVXtlvkAnTq6QvMSW7+H62gX2cU2vdFxHQUxvrWTpi7LwYI3X+YAyIS0r12/p7gaosco7efIxL4yFNw==",
+        "requested": "[10.0.2, )",
+        "resolved": "10.0.2",
+        "contentHash": "/SdW50prUuenglSy7MXU3eVQkOk4/J4fjc+GIhv4NkTmaZOQyTqpVAYi8nRjNtOKHzCy7g5cSlOSgkbT7clLwQ==",
         "dependencies": {
-          "Microsoft.Extensions.Configuration": "10.0.1",
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.1"
+          "Microsoft.Extensions.Configuration": "10.0.2",
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.2"
         }
       },
       "Microsoft.Extensions.Configuration.Json": {
         "type": "Direct",
-        "requested": "[10.0.1, )",
-        "resolved": "10.0.1",
-        "contentHash": "0zW3eYBJlRctmgqk5s0kFIi5o5y2g80mvGCD8bkYxREPQlKUnr0ndU/Sop+UDIhyWN0fIi4RW63vo7BKTi7ncA==",
+        "requested": "[10.0.2, )",
+        "resolved": "10.0.2",
+        "contentHash": "ovjOVr+rNxOT249iezwihlPNMaIJdBC6PMGeMnzhkm5EoKJWFjp3mmvtndfHY6A88X4wulXlidMhmjX8v6V/aw==",
         "dependencies": {
-          "Microsoft.Extensions.Configuration": "10.0.1",
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.1",
-          "Microsoft.Extensions.Configuration.FileExtensions": "10.0.1",
-          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.1"
+          "Microsoft.Extensions.Configuration": "10.0.2",
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.2",
+          "Microsoft.Extensions.Configuration.FileExtensions": "10.0.2",
+          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.2"
         }
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[10.0.1, )",
-        "resolved": "10.0.1",
-        "contentHash": "ISahzLHsHY7vrwqr2p1YWZ+gsxoBRtH7gWRDK8fDUst9pp2He0GiesaqEfeX0V8QMCJM3eNEHGGpnIcPjFo2NQ=="
+        "requested": "[10.0.2, )",
+        "resolved": "10.0.2",
+        "contentHash": "sXdDtMf2qcnbygw9OdE535c2lxSxrZP8gO4UhDJ0xiJbl1wIqXS1OTcTDFTIJPOFd6Mhcm8gPEthqWGUxBsTqw=="
       },
       "Roslynator.Analyzers": {
         "type": "Direct",
@@ -222,133 +222,135 @@
       },
       "GenHTTP.Api": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "1ycnuz46Zrm3aQEH6YojA2udf8kbRpTwOuinMugKYm81F6RweLSuzD/Ua4fM6iyPfUupVaQOus8nDngsdPktDw=="
+        "resolved": "10.4.1",
+        "contentHash": "Qs7EVPhbo5PEd1p9X65e8IdiT9j+7bMLk2eRfH8zSomy43yDVLSHK7s2CvMkt+h5Y4N5iaVMQsdYy0CwXRAeww=="
       },
       "GenHTTP.Engine.Internal": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "qnaM7QQVJ3iWgiC9/WaQWEIOjiA0SXPaqZh2IOhzHLYfLlmETlzfYf8OnZPCxmxL7NLbKSJo7+YkoSTz1cLYKA==",
+        "resolved": "10.4.1",
+        "contentHash": "Ho0F31R5tyJWpH9rBqEJRim85fy7q4Fq7CjN+zlMbpqduSN1RtnEDbOvH+wiK3qZzbVSJjP+JiKcWNRqxrCk/g==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Engine.Shared": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0",
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Engine.Shared": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1",
           "Microsoft.Extensions.ObjectPool": "10.0.1"
         }
       },
       "GenHTTP.Engine.Shared": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "4e7pfCI+c62kMIAq8h3zAxNYhrVSVp6h9s3XpkXmnC4J+LqNAy5Y+TDDFkmyCytlpzSt3iapmRqnDEKIUqL8KA==",
+        "resolved": "10.4.1",
+        "contentHash": "jUYnlZwGxYUBUbsT9qnCap+Fn/NLki/CSmBpLlpfbUG7HzO0J3Q0ib3OxuB0C3kVwJXZLr9rHm93EH1hRKPMYQ==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.ErrorHandling": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.ErrorHandling": "10.4.1"
         }
       },
       "GenHTTP.Modules.ClientCaching": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "tTBmQNIpLxnee+SUVNKRCi69TdLFuNQPjMn1Ph4k7IOj05J8OP/Y5YvDWouMXWoP+2joXpLm1NUsrLSRgf4ZVA==",
+        "resolved": "10.4.1",
+        "contentHash": "3yLnkfFysT9riWkPZxF7DeCvTLq7AWjlEfV7CHIQ77g+o0pjGQLe0LvNNPjsn88T0qs/EUcELNtKttAB0OAdRA==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1"
         }
       },
       "GenHTTP.Modules.Compression": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "HtOtznCDF66rPi5t5GkJ/6g1noL8hD7HP9Arz5HweQWjGo6O+ZIJOdi2oBKWOYE/4B/vhlLr+hy4flE8Z4xUIQ==",
+        "resolved": "10.4.1",
+        "contentHash": "MfjMPHKVgtG3J8KFF+yGFJT3yzp+APRDMiwWeRcb1l0o8bo90xgTnhWxMokozT9zEPTmbH/gCMZEkLgZO8Deeg==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
+          "GenHTTP.Api": "10.4.1",
           "ZstdSharp.Port": "0.8.6"
         }
       },
       "GenHTTP.Modules.Conversion": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "Vrcenxgcj9XHCM+4uWUDNaURMz85voAEaQaCtYnS6aKwQh6C0qExr+avqF+BqjvKzwtbdNiJB3yY4ADPKJb30A==",
+        "resolved": "10.4.1",
+        "contentHash": "E/iuFqijBUqM2D1HGeP+lVuji6VGqi3/IZggGtigdnmYNiaI1LSATdLkPgCZJoSwSi6N1ZQ0SS53K585oWu+Tw==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0",
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1",
           "YamlDotNet": "16.3.0"
         }
       },
       "GenHTTP.Modules.ErrorHandling": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "nYtOMNz2Sn2nbCnFO7izksbETe+od5IIw0kKe/CDV+v7MrPrvh8NHHdjrbHXMjzS3/sh2q6DzqFt7dmB2hf5AA==",
+        "resolved": "10.4.1",
+        "contentHash": "V9jfBMu1k99qwY7+yz2/xS3PUMu/JcCRyEs6t09jjWD5ZOOB35VuZFeziibMFNaxXwrS2yA4Qmpk1YlBfW7CAQ==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.Conversion": "10.2.0",
-          "GenHTTP.Modules.Pages": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.Conversion": "10.4.1",
+          "GenHTTP.Modules.Pages": "10.4.1"
         }
       },
       "GenHTTP.Modules.IO": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "VLoazQyt4ExVc9SmiEL73TwYh9OrAd1AgiGTFKbpQP28DJDOpdpz8P8WjmF29w6EMREKl7Ym274/kfzy9dG6MQ==",
+        "resolved": "10.4.1",
+        "contentHash": "h0+6xXEkn+DvAEzuRfVOPo1l6Anw22IxRjK2szwrdDYmLHkhtmSrVSyrAFFXw8m0yDdJmVFP1N/J5YNF0VwWBw==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0"
+          "GenHTTP.Api": "10.4.1"
         }
       },
       "GenHTTP.Modules.Layouting": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "aaxek7RTl3I/3Iv7ikaggT4lTYzubclFVVobsw/ea3nuXfz79Tjjm0vXPN5OQEfsELRTHYpapCgvjqYU1OmKYg==",
+        "resolved": "10.4.1",
+        "contentHash": "epx6SqbaVInf6GkZSmD6JdjuHaTZdPpw7eFjHccnp8aJ6BDJjZr3Hscs8Og/peqz0KMrtHK3KSgBF5qn7038eA==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.Redirects": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.Redirects": "10.4.1"
         }
       },
       "GenHTTP.Modules.Pages": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "lUn+Db3dhy/TAPv5EQXHMk5QEXPp+vg5RiRLaDYaMvvYIfWH+Yx1xJ8IullrrAA8+Zpu93/BneT3niKToIOKeg==",
+        "resolved": "10.4.1",
+        "contentHash": "810ek9LM2/+G5FlZG117xCbjcgsv3gUI2/bpwPgkE7sgPb9ze7wWy/ePVDplD4nLztH+D0mD1OLyf/uRJE2W/A==",
         "dependencies": {
           "Cottle": "2.1.0",
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1"
         }
       },
       "GenHTTP.Modules.Practices": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "EOZWW2aLhFzr8FoJE3kaJRszev0sF1+ewNVzyx+pqWP6SO2lEqm/lulaclWb6FmPgap8RNYoPxS9ywsHpB1mxA==",
+        "resolved": "10.4.1",
+        "contentHash": "qiO6Ak5Rpj5sYVGzfRSzxwfIhwCnjGveW/7XjOrqfVj03cgkbqyvgHv/pZBy+FZ0jza/5hIScwYAwjjaulCrZg==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.ClientCaching": "10.2.0",
-          "GenHTTP.Modules.Compression": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0",
-          "GenHTTP.Modules.Security": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.ClientCaching": "10.4.1",
+          "GenHTTP.Modules.Compression": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1",
+          "GenHTTP.Modules.Security": "10.4.1"
         }
       },
       "GenHTTP.Modules.Redirects": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "xwf9C0Gtmyn04UHAYlJSLHe3PsZt0hF8qb2lwZP/Wrnh5rEFOqahFzCUd6oApojprPOoUy78xTgto7q/lyXhjw==",
+        "resolved": "10.4.1",
+        "contentHash": "QeQTllsHW0cu+w9hIT5cbAejX8T2idXE4rkhcuDEqYdbcsTYyB1Hqi986LIN+aSXi4KwyYp26ZonZSSqtVuWZg==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1"
         }
       },
       "GenHTTP.Modules.Reflection": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "YJtxmouYF7oUJgTLf8I/B/RF5Eff6G20ZJMaeWvEhSXIeOFXNgAEIz6NIo8nXC5aglkcyRwIy1pQweNpxtT9mg==",
+        "resolved": "10.4.1",
+        "contentHash": "CY0sOedPfHI3TDngyNLH0mkhLCr0E1P/XaSvX7IdCRs0nQwwxdXKzxeUPCWglEtSn7/7iyo/teTs6Vnmu9LI1w==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.Conversion": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.Conversion": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1",
+          "GenHTTP.Modules.Pages": "10.4.1",
+          "Microsoft.CodeAnalysis.CSharp": "5.0.0"
         }
       },
       "GenHTTP.Modules.Security": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "OQGvIThPyiWM0I3CTMC485rAt/sVy3ZRz2fFhdtoMr6M1GDapRFMZJs8jBjwnEJr7R6w+nvv7tsiWwlM/eWFCA==",
+        "resolved": "10.4.1",
+        "contentHash": "UtzgQRzy6Cv0rA+ppcEqMBTGleDa3GzlCBjwEuSUbdzNLGMgXNhzKwPcBon6ylNA4UgKTlM8CbwGqfpFuroVpA==",
         "dependencies": {
-          "GenHTTP.Api": "10.2.0",
-          "GenHTTP.Modules.IO": "10.2.0",
-          "GenHTTP.Modules.Redirects": "10.2.0"
+          "GenHTTP.Api": "10.4.1",
+          "GenHTTP.Modules.IO": "10.4.1",
+          "GenHTTP.Modules.Redirects": "10.4.1"
         }
       },
       "Lib.Harmony": {
@@ -361,6 +363,28 @@
         "resolved": "2.0.323",
         "contentHash": "Kg+fJGWhGj5qRXG0Ilj4ddhuodGXZg57yhfX6OVUDR0M2DKg/UR42/d74+qv5l1qotc1qJilo/ho7xQnULP6yA=="
       },
+      "Microsoft.CodeAnalysis.Analyzers": {
+        "type": "Transitive",
+        "resolved": "3.11.0",
+        "contentHash": "v/EW3UE8/lbEYHoC2Qq7AR/DnmvpgdtAMndfQNmpuIMx/Mto8L5JnuCfdBYtgvalQOtfNCnxFejxuRrryvUTsg=="
+      },
+      "Microsoft.CodeAnalysis.Common": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "ZXRAdvH6GiDeHRyd3q/km8Z44RoM6FBWHd+gen/la81mVnAdHTEsEkO5J0TCNXBymAcx5UYKt5TvgKBhaLJEow==",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.Analyzers": "3.11.0"
+        }
+      },
+      "Microsoft.CodeAnalysis.CSharp": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "5DSyJ9bk+ATuDy7fp2Zt0mJStDVKbBoiz1DyfAwSa+k4H4IwykAUcV3URelw5b8/iVbfSaOwkwmPUZH6opZKCw==",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.Analyzers": "3.11.0",
+          "Microsoft.CodeAnalysis.Common": "[5.0.0]"
+        }
+      },
       "Microsoft.Diagnostics.NETCore.Client": {
         "type": "Transitive",
         "resolved": "0.2.510501",
@@ -371,23 +395,23 @@
       },
       "Microsoft.Extensions.Configuration": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "njoRekyMIK+smav8B6KL2YgIfUtlsRNuT7wvurpLW+m/hoRKVnoELk2YxnUnWRGScCd1rukLMxShwLqEOKowDg==",
+        "resolved": "10.0.2",
+        "contentHash": "Lws+o4DFw6p5NquRoYA3d5QVvi49ugNw7TxbW4QGLsL8F1LCCyJqWFy0+RMQ/hzUuS9aKV5NJ/XGAF5N9/RQcQ==",
         "dependencies": {
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.1",
-          "Microsoft.Extensions.Primitives": "10.0.1"
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.2",
+          "Microsoft.Extensions.Primitives": "10.0.2"
         }
       },
       "Microsoft.Extensions.Configuration.FileExtensions": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "N/6GiwiZFCBFZDk3vg1PhHW3zMqqu5WWpmeZAA9VTXv7Q8pr8NZR/EQsH0DjzqydDksJtY6EQBsu81d5okQOlA==",
+        "resolved": "10.0.2",
+        "contentHash": "6vStNVa/7hcT6VrYvVMGCWUl/QIKwNeQaSGnKw1E4RPpZbQbOjDsATCbrQUa0sFUs7LW8T9aZ2NBKttMz1+WuA==",
         "dependencies": {
-          "Microsoft.Extensions.Configuration": "10.0.1",
-          "Microsoft.Extensions.Configuration.Abstractions": "10.0.1",
-          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.1",
-          "Microsoft.Extensions.FileProviders.Physical": "10.0.1",
-          "Microsoft.Extensions.Primitives": "10.0.1"
+          "Microsoft.Extensions.Configuration": "10.0.2",
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.2",
+          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.2",
+          "Microsoft.Extensions.FileProviders.Physical": "10.0.2",
+          "Microsoft.Extensions.Primitives": "10.0.2"
         }
       },
       "Microsoft.Extensions.DependencyInjection": {
@@ -395,8 +419,7 @@
         "resolved": "6.0.0",
         "contentHash": "k6PWQMuoBDGGHOQTtyois2u4AwyVcIwL2LaSLlTZQm2CYcJ1pxbt6jfAnpWmzENA/wfrYRI/X9DTLoUkE4AsLw==",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
-          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0"
         }
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
@@ -406,26 +429,26 @@
       },
       "Microsoft.Extensions.FileProviders.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "+b3DligYSZuoWltU5YdbMpIEUHNZPgPrzWfNiIuDkMdqOl93UxYB5KzS3lgpRfTXJhTNpo/CZ8w/sTkDTPDdxQ==",
+        "resolved": "10.0.2",
+        "contentHash": "+r/eJ+slW/EmwWmH3En4gzRg1k6+yTqexoHBrMuz5fxsIKJA8MDiSGepjw/ko3XyNqg+w3dxQe+huoVXs5XDJw==",
         "dependencies": {
-          "Microsoft.Extensions.Primitives": "10.0.1"
+          "Microsoft.Extensions.Primitives": "10.0.2"
         }
       },
       "Microsoft.Extensions.FileProviders.Physical": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "4bxzGXIzZnz0Bf7czQ72jGvpOqJsRW/44PS7YLFXTTnu6cNcPvmSREDvBoH0ZVP2hAbMfL4sUoCUn54k70jPWw==",
+        "resolved": "10.0.2",
+        "contentHash": "4+ypApaugtHIz5Q2Z3oC4+erDbOgy0HrMFYS3Nm3qmTXyqK7sU7LJWY9gci99Wcx6j7ivgk8kdCkgmvsA4t0Ow==",
         "dependencies": {
-          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.1",
-          "Microsoft.Extensions.FileSystemGlobbing": "10.0.1",
-          "Microsoft.Extensions.Primitives": "10.0.1"
+          "Microsoft.Extensions.FileProviders.Abstractions": "10.0.2",
+          "Microsoft.Extensions.FileSystemGlobbing": "10.0.2",
+          "Microsoft.Extensions.Primitives": "10.0.2"
         }
       },
       "Microsoft.Extensions.FileSystemGlobbing": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "49dFvGJjLSwGn76eHnP1gBvCJkL8HRYpCrG0DCvsP6wRpEQRLN2Fq8rTxbP+6jS7jmYKCnSVO5C65v4mT3rzeA=="
+        "resolved": "10.0.2",
+        "contentHash": "XozoMaWcFIv1tv0LDF+YMeZYjiNiNIewpNdZ3TEoVGf8ROrp0hVoEdUyUBsI8oYGM5U3Z5hiNEv0j2Z5COnMgg=="
       },
       "Microsoft.Extensions.Logging": {
         "type": "Transitive",
@@ -435,8 +458,7 @@
           "Microsoft.Extensions.DependencyInjection": "6.0.0",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
           "Microsoft.Extensions.Logging.Abstractions": "6.0.0",
-          "Microsoft.Extensions.Options": "6.0.0",
-          "System.Diagnostics.DiagnosticSource": "6.0.0"
+          "Microsoft.Extensions.Options": "6.0.0"
         }
       },
       "Microsoft.Extensions.Logging.Abstractions": {
@@ -460,8 +482,8 @@
       },
       "Microsoft.Extensions.Primitives": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "DO8XrJkp5x4PddDuc/CH37yDBCs9BYN6ijlKyR3vMb55BP1Vwh90vOX8bNfnKxr5B2qEI3D8bvbY1fFbDveDHQ=="
+        "resolved": "10.0.2",
+        "contentHash": "QmSiO+oLBEooGgB3i0GRXyeYRDHjllqt3k365jwfZlYWhvSHA3UL2NEVV5m8aZa041eIlblo6KMI5txvTMpTwA=="
       },
       "Namotion.Reflection": {
         "type": "Transitive",
@@ -566,34 +588,21 @@
       },
       "System.CodeDom": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "owy+NlWSBRNLZO8CZ7IguuaPHHiAivjstTciM7YlXyDDqBY26FMl3F9Nw04n8Dog1JaxFlZiEIEXKPaigRmkNg=="
+        "resolved": "10.0.2",
+        "contentHash": "eih1MnL4tnSjHUhzae0dmpu50Sm0s54faHZc8yhzYfmubAubkBIIulYYN28fasD1m41mhl6Cenhs9/F0aLv3FA=="
       },
       "System.CommandLine": {
         "type": "Transitive",
         "resolved": "2.0.0",
         "contentHash": "Bjklzc5NoxqAGFi7BcGlY2TWAdB06Bq3a5sfRr3ubMRU80Mf98eyq3Y2UgR6xRV0TLznZmfe5T7mUjOunRNcdA=="
       },
-      "System.Diagnostics.DiagnosticSource": {
-        "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "frQDfv0rl209cKm1lnwTgFPzNigy2EKk1BS3uAvHvlBVKe5cymGyHO+Sj+NLv5VF/AhHsqPIUUwya5oV4CHMUw==",
-        "dependencies": {
-          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
-        }
-      },
       "System.Management": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "/mywt9LtfYM+QbnIPPqdES/qWWU3tkorSDHPX99KYhCTtxdjGFmLcz7QwpAAeBKU0o+rZzEcpKZlrtEr1Xq39g==",
+        "resolved": "10.0.2",
+        "contentHash": "eFftuy3i844lVKCb4lJvvjKfcvPVcW8KrAdSaIOcRL42/Fisj46hwUs8Bky+4avzMe5Snm5t7aSayOI1mybYXg==",
         "dependencies": {
-          "System.CodeDom": "10.0.1"
+          "System.CodeDom": "10.0.2"
         }
-      },
-      "System.Runtime.CompilerServices.Unsafe": {
-        "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg=="
       },
       "YamlDotNet": {
         "type": "Transitive",
@@ -616,7 +625,7 @@
           "SixLabors.Fonts": "[2.1.3, )",
           "SixLabors.ImageSharp": "[3.1.12, )",
           "SixLabors.ImageSharp.Drawing": "[2.1.7, )",
-          "System.Management": "[10.0.1, )",
+          "System.Management": "[10.0.2, )",
           "ZLinq": "[1.5.4, )",
           "dnlib": "[4.5.0, )"
         }
@@ -630,10 +639,10 @@
       },
       "System.Management": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "/mywt9LtfYM+QbnIPPqdES/qWWU3tkorSDHPX99KYhCTtxdjGFmLcz7QwpAAeBKU0o+rZzEcpKZlrtEr1Xq39g==",
+        "resolved": "10.0.2",
+        "contentHash": "eFftuy3i844lVKCb4lJvvjKfcvPVcW8KrAdSaIOcRL42/Fisj46hwUs8Bky+4avzMe5Snm5t7aSayOI1mybYXg==",
         "dependencies": {
-          "System.CodeDom": "10.0.1"
+          "System.CodeDom": "10.0.2"
         }
       }
     },
@@ -645,10 +654,10 @@
       },
       "System.Management": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "/mywt9LtfYM+QbnIPPqdES/qWWU3tkorSDHPX99KYhCTtxdjGFmLcz7QwpAAeBKU0o+rZzEcpKZlrtEr1Xq39g==",
+        "resolved": "10.0.2",
+        "contentHash": "eFftuy3i844lVKCb4lJvvjKfcvPVcW8KrAdSaIOcRL42/Fisj46hwUs8Bky+4avzMe5Snm5t7aSayOI1mybYXg==",
         "dependencies": {
-          "System.CodeDom": "10.0.1"
+          "System.CodeDom": "10.0.2"
         }
       }
     },
@@ -660,10 +669,10 @@
       },
       "System.Management": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "/mywt9LtfYM+QbnIPPqdES/qWWU3tkorSDHPX99KYhCTtxdjGFmLcz7QwpAAeBKU0o+rZzEcpKZlrtEr1Xq39g==",
+        "resolved": "10.0.2",
+        "contentHash": "eFftuy3i844lVKCb4lJvvjKfcvPVcW8KrAdSaIOcRL42/Fisj46hwUs8Bky+4avzMe5Snm5t7aSayOI1mybYXg==",
         "dependencies": {
-          "System.CodeDom": "10.0.1"
+          "System.CodeDom": "10.0.2"
         }
       }
     },
@@ -675,10 +684,10 @@
       },
       "System.Management": {
         "type": "Transitive",
-        "resolved": "10.0.1",
-        "contentHash": "/mywt9LtfYM+QbnIPPqdES/qWWU3tkorSDHPX99KYhCTtxdjGFmLcz7QwpAAeBKU0o+rZzEcpKZlrtEr1Xq39g==",
+        "resolved": "10.0.2",
+        "contentHash": "eFftuy3i844lVKCb4lJvvjKfcvPVcW8KrAdSaIOcRL42/Fisj46hwUs8Bky+4avzMe5Snm5t7aSayOI1mybYXg==",
         "dependencies": {
-          "System.CodeDom": "10.0.1"
+          "System.CodeDom": "10.0.2"
         }
       }
     }
