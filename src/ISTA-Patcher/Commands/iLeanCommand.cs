@@ -53,7 +53,7 @@ public class iLeanCommand
 
     private static readonly JsonSerializerOptions DefaultJsonSerializerOption = new() { WriteIndented = true };
 
-    public void Run()
+    public async Task RunAsync()
     {
         var opts = new ISTAOptions.ILeanOptions
         {
@@ -68,7 +68,7 @@ public class iLeanCommand
             Output = this.Output,
         };
 
-        Execute(opts).Wait();
+        await Execute(opts);
     }
 
     [SuppressMessage("Interoperability", "CA1416", Justification = "SupportedOSPlatform attribute is used")]

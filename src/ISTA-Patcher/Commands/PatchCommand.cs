@@ -42,7 +42,7 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
     [CliOption(Description = "Generate a registry file.")]
     public bool GenerateMockRegFile { get; set; }
 
-    public void Run()
+    public async Task RunAsync()
     {
         var opts = new ISTAOptions.PatchOptions
         {
@@ -89,10 +89,10 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
                 break;
             default:
                 Log.Error("Patch type not supported: {PatchType}", opts.PatchType);
-                break;
+                return;
         }
 
-        Execute(opts).Wait();
+        await Execute(opts);
     }
 
     public static Task<int> Execute(ISTAOptions.PatchOptions opts)

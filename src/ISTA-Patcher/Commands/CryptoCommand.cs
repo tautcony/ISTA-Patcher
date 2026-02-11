@@ -44,7 +44,7 @@ public class CryptoCommand
     [CliOption(Description = "Create a key pair.")]
     public bool CreateKeyPair { get; set; }
 
-    public void Run()
+    public async Task RunAsync()
     {
         var opts = new ISTAOptions.CryptoOptions
         {
@@ -55,7 +55,7 @@ public class CryptoCommand
             TargetPath = this.TargetPath,
         };
 
-        Execute(opts).Wait();
+        await Execute(opts);
     }
 
     public static async Task<int> Execute(ISTAOptions.CryptoOptions opts)

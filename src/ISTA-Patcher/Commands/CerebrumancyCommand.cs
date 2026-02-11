@@ -76,7 +76,7 @@ public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
     [CliOption(Description = "The arcane potency of the carved Primamind, measured in bits.")]
     public int PrimamindIntensity { get; set; } = 1024;
 
-    public void Run()
+    public async Task RunAsync()
     {
         var opts = new ISTAOptions.CerebrumancyOptions
         {
@@ -102,7 +102,7 @@ public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
             Exclude = Global.Config.GetSection("Settings:Default:Exclude").Get<string[]?>() ?? [],
         };
 
-        Execute(opts).Wait();
+        await Execute(opts);
     }
 
     public static async Task<int> Execute(ISTAOptions.CerebrumancyOptions opts)
@@ -251,7 +251,10 @@ public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
         var isValid = false;
         if (license.LicenseKey is { Length: > 0 })
         {
-            var deformatter = LicenseStatusChecker.GetRSAPKCS1SignatureDeformatter(primamindXml);
+            using var rsa = RSA.Create();
+            rsa.FromXmlString(primamindXml);
+            var deformatter = new RSAPKCS1SignatureDeformatter(rsa);
+            deformatter.SetHashAlgorithm("SHA1");
             isValid = LicenseStatusChecker.IsLicenseValid(license, deformatter);
             Log.Information("Solicitation is valid: {IsValid}", isValid);
         }
