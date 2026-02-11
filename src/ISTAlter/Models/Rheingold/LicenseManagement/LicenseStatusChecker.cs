@@ -34,7 +34,7 @@ public static class LicenseStatusChecker
 
     public static void GenerateLicenseKey(LicenseInfo licenseInfo, string xmlString)
     {
-        var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
+        using var rsaCryptoServiceProvider = new RSACryptoServiceProvider();
         rsaCryptoServiceProvider.FromXmlString(xmlString);
         licenseInfo.LicenseKey = [];
         var hashValue = GetHashValueFrom(licenseInfo);

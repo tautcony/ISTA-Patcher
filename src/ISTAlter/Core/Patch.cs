@@ -26,7 +26,7 @@ public static partial class Patch
         catch (System.ArgumentNullException e)
         {
             Log.Error(e, "Failed to initialize patch configuration.");
-            Environment.Exit(1);
+            throw;
         }
     }
 
@@ -43,7 +43,7 @@ public static partial class Patch
 
         var guiBasePath = Constants.TesterGUIPath.Aggregate(options.TargetPath, Path.Join);
         var pendingPatchList = patcherProvider.GeneratePatchList(options);
-        var indentLength = pendingPatchList.Max(i => i.Length) + 1;
+        var indentLength = pendingPatchList.Select(i => i.Length).DefaultIfEmpty(0).Max() + 1;
 
         var cts = new CancellationTokenSource();
         var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
@@ -104,7 +104,7 @@ public static partial class Patch
                 File.Copy(bakFileFullPath, pendingPatchItemFullPath, overwrite: true);
             }
 
-            var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
+            using var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
             var patcherVersion = PatchUtils.HavePatchedMark(module);
             var isPatched = patcherVersion != null;
             if (isPatched && !options.Force)
@@ -135,7 +135,7 @@ public static partial class Patch
                 }
 
                 var patchedCount = patch.Delegator(module);
-                patch.AppliedCount += patchedCount;
+                patch.AddAppliedCount(patchedCount);
                 return patchedCount;
             });
 

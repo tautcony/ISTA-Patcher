@@ -74,7 +74,7 @@ public static class DnlibUtils
         var body = method.Body;
         if (body == null)
         {
-            throw new ArgumentNullException($"{method.FullName}.Body null!");
+            throw new InvalidOperationException($"{method.FullName}.Body is null!");
         }
 
         body.Variables.Clear();
@@ -209,7 +209,7 @@ public static class DnlibUtils
     /// <returns>The found operand of type <typeparamref name="T"/> or null if no matching instruction is found or the operand type is not compatible.</returns>
     public static T? FindOperand<T>(this MethodDef method, OpCode opCode, string operandName)
     {
-        return (T)FindInstruction(method, opCode, operandName)?.Operand;
+        return FindInstruction(method, opCode, operandName)?.Operand is T result ? result : default;
     }
 
     /// <summary>
@@ -269,7 +269,7 @@ public static class DnlibUtils
         var body = method.Body;
         if (body == null)
         {
-            throw new ArgumentNullException($"{method.FullName}.Body null!");
+            throw new InvalidOperationException($"{method.FullName}.Body is null!");
         }
 
         var instruction = value switch
@@ -281,7 +281,7 @@ public static class DnlibUtils
             bool b => Instruction.CreateLdcI4(b ? 1 : 0),
             string s => Instruction.Create(OpCodes.Ldstr, s),
             MemberRef m => Instruction.Create(OpCodes.Newobj, m),
-            _ => !Equals(value, default(T)) ? throw new ArgumentException($"Unknown type {value.GetType().FullName}!", paramName: nameof(value)) : null,
+            _ => !Equals(value, default(T)) ? throw new ArgumentException($"Unknown type {value.GetType().FullName}!", paramName: nameof(value)) : Instruction.Create(OpCodes.Ldnull),
         };
 
         method.ReplaceWith([

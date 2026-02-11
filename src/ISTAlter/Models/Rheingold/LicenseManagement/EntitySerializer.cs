@@ -43,16 +43,9 @@ public class EntitySerializer<T>
 
     public static T Deserialize(string xmlContent)
     {
-        StringReader? stringReader = null;
-        try
-        {
-            stringReader = new StringReader(xmlContent);
-            return (T)Serializer.Deserialize(XmlReader.Create(stringReader)) ?? throw new InvalidOperationException();
-        }
-        finally
-        {
-            stringReader?.Dispose();
-        }
+        using var stringReader = new StringReader(xmlContent);
+        using var xmlReader = XmlReader.Create(stringReader);
+        return (T?)Serializer.Deserialize(xmlReader) ?? throw new InvalidOperationException();
     }
 
     public bool SaveToFile(string fileName, out Exception? exception)

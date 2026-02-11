@@ -132,7 +132,7 @@ public class ConcurrencyTaskScheduler : TaskScheduler
        try
        {
            Monitor.TryEnter(this._tasks, ref lockTaken);
-           return lockTaken ? this._tasks : throw new NotSupportedException();
+           return lockTaken ? this._tasks.ToArray() : throw new NotSupportedException();
        }
        finally
        {

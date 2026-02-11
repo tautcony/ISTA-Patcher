@@ -106,14 +106,29 @@ public static partial class PatchUtils
 
         for (var i = 1; i < n; i++)
         {
+            if (a[i - 1, i - 1] == 0)
+            {
+                throw new InvalidOperationException($"Zero pivot at position ({i - 1}, {i - 1}) in tridiagonal system.");
+            }
+
             var m = a[i, i - 1] / a[i - 1, i - 1];
             a[i, i] -= m * a[i - 1, i];
             b[i] -= m * b[i - 1];
         }
 
+        if (a[n - 1, n - 1] == 0)
+        {
+            throw new InvalidOperationException($"Zero pivot at position ({n - 1}, {n - 1}) in tridiagonal system.");
+        }
+
         x[n - 1] = b[n - 1] / a[n - 1, n - 1];
         for (var i = n - 2; i >= 0; i--)
         {
+            if (a[i, i] == 0)
+            {
+                throw new InvalidOperationException($"Zero pivot at position ({i}, {i}) in tridiagonal system.");
+            }
+
             x[i] = (b[i] - (a[i, i + 1] * x[i + 1])) / a[i, i];
         }
 

@@ -29,9 +29,9 @@ public class HashFileInfo
             }
             catch (FormatException ex)
             {
-                this._hash = string.Empty;
                 SentrySdk.CaptureException(ex);
                 Log.Warning(ex, "Failed to parse hash value [{Hash}] for: {FileName}", this._hash, this.FileName);
+                this._hash = string.Empty;
             }
 
             this._decoded = true;

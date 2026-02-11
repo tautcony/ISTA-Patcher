@@ -29,7 +29,7 @@ public static partial class NativeMethods
             return ret;
         }
 
-        var description = DADiskCopyDescription(disk.DangerousGetHandle());
+        using var description = DADiskCopyDescription(disk.DangerousGetHandle());
         if (description.IsInvalid)
         {
             return ret;
@@ -61,16 +61,26 @@ public static partial class NativeMethods
     {
         var matchingDict = IOServiceMatching("IOPlatformExpertDevice");
         var service = IOServiceGetMatchingService(IntPtr.Zero, matchingDict);
-        using var uuidKey = CFStringCreateWithCString(IntPtr.Zero, "IOPlatformUUID", CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-        using var uuidPtr = IORegistryEntryCreateCFProperty(service, uuidKey.DangerousGetHandle(), IntPtr.Zero, 0);
-
-        var ret = string.Empty;
-        var interiorPointer = CFStringGetCStringPtr(uuidPtr.DangerousGetHandle(), CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-        if (interiorPointer != IntPtr.Zero)
+        try
         {
-            ret = Marshal.PtrToStringUTF8(interiorPointer)!;
-        }
+            using var uuidKey = CFStringCreateWithCString(IntPtr.Zero, "IOPlatformUUID", CFStringBuiltInEncodings.kCFStringEncodingUTF8);
+            using var uuidPtr = IORegistryEntryCreateCFProperty(service, uuidKey.DangerousGetHandle(), IntPtr.Zero, 0);
 
-        return ret;
+            var ret = string.Empty;
+            var interiorPointer = CFStringGetCStringPtr(uuidPtr.DangerousGetHandle(), CFStringBuiltInEncodings.kCFStringEncodingUTF8);
+            if (interiorPointer != IntPtr.Zero)
+            {
+                ret = Marshal.PtrToStringUTF8(interiorPointer)!;
+            }
+
+            return ret;
+        }
+        finally
+        {
+            if (service != IntPtr.Zero)
+            {
+                IOObjectRelease(service);
+            }
+        }
     }
 }

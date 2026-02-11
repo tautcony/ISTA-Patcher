@@ -10,5 +10,5 @@ public static class Global
 {
     public static LoggingLevelSwitch LevelSwitch { get; } = new();
 
-    public static readonly IConfigurationRoot Config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+    public static readonly IConfigurationRoot Config = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true).Build();
 }

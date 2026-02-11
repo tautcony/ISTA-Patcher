@@ -74,6 +74,10 @@ public class LicenseInfo : EntitySerializer<LicenseInfo>, ICloneable
 
     public object Clone()
     {
-        return this.MemberwiseClone();
+        var clone = (LicenseInfo)this.MemberwiseClone();
+        clone.SubLicenses = this.SubLicenses?.ToList();
+        clone.ComputerCharacteristics = (byte[]?)this.ComputerCharacteristics?.Clone();
+        clone.LicenseKey = (byte[]?)this.LicenseKey?.Clone();
+        return clone;
     }
 }

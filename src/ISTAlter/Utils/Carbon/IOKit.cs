@@ -38,4 +38,12 @@ internal static partial class IOKit
     /// <returns>This function creates an instantaneous snapshot of a registry entry property, creating a CF container analogue in the caller's task. Not every object available in the kernel is represented as a CF container; currently OSDictionary, OSArray, OSSet, OSSymbol, OSString, OSData, OSNumber, OSBoolean are created as their CF counterparts.</returns>
     [LibraryImport(IOKitLibrary)]
     internal static partial SafeCreateHandle IORegistryEntryCreateCFProperty(IntPtr entry, CFStringRef key, IntPtr allocator, uint options);
+
+    /// <summary>
+    /// Releases an object handle previously returned by IOKitLib.
+    /// </summary>
+    /// <param name="object">The IOKit object to release.</param>
+    /// <returns>A kern_return_t error code.</returns>
+    [LibraryImport(IOKitLibrary)]
+    internal static partial int IOObjectRelease(IntPtr @object);
 }

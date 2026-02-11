@@ -8,9 +8,13 @@ using dnlib.DotNet;
 
 public class PatchInfo(Func<ModuleDefMD, int> delegator, MethodInfo method, int appliedCount)
 {
+    private int _appliedCount = appliedCount;
+
     public Func<ModuleDefMD, int> Delegator { get; set; } = delegator;
 
     public MethodInfo Method { get; set; } = method;
 
-    public int AppliedCount { get; set; } = appliedCount;
+    public int AppliedCount => this._appliedCount;
+
+    public void AddAppliedCount(int count) => Interlocked.Add(ref this._appliedCount, count);
 }

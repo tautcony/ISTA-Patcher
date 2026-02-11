@@ -22,34 +22,33 @@ public static partial class PatchUtils
     private static readonly string Timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.CurrentCulture);
     private static readonly ModuleContext ModCtx = new();
 
-    private static byte[] Version
+    private static readonly byte[] Version = GetVersionBytes();
+
+    private static byte[] GetVersionBytes()
     {
-        get
+        var executingAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var infoVersion = executingAssembly.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>();
+        var version = string.Empty;
+        if (infoVersion != null)
         {
-            var executingAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var infoVersion = executingAssembly.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>();
-            var version = string.Empty;
-            if (infoVersion != null)
+            var match = VersionPattern().Match(infoVersion.InformationalVersion);
+            if (!match.Success)
             {
-                var match = VersionPattern().Match(infoVersion.InformationalVersion);
-                if (!match.Success)
-                {
-                    version = infoVersion.InformationalVersion;
-                }
-                else
-                {
-                    var shortHash = match.Groups["hash"].Value[..7];
-                    version = $"{match.Groups["version"].Value}+{shortHash}";
-                }
+                version = infoVersion.InformationalVersion;
             }
-
-            if (string.IsNullOrEmpty(version))
+            else
             {
-                version = executingAssembly.GetName().Version?.ToString() ?? "0.0.0.0";
+                var shortHash = match.Groups["hash"].Value[..7];
+                version = $"{match.Groups["version"].Value}+{shortHash}";
             }
-
-            return Encoding.UTF8.GetBytes(version);
         }
+
+        if (string.IsNullOrEmpty(version))
+        {
+            version = executingAssembly.GetName().Version?.ToString() ?? "0.0.0.0";
+        }
+
+        return Encoding.UTF8.GetBytes(version);
     }
 
     /// <summary>

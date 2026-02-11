@@ -23,6 +23,6 @@ public static class AvailablePorts
             .Concat(udpListenersEndpoints)
             .Select(e => e.Port);
 
-        return Enumerable.Range(startingPort, ushort.MaxValue - startingPort + 1).Except(portsInUse).FirstOrDefault();
+        return Enumerable.Range(startingPort, ushort.MaxValue - startingPort + 1).Except(portsInUse).First();
     }
 }
