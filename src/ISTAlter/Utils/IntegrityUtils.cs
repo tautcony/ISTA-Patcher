@@ -25,7 +25,7 @@ public static class IntegrityUtils
     {
         try
         {
-            var aesManaged = Aes.Create();
+            using var aesManaged = Aes.Create();
             aesManaged.BlockSize = aesManaged.LegalBlockSizes[0].MaxSize;
             aesManaged.KeySize = aesManaged.LegalKeySizes[0].MaxSize;
 
@@ -43,6 +43,8 @@ public static class IntegrityUtils
             {
                 fileStream.CopyTo(cryptoStream);
             }
+
+            cryptoStream.FlushFinalBlock();
 
             var bytes = memoryStream.ToArray();
             return (from row in Encoding.UTF8.GetString(bytes).Split(";;\r\n", StringSplitOptions.RemoveEmptyEntries).Distinct(StringComparer.Ordinal)
