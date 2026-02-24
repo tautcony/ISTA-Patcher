@@ -3,14 +3,15 @@
 
 namespace ISTAvalon.Services;
 
+using ISTAvalon.Models;
 using Serilog.Core;
 using Serilog.Events;
 
 public sealed class DelegateLogSink : ILogEventSink
 {
-    private Action<string>? _handler;
+    private Action<LogEntry>? _handler;
 
-    public IDisposable Subscribe(Action<string> handler)
+    public IDisposable Subscribe(Action<LogEntry> handler)
     {
         _handler = handler;
         return new Unsubscriber(() => _handler = null);
@@ -18,7 +19,7 @@ public sealed class DelegateLogSink : ILogEventSink
 
     public void Emit(LogEvent logEvent)
     {
-        _handler?.Invoke(logEvent.RenderMessage());
+        _handler?.Invoke(new LogEntry(logEvent.Timestamp, logEvent.Level, logEvent.RenderMessage()));
     }
 
     private sealed class Unsubscriber(Action onDispose) : IDisposable

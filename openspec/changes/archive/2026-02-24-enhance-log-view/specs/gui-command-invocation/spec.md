@@ -1,11 +1,4 @@
-## ADDED Requirements
-
-### Requirement: GUI SHALL execute commands from current form state
-The GUI SHALL translate the active tab's parameter values into command invocation inputs and MUST execute the corresponding CLI command flow using the existing command behavior contract.
-
-#### Scenario: Execute command with selected parameters
-- **WHEN** a user triggers execution from a command tab after providing parameter values
-- **THEN** the GUI invokes the matching command flow with equivalent effective inputs
+## MODIFIED Requirements
 
 ### Requirement: GUI SHALL expose command execution outcomes
 The GUI SHALL present execution progress and final outcome to the user via the enhanced log panel. During execution, the GUI SHALL route structured log entries (carrying timestamp, log level, and rendered message) to the log panel in real time. On completion, the GUI SHALL display success or failure status.

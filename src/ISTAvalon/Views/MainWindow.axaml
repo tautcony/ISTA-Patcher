@@ -2,11 +2,20 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:ISTAvalon.ViewModels"
         xmlns:views="using:ISTAvalon.Views"
+        xmlns:controls="using:ISTAvalon.Controls"
+        xmlns:converters="using:ISTAvalon.Converters"
+        xmlns:models="using:ISTAvalon.Models"
+        xmlns:i="https://github.com/projektanker/icons.avalonia"
         x:Class="ISTAvalon.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="ISTA-Patcher"
-        Width="900" Height="650"
-        MinWidth="600" MinHeight="400">
+        Width="1100" Height="700"
+        MinWidth="700" MinHeight="400">
+
+    <Window.Resources>
+        <converters:LogLevelToBrushConverter x:Key="LogLevelToBrushConverter" />
+        <converters:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter" />
+    </Window.Resources>
 
     <Window.DataTemplates>
         <!-- Bool parameter: checkbox -->
@@ -84,48 +93,143 @@
 
             <TabControl.ContentTemplate>
                 <DataTemplate x:DataType="vm:CommandTabViewModel">
-                    <DockPanel>
-                        <!-- Execute bar -->
-                        <DockPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
-                            <Button DockPanel.Dock="Right"
-                                    Content="Execute"
-                                    Command="{Binding ExecuteCommandCommand}"
-                                    Padding="16,8"
-                                    HorizontalContentAlignment="Center" />
-                            <TextBlock Text="{Binding StatusText}"
-                                       VerticalAlignment="Center"
-                                       Margin="0,0,12,0" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MinWidth="250" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="{Binding IsLogPanelExpanded, Converter={StaticResource BoolToGridLengthConverter}}"
+                                              MinWidth="0" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left column: Parameters + Execute bar -->
+                        <DockPanel Grid.Column="0">
+                            <!-- Execute bar -->
+                            <DockPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                                <Button DockPanel.Dock="Right"
+                                        Content="Execute"
+                                        Command="{Binding ExecuteCommandCommand}"
+                                        Padding="16,8"
+                                        HorizontalContentAlignment="Center" />
+                                <TextBlock Text="{Binding StatusText}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,12,0" />
+                            </DockPanel>
+
+                            <!-- Parameters scroll area -->
+                            <ScrollViewer Padding="0,0,8,0">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Description}"
+                                               FontStyle="Italic"
+                                               Margin="0,0,0,8"
+                                               IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    <ItemsControl ItemsSource="{Binding Parameters}" />
+                                </StackPanel>
+                            </ScrollViewer>
                         </DockPanel>
 
-                        <!-- Output panel -->
-                        <Border DockPanel.Dock="Bottom"
+                        <!-- GridSplitter -->
+                        <GridSplitter Grid.Column="1"
+                                      Width="4"
+                                      ResizeDirection="Columns"
+                                      IsVisible="{Binding IsLogPanelExpanded}" />
+
+                        <!-- Right column: Log panel -->
+                        <Border Grid.Column="2"
                                 BorderBrush="Gray" BorderThickness="1"
-                                CornerRadius="4" Padding="4"
-                                MaxHeight="200" Margin="0,8,0,0">
-                            <ScrollViewer>
-                                <ItemsControl ItemsSource="{Binding OutputLines}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding}"
-                                                       FontFamily="Cascadia Code,Consolas,Menlo,monospace"
-                                                       FontSize="12" />
+                                CornerRadius="4"
+                                IsVisible="{Binding IsLogPanelExpanded}">
+                            <DockPanel>
+                                <!-- Log panel header -->
+                                <Border DockPanel.Dock="Top"
+                                        Background="Transparent"
+                                        CornerRadius="4,4,0,0"
+                                        Padding="8,4">
+                                    <DockPanel>
+                                        <TextBlock Text="Log"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center" />
+                                        <StackPanel DockPanel.Dock="Right"
+                                                    Orientation="Horizontal"
+                                                    Spacing="4"
+                                                    HorizontalAlignment="Right">
+                                            <Button Command="{Binding CopyAllCommand}"
+                                                    ToolTip.Tip="Copy All"
+                                                    Padding="4,2">
+                                                <i:Icon Value="fa-regular fa-copy" FontSize="14" />
+                                            </Button>
+                                            <Button Command="{Binding ClearOutputCommand}"
+                                                    ToolTip.Tip="Clear"
+                                                    Padding="4,2">
+                                                <i:Icon Value="fa-solid fa-trash-can" FontSize="14" />
+                                            </Button>
+                                            <Button Command="{Binding $parent[Window].DataContext.ToggleLogPanelCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip.Tip="Collapse"
+                                                    Padding="4,2">
+                                                <i:Icon Value="fa-solid fa-angles-right" FontSize="14" />
+                                            </Button>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+
+                                <!-- Log entries list -->
+                                <ListBox ItemsSource="{Binding OutputLines}"
+                                         Background="Transparent"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                                    <ListBox.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Copy All"
+                                                      Command="{Binding CopyAllCommand}" />
+                                            <MenuItem Header="Clear"
+                                                      Command="{Binding ClearOutputCommand}" />
+                                        </ContextMenu>
+                                    </ListBox.ContextMenu>
+                                    <ListBox.Styles>
+                                        <Style Selector="ListBoxItem">
+                                            <Setter Property="Padding" Value="4,1" />
+                                            <Setter Property="MinHeight" Value="0" />
+                                        </Style>
+                                    </ListBox.Styles>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate x:DataType="models:LogEntry">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <StackPanel.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Copy Line"
+                                                                  Tag="{Binding}"
+                                                                  Click="OnCopyLineClick" />
+                                                    </ContextMenu>
+                                                </StackPanel.ContextMenu>
+                                                <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:HH:mm:ss.fff}'}"
+                                                           Foreground="{x:Static models:LogPanelPalette.TimestampBrush}"
+                                                           FontFamily="Cascadia Code,Consolas,Menlo,monospace"
+                                                           FontSize="12"
+                                                           VerticalAlignment="Center" />
+                                                <controls:HighlightedLogTextBlock
+                                                    LogEntry="{Binding}"
+                                                    FontFamily="Cascadia Code,Consolas,Menlo,monospace"
+                                                    FontSize="12"
+                                                    VerticalAlignment="Center" />
+                                            </StackPanel>
                                         </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </DockPanel>
                         </Border>
 
-                        <!-- Parameters scroll area -->
-                        <ScrollViewer Padding="0,0,8,0">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Description}"
-                                           FontStyle="Italic"
-                                           Margin="0,0,0,8"
-                                           IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                <ItemsControl ItemsSource="{Binding Parameters}" />
-                            </StackPanel>
-                        </ScrollViewer>
-                    </DockPanel>
+                        <!-- Expand toggle (visible when panel is collapsed, placed in auto-width splitter column) -->
+                        <Button Grid.Column="1"
+                                IsVisible="{Binding !IsLogPanelExpanded}"
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
+                                Margin="2,4"
+                                Padding="4"
+                                ToolTip.Tip="Expand Log"
+                                Command="{Binding $parent[Window].DataContext.ToggleLogPanelCommand}"
+                                CommandParameter="{Binding}">
+                            <i:Icon Value="fa-solid fa-angles-left" FontSize="14" />
+                        </Button>
+                    </Grid>
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>

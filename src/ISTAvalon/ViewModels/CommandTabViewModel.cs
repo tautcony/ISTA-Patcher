@@ -10,11 +10,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ISTAvalon.Models;
 using ISTAvalon.Services;
+using Serilog.Events;
 
 public class CommandTabViewModel : ObservableObject
 {
     private bool _isExecuting;
     private string _statusText = "Ready";
+    private bool _isLogPanelExpanded = true;
 
     public CommandDescriptor Descriptor { get; }
 
@@ -24,7 +26,7 @@ public class CommandTabViewModel : ObservableObject
 
     public ObservableCollection<ParameterViewModel> Parameters { get; }
 
-    public ObservableCollection<string> OutputLines { get; } = [];
+    public ObservableCollection<LogEntry> OutputLines { get; } = [];
 
     public bool IsExecuting
     {
@@ -44,7 +46,17 @@ public class CommandTabViewModel : ObservableObject
         set => SetProperty(ref _statusText, value);
     }
 
+    public bool IsLogPanelExpanded
+    {
+        get => _isLogPanelExpanded;
+        set => SetProperty(ref _isLogPanelExpanded, value);
+    }
+
     public ICommand ExecuteCommandCommand { get; }
+
+    public ICommand ClearOutputCommand { get; }
+
+    public ICommand CopyAllCommand { get; }
 
     public CommandTabViewModel(CommandDescriptor descriptor)
     {
@@ -52,6 +64,28 @@ public class CommandTabViewModel : ObservableObject
         Parameters = new ObservableCollection<ParameterViewModel>(
             descriptor.Parameters.Select(ParameterViewModel.Create));
         ExecuteCommandCommand = new AsyncRelayCommand(ExecuteCommandAsync, () => !IsExecuting);
+        ClearOutputCommand = new RelayCommand(ClearOutput);
+        CopyAllCommand = new AsyncRelayCommand(CopyAllAsync);
+    }
+
+    private void ClearOutput()
+    {
+        OutputLines.Clear();
+        StatusText = "Ready";
+    }
+
+    private async Task CopyAllAsync()
+    {
+        var text = string.Join(Environment.NewLine,
+            OutputLines.Select(e => $"{e.Timestamp:HH:mm:ss.fff} [{e.Level}] {e.Message}"));
+        var clipboard = Avalonia.Application.Current?.ApplicationLifetime is
+            Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+            ? desktop.MainWindow?.Clipboard
+            : null;
+        if (clipboard is not null)
+        {
+            await clipboard.SetTextAsync(text);
+        }
     }
 
     private async Task ExecuteCommandAsync()
@@ -60,9 +94,9 @@ public class CommandTabViewModel : ObservableObject
         StatusText = "Executing...";
         OutputLines.Clear();
 
-        using var subscription = App.LogSink.Subscribe(msg =>
+        using var subscription = App.LogSink.Subscribe(entry =>
         {
-            Dispatcher.UIThread.Post(() => OutputLines.Add(msg));
+            Dispatcher.UIThread.Post(() => OutputLines.Add(entry));
         });
 
         try
@@ -78,7 +112,7 @@ public class CommandTabViewModel : ObservableObject
         {
             var message = ex.InnerException?.Message ?? ex.Message;
             StatusText = $"✗ Command failed: {message}";
-            OutputLines.Add($"Error: {message}");
+            OutputLines.Add(new LogEntry(DateTimeOffset.Now, LogEventLevel.Error, $"Error: {message}"));
         }
         finally
         {
