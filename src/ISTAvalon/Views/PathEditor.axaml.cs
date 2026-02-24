@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2026 TautCony
 
+using Serilog;
+
 namespace ISTAvalon.Views;
 
 using Avalonia.Controls;
@@ -50,30 +52,37 @@ public partial class PathEditor : UserControl
 
     private async void OnBrowseClick(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is not PathParameterViewModel vm)
+        try
         {
-            return;
-        }
-
-        var topLevel = TopLevel.GetTopLevel(this);
-        if (topLevel?.StorageProvider is not { } storageProvider)
-        {
-            return;
-        }
-
-        var folders = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-        {
-            AllowMultiple = false,
-            Title = "Select Folder",
-        });
-
-        if (folders.Count > 0)
-        {
-            var path = folders[0].TryGetLocalPath();
-            if (path != null)
+            if (DataContext is not PathParameterViewModel vm)
             {
-                vm.TextValue = path;
+                return;
             }
+
+            var topLevel = TopLevel.GetTopLevel(this);
+            if (topLevel?.StorageProvider is not { } storageProvider)
+            {
+                return;
+            }
+
+            var folders = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                AllowMultiple = false,
+                Title = "Select Folder",
+            });
+
+            if (folders.Count > 0)
+            {
+                var path = folders[0].TryGetLocalPath();
+                if (path != null)
+                {
+                    vm.TextValue = path;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error occurred while browsing for folder.");
         }
     }
 }

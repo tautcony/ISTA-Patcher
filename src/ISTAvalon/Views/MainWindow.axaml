@@ -162,8 +162,7 @@
                                                     Padding="4,2">
                                                 <i:Icon Value="fa-solid fa-trash-can" FontSize="14" />
                                             </Button>
-                                            <Button Command="{Binding $parent[Window].DataContext.ToggleLogPanelCommand}"
-                                                    CommandParameter="{Binding}"
+                                            <Button Command="{Binding ToggleLogPanelCommand}"
                                                     ToolTip.Tip="Collapse"
                                                     Padding="4,2">
                                                 <i:Icon Value="fa-solid fa-angles-right" FontSize="14" />
@@ -225,8 +224,7 @@
                                 Margin="2,4"
                                 Padding="4"
                                 ToolTip.Tip="Expand Log"
-                                Command="{Binding $parent[Window].DataContext.ToggleLogPanelCommand}"
-                                CommandParameter="{Binding}">
+                                Command="{Binding ToggleLogPanelCommand}">
                             <i:Icon Value="fa-solid fa-angles-left" FontSize="14" />
                         </Button>
                     </Grid>

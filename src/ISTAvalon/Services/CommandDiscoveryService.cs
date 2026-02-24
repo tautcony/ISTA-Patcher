@@ -11,9 +11,9 @@ using ISTAPatcher.Commands;
 
 public static class CommandDiscoveryService
 {
-    private static readonly string[] TabOrder = ["patch", "ilean", "crypto", "cerebrumancy"];
+    private static readonly string[] TabOrder = ["patch", "ilean", "crypto"];
 
-    private static readonly HashSet<string> ExcludedCommands = new(StringComparer.OrdinalIgnoreCase) { "server" };
+    private static readonly HashSet<string> ExcludedCommands = new(StringComparer.OrdinalIgnoreCase) { "cerebrumancy", "server" };
 
     public static IReadOnlyList<CommandDescriptor> DiscoverCommands()
     {
@@ -63,27 +63,33 @@ public static class CommandDiscoveryService
 
     private static void CollectParametersFromType(Type type, List<ParameterDescriptor> results, bool isParentOption)
     {
-        var seen = results.Select(p => p.PropertyInfo.Name).ToHashSet();
-
-        foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+        while (true)
         {
-            if (seen.Contains(prop.Name))
+            var seen = results.Select(p => p.PropertyInfo.Name).ToHashSet();
+
+            foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
             {
+                if (seen.Contains(prop.Name))
+                {
+                    continue;
+                }
+
+                var descriptor = TryBuildParameterDescriptor(prop, isParentOption);
+                if (descriptor != null)
+                {
+                    results.Add(descriptor);
+                    seen.Add(prop.Name);
+                }
+            }
+
+            // Also scan base class (for classes like OptionalPatchOption).
+            if (type.BaseType != null && type.BaseType != typeof(object))
+            {
+                type = type.BaseType;
                 continue;
             }
 
-            var descriptor = TryBuildParameterDescriptor(prop, isParentOption);
-            if (descriptor != null)
-            {
-                results.Add(descriptor);
-                seen.Add(prop.Name);
-            }
-        }
-
-        // Also scan base class (for classes like OptionalPatchOption).
-        if (type.BaseType != null && type.BaseType != typeof(object))
-        {
-            CollectParametersFromType(type.BaseType, results, isParentOption);
+            break;
         }
     }
 
@@ -146,15 +152,7 @@ public static class CommandDiscoveryService
         var isRequired = optAttr?.Required ?? argAttr?.Required ?? false;
 
         var explicitName = optAttr?.Name ?? argAttr?.Name;
-        string displayName;
-        if (!string.IsNullOrEmpty(explicitName))
-        {
-            displayName = explicitName.TrimStart('-');
-        }
-        else
-        {
-            displayName = ToKebabCase(prop.Name);
-        }
+        var displayName = !string.IsNullOrEmpty(explicitName) ? explicitName.TrimStart('-') : ToKebabCase(prop.Name);
 
         var propertyType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
         var kind = DetermineKind(prop, propertyType, optAttr, argAttr);

@@ -4,7 +4,6 @@
 namespace ISTAvalon.Converters;
 
 using System.Globalization;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data.Converters;
 

@@ -58,6 +58,8 @@ public class CommandTabViewModel : ObservableObject
 
     public ICommand CopyAllCommand { get; }
 
+    public ICommand ToggleLogPanelCommand { get; }
+
     public CommandTabViewModel(CommandDescriptor descriptor)
     {
         Descriptor = descriptor;
@@ -66,6 +68,7 @@ public class CommandTabViewModel : ObservableObject
         ExecuteCommandCommand = new AsyncRelayCommand(ExecuteCommandAsync, () => !IsExecuting);
         ClearOutputCommand = new RelayCommand(ClearOutput);
         CopyAllCommand = new AsyncRelayCommand(CopyAllAsync);
+        ToggleLogPanelCommand = new RelayCommand(() => IsLogPanelExpanded = !IsLogPanelExpanded);
     }
 
     private void ClearOutput()

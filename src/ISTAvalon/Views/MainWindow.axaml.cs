@@ -3,8 +3,8 @@
 
 namespace ISTAvalon.Views;
 
+using Serilog;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using ISTAvalon.Models;
 
@@ -17,10 +17,17 @@ public partial class MainWindow : Window
 
     private async void OnCopyLineClick(object? sender, RoutedEventArgs e)
     {
-        if (sender is MenuItem { Tag: LogEntry entry } && Clipboard is { } clipboard)
+        try
         {
-            var text = $"{entry.Timestamp:HH:mm:ss.fff} [{entry.Level}] {entry.Message}";
-            await clipboard.SetTextAsync(text);
+            if (sender is MenuItem { Tag: LogEntry entry } && Clipboard is { } clipboard)
+            {
+                var text = $"{entry.Timestamp:HH:mm:ss.fff} [{entry.Level}] {entry.Message}";
+                await clipboard.SetTextAsync(text);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error occurred while copying log entry to clipboard");
         }
     }
 }

@@ -42,15 +42,13 @@ public static class CommandExecutionService
         }
 
         var result = runMethod.Invoke(command, null);
-        if (result is Task<int> taskInt)
+        switch (result)
         {
-            return await taskInt.ConfigureAwait(false);
-        }
-
-        if (result is Task task)
-        {
-            await task.ConfigureAwait(false);
-            return 0;
+            case Task<int> taskInt:
+                return await taskInt.ConfigureAwait(false);
+            case Task task:
+                await task.ConfigureAwait(false);
+                break;
         }
 
         return 0;
