@@ -683,3 +683,5 @@ fabric.properties
 launchSettings.json
 .idea/
 .vscode/
+.keys/
+.release/
