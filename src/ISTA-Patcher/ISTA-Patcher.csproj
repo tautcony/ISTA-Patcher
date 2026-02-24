@@ -22,7 +22,6 @@ Released under the GNU GPLv3+.</Copyright>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
     <RootNamespace>ISTAPatcher</RootNamespace>
     <OutputType>Exe</OutputType>
-    <PublishSingleFile>true</PublishSingleFile>
     <ApplicationIcon>..\..\assets\logo.ico</ApplicationIcon>
   </PropertyGroup>
 

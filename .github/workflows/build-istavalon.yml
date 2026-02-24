@@ -1,0 +1,128 @@
+name: Build ISTAvalon and Upload
+
+on:
+  push:
+    branches: [ master, feat/**, release/** ]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  pull_request:
+
+env:
+  DOTNET_VERSION: net10.0
+
+jobs:
+  build:
+    name: 'Build'
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      matrix:
+        configuration: [ 'Release' ]
+        runtime-identifier: [ 'win-x64', 'linux-x64', 'linux-arm64', 'osx-x64', 'osx-arm64' ]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET 10.x
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.x
+        cache: true
+        cache-dependency-path: |
+          src/ISTAvalon/packages.lock.json
+          src/ISTA-Patcher/packages.lock.json
+          src/ISTAlter/packages.lock.json
+          src/ISTgenerAtor/packages.lock.json
+
+    - name: Restore dependencies
+      run: |
+        dotnet restore src/ISTAvalon/ISTAvalon.csproj --locked-mode
+
+    - name: Update version info
+      if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+      run: |
+        proj_file="src/ISTAvalon/ISTAvalon.csproj"
+        version="<InformationalVersion>$(git rev-parse --short HEAD)</InformationalVersion>"
+        sed -i "s#<InformationalVersion>[^<]*<\/InformationalVersion>#$version#g" $proj_file
+
+    - name: Publish the application
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: true
+      run: dotnet publish src/ISTAvalon --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --no-self-contained -p:IncludeNativeLibrariesForSelfExtract=true
+
+    - name: Copy files
+      run: |
+        cp -f LICENSE src/ISTAvalon/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/LICENSE
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ISTAvalon-${{ matrix.runtime-identifier }}-${{ matrix.configuration }}
+        retention-days: 14
+        path: |
+          src/ISTAvalon/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*
+          !src/ISTAvalon/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*.pdb
+          !src/ISTAvalon/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*.dbg
+          !src/ISTAvalon/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*.dwarf
+
+  glue:
+    name: 'Build (Release, osx-universal)'
+    needs: build
+    runs-on: ubuntu-24.04-arm
+    steps:
+    - name: Setup working directory
+      run: |
+        mkdir -p src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish
+        mkdir -p src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-arm64/publish
+
+    - name: Setup lipo
+      run: |
+        curl -L -o /tmp/lipo https://github.com/konoui/lipo/releases/latest/download/lipo_Linux_arm64
+        chmod +x /tmp/lipo
+        sudo mv /tmp/lipo /usr/local/bin/lipo
+
+    - name: Download x64 build
+      uses: actions/download-artifact@v4
+      with:
+        name: ISTAvalon-osx-x64-Release
+        path: src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish
+
+    - name: Download arm64 build
+      uses: actions/download-artifact@v4
+      with:
+        name: ISTAvalon-osx-arm64-Release
+        path: src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-arm64/publish
+
+    - name: Glue the binary
+      run: |
+        mkdir -p src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish
+        lipo -create \
+          src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/ISTAvalon \
+          src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-arm64/publish/ISTAvalon \
+          -output src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/ISTAvalon
+
+    - name: Copy files
+      run: |
+        cp -f src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/LICENSE \
+              src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/LICENSE
+        cp -f src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/appsettings.json \
+              src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/appsettings.json
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ISTAvalon-osx-universal-Release
+        retention-days: 14
+        path: |
+          src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*
+          !src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*.pdb
+          !src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*.dbg
+          !src/ISTAvalon/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*.dwarf
+
+    - name: 'Remove temporary artifacts'
+      uses: geekyeggo/delete-artifact@v5
+      with:
+        name: |
+          ISTAvalon-osx-arm64-Release
+          ISTAvalon-osx-x64-Release

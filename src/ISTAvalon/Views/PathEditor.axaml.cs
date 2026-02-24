@@ -20,7 +20,7 @@ public partial class PathEditor : UserControl
 
     private static void OnDragOver(object? sender, DragEventArgs e)
     {
-        e.DragEffects = e.Data.Contains(DataFormats.Files)
+        e.DragEffects = e.DataTransfer.Contains(DataFormat.File)
             ? DragDropEffects.Copy
             : DragDropEffects.None;
     }
@@ -32,15 +32,14 @@ public partial class PathEditor : UserControl
             return;
         }
 
-        var files = e.Data.GetFiles();
-        if (files == null)
+        foreach (var transferItem in e.DataTransfer.GetItems(DataFormat.File))
         {
-            return;
-        }
+            if (transferItem.TryGetRaw(DataFormat.File) is not IStorageItem storageItem)
+            {
+                continue;
+            }
 
-        foreach (var item in files)
-        {
-            var path = item.TryGetLocalPath();
+            var path = storageItem.TryGetLocalPath();
             if (path != null && Directory.Exists(path))
             {
                 vm.TextValue = path;

@@ -49,7 +49,7 @@ jobs:
     - name: Publish the application
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: true
-      run: dotnet publish src/ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --no-self-contained -p:IncludeNativeLibrariesForSelfExtract=true
+      run: dotnet publish src/ISTA-Patcher --configuration ${{ matrix.configuration }} --runtime ${{ matrix.runtime-identifier }} --no-self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
     - name: Copy files
       run: |
@@ -64,6 +64,7 @@ jobs:
           src/ISTA-Patcher/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*
           !src/ISTA-Patcher/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*.pdb
           !src/ISTA-Patcher/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*.dbg
+          !src/ISTA-Patcher/bin/${{ matrix.configuration }}/${{ env.DOTNET_VERSION }}/${{ matrix.runtime-identifier }}/publish/*.dwarf
 
   glue:
     name: 'Build (Release, osx-universal)'
@@ -96,12 +97,17 @@ jobs:
     - name: Glue the binary
       run: |
         mkdir -p src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish
-        lipo -create src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/ISTA-Patcher src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-arm64/publish/ISTA-Patcher -output src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/ISTA-Patcher
+        lipo -create \
+          src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/ISTA-Patcher \
+          src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-arm64/publish/ISTA-Patcher \
+          -output src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/ISTA-Patcher
 
     - name: Copy files
       run: |
-        cp -f src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/LICENSE src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/LICENSE
-        cp -f src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/appsettings.json src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/appsettings.json
+        cp -f src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/LICENSE \
+              src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/LICENSE
+        cp -f src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-x64/publish/appsettings.json \
+              src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/appsettings.json
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -111,6 +117,7 @@ jobs:
         path: |
           src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*
           !src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*.pdb
+          !src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*.dbg
           !src/ISTA-Patcher/bin/Release/${{ env.DOTNET_VERSION }}/osx-universal/publish/*.dwarf
 
     - name: 'Remove temporary artifacts'
