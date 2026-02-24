@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ISTAvalon.ViewModels"
+             x:Class="ISTAvalon.Views.PathEditor"
+             x:DataType="vm:PathParameterViewModel"
+             DragDrop.AllowDrop="True">
+    <DockPanel>
+        <Button DockPanel.Dock="Right"
+                Content="Browse…"
+                Click="OnBrowseClick"
+                Margin="4,0,0,0"
+                VerticalAlignment="Stretch" />
+        <TextBox Text="{Binding TextValue}"
+                 Watermark="{Binding Descriptor.Description}"
+                 HorizontalAlignment="Stretch" />
+    </DockPanel>
+</UserControl>

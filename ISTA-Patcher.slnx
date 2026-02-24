@@ -3,4 +3,5 @@
   <Project Path="src\ISTAlter\ISTAlter.csproj" Type="Classic C#" />
   <Project Path="src\ISTgenerAtor\ISTgenerAtor.csproj" Type="Classic C#" />
   <Project Path="src\ISTestA\ISTestA.csproj" Type="Classic C#" />
+  <Project Path="src\ISTAvalon\ISTAvalon.csproj" Type="Classic C#" />
 </Solution>

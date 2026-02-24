@@ -1,0 +1,133 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ISTAvalon.ViewModels"
+        xmlns:views="using:ISTAvalon.Views"
+        x:Class="ISTAvalon.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="ISTA-Patcher"
+        Width="900" Height="650"
+        MinWidth="600" MinHeight="400">
+
+    <Window.DataTemplates>
+        <!-- Bool parameter: checkbox -->
+        <DataTemplate DataType="vm:BoolParameterViewModel">
+            <StackPanel Margin="0,4">
+                <CheckBox IsChecked="{Binding IsChecked}"
+                          Content="{Binding Descriptor.DisplayName}"
+                          ToolTip.Tip="{Binding Descriptor.Description}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Enum parameter: dropdown -->
+        <DataTemplate DataType="vm:EnumParameterViewModel">
+            <StackPanel Margin="0,4" Spacing="2">
+                <TextBlock Text="{Binding Descriptor.DisplayName}"
+                           ToolTip.Tip="{Binding Descriptor.Description}" />
+                <ComboBox ItemsSource="{Binding EnumValues}"
+                          SelectedItem="{Binding SelectedValue}"
+                          HorizontalAlignment="Stretch" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Numeric parameter: numeric up-down -->
+        <DataTemplate DataType="vm:NumericParameterViewModel">
+            <StackPanel Margin="0,4" Spacing="2">
+                <TextBlock Text="{Binding Descriptor.DisplayName}"
+                           ToolTip.Tip="{Binding Descriptor.Description}" />
+                <NumericUpDown Value="{Binding NumericValue}"
+                               HorizontalAlignment="Stretch" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Path parameter: textbox + browse button + drag-drop -->
+        <DataTemplate DataType="vm:PathParameterViewModel">
+            <StackPanel Margin="0,4" Spacing="2">
+                <TextBlock Text="{Binding Descriptor.DisplayName}"
+                           ToolTip.Tip="{Binding Descriptor.Description}" />
+                <views:PathEditor />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- String parameter: textbox -->
+        <DataTemplate DataType="vm:StringParameterViewModel">
+            <StackPanel Margin="0,4" Spacing="2">
+                <TextBlock Text="{Binding Descriptor.DisplayName}"
+                           ToolTip.Tip="{Binding Descriptor.Description}" />
+                <TextBox Text="{Binding TextValue}"
+                         Watermark="{Binding Descriptor.Description}"
+                         HorizontalAlignment="Stretch" />
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- String array parameter: multiline textbox -->
+        <DataTemplate DataType="vm:StringArrayParameterViewModel">
+            <StackPanel Margin="0,4" Spacing="2">
+                <TextBlock Text="{Binding Descriptor.DisplayName}"
+                           ToolTip.Tip="{Binding Descriptor.Description}" />
+                <TextBox Text="{Binding TextValue}"
+                         Watermark="Comma-separated values"
+                         AcceptsReturn="True"
+                         MinHeight="60"
+                         HorizontalAlignment="Stretch" />
+            </StackPanel>
+        </DataTemplate>
+    </Window.DataTemplates>
+
+    <DockPanel Margin="8">
+        <TabControl ItemsSource="{Binding CommandTabs}"
+                    SelectedItem="{Binding SelectedTab}">
+            <TabControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:CommandTabViewModel">
+                    <TextBlock Text="{Binding Name}" />
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+
+            <TabControl.ContentTemplate>
+                <DataTemplate x:DataType="vm:CommandTabViewModel">
+                    <DockPanel>
+                        <!-- Execute bar -->
+                        <DockPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                            <Button DockPanel.Dock="Right"
+                                    Content="Execute"
+                                    Command="{Binding ExecuteCommandCommand}"
+                                    Padding="16,8"
+                                    HorizontalContentAlignment="Center" />
+                            <TextBlock Text="{Binding StatusText}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,12,0" />
+                        </DockPanel>
+
+                        <!-- Output panel -->
+                        <Border DockPanel.Dock="Bottom"
+                                BorderBrush="Gray" BorderThickness="1"
+                                CornerRadius="4" Padding="4"
+                                MaxHeight="200" Margin="0,8,0,0">
+                            <ScrollViewer>
+                                <ItemsControl ItemsSource="{Binding OutputLines}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"
+                                                       FontFamily="Cascadia Code,Consolas,Menlo,monospace"
+                                                       FontSize="12" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+
+                        <!-- Parameters scroll area -->
+                        <ScrollViewer Padding="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Description}"
+                                           FontStyle="Italic"
+                                           Margin="0,0,0,8"
+                                           IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                <ItemsControl ItemsSource="{Binding Parameters}" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+    </DockPanel>
+</Window>
