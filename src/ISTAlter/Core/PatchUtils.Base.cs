@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2022-2025 TautCony
+// SPDX-FileCopyrightText: Copyright 2022-2026 TautCony
 
 namespace ISTAlter.Core;
 
