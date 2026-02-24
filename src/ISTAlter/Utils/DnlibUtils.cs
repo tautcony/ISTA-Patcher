@@ -61,7 +61,7 @@ public static class DnlibUtils
     /// </returns>
     public static MethodDef? GetMethod(this ModuleDefMD module, string type, string name, string desc)
     {
-        return GetType(module, type)?.Methods.FirstOrDefault(m => m.Name.Equals(name) && DescriptionOf(m).Equals(desc, StringComparison.Ordinal));
+        return module.GetType(type)?.Methods.FirstOrDefault(m => m.Name.Equals(name) && DescriptionOf(m).Equals(desc, StringComparison.Ordinal));
     }
 
     /// <summary>
@@ -88,14 +88,14 @@ public static class DnlibUtils
     /// </summary>
     /// <param name="method">The <see cref="dnlib.DotNet.MethodDef"/> to modify.</param>
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
-    public static void ReturnZeroMethod(this MethodDef method) => ReturningWithValue(method, 0);
+    public static void ReturnZeroMethod(this MethodDef method) => method.ReturningWithValue(0);
 
     /// <summary>
     /// Modifies the body of the <see cref="dnlib.DotNet.MethodDef"/> to return one.
     /// </summary>
     /// <param name="method">The <see cref="dnlib.DotNet.MethodDef"/> to modify.</param>
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
-    public static void ReturnOneMethod(this MethodDef method) => ReturningWithValue(method, 1);
+    public static void ReturnOneMethod(this MethodDef method) => method.ReturningWithValue(1);
 
     /// <summary>
     /// Modifies the body of the <see cref="dnlib.DotNet.MethodDef"/> to return one.
@@ -105,7 +105,7 @@ public static class DnlibUtils
     /// <returns>An action that modifies the body of the <see cref="dnlib.DotNet.MethodDef"/> to return the specified value.</returns>
     public static Action<MethodDef> ReturnUInt32Method(uint value)
     {
-        return method => ReturningWithValue(method, value);
+        return method => method.ReturningWithValue(value);
     }
 
     /// <summary>
@@ -113,14 +113,14 @@ public static class DnlibUtils
     /// </summary>
     /// <param name="method">The <see cref="dnlib.DotNet.MethodDef"/> to modify.</param>
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
-    public static void ReturnFalseMethod(this MethodDef method) => ReturningWithValue(method, value: false);
+    public static void ReturnFalseMethod(this MethodDef method) => method.ReturningWithValue(value: false);
 
     /// <summary>
     /// Modifies the body of the <see cref="dnlib.DotNet.MethodDef"/> to return true.
     /// </summary>
     /// <param name="method">The <see cref="dnlib.DotNet.MethodDef"/> to modify.</param>
     /// <exception cref="ArgumentNullException">Thrown if the body of the method is null.</exception>
-    public static void ReturnTrueMethod(this MethodDef method) => ReturningWithValue(method, value: true);
+    public static void ReturnTrueMethod(this MethodDef method) => method.ReturningWithValue(value: true);
 
     /// <summary>
     /// Modifies the body of the <see cref="dnlib.DotNet.MethodDef"/> to return the specified string.
@@ -129,7 +129,7 @@ public static class DnlibUtils
     /// <returns>An action that modifies the body of the <see cref="dnlib.DotNet.MethodDef"/> to return the specified string.</returns>
     public static Action<MethodDef> ReturnStringMethod(string value)
     {
-        return method => ReturningWithValue(method, value);
+        return method => method.ReturningWithValue(value);
     }
 
     /// <summary>
@@ -209,7 +209,7 @@ public static class DnlibUtils
     /// <returns>The found operand of type <typeparamref name="T"/> or null if no matching instruction is found or the operand type is not compatible.</returns>
     public static T? FindOperand<T>(this MethodDef method, OpCode opCode, string operandName)
     {
-        return FindInstruction(method, opCode, operandName)?.Operand is T result ? result : default;
+        return method.FindInstruction(opCode, operandName)?.Operand is T result ? result : default;
     }
 
     /// <summary>

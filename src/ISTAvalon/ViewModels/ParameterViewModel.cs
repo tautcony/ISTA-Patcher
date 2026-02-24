@@ -6,14 +6,9 @@ namespace ISTAvalon.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ISTAvalon.Models;
 
-public abstract class ParameterViewModel : ObservableObject
+public abstract class ParameterViewModel(ParameterDescriptor descriptor) : ObservableObject
 {
-    public ParameterDescriptor Descriptor { get; }
-
-    protected ParameterViewModel(ParameterDescriptor descriptor)
-    {
-        Descriptor = descriptor;
-    }
+    public ParameterDescriptor Descriptor { get; } = descriptor;
 
     public abstract object? GetValue();
 
@@ -32,9 +27,9 @@ public abstract class ParameterViewModel : ObservableObject
     }
 }
 
-public class BoolParameterViewModel : ParameterViewModel
+public class BoolParameterViewModel(ParameterDescriptor descriptor) : ParameterViewModel(descriptor)
 {
-    private bool _isChecked;
+    private bool _isChecked = descriptor.DefaultValue is true;
 
     public bool IsChecked
     {
@@ -42,17 +37,12 @@ public class BoolParameterViewModel : ParameterViewModel
         set => SetProperty(ref _isChecked, value);
     }
 
-    public BoolParameterViewModel(ParameterDescriptor descriptor) : base(descriptor)
-    {
-        _isChecked = descriptor.DefaultValue is true;
-    }
-
     public override object? GetValue() => IsChecked;
 }
 
-public class EnumParameterViewModel : ParameterViewModel
+public class EnumParameterViewModel(ParameterDescriptor descriptor) : ParameterViewModel(descriptor)
 {
-    private string? _selectedValue;
+    private string? _selectedValue = descriptor.DefaultValue as string;
 
     public string[] EnumValues => Descriptor.EnumValues;
 
@@ -60,11 +50,6 @@ public class EnumParameterViewModel : ParameterViewModel
     {
         get => _selectedValue;
         set => SetProperty(ref _selectedValue, value);
-    }
-
-    public EnumParameterViewModel(ParameterDescriptor descriptor) : base(descriptor)
-    {
-        _selectedValue = descriptor.DefaultValue as string;
     }
 
     public override object? GetValue() =>
@@ -96,37 +81,27 @@ public class NumericParameterViewModel : ParameterViewModel
     public override object? GetValue() => Convert.ChangeType(NumericValue, Descriptor.PropertyType);
 }
 
-public class StringParameterViewModel : ParameterViewModel
+public class StringParameterViewModel(ParameterDescriptor descriptor) : ParameterViewModel(descriptor)
 {
-    private string? _textValue;
+    private string? _textValue = descriptor.DefaultValue as string;
 
     public string? TextValue
     {
         get => _textValue;
         set => SetProperty(ref _textValue, value);
-    }
-
-    public StringParameterViewModel(ParameterDescriptor descriptor) : base(descriptor)
-    {
-        _textValue = descriptor.DefaultValue as string;
     }
 
     public override object? GetValue() => TextValue;
 }
 
-public class PathParameterViewModel : ParameterViewModel
+public class PathParameterViewModel(ParameterDescriptor descriptor) : ParameterViewModel(descriptor)
 {
-    private string? _textValue;
+    private string? _textValue = descriptor.DefaultValue as string;
 
     public string? TextValue
     {
         get => _textValue;
         set => SetProperty(ref _textValue, value);
-    }
-
-    public PathParameterViewModel(ParameterDescriptor descriptor) : base(descriptor)
-    {
-        _textValue = descriptor.DefaultValue as string;
     }
 
     public override object? GetValue() => TextValue;
