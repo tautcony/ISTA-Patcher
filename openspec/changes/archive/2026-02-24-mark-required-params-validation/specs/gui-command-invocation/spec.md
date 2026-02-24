@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: GUI SHALL execute commands from current form state
 The GUI SHALL translate the active tab's parameter values into command invocation inputs and MUST execute the corresponding CLI command flow using the existing command behavior contract. Before execution, the GUI SHALL validate that all required parameters have non-empty values. If validation fails, the GUI MUST abort execution and display a status message listing the missing required parameter display names.
@@ -10,18 +10,3 @@ The GUI SHALL translate the active tab's parameter values into command invocatio
 #### Scenario: Block execution when required parameters are missing
 - **WHEN** a user triggers execution from a command tab and one or more required parameters lack values
 - **THEN** the GUI does not invoke the command and displays a warning in the status area listing the missing required parameter display names
-
-### Requirement: GUI SHALL expose command execution outcomes
-The GUI SHALL present execution progress and final outcome to the user via the enhanced log panel. During execution, the GUI SHALL route structured log entries (carrying timestamp, log level, and rendered message) to the log panel in real time. On completion, the GUI SHALL display success or failure status.
-
-#### Scenario: Show successful command outcome
-- **WHEN** a command finishes successfully
-- **THEN** the GUI displays a success outcome with completion feedback in the status area
-
-#### Scenario: Show failed command outcome
-- **WHEN** a command fails during execution
-- **THEN** the GUI displays failure feedback with error information in both the status area and as a log entry
-
-#### Scenario: Stream structured log entries during execution
-- **WHEN** a command is executing and produces log output
-- **THEN** each log entry is delivered to the log panel as a structured object containing timestamp, log level, and rendered message

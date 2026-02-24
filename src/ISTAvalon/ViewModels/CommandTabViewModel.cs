@@ -64,7 +64,9 @@ public class CommandTabViewModel : ObservableObject
     {
         Descriptor = descriptor;
         Parameters = new ObservableCollection<ParameterViewModel>(
-            descriptor.Parameters.Select(ParameterViewModel.Create));
+            descriptor.Parameters
+                .OrderByDescending(p => p.IsRequired)
+                .Select(ParameterViewModel.Create));
         ExecuteCommandCommand = new AsyncRelayCommand(ExecuteCommandAsync, () => !IsExecuting);
         ClearOutputCommand = new RelayCommand(ClearOutput);
         CopyAllCommand = new AsyncRelayCommand(CopyAllAsync);
@@ -93,6 +95,17 @@ public class CommandTabViewModel : ObservableObject
 
     private async Task ExecuteCommandAsync()
     {
+        var missing = Parameters
+            .Where(p => p.Descriptor.IsRequired && !p.HasValue)
+            .Select(p => p.Descriptor.DisplayName)
+            .ToList();
+
+        if (missing.Count > 0)
+        {
+            StatusText = $"⚠ Required: {string.Join(", ", missing)}";
+            return;
+        }
+
         IsExecuting = true;
         StatusText = "Executing...";
         OutputLines.Clear();

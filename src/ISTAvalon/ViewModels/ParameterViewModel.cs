@@ -10,6 +10,8 @@ public abstract class ParameterViewModel(ParameterDescriptor descriptor) : Obser
 {
     public ParameterDescriptor Descriptor { get; } = descriptor;
 
+    public abstract bool HasValue { get; }
+
     public abstract object? GetValue();
 
     public static ParameterViewModel Create(ParameterDescriptor descriptor)
@@ -37,6 +39,8 @@ public class BoolParameterViewModel(ParameterDescriptor descriptor) : ParameterV
         set => SetProperty(ref _isChecked, value);
     }
 
+    public override bool HasValue => true;
+
     public override object? GetValue() => IsChecked;
 }
 
@@ -51,6 +55,8 @@ public class EnumParameterViewModel(ParameterDescriptor descriptor) : ParameterV
         get => _selectedValue;
         set => SetProperty(ref _selectedValue, value);
     }
+
+    public override bool HasValue => SelectedValue != null;
 
     public override object? GetValue() =>
         SelectedValue != null ? Enum.Parse(Descriptor.PropertyType, SelectedValue) : null;
@@ -78,6 +84,8 @@ public class NumericParameterViewModel : ParameterViewModel
         }
     }
 
+    public override bool HasValue => true;
+
     public override object? GetValue() => Convert.ChangeType(NumericValue, Descriptor.PropertyType);
 }
 
@@ -91,6 +99,8 @@ public class StringParameterViewModel(ParameterDescriptor descriptor) : Paramete
         set => SetProperty(ref _textValue, value);
     }
 
+    public override bool HasValue => !string.IsNullOrWhiteSpace(TextValue);
+
     public override object? GetValue() => TextValue;
 }
 
@@ -103,6 +113,8 @@ public class PathParameterViewModel(ParameterDescriptor descriptor) : ParameterV
         get => _textValue;
         set => SetProperty(ref _textValue, value);
     }
+
+    public override bool HasValue => !string.IsNullOrWhiteSpace(TextValue);
 
     public override object? GetValue() => TextValue;
 }
@@ -121,6 +133,8 @@ public class StringArrayParameterViewModel : ParameterViewModel
     {
         _textValue = descriptor.DefaultValue is string[] arr ? string.Join(", ", arr) : null;
     }
+
+    public override bool HasValue => !string.IsNullOrWhiteSpace(TextValue);
 
     public override object? GetValue() =>
         TextValue?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];

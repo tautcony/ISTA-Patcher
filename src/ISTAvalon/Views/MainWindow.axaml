@@ -22,16 +22,25 @@
         <DataTemplate DataType="vm:BoolParameterViewModel">
             <StackPanel Margin="0,4">
                 <CheckBox IsChecked="{Binding IsChecked}"
-                          Content="{Binding Descriptor.DisplayName}"
-                          ToolTip.Tip="{Binding Descriptor.Description}" />
+                          ToolTip.Tip="{Binding Descriptor.Description}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Descriptor.DisplayName}" />
+                        <TextBlock Text=" *" Foreground="Red"
+                                   IsVisible="{Binding Descriptor.IsRequired}" />
+                    </StackPanel>
+                </CheckBox>
             </StackPanel>
         </DataTemplate>
 
         <!-- Enum parameter: dropdown -->
         <DataTemplate DataType="vm:EnumParameterViewModel">
             <StackPanel Margin="0,4" Spacing="2">
-                <TextBlock Text="{Binding Descriptor.DisplayName}"
-                           ToolTip.Tip="{Binding Descriptor.Description}" />
+                <StackPanel Orientation="Horizontal"
+                            ToolTip.Tip="{Binding Descriptor.Description}">
+                    <TextBlock Text="{Binding Descriptor.DisplayName}" />
+                    <TextBlock Text=" *" Foreground="Red"
+                               IsVisible="{Binding Descriptor.IsRequired}" />
+                </StackPanel>
                 <ComboBox ItemsSource="{Binding EnumValues}"
                           SelectedItem="{Binding SelectedValue}"
                           HorizontalAlignment="Stretch" />
@@ -41,8 +50,12 @@
         <!-- Numeric parameter: numeric up-down -->
         <DataTemplate DataType="vm:NumericParameterViewModel">
             <StackPanel Margin="0,4" Spacing="2">
-                <TextBlock Text="{Binding Descriptor.DisplayName}"
-                           ToolTip.Tip="{Binding Descriptor.Description}" />
+                <StackPanel Orientation="Horizontal"
+                            ToolTip.Tip="{Binding Descriptor.Description}">
+                    <TextBlock Text="{Binding Descriptor.DisplayName}" />
+                    <TextBlock Text=" *" Foreground="Red"
+                               IsVisible="{Binding Descriptor.IsRequired}" />
+                </StackPanel>
                 <NumericUpDown Value="{Binding NumericValue}"
                                HorizontalAlignment="Stretch" />
             </StackPanel>
@@ -51,8 +64,12 @@
         <!-- Path parameter: textbox + browse button + drag-drop -->
         <DataTemplate DataType="vm:PathParameterViewModel">
             <StackPanel Margin="0,4" Spacing="2">
-                <TextBlock Text="{Binding Descriptor.DisplayName}"
-                           ToolTip.Tip="{Binding Descriptor.Description}" />
+                <StackPanel Orientation="Horizontal"
+                            ToolTip.Tip="{Binding Descriptor.Description}">
+                    <TextBlock Text="{Binding Descriptor.DisplayName}" />
+                    <TextBlock Text=" *" Foreground="Red"
+                               IsVisible="{Binding Descriptor.IsRequired}" />
+                </StackPanel>
                 <views:PathEditor />
             </StackPanel>
         </DataTemplate>
@@ -60,8 +77,12 @@
         <!-- String parameter: textbox -->
         <DataTemplate DataType="vm:StringParameterViewModel">
             <StackPanel Margin="0,4" Spacing="2">
-                <TextBlock Text="{Binding Descriptor.DisplayName}"
-                           ToolTip.Tip="{Binding Descriptor.Description}" />
+                <StackPanel Orientation="Horizontal"
+                            ToolTip.Tip="{Binding Descriptor.Description}">
+                    <TextBlock Text="{Binding Descriptor.DisplayName}" />
+                    <TextBlock Text=" *" Foreground="Red"
+                               IsVisible="{Binding Descriptor.IsRequired}" />
+                </StackPanel>
                 <TextBox Text="{Binding TextValue}"
                          Watermark="{Binding Descriptor.Description}"
                          HorizontalAlignment="Stretch" />
@@ -71,8 +92,12 @@
         <!-- String array parameter: multiline textbox -->
         <DataTemplate DataType="vm:StringArrayParameterViewModel">
             <StackPanel Margin="0,4" Spacing="2">
-                <TextBlock Text="{Binding Descriptor.DisplayName}"
-                           ToolTip.Tip="{Binding Descriptor.Description}" />
+                <StackPanel Orientation="Horizontal"
+                            ToolTip.Tip="{Binding Descriptor.Description}">
+                    <TextBlock Text="{Binding Descriptor.DisplayName}" />
+                    <TextBlock Text=" *" Foreground="Red"
+                               IsVisible="{Binding Descriptor.IsRequired}" />
+                </StackPanel>
                 <TextBox Text="{Binding TextValue}"
                          Watermark="Comma-separated values"
                          AcceptsReturn="True"

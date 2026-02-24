@@ -33,5 +33,5 @@
 ## 6. Verification and Polishing
 
 - [x] 6.1 Validate representative command tabs (`patch`, `ilean`, `crypto`, `server`) for metadata accuracy and execution parity.
-- [ ] 6.2 Verify directory UX by testing folder selector and drag-and-drop on path-like string parameters (including `TargetPath`).
+- [x] 6.2 Verify directory UX by testing folder selector and drag-and-drop on path-like string parameters (including `TargetPath`).
 - [x] 6.3 Run solution build/test checks relevant to changed projects and resolve integration issues within scope.
