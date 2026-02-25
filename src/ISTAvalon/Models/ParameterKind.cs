@@ -7,6 +7,8 @@ public enum ParameterKind
 {
     Bool,
     Enum,
+    Integer,
+    Float,
     Numeric,
     String,
     Path,

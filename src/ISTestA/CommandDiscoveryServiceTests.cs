@@ -4,6 +4,7 @@
 namespace ISTestA;
 
 using DotMake.CommandLine;
+using ISTAvalon.Models;
 using ISTAvalon.Services;
 using ISTAvalon.ViewModels;
 
@@ -105,6 +106,24 @@ public class CommandDiscoveryServiceTests
         }
     }
 
+    [Test]
+    public void DiscoverCommands_DetermineKind_DistinguishesIntegerAndFloat()
+    {
+        var commands = CommandDiscoveryService.DiscoverCommands([
+            typeof(NumericKindsCommand),
+        ]);
+
+        var command = commands.Single(c => c.Name == "numeric-kinds");
+        var count = command.Parameters.Single(p => p.Name == nameof(NumericKindsCommand.Count));
+        var ratio = command.Parameters.Single(p => p.Name == nameof(NumericKindsCommand.Ratio));
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(count.Kind, Is.EqualTo(ParameterKind.Integer));
+            Assert.That(ratio.Kind, Is.EqualTo(ParameterKind.Float));
+        }
+    }
+
     [CliCommand(Name = "standalone")]
     internal class StandaloneRootCommand
     {
@@ -158,6 +177,18 @@ public class CommandDiscoveryServiceTests
 
         [CliOption(Required = true)]
         public string? LocalValue { get; set; }
+
+        public Task RunAsync() => Task.CompletedTask;
+    }
+
+    [CliCommand(Name = "numeric-kinds")]
+    internal class NumericKindsCommand
+    {
+        [CliOption]
+        public int Count { get; set; }
+
+        [CliOption]
+        public double Ratio { get; set; }
 
         public Task RunAsync() => Task.CompletedTask;
     }

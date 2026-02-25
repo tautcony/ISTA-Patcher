@@ -57,6 +57,8 @@
                                IsVisible="{Binding Descriptor.IsRequired}" />
                 </StackPanel>
                 <NumericUpDown Value="{Binding NumericValue}"
+                               Increment="{Binding Increment}"
+                               FormatString="{Binding FormatString}"
                                HorizontalAlignment="Stretch" />
             </StackPanel>
         </DataTemplate>

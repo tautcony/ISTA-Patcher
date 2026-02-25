@@ -297,9 +297,14 @@ public static class CommandDiscoveryService
             return ParameterKind.Enum;
         }
 
-        if (IsNumeric(propertyType))
+        if (IsIntegerType(propertyType))
         {
-            return ParameterKind.Numeric;
+            return ParameterKind.Integer;
+        }
+
+        if (IsFloatingPointType(propertyType))
+        {
+            return ParameterKind.Float;
         }
 
         if (propertyType == typeof(string[]) || (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(List<>) && propertyType.GetGenericArguments()[0] == typeof(string)))
@@ -334,11 +339,15 @@ public static class CommandDiscoveryService
                name.Contains("Folder", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool IsNumeric(Type type)
+    private static bool IsIntegerType(Type type)
     {
         return type == typeof(int) || type == typeof(long) || type == typeof(short) ||
-               type == typeof(double) || type == typeof(float) || type == typeof(decimal) ||
                type == typeof(byte) || type == typeof(uint) || type == typeof(ulong) || type == typeof(ushort);
+    }
+
+    private static bool IsFloatingPointType(Type type)
+    {
+        return type == typeof(double) || type == typeof(float) || type == typeof(decimal);
     }
 
     private static object? GetDefaultValue(PropertyInfo prop, Type propertyType, ParameterKind kind)
@@ -360,6 +369,8 @@ public static class CommandDiscoveryService
             return kind switch
             {
                 ParameterKind.Bool => false,
+                ParameterKind.Integer => 0,
+                ParameterKind.Float => 0m,
                 ParameterKind.Numeric => 0,
                 _ => null,
             };

@@ -20,6 +20,8 @@ public abstract class ParameterViewModel(ParameterDescriptor descriptor) : Obser
         {
             ParameterKind.Bool => new BoolParameterViewModel(descriptor),
             ParameterKind.Enum => new EnumParameterViewModel(descriptor),
+            ParameterKind.Integer => new NumericParameterViewModel(descriptor),
+            ParameterKind.Float => new NumericParameterViewModel(descriptor),
             ParameterKind.Numeric => new NumericParameterViewModel(descriptor),
             ParameterKind.Path => new PathParameterViewModel(descriptor),
             ParameterKind.String => new StringParameterViewModel(descriptor),
@@ -65,15 +67,26 @@ public class EnumParameterViewModel(ParameterDescriptor descriptor) : ParameterV
 public class NumericParameterViewModel : ParameterViewModel
 {
     private decimal _numericValue;
+    private readonly bool _isIntegerKind;
+
+    public decimal Increment => _isIntegerKind ? 1m : 0.1m;
+
+    public string FormatString => _isIntegerKind ? "N0" : "0.###";
 
     public decimal NumericValue
     {
         get => _numericValue;
-        set => SetProperty(ref _numericValue, value);
+        set
+        {
+            var normalized = _isIntegerKind ? decimal.Truncate(value) : value;
+            SetProperty(ref _numericValue, normalized);
+        }
     }
 
     public NumericParameterViewModel(ParameterDescriptor descriptor) : base(descriptor)
     {
+        _isIntegerKind = descriptor.Kind == ParameterKind.Integer;
+
         try
         {
             _numericValue = descriptor.DefaultValue != null ? Convert.ToDecimal(descriptor.DefaultValue) : 0m;
