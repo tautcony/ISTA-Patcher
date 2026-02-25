@@ -13,50 +13,62 @@ public class LogMessageHighlighterTests
     [Test]
     public void Highlight_AnsiRedAndReset_RendersWithoutEscapeCodes()
     {
-        const string message = "\u001b[31mERR\u001b[0m normal";
+        const string message = "\e[31mERR\e[0m normal";
 
         var runs = LogMessageHighlighter.Highlight(message, LogEventLevel.Information);
 
-        Assert.That(string.Concat(runs.Select(r => r.Text)), Is.EqualTo("ERR normal"));
-        Assert.That(runs[0].Foreground, Is.SameAs(LogPanelPalette.AnsiRedBrush));
-        Assert.That(runs[^1].Foreground, Is.SameAs(LogPanelPalette.InformationBrush));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(string.Concat(runs.Select(r => r.Text)), Is.EqualTo("ERR normal"));
+            Assert.That(runs[0].Foreground, Is.SameAs(LogPanelPalette.AnsiRedBrush));
+            Assert.That(runs[^1].Foreground, Is.SameAs(LogPanelPalette.InformationBrush));
+        }
     }
 
     [Test]
     public void Highlight_AnsiBrightYellowAndDefaultReset_AppliesExpectedBrushes()
     {
-        const string message = "\u001b[93mWARN\u001b[39m done";
+        const string message = "\e[93mWARN\e[39m done";
 
         var runs = LogMessageHighlighter.Highlight(message, LogEventLevel.Warning);
 
-        Assert.That(string.Concat(runs.Select(r => r.Text)), Is.EqualTo("WARN done"));
-        Assert.That(runs[0].Foreground, Is.SameAs(LogPanelPalette.AnsiBrightYellowBrush));
-        Assert.That(runs[^1].Foreground, Is.SameAs(LogPanelPalette.WarningBrush));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(string.Concat(runs.Select(r => r.Text)), Is.EqualTo("WARN done"));
+            Assert.That(runs[0].Foreground, Is.SameAs(LogPanelPalette.AnsiBrightYellowBrush));
+            Assert.That(runs[^1].Foreground, Is.SameAs(LogPanelPalette.WarningBrush));
+        }
     }
 
     [Test]
     public void Highlight_AnsiTrueColorForeground_AppliesRgbBrush()
     {
-        const string message = "\u001b[38;2;12;200;34mRGB\u001b[0m";
+        const string message = "\e[38;2;12;200;34mRGB\e[0m";
 
         var runs = LogMessageHighlighter.Highlight(message, LogEventLevel.Information);
 
-        Assert.That(string.Concat(runs.Select(r => r.Text)), Is.EqualTo("RGB"));
-        Assert.That(runs[0].Foreground, Is.TypeOf<SolidColorBrush>());
         var brush = (SolidColorBrush)runs[0].Foreground!;
-        Assert.That(brush.Color, Is.EqualTo(Color.FromRgb(12, 200, 34)));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(string.Concat(runs.Select(r => r.Text)), Is.EqualTo("RGB"));
+            Assert.That(runs[0].Foreground, Is.TypeOf<SolidColorBrush>());
+            Assert.That(brush.Color, Is.EqualTo(Color.FromRgb(12, 200, 34)));
+        }
     }
 
     [Test]
     public void Highlight_Ansi256Foreground_AppliesPaletteBrush()
     {
-        const string message = "\u001b[38;5;196mALERT\u001b[0m";
+        const string message = "\e[38;5;196mALERT\e[0m";
 
         var runs = LogMessageHighlighter.Highlight(message, LogEventLevel.Information);
 
-        Assert.That(string.Concat(runs.Select(r => r.Text)), Is.EqualTo("ALERT"));
-        Assert.That(runs[0].Foreground, Is.TypeOf<SolidColorBrush>());
         var brush = (SolidColorBrush)runs[0].Foreground!;
-        Assert.That(brush.Color, Is.EqualTo(Color.FromRgb(255, 0, 0)));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(string.Concat(runs.Select(r => r.Text)), Is.EqualTo("ALERT"));
+            Assert.That(runs[0].Foreground, Is.TypeOf<SolidColorBrush>());
+            Assert.That(brush.Color, Is.EqualTo(Color.FromRgb(255, 0, 0)));
+        }
     }
 }

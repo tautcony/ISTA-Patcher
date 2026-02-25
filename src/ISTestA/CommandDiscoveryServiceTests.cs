@@ -37,8 +37,11 @@ public class CommandDiscoveryServiceTests
         var outer = commands.Single(c => c.Name == "outer");
         var standalone = commands.Single(c => c.Name == "standalone");
 
-        Assert.That(outer.Subcommands.Select(c => c.Name), Does.Contain("nested-child"));
-        Assert.That(standalone.Subcommands.Select(c => c.Name), Does.Not.Contain("nested-child"));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(outer.Subcommands.Select(c => c.Name), Does.Contain("nested-child"));
+            Assert.That(standalone.Subcommands.Select(c => c.Name), Does.Not.Contain("nested-child"));
+        }
     }
 
     [Test]
@@ -48,7 +51,7 @@ public class CommandDiscoveryServiceTests
             typeof(OrphanCommand),
         ]);
 
-        Assert.That(commands.Select(c => c.Name).ToArray(), Is.EqualTo(new[] { "orphan" }));
+        Assert.That(commands.Select(c => c.Name).ToArray(), Is.EqualTo(["orphan"]));
     }
 
     [Test]
@@ -66,10 +69,13 @@ public class CommandDiscoveryServiceTests
         Assert.That(parentOption.IsParentOption, Is.True);
 
         var sharedOption = child.Parameters.Single(p => p.Name == nameof(DerivedOptionCommand.Shared));
-        Assert.That(sharedOption.IsParentOption, Is.False);
-        Assert.That(sharedOption.PropertyInfo.DeclaringType, Is.EqualTo(typeof(DerivedOptionCommand)));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(sharedOption.IsParentOption, Is.False);
+            Assert.That(sharedOption.PropertyInfo.DeclaringType, Is.EqualTo(typeof(DerivedOptionCommand)));
 
-        Assert.That(child.Parameters.Count(p => p.Name == nameof(DerivedOptionCommand.Shared)), Is.EqualTo(1));
+            Assert.That(child.Parameters.Count(p => p.Name == nameof(DerivedOptionCommand.Shared)), Is.EqualTo(1));
+        }
     }
 
     [Test]
@@ -82,14 +88,21 @@ public class CommandDiscoveryServiceTests
 
         var vm = new MainWindowViewModel(commands);
 
-        Assert.That(vm.CommandTabs.Select(t => t.Name).ToArray(), Is.EqualTo(new[] { "parent" }));
-        Assert.That(vm.CommandTabs[0].HasSubcommands, Is.True);
-        Assert.That(vm.CommandTabs[0].AvailableCommands.Select(c => c.Name), Is.EqualTo(new[] { "parent", "derived-option" }));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(vm.CommandTabs.Select(t => t.Name).ToArray(), Is.EqualTo(["parent"]));
+            Assert.That(vm.CommandTabs[0].HasSubcommands, Is.True);
+            Assert.That(vm.CommandTabs[0].AvailableCommands.Select(c => c.Name), Is.EqualTo(["parent", "derived-option"
+            ]));
+        }
 
         vm.CommandTabs[0].SelectedCommand = vm.CommandTabs[0].AvailableCommands.Single(c => c.Name == "derived-option");
 
-        Assert.That(vm.CommandTabs[0].Parameters.Any(p => p.Descriptor.Name == nameof(DerivedOptionCommand.LocalValue)), Is.True);
-        Assert.That(vm.CommandTabs[0].Parameters.Any(p => p.Descriptor.Name == nameof(DerivedOptionCommand.Shared)), Is.True);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(vm.CommandTabs[0].Parameters.Any(p => p.Descriptor.Name == nameof(DerivedOptionCommand.LocalValue)), Is.True);
+            Assert.That(vm.CommandTabs[0].Parameters.Any(p => p.Descriptor.Name == nameof(DerivedOptionCommand.Shared)), Is.True);
+        }
     }
 
     [CliCommand(Name = "standalone")]
@@ -149,7 +162,7 @@ public class CommandDiscoveryServiceTests
         public Task RunAsync() => Task.CompletedTask;
     }
 
-    private static IReadOnlyList<string> FlattenNames(IEnumerable<ISTAvalon.Models.CommandDescriptor> roots)
+    private static List<string> FlattenNames(IEnumerable<ISTAvalon.Models.CommandDescriptor> roots)
     {
         var names = new List<string>();
         foreach (var root in roots)

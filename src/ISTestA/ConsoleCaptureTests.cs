@@ -5,7 +5,6 @@ namespace ISTestA;
 
 using ISTAvalon.Models;
 using ISTAvalon.Services;
-using ISTAvalon.ViewModels;
 using Serilog.Events;
 
 public class ConsoleCaptureTests
@@ -21,8 +20,11 @@ public class ConsoleCaptureTests
             Console.Error.WriteLine("oops");
         }
 
-        Assert.That(entries.Any(e => e.Level == LogEventLevel.Information && e.Message == "[stdout] hello"), Is.True);
-        Assert.That(entries.Any(e => e.Level == LogEventLevel.Error && e.Message == "[stderr] oops"), Is.True);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(entries.Any(e => e.Level == LogEventLevel.Information && e.Message == "[stdout] hello"), Is.True);
+            Assert.That(entries.Any(e => e.Level == LogEventLevel.Error && e.Message == "[stderr] oops"), Is.True);
+        }
     }
 
     [Test]
@@ -37,8 +39,11 @@ public class ConsoleCaptureTests
             Console.Error.WriteLine("inside scope err");
         }
 
-        Assert.That(Console.Out, Is.SameAs(originalOut));
-        Assert.That(Console.Error, Is.SameAs(originalErr));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(Console.Out, Is.SameAs(originalOut));
+            Assert.That(Console.Error, Is.SameAs(originalErr));
+        }
     }
 
     [Test]
@@ -55,11 +60,14 @@ public class ConsoleCaptureTests
             Subcommands = [],
         };
 
-        var result = await CommandExecutionService.ExecuteAsync(descriptor, Array.Empty<ParameterViewModel>());
+        var result = await CommandExecutionService.ExecuteAsync(descriptor, []);
 
-        Assert.That(result, Is.EqualTo(0));
-        Assert.That(entries.Any(e => e.Message.Contains("[stdout] line from stdout", StringComparison.Ordinal)), Is.True);
-        Assert.That(entries.Any(e => e.Message.Contains("[stderr] line from stderr", StringComparison.Ordinal)), Is.True);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result, Is.Zero);
+            Assert.That(entries.Any(e => e.Message.Contains("[stdout] line from stdout", StringComparison.Ordinal)), Is.True);
+            Assert.That(entries.Any(e => e.Message.Contains("[stderr] line from stderr", StringComparison.Ordinal)), Is.True);
+        }
     }
 
     [Test]
@@ -76,14 +84,17 @@ public class ConsoleCaptureTests
             Subcommands = [],
         };
 
-        await CommandExecutionService.ExecuteAsync(descriptor, Array.Empty<ParameterViewModel>());
-        await CommandExecutionService.ExecuteAsync(descriptor, Array.Empty<ParameterViewModel>());
+        await CommandExecutionService.ExecuteAsync(descriptor, []);
+        await CommandExecutionService.ExecuteAsync(descriptor, []);
 
         var stdoutLines = entries.Count(e => e.Message.Contains("[stdout] line from stdout", StringComparison.Ordinal));
         var stderrLines = entries.Count(e => e.Message.Contains("[stderr] line from stderr", StringComparison.Ordinal));
 
-        Assert.That(stdoutLines, Is.EqualTo(2));
-        Assert.That(stderrLines, Is.EqualTo(2));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(stdoutLines, Is.EqualTo(2));
+            Assert.That(stderrLines, Is.EqualTo(2));
+        }
     }
 
     private sealed class ConsoleWriteCommand
