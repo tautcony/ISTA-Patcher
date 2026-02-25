@@ -143,6 +143,22 @@
                             <!-- Parameters scroll area -->
                             <ScrollViewer Padding="0,0,8,0">
                                 <StackPanel>
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="8"
+                                                Margin="0,0,0,8"
+                                                IsVisible="{Binding HasSubcommands}">
+                                        <TextBlock Text="Subcommand:"
+                                                   VerticalAlignment="Center" />
+                                        <ComboBox ItemsSource="{Binding AvailableCommands}"
+                                                  SelectedItem="{Binding SelectedCommand}"
+                                                  MinWidth="220">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate x:DataType="models:CommandDescriptor">
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </StackPanel>
                                     <TextBlock Text="{Binding Description}"
                                                FontStyle="Italic"
                                                Margin="0,0,0,8"

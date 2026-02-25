@@ -14,17 +14,38 @@ using Serilog.Events;
 
 public class CommandTabViewModel : ObservableObject
 {
+    private readonly Dictionary<Type, ObservableCollection<ParameterViewModel>> _parameterStateByCommand = [];
+
     private bool _isExecuting;
     private string _statusText = "Ready";
     private bool _isLogPanelExpanded = true;
+    private CommandDescriptor _selectedCommand;
 
-    public CommandDescriptor Descriptor { get; }
+    public CommandDescriptor RootDescriptor { get; }
 
-    public string Name => Descriptor.Name;
+    public string Name => RootDescriptor.Name;
 
-    public string Description => Descriptor.Description;
+    public ObservableCollection<CommandDescriptor> AvailableCommands { get; }
 
-    public ObservableCollection<ParameterViewModel> Parameters { get; }
+    public bool HasSubcommands => AvailableCommands.Count > 1;
+
+    public CommandDescriptor SelectedCommand
+    {
+        get => _selectedCommand;
+        set
+        {
+            if (SetProperty(ref _selectedCommand, value))
+            {
+                Parameters = ResolveParametersFor(value);
+                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(Parameters));
+            }
+        }
+    }
+
+    public string Description => SelectedCommand.Description;
+
+    public ObservableCollection<ParameterViewModel> Parameters { get; private set; }
 
     public ObservableCollection<LogEntry> OutputLines { get; } = [];
 
@@ -62,15 +83,47 @@ public class CommandTabViewModel : ObservableObject
 
     public CommandTabViewModel(CommandDescriptor descriptor)
     {
-        Descriptor = descriptor;
-        Parameters = new ObservableCollection<ParameterViewModel>(
-            descriptor.Parameters
-                .OrderByDescending(p => p.IsRequired)
-                .Select(ParameterViewModel.Create));
+        RootDescriptor = descriptor;
+        AvailableCommands = new ObservableCollection<CommandDescriptor>(FlattenCommands(descriptor));
+        SelectedCommand = AvailableCommands[0];
+        Parameters = ResolveParametersFor(SelectedCommand);
+
         ExecuteCommandCommand = new AsyncRelayCommand(ExecuteCommandAsync, () => !IsExecuting);
         ClearOutputCommand = new RelayCommand(ClearOutput);
         CopyAllCommand = new AsyncRelayCommand(CopyAllAsync);
         ToggleLogPanelCommand = new RelayCommand(() => IsLogPanelExpanded = !IsLogPanelExpanded);
+    }
+
+    private static IReadOnlyList<CommandDescriptor> FlattenCommands(CommandDescriptor root)
+    {
+        var result = new List<CommandDescriptor> { root };
+        AddSubcommands(root, result);
+        return result;
+
+        static void AddSubcommands(CommandDescriptor descriptor, ICollection<CommandDescriptor> bag)
+        {
+            foreach (var child in descriptor.Subcommands)
+            {
+                bag.Add(child);
+                AddSubcommands(child, bag);
+            }
+        }
+    }
+
+    private ObservableCollection<ParameterViewModel> ResolveParametersFor(CommandDescriptor descriptor)
+    {
+        if (_parameterStateByCommand.TryGetValue(descriptor.CommandType, out var parameters))
+        {
+            return parameters;
+        }
+
+        parameters = new ObservableCollection<ParameterViewModel>(
+            descriptor.Parameters
+                .OrderByDescending(p => p.IsRequired)
+                .Select(ParameterViewModel.Create));
+
+        _parameterStateByCommand[descriptor.CommandType] = parameters;
+        return parameters;
     }
 
     private void ClearOutput()
@@ -118,7 +171,7 @@ public class CommandTabViewModel : ObservableObject
         try
         {
             var result = await Task.Run(() =>
-                CommandExecutionService.ExecuteAsync(Descriptor, Parameters));
+                CommandExecutionService.ExecuteAsync(SelectedCommand, Parameters));
 
             StatusText = result == 0
                 ? "✓ Command completed successfully."

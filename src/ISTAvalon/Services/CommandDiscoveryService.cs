@@ -6,68 +6,187 @@ namespace ISTAvalon.Services;
 using System.Reflection;
 using System.Text;
 using DotMake.CommandLine;
-using ISTAvalon.Models;
+using Models;
 using ISTAPatcher.Commands;
+using Serilog;
 
 public static class CommandDiscoveryService
 {
     private static readonly string[] TabOrder = ["patch", "ilean", "crypto"];
 
-    private static readonly HashSet<string> ExcludedCommands = new(StringComparer.OrdinalIgnoreCase) { "cerebrumancy", "server" };
+    private static readonly HashSet<string> ExcludedCommands = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "server",
+    };
 
-    public static IReadOnlyList<CommandDescriptor> DiscoverCommands()
+    public static IReadOnlyList<CommandDescriptor> DiscoverCommands(bool includeHidden = false)
     {
         var assembly = typeof(RootCommand).Assembly;
-        var commandTypes = assembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && t.GetCustomAttribute<CliCommandAttribute>() is { } attr && attr.Parent == typeof(RootCommand))
-            .ToList();
-
-        return commandTypes
-            .Select(BuildCommandDescriptor)
-            .Where(c => !ExcludedCommands.Contains(c.Name))
-            .OrderBy(c =>
-            {
-                var index = Array.FindIndex(TabOrder, n => string.Equals(n, c.Name, StringComparison.OrdinalIgnoreCase));
-                return index >= 0 ? index : TabOrder.Length;
-            })
-            .ToList();
+        return DiscoverCommands(assembly.GetTypes(), includeHidden);
     }
 
-    private static CommandDescriptor BuildCommandDescriptor(Type commandType)
+    internal static IReadOnlyList<CommandDescriptor> DiscoverCommands(IEnumerable<Type> types, bool includeHidden = false)
     {
-        var cmdAttr = commandType.GetCustomAttribute<CliCommandAttribute>()!;
-        var commandName = !string.IsNullOrEmpty(cmdAttr.Name)
-            ? cmdAttr.Name
-            : ToKebabCase(commandType.Name.Replace("Command", string.Empty));
+        var commandInfos = types
+            .Where(t => t.IsClass && !t.IsAbstract)
+            .Select(t => new { Type = t, Attr = t.GetCustomAttribute<CliCommandAttribute>() })
+            .Where(x => x.Attr is not null)
+            .Select(x => new CommandInfo(x.Type, x.Attr!))
+            .ToDictionary(x => x.Type, x => x);
 
+        // Build all descriptors first, then attach parent/child relationships.
+        foreach (var info in commandInfos.Values)
+        {
+            info.Name = ResolveCommandName(info.Type, info.Attribute);
+            info.ParentType = ResolveParentType(info.Type, info.Attribute, commandInfos);
+            info.Parameters = BuildParameters(info.Type, info.ParentType);
+        }
+
+        var visibleInfos = commandInfos.Values
+            .Where(i => i.IsExecutable)
+            .Where(i => !ExcludedCommands.Contains(i.Name))
+            .Where(i => includeHidden || !i.Attribute.Hidden)
+            .ToDictionary(i => i.Type, i => i);
+
+        var nodeMap = visibleInfos.Values.ToDictionary(i => i.Type, i =>
+            new MutableCommandDescriptor
+            {
+                Name = i.Name,
+                Description = i.Attribute.Description ?? string.Empty,
+                CommandType = i.Type,
+                ParentCommandType = i.ParentType,
+                IsHidden = i.Attribute.Hidden,
+                Parameters = i.Parameters,
+            });
+
+        foreach (var info in visibleInfos.Values)
+        {
+            var parentType = info.ParentType;
+            if (parentType == null)
+            {
+                continue;
+            }
+
+            if (!nodeMap.TryGetValue(parentType, out var parent))
+            {
+                // Missing/filtered parent keeps the command discoverable as root.
+                Log.Debug("Command {CommandName} parent {ParentType} is unavailable; promoting to root", info.Name, parentType.Name);
+                continue;
+            }
+
+            parent.Subcommands.Add(nodeMap[info.Type]);
+        }
+
+        foreach (var descriptor in nodeMap.Values)
+        {
+            descriptor.Subcommands = descriptor.Subcommands
+                .OrderBy(ChildSortKey)
+                .ToList();
+        }
+
+        var roots = nodeMap.Values
+            .Where(c => c.ParentCommandType == null || !nodeMap.ContainsKey(c.ParentCommandType))
+            .OrderBy(RootSortKey)
+            .Select(Freeze)
+            .ToList();
+
+        return roots;
+    }
+
+    private static IReadOnlyList<ParameterDescriptor> BuildParameters(Type commandType, Type? parentCommandType)
+    {
         var parameters = new List<ParameterDescriptor>();
 
-        // Collect root command parameters (inherited options like Verbosity).
-        CollectParametersFromType(typeof(RootCommand), parameters, isParentOption: true);
+        if (parentCommandType != null)
+        {
+            CollectParametersFromTypeHierarchy(parentCommandType, parameters, isParentOption: true);
+        }
 
-        // Collect parameters from the command itself (including base class).
-        CollectParametersFromType(commandType, parameters, isParentOption: false);
-
-        // Collect parameters declared on implemented interfaces.
+        CollectParametersFromTypeHierarchy(commandType, parameters, isParentOption: false);
         CollectParametersFromInterfaces(commandType, parameters);
 
+        return parameters;
+    }
+
+    private static Type? ResolveParentType(Type commandType, CliCommandAttribute attribute, IReadOnlyDictionary<Type, CommandInfo> allCommands)
+    {
+        if (commandType.IsNested && commandType.DeclaringType != null && allCommands.ContainsKey(commandType.DeclaringType))
+        {
+            if (attribute.Parent != null)
+            {
+                Log.Debug("Ignoring CliCommand.Parent for nested command type {CommandType}", commandType.Name);
+            }
+
+            return commandType.DeclaringType;
+        }
+
+        if (attribute.Parent == null)
+        {
+            return null;
+        }
+
+        if (allCommands.ContainsKey(attribute.Parent))
+        {
+            return attribute.Parent;
+        }
+
+        Log.Debug("Command {CommandType} points to missing parent type {ParentType}", commandType.Name, attribute.Parent.Name);
+        return null;
+    }
+
+    private static string ResolveCommandName(Type commandType, CliCommandAttribute cmdAttr)
+    {
+        return !string.IsNullOrEmpty(cmdAttr.Name)
+            ? cmdAttr.Name
+            : ToKebabCase(commandType.Name.Replace("Command", string.Empty));
+    }
+
+    private static CommandDescriptor Freeze(MutableCommandDescriptor source)
+    {
         return new CommandDescriptor
         {
-            Name = commandName,
-            Description = cmdAttr.Description ?? string.Empty,
-            CommandType = commandType,
-            IsHidden = cmdAttr.Hidden,
-            Parameters = parameters,
+            Name = source.Name,
+            Description = source.Description,
+            CommandType = source.CommandType,
+            ParentCommandType = source.ParentCommandType,
+            IsHidden = source.IsHidden,
+            Parameters = source.Parameters,
+            Subcommands = source.Subcommands.Select(Freeze).ToList(),
         };
     }
 
-    private static void CollectParametersFromType(Type type, List<ParameterDescriptor> results, bool isParentOption)
+    private static string RootSortKey(MutableCommandDescriptor descriptor)
     {
-        while (true)
+        var index = Array.FindIndex(TabOrder, n => string.Equals(n, descriptor.Name, StringComparison.OrdinalIgnoreCase));
+        if (index >= 0)
+        {
+            return $"00-{index:000}-{descriptor.Name}";
+        }
+
+        return $"01-{descriptor.Name}";
+    }
+
+    private static string ChildSortKey(MutableCommandDescriptor descriptor)
+    {
+        return descriptor.Name;
+    }
+
+    private static void CollectParametersFromTypeHierarchy(Type type, List<ParameterDescriptor> results, bool isParentOption)
+    {
+        var hierarchy = new List<Type>();
+        var cursor = type;
+        while (cursor != typeof(object) && cursor != null)
+        {
+            hierarchy.Add(cursor);
+            cursor = cursor.BaseType!;
+        }
+
+        // Derived types override base types when same property appears.
+        foreach (var current in hierarchy)
         {
             var seen = results.Select(p => p.PropertyInfo.Name).ToHashSet();
 
-            foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+            foreach (var prop in current.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
             {
                 if (seen.Contains(prop.Name))
                 {
@@ -81,15 +200,6 @@ public static class CommandDiscoveryService
                     seen.Add(prop.Name);
                 }
             }
-
-            // Also scan base class (for classes like OptionalPatchOption).
-            if (type.BaseType != null && type.BaseType != typeof(object))
-            {
-                type = type.BaseType;
-                continue;
-            }
-
-            break;
         }
     }
 
@@ -282,5 +392,39 @@ public static class CommandDiscoveryService
         }
 
         return sb.ToString();
+    }
+
+    private sealed class CommandInfo(Type type, CliCommandAttribute attribute)
+    {
+        public Type Type { get; } = type;
+
+        public CliCommandAttribute Attribute { get; } = attribute;
+
+        public string Name { get; set; } = string.Empty;
+
+        public Type? ParentType { get; set; }
+
+        public IReadOnlyList<ParameterDescriptor> Parameters { get; set; } = [];
+
+        public bool IsExecutable =>
+            Type.GetMethod("RunAsync", BindingFlags.Public | BindingFlags.Instance) != null ||
+            Type.GetMethod("Run", BindingFlags.Public | BindingFlags.Instance) != null;
+    }
+
+    private sealed class MutableCommandDescriptor
+    {
+        public required string Name { get; init; }
+
+        public string Description { get; init; } = string.Empty;
+
+        public required Type CommandType { get; init; }
+
+        public Type? ParentCommandType { get; init; }
+
+        public bool IsHidden { get; init; }
+
+        public required IReadOnlyList<ParameterDescriptor> Parameters { get; init; }
+
+        public List<MutableCommandDescriptor> Subcommands { get; set; } = [];
     }
 }

@@ -6,7 +6,6 @@ namespace ISTAvalon.Services;
 using System.Reflection;
 using ISTAvalon.Models;
 using ISTAvalon.ViewModels;
-using ISTAPatcher.Commands;
 
 public static class CommandExecutionService
 {
@@ -14,17 +13,22 @@ public static class CommandExecutionService
     {
         var command = Activator.CreateInstance(descriptor.CommandType)!;
 
-        // Set the parent command (RootCommand) with root-level options.
+        // Set the parent command with parent-level options when available.
         var parentProp = descriptor.CommandType.GetProperty("ParentCommand", BindingFlags.Public | BindingFlags.Instance);
-        if (parentProp != null)
+        if (parentProp != null && descriptor.ParentCommandType != null)
         {
-            var rootCmd = new RootCommand();
-            foreach (var param in parameters.Where(p => p.Descriptor.IsParentOption))
+            var parentCommand = Activator.CreateInstance(descriptor.ParentCommandType);
+            if (parentCommand == null)
             {
-                param.Descriptor.PropertyInfo.SetValue(rootCmd, ConvertValue(param));
+                throw new InvalidOperationException($"Unable to create parent command instance for {descriptor.CommandType.Name}.");
             }
 
-            parentProp.SetValue(command, rootCmd);
+            foreach (var param in parameters.Where(p => p.Descriptor.IsParentOption))
+            {
+                param.Descriptor.PropertyInfo.SetValue(parentCommand, ConvertValue(param));
+            }
+
+            parentProp.SetValue(command, parentCommand);
         }
 
         // Set command-level options and arguments.

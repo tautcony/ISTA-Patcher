@@ -45,6 +45,7 @@ Released under the GNU GPLv3+.</Copyright>
 
   <ItemGroup>
     <ProjectReference Include="..\ISTAlter\ISTAlter.csproj"/>
+    <ProjectReference Include="..\ISTAvalon\ISTAvalon.csproj"/>
   </ItemGroup>
 
 </Project>

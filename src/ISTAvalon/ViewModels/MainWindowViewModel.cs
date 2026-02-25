@@ -19,9 +19,9 @@ public class MainWindowViewModel : ObservableObject
         set => SetProperty(ref _selectedTab, value);
     }
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(IReadOnlyList<Models.CommandDescriptor>? descriptors = null)
     {
-        var descriptors = CommandDiscoveryService.DiscoverCommands();
+        descriptors ??= CommandDiscoveryService.DiscoverCommands();
         CommandTabs = new ObservableCollection<CommandTabViewModel>(
             descriptors.Select(d => new CommandTabViewModel(d)));
         SelectedTab = CommandTabs.FirstOrDefault();

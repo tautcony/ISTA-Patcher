@@ -11,7 +11,11 @@ public sealed class CommandDescriptor
 
     public required Type CommandType { get; init; }
 
+    public Type? ParentCommandType { get; init; }
+
     public bool IsHidden { get; init; }
 
     public required IReadOnlyList<ParameterDescriptor> Parameters { get; init; }
+
+    public IReadOnlyList<CommandDescriptor> Subcommands { get; init; } = [];
 }
