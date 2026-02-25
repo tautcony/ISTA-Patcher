@@ -59,6 +59,17 @@ Within each log message body, quoted strings and numeric literals SHALL be highl
 - **WHEN** a log message segment is neither a quoted string nor a numeric literal
 - **THEN** the segment is rendered with the log-level foreground color
 
+### Requirement: GUI SHALL display execution logs with level-aware styling
+The GUI SHALL render execution log entries in the log panel with level-aware visual styling and timestamped messages. Entries from structured logging and captured console output SHALL be displayed through the same list model so users can inspect complete execution output in one place. For captured console messages containing ANSI SGR foreground color escapes, the renderer SHALL apply corresponding foreground colors in the log panel while suppressing raw escape characters from displayed text.
+
+#### Scenario: Render mixed log sources in one panel
+- **WHEN** execution emits both structured logs and captured console output
+- **THEN** the log panel displays both entry types in the same timeline view
+
+#### Scenario: Render ANSI-colored console output
+- **WHEN** a captured console line includes ANSI SGR foreground color escape sequences
+- **THEN** the log panel displays the text without raw escape characters and applies the mapped foreground colors
+
 ### Requirement: A `LogPanelPalette` class SHALL centralise all log panel colors
 The system SHALL provide a `LogPanelPalette` class that exposes brush properties for every color used in the log panel: per-level foregrounds (Verbose, Debug, Information, Warning, Error, Fatal), token foregrounds (String, Number), and panel chrome (Timestamp, Background, Header). All consumers SHALL read colors from this class.
 
@@ -80,6 +91,13 @@ Users SHALL be able to select text within individual log entries and copy it to 
 #### Scenario: Copy all log output via context menu
 - **WHEN** the user invokes "Copy All" from the log panel context menu
 - **THEN** the full text of all visible log entries (with timestamps) is placed on the system clipboard
+
+### Requirement: GUI SHALL support log interaction utilities
+The GUI SHALL allow users to clear log output, copy all output, and copy individual lines from the log panel. These utilities SHALL include captured console output entries in addition to structured log entries.
+
+#### Scenario: Copy all includes captured console output
+- **WHEN** a user runs a command that produces captured console output and selects copy-all
+- **THEN** copied text includes those captured console lines with their rendered metadata
 
 ### Requirement: Log panel SHALL provide a Clear control
 The log panel header SHALL include a Clear button that removes all accumulated log entries from the output.

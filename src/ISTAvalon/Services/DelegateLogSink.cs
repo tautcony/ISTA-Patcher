@@ -19,7 +19,12 @@ public sealed class DelegateLogSink : ILogEventSink
 
     public void Emit(LogEvent logEvent)
     {
-        _handler?.Invoke(new LogEntry(logEvent.Timestamp, logEvent.Level, logEvent.RenderMessage()));
+        Publish(new LogEntry(logEvent.Timestamp, logEvent.Level, logEvent.RenderMessage()));
+    }
+
+    public void Publish(LogEntry entry)
+    {
+        _handler?.Invoke(entry);
     }
 
     private sealed class Unsubscriber(Action onDispose) : IDisposable

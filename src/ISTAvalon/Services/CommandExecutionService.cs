@@ -4,6 +4,7 @@
 namespace ISTAvalon.Services;
 
 using System.Reflection;
+using ISTAvalon;
 using ISTAvalon.Models;
 using ISTAvalon.ViewModels;
 
@@ -44,6 +45,8 @@ public static class CommandExecutionService
         {
             throw new InvalidOperationException($"Command type {descriptor.CommandType.Name} does not have a RunAsync method.");
         }
+
+        using var capture = new ConsoleCaptureScope(App.LogSink.Publish);
 
         var result = runMethod.Invoke(command, null);
         switch (result)
