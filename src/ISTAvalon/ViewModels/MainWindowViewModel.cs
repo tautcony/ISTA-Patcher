@@ -5,13 +5,17 @@ namespace ISTAvalon.ViewModels;
 
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using ISTAvalon.Models;
 using ISTAvalon.Services;
 
 public class MainWindowViewModel : ObservableObject
 {
     private CommandTabViewModel? _selectedTab;
+    private AppMetadata AppMetadata { get; }
 
     public ObservableCollection<CommandTabViewModel> CommandTabs { get; }
+
+    public string WindowTitle => AppMetadata.WindowTitle;
 
     public CommandTabViewModel? SelectedTab
     {
@@ -21,6 +25,7 @@ public class MainWindowViewModel : ObservableObject
 
     public MainWindowViewModel(IReadOnlyList<Models.CommandDescriptor>? descriptors = null)
     {
+        AppMetadata = AppMetadataProvider.Get();
         descriptors ??= CommandDiscoveryService.DiscoverCommands();
         CommandTabs = new ObservableCollection<CommandTabViewModel>(
             descriptors.Select(d => new CommandTabViewModel(d)));

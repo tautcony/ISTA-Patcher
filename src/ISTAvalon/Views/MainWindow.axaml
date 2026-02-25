@@ -8,7 +8,7 @@
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         x:Class="ISTAvalon.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="ISTA-Patcher"
+        Title="{Binding WindowTitle}"
         Width="1100" Height="700"
         MinWidth="700" MinHeight="400">
 

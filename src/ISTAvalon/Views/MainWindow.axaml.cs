@@ -30,4 +30,5 @@ public partial class MainWindow : Window
             Log.Error(ex, "Error occurred while copying log entry to clipboard");
         }
     }
+
 }
