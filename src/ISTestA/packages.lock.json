@@ -958,7 +958,10 @@
           "CommunityToolkit.Mvvm": "[8.4.0, )",
           "ISTA-Patcher": "[2.4.0, )",
           "Projektanker.Icons.Avalonia": "[9.6.2, )",
-          "Projektanker.Icons.Avalonia.FontAwesome": "[9.6.2, )"
+          "Projektanker.Icons.Avalonia.FontAwesome": "[9.6.2, )",
+          "Sentry": "[6.1.0, )",
+          "Sentry.Profiling": "[6.1.0, )",
+          "Sentry.Serilog": "[6.1.0, )"
         }
       }
     }

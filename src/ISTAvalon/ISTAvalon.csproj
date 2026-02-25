@@ -32,6 +32,9 @@ Released under the GNU GPLv3+.</Copyright>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Projektanker.Icons.Avalonia" Version="9.6.2" />
     <PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.6.2" />
+    <PackageReference Include="Sentry" Version="6.1.0" />
+    <PackageReference Include="Sentry.Profiling" Version="6.1.0" />
+    <PackageReference Include="Sentry.Serilog" Version="6.1.0" />
     <PackageReference Include="Avalonia.Diagnostics" Version="11.3.12" Condition="'$(Configuration)' == 'Debug'" />
   </ItemGroup>
 

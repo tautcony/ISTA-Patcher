@@ -79,6 +79,32 @@
           "Projektanker.Icons.Avalonia": "9.6.2"
         }
       },
+      "Sentry": {
+        "type": "Direct",
+        "requested": "[6.1.0, )",
+        "resolved": "6.1.0",
+        "contentHash": "8d0ql+JAjVMo3WG+MHj62oh3jZVZrwWa/ExVcT0NIRcf6Qsig7wsagwaumWvlXj9F850V+YSyNHWyNNrAipFeA=="
+      },
+      "Sentry.Profiling": {
+        "type": "Direct",
+        "requested": "[6.1.0, )",
+        "resolved": "6.1.0",
+        "contentHash": "Yw3OcJ/vwXlvKV01Gpf+4vbJ0e2MNTlBoIeb+0HiV1QL/ZGvJB5Syw3pIZv5pybIlWBPWHN/wLuskb54J4jXMA==",
+        "dependencies": {
+          "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
+          "Sentry": "6.1.0"
+        }
+      },
+      "Sentry.Serilog": {
+        "type": "Direct",
+        "requested": "[6.1.0, )",
+        "resolved": "6.1.0",
+        "contentHash": "IKp20qTzxKueUqzuEjSshMR139wAEy8GNs+jEaG9AsRXWzC5Qt317wS6iyHg8GtJQIffRF3bPjcy9bOHWmmLIg==",
+        "dependencies": {
+          "Sentry": "6.1.0",
+          "Serilog": "2.10.0"
+        }
+      },
       "Avalonia.Angle.Windows.Natives": {
         "type": "Transitive",
         "resolved": "2.1.25547.20250602",
@@ -658,29 +684,6 @@
           "NSwag.Core": "14.6.3",
           "Namotion.Reflection": "3.4.3",
           "Newtonsoft.Json": "13.0.3"
-        }
-      },
-      "Sentry": {
-        "type": "Transitive",
-        "resolved": "6.1.0",
-        "contentHash": "8d0ql+JAjVMo3WG+MHj62oh3jZVZrwWa/ExVcT0NIRcf6Qsig7wsagwaumWvlXj9F850V+YSyNHWyNNrAipFeA=="
-      },
-      "Sentry.Profiling": {
-        "type": "Transitive",
-        "resolved": "6.1.0",
-        "contentHash": "Yw3OcJ/vwXlvKV01Gpf+4vbJ0e2MNTlBoIeb+0HiV1QL/ZGvJB5Syw3pIZv5pybIlWBPWHN/wLuskb54J4jXMA==",
-        "dependencies": {
-          "Microsoft.Diagnostics.NETCore.Client": "0.2.510501",
-          "Sentry": "6.1.0"
-        }
-      },
-      "Sentry.Serilog": {
-        "type": "Transitive",
-        "resolved": "6.1.0",
-        "contentHash": "IKp20qTzxKueUqzuEjSshMR139wAEy8GNs+jEaG9AsRXWzC5Qt317wS6iyHg8GtJQIffRF3bPjcy9bOHWmmLIg==",
-        "dependencies": {
-          "Sentry": "6.1.0",
-          "Serilog": "2.10.0"
         }
       },
       "Serilog": {

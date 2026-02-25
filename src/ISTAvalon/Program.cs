@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 TautCony
 
 using Avalonia;
+using ISTAvalon.Services;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.FontAwesome;
 
@@ -12,6 +13,7 @@ public static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        TelemetryBootstrap.Initialize(args);
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
