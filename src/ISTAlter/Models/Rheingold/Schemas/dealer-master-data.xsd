@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://www.bmw.com/ibase/beans/dealerdata"
+    xmlns:tns="http://www.bmw.com/ibase/beans/dealerdata"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+  <xs:simpleType name="Product">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Motorcycle" />
+      <xs:enumeration value="Vehicle" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="BusinessLine">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="VehicleSales" />
+      <xs:enumeration value="Service" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="BusinessRelationship">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Contract" />
+      <xs:enumeration value="Independent" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="Address">
+    <xs:attribute name="street1" type="xs:string" use="optional" />
+    <xs:attribute name="street2" type="xs:string" use="optional" />
+    <xs:attribute name="postalCode" type="xs:string" use="optional" />
+    <xs:attribute name="town1" type="xs:string" use="optional" />
+    <xs:attribute name="town2" type="xs:string" use="optional" />
+    <xs:attribute name="country" type="xs:string" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="Phone">
+    <xs:attribute name="countryCode" type="xs:string" use="optional" />
+    <xs:attribute name="areaCode" type="xs:string" use="optional" />
+    <xs:attribute name="localNumber" type="xs:string" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="Communication">
+    <xs:sequence>
+      <xs:element name="voice" type="tns:Phone" minOccurs="1" />
+      <xs:element name="fax" type="tns:Phone" minOccurs="0" nillable="true" />
+    </xs:sequence>
+    <xs:attribute name="email" type="xs:string" use="optional" />
+    <xs:attribute name="url" type="xs:anyURI" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="Contract">
+    <xs:sequence>
+      <xs:element name="brand" type="xs:string" minOccurs="0" />
+      <xs:element name="product" type="tns:Product" minOccurs="1" />
+      <xs:element name="businessLine" type="tns:BusinessLine" minOccurs="1" />
+      <xs:element name="salesBranch" type="xs:string" minOccurs="0" />
+    </xs:sequence>
+    <xs:attribute name="internationalDealerNumber" type="xs:string" use="optional" />
+    <xs:attribute name="nationalDealerNumber" type="xs:string" use="optional" />
+    <xs:attribute name="startDate" type="xs:date" use="required" />
+    <xs:attribute name="endContractDate" type="xs:date" use="optional" />
+    <xs:attribute name="endServiceDate" type="xs:date" use="optional" />
+    <xs:attribute name="mobileService" type="xs:boolean" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="Outlet">
+    <xs:sequence>
+      <xs:element name="address" type="tns:Address" minOccurs="1" />
+      <xs:element name="contact" type="tns:Communication" minOccurs="1" />
+      <xs:element name="businessRelationship" type="tns:BusinessRelationship" minOccurs="1" />
+      <xs:element name="marketLanguage" type="xs:language" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="contract" type="tns:Contract" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute name="outletNumber" type="xs:integer" use="required" />
+    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="protectionVehicleService" type="xs:boolean" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="DistributionPartner">
+    <xs:sequence>
+      <xs:element name="outlet" type="tns:Outlet" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute name="distributionPartnerNumber" type="xs:string" use="required" />
+    <xs:attribute name="name" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="DealerMasterData">
+    <xs:sequence>
+      <xs:element name="distributionPartner" type="tns:DistributionPartner" minOccurs="1" />
+    </xs:sequence>
+    <xs:attribute name="expirationDate" type="xs:dateTime" use="required" />
+    <xs:attribute name="verificationCode" type="xs:string" use="required" />
+    <xs:attribute name="hardwareId" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:element name="Address" type="tns:Address" nillable="true" />
+  <xs:element name="Phone" type="tns:Phone" nillable="true" />
+  <xs:element name="Communication" type="tns:Communication" nillable="true" />
+  <xs:element name="Contract" type="tns:Contract" nillable="true" />
+  <xs:element name="Outlet" type="tns:Outlet" nillable="true" />
+  <xs:element name="DistributionPartner" type="tns:DistributionPartner" nillable="false" />
+  <xs:element name="DealerMasterData" type="tns:DealerMasterData" nillable="false" />
+</xs:schema>

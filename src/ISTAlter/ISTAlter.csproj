@@ -53,4 +53,8 @@ Released under the GNU GPLv3+.</Copyright>
   <ItemGroup>
     <ProjectReference Include="..\ISTgenerAtor\ISTgenerAtor.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Models/Rheingold/Schemas/*.xsd" />
+  </ItemGroup>
 </Project>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://tempuri.org/LicenseInfo.xsd"
+    xmlns:tns="http://tempuri.org/LicenseInfo.xsd"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+  <xs:simpleType name="LicenseType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="offline" />
+      <xs:enumeration value="online" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="LicensePackage">
+    <xs:sequence>
+      <xs:element name="PackageName" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="PackageVersion" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="PackageExpire" type="xs:dateTime" minOccurs="1" />
+    </xs:sequence>
+    <xs:attribute name="PackageRule" type="xs:string" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="LicenseInfo">
+    <xs:sequence>
+      <xs:element name="Name" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="Email" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="Expiration" type="xs:dateTime" minOccurs="1" />
+      <xs:element name="Comment" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="ComputerName" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="UserName" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="AvailableBrandTypes" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="AvailableLanguages" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="AvailableOperationModes" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="DistributionPartnerNumber" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="ComputerCharacteristics" type="xs:base64Binary" minOccurs="0" nillable="true" />
+      <xs:element name="LicenseKey" type="xs:base64Binary" minOccurs="0" nillable="true" />
+      <xs:element name="LicenseServerURL" type="xs:string" minOccurs="0" nillable="true" />
+      <xs:element name="LicenseType" type="tns:LicenseType" minOccurs="1" />
+      <xs:element name="SubLicenses" type="tns:LicensePackage" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="LicensePackage" type="tns:LicensePackage" nillable="true" />
+  <xs:element name="LicenseInfo" type="tns:LicenseInfo" nillable="false" />
+</xs:schema>
