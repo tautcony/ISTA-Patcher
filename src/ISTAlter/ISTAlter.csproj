@@ -29,7 +29,6 @@ Released under the GNU GPLv3+.</Copyright>
 
   <ItemGroup>
     <PackageReference Include="dnlib" Version="4.5.0" />
-    <PackageReference Include="Lib.Harmony" Version="2.4.2" />
     <PackageReference Include="Roslynator.Analyzers" Version="4.14.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

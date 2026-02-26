@@ -62,6 +62,7 @@ namespace ISTAlter.Core;
 
 using System.Text;
 using ISTAlter.Utils;
+using dnlib.DotNet;
 
 public static partial class PatchUtils
 {
@@ -77,6 +78,12 @@ public static partial class PatchUtils
     public static byte[] GetBytes(this string s)
     {
         return Encoding.UTF8.GetBytes(s);
+    }
+
+    public static void SetPatchedMark(ModuleDefMD module)
+    {
+        PatchUtils.SetPatchedMarkInner(module);
+        PatchUtils.ValidatePatchResult(module);
     }
 }
 ";

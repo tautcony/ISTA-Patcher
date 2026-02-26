@@ -247,7 +247,7 @@ public static partial class PatchUtils
     /// Set the patched mark to the assembly.
     /// </summary>
     /// <param name="module">module to set.</param>
-    public static void SetPatchedMark(ModuleDefMD module)
+    public static void SetPatchedMarkInner(ModuleDefMD module)
     {
         if (HavePatchedMark(module) != null)
         {
