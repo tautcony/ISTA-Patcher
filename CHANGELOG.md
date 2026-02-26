@@ -1,5 +1,11 @@
 ﻿# Changelog
 
+## 2.5.0 / 2026-02-26
+- Feat - Release ISTAvalon GUI application
+- Feat - Add support for custom patch definitions in configuration
+- Fix - Ensure proper crypto processing
+- Chore - Upgrade dependencies to latest versions
+
 ## 2.4.0 / 2025-11-18
 - Feat - Upgrade to .NET 10.0
 - Feat - Add validation patches for ISTA 4.56+
