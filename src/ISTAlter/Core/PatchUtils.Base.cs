@@ -91,10 +91,50 @@ public static partial class PatchUtils
         }
     }
 
+    private static int ComputeBodyFingerprint(MethodDef method)
+    {
+        if (method.Body is not { } body)
+        {
+            return 0;
+        }
+
+        HashCode hash = default;
+        foreach (var instr in body.Instructions)
+        {
+            hash.Add(instr.OpCode.Code);
+            switch (instr.Operand)
+            {
+                case string s:
+                    hash.Add(s.GetHashCode(StringComparison.Ordinal));
+                    break;
+                case int i:
+                    hash.Add(i);
+                    break;
+                case long l:
+                    hash.Add(l);
+                    break;
+                case double d:
+                    hash.Add(d.GetHashCode());
+                    break;
+                case float f:
+                    hash.Add(f.GetHashCode());
+                    break;
+                case IFullName fn:
+                    hash.Add(fn.FullName.GetHashCode(StringComparison.Ordinal));
+                    break;
+                case Instruction target:
+                    hash.Add(body.Instructions.IndexOf(target));
+                    break;
+            }
+        }
+
+        return hash.ToHashCode();
+    }
+
     /// <summary>
     /// Applies a patch to a method in the specified assembly.
     /// </summary>
-    /// <param name="module">The <see cref="dnlib.DotNet.ModuleDefMD"/> to apply the patch to.</param>
+    /// <param name="module">The <see cref="ModuleDefMD"/> to apply the patch to.</param>
     /// <param name="type">The full name of the type containing the method.</param>
     /// <param name="name">The name of the method.</param>
     /// <param name="desc">The description of the method.</param>
@@ -116,14 +156,15 @@ public static partial class PatchUtils
             return 0;
         }
 
+        var fingerprint = ComputeBodyFingerprint(method);
         operation(method);
-        return 1;
+        return ComputeBodyFingerprint(method) != fingerprint ? 1 : 0;
     }
 
     /// <summary>
     /// Applies a patch to an async method in the specified assembly.
     /// </summary>
-    /// <param name="module">The <see cref="dnlib.DotNet.ModuleDefMD"/> to apply the patch to.</param>
+    /// <param name="module">The <see cref="ModuleDefMD"/> to apply the patch to.</param>
     /// <param name="type">The full name of the type containing the method.</param>
     /// <param name="name">The name of the method.</param>
     /// <param name="desc">The description of the method.</param>
@@ -159,14 +200,15 @@ public static partial class PatchUtils
             return 0;
         }
 
+        var fingerprint = ComputeBodyFingerprint(generateMethod);
         operation(generateMethod);
-        return 1;
+        return ComputeBodyFingerprint(generateMethod) != fingerprint ? 1 : 0;
     }
 
     /// <summary>
     /// Applies a patch to a property getter in the specified assembly.
     /// </summary>
-    /// <param name="module">The <see cref="dnlib.DotNet.ModuleDefMD"/> to apply the patch to.</param>
+    /// <param name="module">The <see cref="ModuleDefMD"/> to apply the patch to.</param>
     /// <param name="type">The full name of the type containing the method.</param>
     /// <param name="propertyName">The name of the property.</param>
     /// <param name="operation">The action representing the patch operation to be applied to the method.</param>
@@ -193,8 +235,10 @@ public static partial class PatchUtils
 
         Log.Verbose("Applying patch {PatchName} => {Name} <= {Module}: {Result}", memberName, $"{propertyName}::getter", module, propertyDef.GetMethod != null);
 
-        operation(propertyDef.GetMethod);
-        return 1;
+        var getter = propertyDef.GetMethod;
+        var fingerprint = ComputeBodyFingerprint(getter);
+        operation(getter);
+        return ComputeBodyFingerprint(getter) != fingerprint ? 1 : 0;
     }
 
     /// <summary>
