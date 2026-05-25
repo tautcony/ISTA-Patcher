@@ -125,6 +125,8 @@ public static partial class PatchUtils
                 case Instruction target:
                     hash.Add(body.Instructions.IndexOf(target));
                     break;
+                default:
+                    break;
             }
         }
 
