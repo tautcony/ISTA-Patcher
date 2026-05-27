@@ -99,6 +99,12 @@ public static partial class PatchUtils
         }
 
         HashCode hash = default;
+        var indexMap = new Dictionary<Instruction, int>(body.Instructions.Count);
+        for (var idx = 0; idx < body.Instructions.Count; idx++)
+        {
+            indexMap[body.Instructions[idx]] = idx;
+        }
+
         foreach (var instr in body.Instructions)
         {
             hash.Add(instr.OpCode.Code);
@@ -123,7 +129,7 @@ public static partial class PatchUtils
                     hash.Add(fn.FullName.GetHashCode(StringComparison.Ordinal));
                     break;
                 case Instruction target:
-                    hash.Add(body.Instructions.IndexOf(target));
+                    hash.Add(indexMap.TryGetValue(target, out var targetIndex) ? targetIndex : -1);
                     break;
                 default:
                     break;
