@@ -12,7 +12,9 @@ public static class ISTAOptions
     public enum PatchType
     {
         BMW = 0,
+        B = BMW,
         Toyota = 1,
+        T = Toyota,
     }
 
     public enum ModeType
