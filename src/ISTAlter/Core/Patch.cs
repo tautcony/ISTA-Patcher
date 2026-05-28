@@ -53,11 +53,17 @@ public static partial class Patch
         var attemptedCount = attemptedPatches.Count;
         var skippedCount = patcherProvider.Patches.Count - attemptedCount;
         var totalFunctions = patcherProvider.Patches.Sum(p => p.AppliedCount);
+
+        const string green = "[32m";
+        const string red = "[31m";
+        const string reset = "[0m";
+        var countColor = appliedCount == attemptedCount ? green : red;
+        var counter = $"{countColor}{appliedCount}/{attemptedCount}{reset}";
+
         Log.Information(
-            @"=== ISTA Patch Done in {Time:mm\:ss\.fff} [{Applied}/{Attempted} patches, {Functions} functions, {Skipped} skipped] ===",
+            @"=== ISTA Patch Done in {Time:mm\:ss\.fff} [{Counter} patches, {Functions} functions, {Skipped} skipped] ===",
             timer.Elapsed,
-            appliedCount,
-            attemptedCount,
+            counter,
             totalFunctions,
             skippedCount);
     }
