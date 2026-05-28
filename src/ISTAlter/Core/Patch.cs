@@ -143,6 +143,12 @@ public static partial class Patch
                     continue;
                 }
 
+                if (!PatchUtils.IsVersionInRange(module, patch.Method))
+                {
+                    resultBuilder.Append('-');
+                    continue;
+                }
+
                 if (!PatchUtils.IsPatchApplicable(module, patch.Method))
                 {
                     resultBuilder.Append('-');

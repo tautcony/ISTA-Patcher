@@ -414,6 +414,40 @@ public static partial class PatchUtils
     /// <param name="module">Module to check.</param>
     /// <param name="patcher">Patcher to check.</param>
     /// <returns>True if the patcher is applicable.</returns>
+    /// <summary>
+    /// Returns true when the module's assembly version falls within the patch's declared
+    /// [FromVersion, UntilVersion) range.  A missing bound is treated as open-ended.
+    /// This check is intentionally silent: being outside the declared range is expected
+    /// behaviour, not an error condition.
+    /// </summary>
+    public static bool IsVersionInRange(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
+    {
+        var untilVersion = patcher?.GetCustomAttribute<UntilVersionAttribute>()?.Version;
+        var fromVersion = patcher?.GetCustomAttribute<FromVersionAttribute>()?.Version;
+
+        if (fromVersion == null && untilVersion == null)
+        {
+            return true;
+        }
+
+        var moduleVersion = module.Assembly.Version;
+
+        // moduleVersion ∈ [fromVersion, untilVersion)
+        if (fromVersion != null && moduleVersion < fromVersion)
+        {
+            Log.Debug("{PatcherName} not yet applicable for {Assembly}({Version}), requires >= {From}", patcher!.Name, module.Assembly.Name, moduleVersion, fromVersion);
+            return false;
+        }
+
+        if (untilVersion != null && moduleVersion >= untilVersion)
+        {
+            Log.Debug("{PatcherName} no longer applicable for {Assembly}({Version}), requires < {Until}", patcher!.Name, module.Assembly.Name, moduleVersion, untilVersion);
+            return false;
+        }
+
+        return true;
+    }
+
     public static bool IsPatchApplicable(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
     {
         var libraryNames = patcher?.GetCustomAttribute<LibraryNameAttribute>()?.FileName;
@@ -423,44 +457,21 @@ public static partial class PatchUtils
         // Validate attribute dependencies
         if ((untilVersion != null || fromVersion != null) && libraryNames == null)
         {
-            Log.Error("Patcher {PatcherName} has version constraints but no LibraryName attribute", patcher.Name);
+            Log.Error("Patcher {PatcherName} has version constraints but no LibraryName attribute", patcher!.Name);
         }
 
-        // Check library name first
+        // Check library name
         if (libraryNames != null)
         {
             if (!libraryNames.Contains(module.FullName, StringComparer.Ordinal))
             {
-                Log.Debug("{PatcherName} is not valid for library: {Library}", patcher.Name, module.FullName);
+                Log.Debug("{PatcherName} is not valid for library: {Library}", patcher!.Name, module.FullName);
                 return false;
             }
         }
         else
         {
             Log.Debug("Skip library check for {PatchName} due to no library name is set", patcher?.Name);
-        }
-
-        // Then check version
-        if (untilVersion != null || fromVersion != null)
-        {
-            var moduleVersion = module.Assembly.Version;
-
-            // A valid patcher should match the version range: moduleVersion ∈ [fromVersion, untilVersion)
-            if (fromVersion != null && moduleVersion < fromVersion)
-            {
-                Log.Warning("{PatcherName} is not valid for assembly yet: {Assembly}({Version})", patcher.Name, module.Assembly.Name, module.Assembly.Version);
-                return false;
-            }
-
-            if (untilVersion != null && moduleVersion >= untilVersion)
-            {
-                Log.Warning("{PatcherName} is no longer valid for assembly: {Assembly}({Version})", patcher.Name, module.Assembly.Name, module.Assembly.Version);
-                return false;
-            }
-        }
-        else
-        {
-            Log.Debug("No version check for {PatcherName} has been set", patcher?.Name);
         }
 
         return true;
