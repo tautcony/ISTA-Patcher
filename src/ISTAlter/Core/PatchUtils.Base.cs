@@ -409,17 +409,14 @@ public static partial class PatchUtils
     }
 
     /// <summary>
-    /// Check if the patcher is applicable to the assembly by validating both library name and version.
-    /// </summary>
-    /// <param name="module">Module to check.</param>
-    /// <param name="patcher">Patcher to check.</param>
-    /// <returns>True if the patcher is applicable.</returns>
-    /// <summary>
     /// Returns true when the module's assembly version falls within the patch's declared
     /// [FromVersion, UntilVersion) range.  A missing bound is treated as open-ended.
     /// This check is intentionally silent: being outside the declared range is expected
     /// behaviour, not an error condition.
     /// </summary>
+    /// <param name="module">Module to check.</param>
+    /// <param name="patcher">Patcher to check.</param>
+    /// <returns>True if the module's version is within the declared range (or no range is declared).</returns>
     public static bool IsVersionInRange(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
     {
         var untilVersion = patcher?.GetCustomAttribute<UntilVersionAttribute>()?.Version;
@@ -448,6 +445,13 @@ public static partial class PatchUtils
         return true;
     }
 
+    /// <summary>
+    /// Check if the patcher is applicable to the assembly by validating the declared library name.
+    /// Version-range filtering is handled separately by <see cref="IsVersionInRange"/>.
+    /// </summary>
+    /// <param name="module">Module to check.</param>
+    /// <param name="patcher">Patcher to check.</param>
+    /// <returns>True if the patcher is applicable.</returns>
     public static bool IsPatchApplicable(ModuleDefMD module, System.Reflection.MethodInfo? patcher)
     {
         var libraryNames = patcher?.GetCustomAttribute<LibraryNameAttribute>()?.FileName;
