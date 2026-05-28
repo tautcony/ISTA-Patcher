@@ -307,7 +307,7 @@ public static partial class PatchUtils
     [NotSendPatch]
     [LibraryName("ISTAGUI.exe")]
     [FromVersion("4.55")]
-    public static int PatchMultisessionLogicFrom455(ModuleDefMD module)
+    public static int PatchMultisessionLogicGetters(ModuleDefMD module)
     {
         return module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.MultisessionLogic",
@@ -537,7 +537,7 @@ public static partial class PatchUtils
     [LibraryName("RheingoldPresentationFramework.dll")]
     [FromVersion("4.44")]
     [UntilVersion("4.52")]
-    public static int PatchUserEnvironmentProviderFrom444(ModuleDefMD module)
+    public static int PatchUserEnvironmentProviderPresentationFramework(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.PresentationFramework.Authentication.UserEnvironmentProvider",
@@ -555,57 +555,38 @@ public static partial class PatchUtils
     [UserAuthPatch]
     [LibraryName("\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.dll")]
     [FromVersion("4.52")]
-    [UntilVersion("4.55")]
-    public static int PatchUserEnvironmentProviderFrom452(ModuleDefMD module)
+    public static int PatchUserEnvironmentProvider(ModuleDefMD module)
     {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider",
-            "GetCurrentUserEnvironment",
-            "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.LoginRepository.Entities.UserEnvironment",
-            DnlibUtils.ReturnUInt32Method(2) // PROD
-        ) + module.PatchFunction(
-            "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider",
-            "GetCurrentNetworkType",
-            "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.LoginRepository.Entities.NetworkType",
-            DnlibUtils.ReturnUInt32Method(1) // LAN ?
-        );
-    }
+        const string className = "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider";
 
-    [UserAuthPatch]
-    [LibraryName("\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.dll")]
-    [FromVersion("4.55")]
-    [UntilVersion("4.57")]
-    public static int PatchUserEnvironmentProviderFrom455(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider",
-            "GetCurrentUserEnvironment",
-            "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.UserLogin.UserEnvironment",
-            DnlibUtils.ReturnUInt32Method(2) // PROD
-        ) + module.PatchFunction(
-            "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider",
-            "GetCurrentNetworkType",
-            "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.UserLogin.NetworkType",
-            DnlibUtils.ReturnUInt32Method(0) // Intranet
-        );
-    }
+        var version = module.Assembly.Version;
+        var result = version < new Version("4.55")
+            ? PatchV452(module)
+            : version < new Version("4.57")
+                ? PatchV455(module)
+                : PatchV457(module);
 
-    [UserAuthPatch]
-    [LibraryName("\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.dll")]
-    [FromVersion("4.57")]
-    public static int PatchUserEnvironmentProviderFrom457(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider",
-            "GetCurrentUserEnvironment",
-            "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.UserLogin.UserEnvironment",
-            DnlibUtils.ReturnUInt32Method(2) // PROD
-        ) + module.PatchFunction(
-            "\u0042\u004d\u0057.ISPI.TRIC.ISTA.LOGIN.DataProviders.UserEnvironmentProvider",
-            "GetCurrentNetworkType",
-            "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.UserLogin.EnvironmentNetworkType",
-            DnlibUtils.ReturnUInt32Method(0) // Intranet
-        );
+        if (result == 0)
+        {
+            Log.Warning("{PatchName} found no applicable target in {Assembly}({Version})", nameof(PatchUserEnvironmentProvider), module.Assembly.Name, version);
+        }
+
+        return result;
+
+        // 4.52–4.55: LoginRepository.Entities namespace, NetworkType LAN=1
+        static int PatchV452(ModuleDefMD m) =>
+            m.PatchFunction(className, "GetCurrentUserEnvironment", "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.LoginRepository.Entities.UserEnvironment", DnlibUtils.ReturnUInt32Method(2))
+            + m.PatchFunction(className, "GetCurrentNetworkType", "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.LoginRepository.Entities.NetworkType", DnlibUtils.ReturnUInt32Method(1));
+
+        // 4.55–4.57: Contracts.Enums.UserLogin namespace, Intranet=0
+        static int PatchV455(ModuleDefMD m) =>
+            m.PatchFunction(className, "GetCurrentUserEnvironment", "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.UserLogin.UserEnvironment", DnlibUtils.ReturnUInt32Method(2))
+            + m.PatchFunction(className, "GetCurrentNetworkType", "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.UserLogin.NetworkType", DnlibUtils.ReturnUInt32Method(0));
+
+        // 4.57+: same UserEnvironment, renamed to EnvironmentNetworkType
+        static int PatchV457(ModuleDefMD m) =>
+            m.PatchFunction(className, "GetCurrentUserEnvironment", "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.UserLogin.UserEnvironment", DnlibUtils.ReturnUInt32Method(2))
+            + m.PatchFunction(className, "GetCurrentNetworkType", "()\u0042\u004d\u0057.ISPI.TRIC.ISTA.Contracts.Enums.UserLogin.EnvironmentNetworkType", DnlibUtils.ReturnUInt32Method(0));
     }
 
     [UserAuthPatch]
@@ -801,16 +782,27 @@ public static partial class PatchUtils
     [FixDS2VehicleIdentificationPatch]
     [LibraryName("RheingoldDiagnostics.dll")]
     [FromVersion("4.49")]
-    [UntilVersion("4.56")]
-    public static int PatchFixDS2VehicleIdentFrom449(ModuleDefMD module)
+    public static int PatchFixDS2VehicleIdent(ModuleDefMD module)
     {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
-            "doVehicleShortTest",
-            "(\u0042\u004d\u0057.Rheingold.CoreFramework.IProgressMonitor)System.Boolean",
-            FixCondition);
+        const string className = "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent";
+        const string sig = "(\u0042\u004d\u0057.Rheingold.CoreFramework.IProgressMonitor)System.Boolean";
 
-        static void FixCondition(MethodDef method)
+        var version = module.Assembly.Version;
+
+        // < 4.56: camelCase method, HandleMissingEcus(bool) signature, Instruction[] injection
+        // ≥ 4.56: PascalCase method, HandleMissingEcus() signature, List<Instruction> + SimplifyBranches
+        var result = version < new Version("4.56")
+            ? module.PatchFunction(className, "doVehicleShortTest", sig, FixLegacy)
+            : module.PatchFunction(className, "DoVehicleShortTest", sig, FixModern);
+
+        if (result == 0)
+        {
+            Log.Warning("{PatchName} found no applicable target in {Assembly}({Version})", nameof(PatchFixDS2VehicleIdent), module.Assembly.Name, version);
+        }
+
+        return result;
+
+        static void FixLegacy(MethodDef method)
         {
             var instructions = method.Body.Instructions;
 
@@ -861,20 +853,8 @@ public static partial class PatchUtils
                 instructions.Insert(indexOfSetIdentSuccessfully - 2, instruction);
             }
         }
-    }
 
-    [FixDS2VehicleIdentificationPatch]
-    [LibraryName("RheingoldDiagnostics.dll")]
-    [FromVersion("4.56")]
-    public static int PatchFixDS2VehicleIdentFrom456(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
-            "DoVehicleShortTest",
-            "(\u0042\u004d\u0057.Rheingold.CoreFramework.IProgressMonitor)System.Boolean",
-            FixDoVehicleShortTest);
-
-        static void FixDoVehicleShortTest(MethodDef method)
+        static void FixModern(MethodDef method)
         {
             var instructions = method.Body.Instructions;
 
@@ -991,25 +971,33 @@ public static partial class PatchUtils
 
     [MotorbikeClamp15Patch]
     [LibraryName("RheingoldDiagnostics.dll")]
-    [UntilVersion("4.58")]
     public static int PatchMotorbikeClamp15(ModuleDefMD module)
     {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
-            "ClearAndReadErrorInfoMemory",
-            "(\u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.IJobServices)System.Void",
-            PatchClamp15Check
-        );
+        const string className = "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent";
+        const string methodName = "ClearAndReadErrorInfoMemory";
+        const string sigLegacy = "(\u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.IJobServices)System.Void";
+        const string sigModern = "(\u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.IJobServices,System.Func`1<System.Collections.Generic.IDictionary`2<System.String,System.Object>>)System.Void";
 
+        var version = module.Assembly.Version;
+        var result = version < new Version("4.58")
+            ? module.PatchFunction(className, methodName, sigLegacy, PatchClamp15Check)
+            : module.PatchFunction(className, methodName, sigModern, PatchClamp15Check);
+
+        if (result == 0)
+        {
+            Log.Warning("{PatchName} found no applicable target in {Assembly}({Version})", nameof(PatchMotorbikeClamp15), module.Assembly.Name, version);
+        }
+
+        return result;
+
+        // IL logic is identical for all versions: redirect the outer HasValue brfalse to skip
+        // the RegisterMessage block when clamp is unavailable.
+        // < 4.58: transforms (!clamp.HasValue || clamp < 0.1) → (clamp.HasValue && clamp < 0.1)
+        // ≥ 4.58: same redirect on restructured control flow
         static void PatchClamp15Check(MethodDef method)
         {
             var instructions = method.Body.Instructions;
 
-            // Transform the logic from:
-            // Original: if (flag && (!clamp.HasValue || clamp < 0.1)) { RegisterMessage(); return; }
-            // To: if (flag && (clamp.HasValue && clamp < 0.1)) { RegisterMessage(); return; }
-
-            // First find the HasValue call
             var hasValueCall = method.FindInstruction(OpCodes.Call, "System.Boolean System.Nullable`1<System.Double>::get_HasValue()");
             if (hasValueCall == null)
             {
@@ -1024,7 +1012,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            // The next instruction after HasValue call should be brfalse.s
             var brfalseInstruction = instructions[hasValueIndex + 1];
             if (brfalseInstruction.OpCode != OpCodes.Brfalse_S)
             {
@@ -1032,8 +1019,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Find the instruction that skips the RegisterMessage block (IL_012d in the original)
-            // This should be the target of the second brfalse.s instruction after the value comparison
             var valueComparisonBrfalse = instructions.Skip(hasValueIndex + 2)
                 .FirstOrDefault(inst => inst.OpCode == OpCodes.Brfalse_S);
 
@@ -1043,68 +1028,6 @@ public static partial class PatchUtils
                 return;
             }
 
-            // Change the first brfalse target to point to the same target as the value comparison brfalse
-            // This transforms (!clamp.HasValue || clamp < 0.1) to (clamp.HasValue && clamp < 0.1)
-            brfalseInstruction.Operand = valueComparisonBrfalse.Operand;
-        }
-    }
-
-    [MotorbikeClamp15Patch]
-    [LibraryName("RheingoldDiagnostics.dll")]
-    [FromVersion("4.58")]
-    public static int PatchMotorbikeClamp15From458(ModuleDefMD module)
-    {
-        return module.PatchFunction(
-            "\u0042\u004d\u0057.Rheingold.Diagnostics.VehicleIdent",
-            "ClearAndReadErrorInfoMemory",
-            "(\u0042\u004d\u0057.Rheingold.CoreFramework.Contracts.IJobServices,System.Func`1<System.Collections.Generic.IDictionary`2<System.String,System.Object>>)System.Void",
-            PatchClamp15CheckFrom458
-        );
-
-        static void PatchClamp15CheckFrom458(MethodDef method)
-        {
-            var instructions = method.Body.Instructions;
-
-            // In ISTA 4.58+, the clamp15 check restructured control flow:
-            // if (clamp != null) { if (!(value < 0.1 & hasValue)) { goto IL_12D; } }
-            // RegisterMessage(); return;
-            // IL_12D: (continue)
-            // When HasValue is false, the outer brfalse.s branches forward to RegisterMessage (warning).
-            // Patch: redirect the outer HasValue brfalse.s to IL_12D to suppress the warning
-            // when no clamp15 reading is available, matching the intent of the original patch.
-            var hasValueCall = method.FindInstruction(OpCodes.Call, "System.Boolean System.Nullable`1<System.Double>::get_HasValue()");
-            if (hasValueCall == null)
-            {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
-                return;
-            }
-
-            var hasValueIndex = instructions.IndexOf(hasValueCall);
-            if (hasValueIndex == -1 || hasValueIndex >= instructions.Count - 1)
-            {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
-                return;
-            }
-
-            // The next instruction after HasValue call should be brfalse.s (branches to RegisterMessage when null)
-            var brfalseInstruction = instructions[hasValueIndex + 1];
-            if (brfalseInstruction.OpCode != OpCodes.Brfalse_S)
-            {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
-                return;
-            }
-
-            // Find the inner brfalse.s that skips to IL_12D (branches when !(value < 0.1 & hasValue) is false)
-            var valueComparisonBrfalse = instructions.Skip(hasValueIndex + 2)
-                .FirstOrDefault(inst => inst.OpCode == OpCodes.Brfalse_S);
-
-            if (valueComparisonBrfalse == null)
-            {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
-                return;
-            }
-
-            // Redirect the outer HasValue brfalse to skip the warning when clamp is unavailable
             brfalseInstruction.Operand = valueComparisonBrfalse.Operand;
         }
     }
