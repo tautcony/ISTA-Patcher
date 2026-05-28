@@ -106,4 +106,90 @@ public class ConsoleCaptureTests
             return Task.FromResult(0);
         }
     }
+
+    // ────────────── LineInterceptingTextWriter low-level paths ──────────────
+
+    [Test]
+    public void ConsoleCaptureScope_WriteChar_EmitsLineOnNewline()
+    {
+        var entries = new List<LogEntry>();
+        using var scope = new ConsoleCaptureScope(entries.Add);
+
+        // Write individual characters including a newline
+        Console.Out.Write('h');
+        Console.Out.Write('i');
+        Console.Out.Write('\n');
+
+        Assert.That(entries.Any(e => e.Message.Contains("hi", StringComparison.Ordinal)), Is.True);
+    }
+
+    [Test]
+    public void ConsoleCaptureScope_WriteChar_IgnoresCarriageReturn()
+    {
+        var entries = new List<LogEntry>();
+        using var scope = new ConsoleCaptureScope(entries.Add);
+
+        // \r should be stripped; \n triggers emission
+        Console.Out.Write('o');
+        Console.Out.Write('k');
+        Console.Out.Write('\r');
+        Console.Out.Write('\n');
+
+        Assert.That(entries.Any(e => e.Message.Contains("ok", StringComparison.Ordinal)), Is.True);
+    }
+
+    [Test]
+    public void ConsoleCaptureScope_WriteString_WithEmbeddedNewlines_EmitsMultipleLines()
+    {
+        var entries = new List<LogEntry>();
+        using var scope = new ConsoleCaptureScope(entries.Add);
+
+        Console.Out.Write("line1\nline2\n");
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(entries.Any(e => e.Message.Contains("line1", StringComparison.Ordinal)), Is.True);
+            Assert.That(entries.Any(e => e.Message.Contains("line2", StringComparison.Ordinal)), Is.True);
+        }
+    }
+
+    [Test]
+    public void ConsoleCaptureScope_WriteString_NullOrEmpty_DoesNotEmit()
+    {
+        var entries = new List<LogEntry>();
+        using var scope = new ConsoleCaptureScope(entries.Add);
+
+        Console.Out.Write((string?)null);
+        Console.Out.Write(string.Empty);
+
+        Assert.That(entries, Is.Empty);
+    }
+
+    [Test]
+    public void ConsoleCaptureScope_Flush_WithPartialBuffer_EmitsLine()
+    {
+        var entries = new List<LogEntry>();
+
+        // Create scope and write without a trailing newline; Dispose should flush
+        using (new ConsoleCaptureScope(entries.Add))
+        {
+            Console.Out.Write("partial");
+            // No newline — the Dispose/Flush should still emit this
+        }
+
+        Assert.That(entries.Any(e => e.Message.Contains("partial", StringComparison.Ordinal)), Is.True);
+    }
+
+    [Test]
+    public void ConsoleCaptureScope_DoubleDispose_IsIdempotent()
+    {
+        var entries = new List<LogEntry>();
+        var scope = new ConsoleCaptureScope(entries.Add);
+
+        Assert.DoesNotThrow(() =>
+        {
+            scope.Dispose();
+            scope.Dispose(); // second dispose should not throw
+        });
+    }
 }

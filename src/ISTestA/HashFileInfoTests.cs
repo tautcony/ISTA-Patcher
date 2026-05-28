@@ -161,4 +161,84 @@ public class HashFileInfoTests
         Assert.That(ex.InnerException!.Message, Does.Contain("Expected at least 2 elements"),
             "Exception message should indicate the validation failure");
     }
+
+    // ────────────── Hash property ──────────────
+
+    /// <summary>
+    /// Hash stored as base64 should be decoded to hex on first access.
+    /// </summary>
+    [Test]
+    public void Hash_ValidBase64_DecodesOnFirstAccess()
+    {
+        // "abcdefghijklmnop" (16 bytes) as base64
+        var bytes = new byte[] { 0xAB, 0xCD, 0xEF };
+        var b64 = Convert.ToBase64String(bytes);
+        var instance = new HashFileInfo(["file.dll", b64]);
+
+        var hash = instance.Hash;
+
+        Assert.That(hash, Is.EqualTo("ABCDEF").IgnoreCase);
+    }
+
+    /// <summary>
+    /// Second access of Hash should return cached value without re-decoding.
+    /// </summary>
+    [Test]
+    public void Hash_ValidBase64_SecondAccessReturnsCachedValue()
+    {
+        var bytes = new byte[] { 0x01, 0x02, 0x03 };
+        var b64 = Convert.ToBase64String(bytes);
+        var instance = new HashFileInfo(["file.dll", b64]);
+
+        var first = instance.Hash;
+        var second = instance.Hash;
+
+        Assert.That(second, Is.EqualTo(first));
+    }
+
+    /// <summary>
+    /// Invalid base64 should cause the Hash property to return empty string.
+    /// </summary>
+    [Test]
+    public void Hash_InvalidBase64_ReturnsEmptyString()
+    {
+        var instance = new HashFileInfo(["file.dll", "not-valid-base64!!!"]);
+
+        var hash = instance.Hash;
+
+        Assert.That(hash, Is.Empty);
+    }
+
+    // ────────────── CalculateHash ──────────────
+
+    [Test]
+    public async Task CalculateHash_ExistingFile_ReturnsHexHash()
+    {
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            await File.WriteAllBytesAsync(tempFile, [1, 2, 3, 4, 5]);
+
+            var hash = await HashFileInfo.CalculateHash(tempFile);
+
+            Assert.That(hash, Is.Not.Empty);
+            Assert.That(hash, Has.Length.EqualTo(64)); // SHA-256 = 32 bytes = 64 hex chars
+            Assert.That(hash, Does.Match("^[0-9A-Fa-f]+$"));
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
+
+    [Test]
+    public async Task CalculateHash_NonExistentFile_ReturnsEmptyString()
+    {
+        // Use a temp directory that exists but with a non-existent file name
+        var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + "_nonexistent.dll");
+
+        var hash = await HashFileInfo.CalculateHash(path);
+
+        Assert.That(hash, Is.Empty);
+    }
 }

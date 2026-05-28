@@ -76,6 +76,11 @@ public class PatchPathTraversalTests
     [Test]
     public void PatchSingleFile_WindowsPathTraversal_CanEscapeBaseDirectory()
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Pass("Backslash traversal is only normalized as directory traversal on Windows.");
+        }
+
         // Arrange
         var sensitiveFile = Path.Combine(_tempTargetPath, "important.dll");
         File.WriteAllText(sensitiveFile, "important content");
@@ -106,7 +111,7 @@ public class PatchPathTraversalTests
     {
         // Arrange
         var basePath = Path.GetFullPath(_testBasePath);
-        var traversalAttempt = "..\\..\\..\\sensitive.dll";
+        var traversalAttempt = Path.Combine("..", "sensitive.dll");
         var fullPath = Path.GetFullPath(Path.Join(basePath, traversalAttempt));
 
         // Act: Check if path is within base directory

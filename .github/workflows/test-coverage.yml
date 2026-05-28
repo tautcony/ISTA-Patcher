@@ -1,0 +1,66 @@
+name: Test Coverage
+
+on:
+  push:
+    branches: [ master, feat/**, release/** ]
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+  code-quality: write
+
+jobs:
+  test:
+    name: Unit Tests and Coverage
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    - name: Setup .NET 10.x
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.x
+        cache: true
+        cache-dependency-path: |
+          src/ISTA-Patcher/packages.lock.json
+          src/ISTAvalon/packages.lock.json
+          src/ISTAlter/packages.lock.json
+          src/ISTestA/packages.lock.json
+          src/ISTgenerAtor/packages.lock.json
+
+    - name: Restore dependencies
+      run: dotnet restore src/ISTestA/ISTestA.csproj --locked-mode
+
+    - name: Run unit tests with coverage
+      run: |
+        dotnet test src/ISTestA/ISTestA.csproj \
+          --configuration Debug \
+          --no-restore \
+          --settings coverage.runsettings \
+          --logger "trx;LogFileName=unit-tests.trx" \
+          --collect:"XPlat Code Coverage" \
+          --results-directory TestResults
+        mkdir -p coverage
+        cp TestResults/*/coverage.cobertura.xml coverage/coverage.cobertura.xml
+
+    - name: Upload unit test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: unit-test-results
+        retention-days: 14
+        if-no-files-found: ignore
+        path: |
+          TestResults/**/*.trx
+          TestResults/**/coverage.cobertura.xml
+
+    - name: Upload code coverage
+      uses: actions/upload-code-coverage@v1
+      with:
+        file: coverage/coverage.cobertura.xml
+        language: "C#"
+        label: code-coverage/coverlet
