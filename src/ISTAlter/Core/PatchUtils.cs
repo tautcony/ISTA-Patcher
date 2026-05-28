@@ -157,7 +157,7 @@ public static partial class PatchUtils
     [ValidationPatch]
     [LibraryName("PsdzServiceImpl.dll")]
     [UntilVersion("4.56")]
-    public static int PatchConfigurationServiceTo455(ModuleDefMD module)
+    public static int PatchPsdzConfigurationService(ModuleDefMD module)
     {
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.Psdz.Services.ConfigurationService",
