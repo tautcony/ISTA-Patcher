@@ -127,9 +127,52 @@ public static class RegistryUtils
             ],
         };
         var value = licenseInfo.Serialize();
-        const string template = "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\\u0042\u004d\u0057Group\\ISPI\\Rheingold]\n\"License\"=\"{}\"";
-        File.WriteAllText(licenseFile, template.Replace("{}", ToLiteral(value), StringComparison.Ordinal));
+        const string template = "Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\\u0042\u004d\u0057Group\\ISPI\\Rheingold]\n\"License\"=\"{}\"";
+
+        // The template targets the native 64-bit hive by default (ISTA >= 4.55).
+        // Older 32-bit versions (< 4.55) need the WOW6432Node redirection node.
+        var registryTemplate = IsSixtyFourBit(basePath)
+            ? template
+            : template.Replace("SOFTWARE\\", "SOFTWARE\\WOW6432Node\\", StringComparison.Ordinal);
+        File.WriteAllText(licenseFile, registryTemplate.Replace("{}", ToLiteral(value), StringComparison.Ordinal));
         Log.Information("Registry file generated: {Path}", licenseFile);
+    }
+
+    private static bool IsSixtyFourBit(string basePath)
+    {
+        var version = GetIstaVersion(basePath);
+
+        // Default to the 64-bit hive; only fall back to WOW6432Node when the ISTA
+        // version is positively known to predate the 4.55 64-bit switch.
+        var sixtyFourBit = version == null || version >= new Version("4.55");
+        Log.Information(
+            "ISTA version {Version} detected, generating {Hive} registry key",
+            version?.ToString() ?? "unknown",
+            sixtyFourBit ? "64-bit" : "WOW6432Node (32-bit)");
+        return sixtyFourBit;
+    }
+
+    private static Version? GetIstaVersion(string basePath)
+    {
+        // RheingoldCoreFramework.dll carries the ISTA version and is always present
+        // (it hosts the mandatory license patches), so it is the canonical source.
+        var corePath = Path.Join(basePath, "RheingoldCoreFramework.dll");
+        if (!File.Exists(corePath))
+        {
+            Log.Warning("Cannot determine ISTA version: {Path} not found", corePath);
+            return null;
+        }
+
+        try
+        {
+            var module = PatchUtils.LoadModule(corePath);
+            return module.Assembly?.Version;
+        }
+        catch (Exception ex)
+        {
+            Log.Warning("Cannot determine ISTA version from {Path}: {Message}", corePath, ex.Message);
+            return null;
+        }
     }
 
     private static string ToLiteral(string valueTextForCompiler)
