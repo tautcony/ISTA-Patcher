@@ -172,7 +172,7 @@ public static partial class PatchUtils
                 default:
                     if (instr.Operand != null)
                     {
-                        Log.Warning("Unhandled operand type {Type} in {Method}", instr.Operand.GetType(), method.FullName);
+                        LogPatchWarning("Unhandled operand type {Type} in {Method}", instr.Operand.GetType(), method.FullName);
                     }
 
                     break;
@@ -240,14 +240,14 @@ public static partial class PatchUtils
         var asyncStateMachineAttribute = method.CustomAttributes.FirstOrDefault(i => string.Equals(i.TypeFullName, "System.Runtime.CompilerServices.AsyncStateMachineAttribute", StringComparison.Ordinal));
         if (asyncStateMachineAttribute is not { ConstructorArguments: [{ Value: ValueTypeSig stateMachineType }] })
         {
-            Log.Warning("Required attribute not found, can not patch {Method}", method.FullName);
+            LogPatchWarning("Required attribute not found, can not patch {Method}", method.FullName);
             return 0;
         }
 
         var typeDef = stateMachineType.TypeDefOrRef.ResolveTypeDef();
         if (typeDef?.Methods.FirstOrDefault(m => m.Name == "MoveNext" && m.HasOverrides) is not { } generateMethod)
         {
-            Log.Warning("Required attribute not found, can not patch {Method}", method.FullName);
+            LogPatchWarning("Required attribute not found, can not patch {Method}", method.FullName);
             return 0;
         }
 

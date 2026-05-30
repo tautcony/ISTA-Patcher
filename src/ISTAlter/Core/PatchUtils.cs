@@ -182,7 +182,7 @@ public static partial class PatchUtils
             if (getBaseService == null || getPSdZProperties == null || setPSdZProperties == null || putProperty == null ||
                 stringImplicit == null)
             {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                LogPatchWarning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -191,7 +191,7 @@ public static partial class PatchUtils
                 var property = method.GetLocalByType("java.util.Properties");
                 if (property == null || method.Body.Variables.Count == 0)
                 {
-                    Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                    LogPatchWarning("Required instructions not found, can not patch {Method}", method.FullName);
                     return;
                 }
 
@@ -301,7 +301,7 @@ public static partial class PatchUtils
 
             if (patchCount == 0)
             {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                LogPatchWarning("Required instructions not found, can not patch {Method}", method.FullName);
             }
         }
     }
@@ -368,7 +368,7 @@ public static partial class PatchUtils
             var invalidOperationException = method.FindOperand<MemberRef>(OpCodes.Newobj, "System.Void System.InvalidOperationException::.ctor(System.String)");
             if (getProcessesByName == null || firstOrDefault == null || invalidOperationException == null)
             {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                LogPatchWarning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
@@ -499,7 +499,7 @@ public static partial class PatchUtils
                 }
                 else
                 {
-                    Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                    LogPatchWarning("Required instructions not found, can not patch {Method}", method.FullName);
                 }
             }
         };

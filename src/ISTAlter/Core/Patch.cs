@@ -174,7 +174,12 @@ public static partial class Patch
                 }
 
                 patch.AddAttemptedCount();
-                var patchedCount = patch.Delegator(module);
+                int patchedCount;
+                using (PatchUtils.BeginPatchScope(patch.Method.Name))
+                {
+                    patchedCount = patch.Delegator(module);
+                }
+
                 patch.AddAppliedCount(patchedCount);
                 if (patchedCount > 0)
                 {
