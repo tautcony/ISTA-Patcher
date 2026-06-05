@@ -44,6 +44,8 @@ internal sealed class MotorbikeClamp15PatchAttribute : ISTAPatchAttribute;
 
 internal sealed class ManualClampSwitchPatchAttribute : ISTAPatchAttribute;
 
+internal sealed class ISTAVoltagePatchAttribute : ISTAPatchAttribute;
+
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 internal sealed class FromVersionAttribute(string version) : Attribute
 {

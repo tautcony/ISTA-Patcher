@@ -115,6 +115,11 @@ public class DefaultPatcherProvider : IPatcherProvider
             Log.Information("Loaded {Count} custom patches from configuration", customPatches.Count);
         }
 
+        if (opts.ISTAVoltage)
+        {
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(ISTAVoltagePatchAttribute)));
+        }
+
         Log.Debug("Loaded patches: {Patches}", string.Join(", ", this.Patches.Select(p => p.Method.Name)));
     }
 

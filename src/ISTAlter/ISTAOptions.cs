@@ -84,6 +84,8 @@ public static class ISTAOptions
         public bool ManualClampSwitch { get; set; }
 
         public List<CustomPatchDefinition>? CustomPatchDefinitions { get; set; }
+
+        public bool ISTAVoltage { get; set; }
     }
 
     public class PatchOptions : OptionalPatchOptions
