@@ -49,6 +49,9 @@ public class OptionalPatchOption
     [CliOption(Name = "--enable-manual-clamp-switch-bypass", Description = "Enable patch for manual clamp switch bypass.")]
     public bool ManualClampSwitch { get; set; }
 
+    [CliOption(Name = "--enable-skip-battery-demand", Description = "Disable the battery demand online service call to prevent crashes when the service URL is not configured (standalone mode).")]
+    public bool SkipBatteryDemand { get; set; }
+
     [CliOption(Name = "--enable-ista-voltage", Description = "Inject the ISTA voltage controller into IstaOperation.exe (loads ISTAVoltageControl.dll to display/track KL15/KL30 over OBD/D-CAN or ENET).")]
     public bool ISTAVoltage { get; set; }
 }

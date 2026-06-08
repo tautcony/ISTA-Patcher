@@ -64,6 +64,7 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
             ForceICOMNext = this.ForceICOMNext,
             MotorbikeClamp15Fix = this.MotorbikeClamp15Fix,
             ManualClampSwitch = this.ManualClampSwitch,
+            SkipBatteryDemand = this.SkipBatteryDemand,
             ISTAVoltage = this.ISTAVoltage,
             PatchType = this.PatchType,
             GenerateMockRegFile = this.GenerateMockRegFile,

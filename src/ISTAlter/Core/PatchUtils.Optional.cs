@@ -1411,4 +1411,68 @@ public static partial class PatchUtils
             }
         }
     }
+
+    [SkipBatteryDemandPatch]
+    [LibraryName("Authoring.dll")]
+    [FromVersion("4.59")]
+    public static int PatchGetBatteryDataFromBackend(ModuleDefMD module)
+    {
+        var apiResultCtor = module.GetType("\u0042\u004d\u0057.Authoring.API.ApiResult")
+            ?.FindConstructors().FirstOrDefault(m => m.MethodSig.Params.Count == 0);
+        var batteryDataCtor = module.GetType("\u0042\u004d\u0057.Authoring.API.Implementation.SeamLM2Demand.SeamLM2BatteryData")
+            ?.FindConstructors().FirstOrDefault(m => m.MethodSig.Params.Count == 1);
+        if (apiResultCtor == null || batteryDataCtor == null)
+        {
+            Log.Warning("Required constructors not found in {Assembly}({Version})", module.Assembly.Name, module.Assembly.Version);
+            return 0;
+        }
+
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Authoring.API.Implementation.SeamLM2Demand.SeamLM2BatteryDataHandler",
+            "GetBatteryDataFromBackend",
+            "(System.String)\u0042\u004d\u0057.Authoring.API.Interface.SeamLM2Demand.ISeamLM2BatteryData",
+            method =>
+            {
+                method.ReplaceWith([
+                    Instruction.Create(OpCodes.Newobj, apiResultCtor),
+                    Instruction.Create(OpCodes.Newobj, batteryDataCtor),
+                    OpCodes.Ret.ToInstruction(),
+                ]);
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+            }
+        );
+    }
+
+    [SkipBatteryDemandPatch]
+    [LibraryName("Authoring.dll")]
+    [FromVersion("4.59")]
+    public static int PatchGetBatteryDataFromBackendLegacy(ModuleDefMD module)
+    {
+        var apiResultCtor = module.GetType("\u0042\u004d\u0057.Authoring.API.ApiResult")
+            ?.FindConstructors().FirstOrDefault(m => m.MethodSig.Params.Count == 0);
+        var batteryDataCtor = module.GetType("\u0042\u004d\u0057.Authoring.API.Implementation.BatteryService.BatteryData")
+            ?.FindConstructors().FirstOrDefault(m => m.MethodSig.Params.Count == 1);
+        if (apiResultCtor == null || batteryDataCtor == null)
+        {
+            Log.Warning("Required constructors not found in {Assembly}({Version})", module.Assembly.Name, module.Assembly.Version);
+            return 0;
+        }
+
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Authoring.API.Implementation.BatteryService.BatteryDataHandler",
+            "GetBatteryDataFromBackend",
+            "(System.String)\u0042\u004d\u0057.Authoring.API.Interface.BatteryService.IBatteryData",
+            method =>
+            {
+                method.ReplaceWith([
+                    Instruction.Create(OpCodes.Newobj, apiResultCtor),
+                    Instruction.Create(OpCodes.Newobj, batteryDataCtor),
+                    OpCodes.Ret.ToInstruction(),
+                ]);
+                method.Body.Variables.Clear();
+                method.Body.ExceptionHandlers.Clear();
+            }
+        );
+    }
 }

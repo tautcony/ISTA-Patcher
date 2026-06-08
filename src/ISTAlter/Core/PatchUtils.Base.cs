@@ -70,7 +70,12 @@ public static partial class PatchUtils
     /// <param name="fileName">The path to the module file will be saved.</param>
     public static void SaveModule(ModuleDefMD module, string fileName)
     {
-        if (HavePatchedMark(module) == null)
+        if (!IsConsistent(module))
+        {
+            return;
+        }
+
+        if (!IsStamped(module))
         {
             return;
         }
@@ -353,7 +358,7 @@ public static partial class PatchUtils
         var ctor = patchedAttribute.FindConstructors().First();
         var attributes = new List<CustomAttribute>
         {
-            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "By"), new CAArgument(module.CorLibTypes.String, "ISTA-Patcher") } },
+            new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "By"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Recompose(), 0, 12)) } },
             new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "At"), new CAArgument(module.CorLibTypes.String, Timestamp) } },
             new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Repo"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Source)) } },
             new(ctor) { ConstructorArguments = { new CAArgument(module.CorLibTypes.String, "Version"), new CAArgument(module.CorLibTypes.String, Encoding.UTF8.GetString(Version)) } },

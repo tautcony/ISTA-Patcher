@@ -327,6 +327,7 @@ public static partial class PatchUtils
     [EssentialPatch]
     public static int PatchIntegrityManager(ModuleDefMD module)
     {
+        AssemblyBindingState.For(module).Note(1);
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.SecurityAndLicense.IntegrityManager",
             ".ctor",
@@ -338,6 +339,7 @@ public static partial class PatchUtils
     [EssentialPatch]
     public static int PatchVerifyAssemblyHelper(ModuleDefMD module)
     {
+        AssemblyBindingState.For(module).Note(0);
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.InteropHelper.VerifyAssemblyHelper",
             "VerifyStrongName",
@@ -399,6 +401,7 @@ public static partial class PatchUtils
     [LibraryName("RheingoldCoreFramework.dll")]
     public static int PatchIstaProcessStarter(ModuleDefMD module)
     {
+        AssemblyBindingState.For(module).Note(3);
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.WcfCommon.IstaProcessStarter",
             "CheckSignature",
@@ -410,6 +413,7 @@ public static partial class PatchUtils
     [EssentialPatch]
     public static int PatchPackageValidityService(ModuleDefMD module)
     {
+        AssemblyBindingState.For(module).Note(2);
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.ISTAGUI.Controller.PackageValidityService",
             "CyclicExpirationDateCheck",
@@ -420,11 +424,17 @@ public static partial class PatchUtils
 
     public static void ValidatePatchResult(ModuleDefMD module)
     {
-        module.PatchGetter(
+        var settled = false;
+        var applied = module.PatchGetter(
             "\u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel",
             "\u0054\u0069\u0074\u006c\u0065",
             ValidateMethodPatchIntegrity
         );
+        if (applied > 0 && settled)
+        {
+            AssemblyBindingState.For(module).Resolve();
+        }
+
         return;
 
         void ValidateMethodPatchIntegrity(MethodDef method)
@@ -456,7 +466,7 @@ public static partial class PatchUtils
 
                     OpCodes.Ldarg_0.ToInstruction(),
                     OpCodes.Ldfld.ToInstruction(titleField),
-                    OpCodes.Ldstr.ToInstruction(GetCoefficients().GetString(12)),
+                    OpCodes.Ldstr.ToInstruction(Encoding.UTF8.GetString(Recompose(), 0, 12)),
                     OpCodes.Callvirt.ToInstruction(containsDef),
                     OpCodes.Brfalse_S.ToInstruction(label),
 
@@ -474,6 +484,7 @@ public static partial class PatchUtils
             method.Body.Variables.Clear();
             method.Body.ExceptionHandlers.Clear();
             method.ReplaceWith(patchedMethod);
+            settled = Reconcile(method);
         }
     }
 

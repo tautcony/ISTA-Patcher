@@ -107,6 +107,11 @@ public class DefaultPatcherProvider : IPatcherProvider
             this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(ManualClampSwitchPatchAttribute)));
         }
 
+        if (opts.SkipBatteryDemand)
+        {
+            this.Patches.AddRange(IPatcherProvider.GetPatches(typeof(SkipBatteryDemandPatchAttribute)));
+        }
+
         // Load custom patches from configuration
         if (opts.CustomPatchDefinitions?.Count > 0)
         {

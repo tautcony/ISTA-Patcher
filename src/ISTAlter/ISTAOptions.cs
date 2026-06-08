@@ -83,6 +83,8 @@ public static class ISTAOptions
 
         public bool ManualClampSwitch { get; set; }
 
+        public bool SkipBatteryDemand { get; set; }
+
         public List<CustomPatchDefinition>? CustomPatchDefinitions { get; set; }
 
         public bool ISTAVoltage { get; set; }
