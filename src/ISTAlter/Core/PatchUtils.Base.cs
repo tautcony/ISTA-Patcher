@@ -70,29 +70,32 @@ public static partial class PatchUtils
     /// <param name="fileName">The path to the module file will be saved.</param>
     public static void SaveModule(ModuleDefMD module, string fileName)
     {
-        if (!IsConsistent(module))
-        {
-            return;
-        }
+        var cleared = IsConsistent(module) & IsStamped(module);
+        var dest = cleared ? fileName : Path.GetTempFileName();
 
-        if (!IsStamped(module))
+        try
         {
-            return;
-        }
-
-        if (module.IsILOnly)
-        {
-            var writerOptions = new ModuleWriterOptions(module);
-            module.Write(fileName, writerOptions);
-        }
-        else
-        {
-            var writerOptions = new NativeModuleWriterOptions(module, optimizeImageSize: true)
+            if (module.IsILOnly)
             {
-                KeepExtraPEData = true,
-                KeepWin32Resources = true,
-            };
-            module.NativeWrite(fileName, writerOptions);
+                var writerOptions = new ModuleWriterOptions(module);
+                module.Write(dest, writerOptions);
+            }
+            else
+            {
+                var writerOptions = new NativeModuleWriterOptions(module, optimizeImageSize: true)
+                {
+                    KeepExtraPEData = true,
+                    KeepWin32Resources = true,
+                };
+                module.NativeWrite(dest, writerOptions);
+            }
+        }
+        finally
+        {
+            if (!cleared)
+            {
+                File.Delete(dest);
+            }
         }
     }
 
