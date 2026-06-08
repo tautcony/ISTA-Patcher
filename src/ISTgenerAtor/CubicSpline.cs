@@ -55,12 +55,13 @@ internal static class CubicSpline
 
     private static double[] SolveLinearSystem(double[,] a, double[] b)
     {
+        const double epsilon = 1e-12;
         var n = b.Length;
         var x = new double[n];
 
         for (var i = 1; i < n; i++)
         {
-            if (a[i - 1, i - 1] == 0)
+            if (Math.Abs(a[i - 1, i - 1]) < epsilon)
             {
                 throw new InvalidOperationException($"Zero pivot at position ({i - 1}, {i - 1}) in tridiagonal system.");
             }
@@ -70,7 +71,7 @@ internal static class CubicSpline
             b[i] -= m * b[i - 1];
         }
 
-        if (a[n - 1, n - 1] == 0)
+        if (Math.Abs(a[n - 1, n - 1]) < epsilon)
         {
             throw new InvalidOperationException($"Zero pivot at position ({n - 1}, {n - 1}) in tridiagonal system.");
         }
@@ -78,7 +79,7 @@ internal static class CubicSpline
         x[n - 1] = b[n - 1] / a[n - 1, n - 1];
         for (var i = n - 2; i >= 0; i--)
         {
-            if (a[i, i] == 0)
+            if (Math.Abs(a[i, i]) < epsilon)
             {
                 throw new InvalidOperationException($"Zero pivot at position ({i}, {i}) in tridiagonal system.");
             }
