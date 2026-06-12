@@ -420,15 +420,6 @@ public static partial class PatchUtils
     [FromVersion("4.55")]
     public static int PatchEdgeTelemetry(ModuleDefMD module)
     {
-        // EDGE telemetry egress that the IsSend*Forbidden flags do NOT gate. These two senders fire
-        // the HTTP POST unconditionally (the forbidden flag only rides inside the payload), so the
-        // request still leaves the machine. Empty their bodies -> the telemetry call never happens.
-        //
-        // SCOPE: telemetry only — Speedlink (session/dealer) + OBFCM (fuel data to the Vehicle Shadow
-        // backend). EDGEBattery / EDGEPDI are intentionally left FUNCTIONAL (their response drives
-        // features). To extend to "zero EDGE egress", empty
-        // BMW.Rheingold.InfoProvider.EDGE.EDGEProcessorImpl::SendDataToBackend instead (single
-        // chokepoint, but blocks ALL channels including battery/PDI).
         return module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.RheingoldSessionController.Logic",
             "SendSpeedlinkDataInBackground",
@@ -439,6 +430,19 @@ public static partial class PatchUtils
             "SendObfcmDataToVehicleShadowBackend",
             "(\u0042\u004d\u0057.Rheingold.InfoProvider.EDGE.Models.OBFCM.OBFCMData,System.String)System.Void",
             DnlibUtils.EmptyingMethod
+        );
+    }
+
+    [NotSendPatch]
+    [LibraryName("RheingoldInfoProvider.dll")]
+    [FromVersion("4.55")]
+    public static int PatchSccVehicleSession(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.InfoProvider.SCC.SCCProcessorImpl",
+            "PostVehicleSession",
+            "(System.Collections.Generic.IEnumerable`1<System.String>,\u0042\u004d\u0057.Rheingold.InfoProvider.SCC.Models.VehicleSession)System.Net.HttpStatusCode",
+            DnlibUtils.ReturnUInt32Method((uint)System.Net.HttpStatusCode.ServiceUnavailable)
         );
     }
 
