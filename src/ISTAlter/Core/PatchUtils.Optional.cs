@@ -968,15 +968,32 @@ public static partial class PatchUtils
     [LibraryName("RheingoldxVM.dll")]
     public static int PatchSLP(ModuleDefMD module)
     {
-        return module.PatchFunction(
+        var version = module.Assembly.Version;
+
+        // < 4.60: SLP.cs still recognizes DevType=="ICOM" (legacy A/A2) directly; the device's
+        // DevTypeExt ("ICOM_A1"/"ICOM_A2") is what marks it unsupported, so hardcoding it to
+        // "ICOM_Next_A" is enough to route it through the ICOM-Next handling.
+        // >= 4.60: device dispatch was rewritten to only recognize DevType=="ICOM-Next"; legacy
+        // units report DevType=="ICOM" and now fall through to the ENET check, returning null
+        // (logged as "newDevice is null or invalid"). Normalize the parsed attribute dictionary
+        // right after it is built so the existing dispatch takes the ICOM-Next branch too.
+        var result = module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.xVM.SLP",
             "ScanDeviceFromAttrList",
             "(\u0042\u004d\u0057.Rheingold.xVM.SLPAttrRply,System.String[])\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.VCIDevice",
-            ReplaceDeviceType) + module.PatchFunction(
+            version < new Version("4.60") ? ReplaceDeviceType : NormalizeDevType
+        ) + module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.xVM.SLP",
             "IsIcomUnsupported",
             "(System.Collections.Generic.Dictionary`2<System.String,System.String>)System.Boolean",
             DnlibUtils.ReturnFalseMethod);
+
+        if (result == 0)
+        {
+            Log.Warning("{PatchName} found no applicable target in {Assembly}({Version})", nameof(PatchSLP), module.Assembly.Name, version);
+        }
+
+        return result;
 
         static void ReplaceDeviceType(MethodDef method)
         {
@@ -997,6 +1014,53 @@ public static partial class PatchUtils
                     break;
                 }
             }
+        }
+
+        static void NormalizeDevType(MethodDef method)
+        {
+            const string parseAttrListOperand = "System.Collections.Generic.Dictionary`2<System.String,System.String> \u0042\u004d\u0057.Rheingold.xVM.SLP::ParseAttrList(\u0042\u004d\u0057.Rheingold.xVM.SLPString)";
+            var parseAttrListCall = method.FindInstruction(OpCodes.Call, parseAttrListOperand);
+            if (parseAttrListCall == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var instructions = method.Body.Instructions;
+            var idx = instructions.IndexOf(parseAttrListCall);
+            var stlocInstruction = instructions[idx + 1];
+            if (stlocInstruction.OpCode != OpCodes.Stloc_0)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var getItem = method.Module.Import(typeof(Dictionary<string, string>).GetMethod("get_Item"));
+            var setItem = method.Module.Import(typeof(Dictionary<string, string>).GetMethod("set_Item"));
+            var stringEquals = method.Module.Import(typeof(string).GetMethod("op_Equality", [typeof(string), typeof(string)]));
+
+            var insertionTarget = instructions[idx + 2];
+            Instruction[] normalizeDevType =
+            [
+                OpCodes.Ldloc_0.ToInstruction(),
+                OpCodes.Ldstr.ToInstruction("DevType"),
+                OpCodes.Callvirt.ToInstruction(getItem),
+                OpCodes.Ldstr.ToInstruction("ICOM"),
+                OpCodes.Call.ToInstruction(stringEquals),
+                OpCodes.Brfalse_S.ToInstruction(insertionTarget),
+                OpCodes.Ldloc_0.ToInstruction(),
+                OpCodes.Ldstr.ToInstruction("DevType"),
+                OpCodes.Ldstr.ToInstruction("ICOM-Next"),
+                OpCodes.Callvirt.ToInstruction(setItem),
+            ];
+
+            for (var i = 0; i < normalizeDevType.Length; i++)
+            {
+                instructions.Insert(idx + 2 + i, normalizeDevType[i]);
+            }
+
+            method.Body.SimplifyBranches();
+            method.Body.OptimizeBranches();
         }
     }
 
