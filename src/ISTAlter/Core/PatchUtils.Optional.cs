@@ -970,13 +970,6 @@ public static partial class PatchUtils
     {
         var version = module.Assembly.Version;
 
-        // < 4.60: SLP.cs still recognizes DevType=="ICOM" (legacy A/A2) directly; the device's
-        // DevTypeExt ("ICOM_A1"/"ICOM_A2") is what marks it unsupported, so hardcoding it to
-        // "ICOM_Next_A" is enough to route it through the ICOM-Next handling.
-        // >= 4.60: device dispatch was rewritten to only recognize DevType=="ICOM-Next"; legacy
-        // units report DevType=="ICOM" and now fall through to the ENET check, returning null
-        // (logged as "newDevice is null or invalid"). Normalize the parsed attribute dictionary
-        // right after it is built so the existing dispatch takes the ICOM-Next branch too.
         var result = module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.xVM.SLP",
             "ScanDeviceFromAttrList",
@@ -1019,27 +1012,40 @@ public static partial class PatchUtils
         static void NormalizeDevType(MethodDef method)
         {
             const string parseAttrListOperand = "System.Collections.Generic.Dictionary`2<System.String,System.String> \u0042\u004d\u0057.Rheingold.xVM.SLP::ParseAttrList(\u0042\u004d\u0057.Rheingold.xVM.SLPString)";
-            var parseAttrListCall = method.FindInstruction(OpCodes.Call, parseAttrListOperand);
-            if (parseAttrListCall == null)
-            {
-                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
-                return;
-            }
+            const string getItemOperand = "System.String System.Collections.Generic.Dictionary`2<System.String,System.String>::get_Item(System.String)";
+            const string opEqualityOperand = "System.Boolean System.String::op_Equality(System.String,System.String)";
 
             var instructions = method.Body.Instructions;
-            var idx = instructions.IndexOf(parseAttrListCall);
-            var stlocInstruction = instructions[idx + 1];
-            if (stlocInstruction.OpCode != OpCodes.Stloc_0)
+            var parseAttrListCall = method.FindInstruction(OpCodes.Call, parseAttrListOperand);
+            if (parseAttrListCall == null || instructions[instructions.IndexOf(parseAttrListCall) + 1].OpCode != OpCodes.Stloc_0)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
             }
 
-            var getItem = method.Module.Import(typeof(Dictionary<string, string>).GetMethod("get_Item"));
-            var setItem = method.Module.Import(typeof(Dictionary<string, string>).GetMethod("set_Item"));
-            var stringEquals = method.Module.Import(typeof(string).GetMethod("op_Equality", [typeof(string), typeof(string)]));
+            // Resolve the dictionary/string members from the TARGET module (mscorlib) by reusing existing
+            // operands. The patcher targets .NET (net10.0), so importing via typeof() binds them to
+            // System.Private.CoreLib, which does not exist on ISTA's .NET Framework runtime and breaks the
+            // patched method (only non-primitive types like Dictionary`2 are affected; dnlib remaps String).
+            var module = method.Module;
+            var getItem = method.FindInstruction(OpCodes.Callvirt, getItemOperand)?.Operand as IMethod;
+            var stringEquals = method.FindInstruction(OpCodes.Call, opEqualityOperand)?.Operand as IMethod;
+            if (getItem == null || stringEquals == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
 
+            var setItemSig = MethodSig.CreateInstance(module.CorLibTypes.Void, new GenericVar(0), new GenericVar(1));
+            var setItem = new MemberRefUser(module, "set_Item", setItemSig, getItem.DeclaringType);
+
+            // >= 4.60: legacy ICOM/A1/A2 report DevType != "ICOM-Next" and fall through to the ENET check.
+            // Right after ParseAttrList, rewrite those to "ICOM-Next" so they take the existing ICOM-Next
+            // dispatch branch, and force DevTypeExt to "ICOM_Next_A". Genuine ICOM-Next is left untouched
+            // (its DevType never matches), so its dispatch, firmware check and State stay exactly as upstream.
+            var idx = instructions.IndexOf(parseAttrListCall);
             var insertionTarget = instructions[idx + 2];
+            var normalizeStart = OpCodes.Ldloc_0.ToInstruction();
             Instruction[] normalizeDevType =
             [
                 OpCodes.Ldloc_0.ToInstruction(),
@@ -1047,10 +1053,27 @@ public static partial class PatchUtils
                 OpCodes.Callvirt.ToInstruction(getItem),
                 OpCodes.Ldstr.ToInstruction("ICOM"),
                 OpCodes.Call.ToInstruction(stringEquals),
-                OpCodes.Brfalse_S.ToInstruction(insertionTarget),
+                OpCodes.Brtrue.ToInstruction(normalizeStart),
                 OpCodes.Ldloc_0.ToInstruction(),
                 OpCodes.Ldstr.ToInstruction("DevType"),
+                OpCodes.Callvirt.ToInstruction(getItem),
+                OpCodes.Ldstr.ToInstruction("ICOM A1"),
+                OpCodes.Call.ToInstruction(stringEquals),
+                OpCodes.Brtrue.ToInstruction(normalizeStart),
+                OpCodes.Ldloc_0.ToInstruction(),
+                OpCodes.Ldstr.ToInstruction("DevType"),
+                OpCodes.Callvirt.ToInstruction(getItem),
+                OpCodes.Ldstr.ToInstruction("ICOM A2"),
+                OpCodes.Call.ToInstruction(stringEquals),
+                OpCodes.Brtrue.ToInstruction(normalizeStart),
+                OpCodes.Br.ToInstruction(insertionTarget),
+                normalizeStart,
+                OpCodes.Ldstr.ToInstruction("DevType"),
                 OpCodes.Ldstr.ToInstruction("ICOM-Next"),
+                OpCodes.Callvirt.ToInstruction(setItem),
+                OpCodes.Ldloc_0.ToInstruction(),
+                OpCodes.Ldstr.ToInstruction("DevTypeExt"),
+                OpCodes.Ldstr.ToInstruction("ICOM_Next_A"),
                 OpCodes.Callvirt.ToInstruction(setItem),
             ];
 
