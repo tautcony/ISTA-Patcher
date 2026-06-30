@@ -974,7 +974,7 @@ public static partial class PatchUtils
             "\u0042\u004d\u0057.Rheingold.xVM.SLP",
             "ScanDeviceFromAttrList",
             "(\u0042\u004d\u0057.Rheingold.xVM.SLPAttrRply,System.String[])\u0042\u004d\u0057.Rheingold.CoreFramework.DatabaseProvider.VCIDevice",
-            version < new Version("4.60") ? ReplaceDeviceType : NormalizeDevType
+            version < new Version("4.60") ? ReplaceDeviceType : RewriteIcomNextDispatch
         ) + module.PatchFunction(
             "\u0042\u004d\u0057.Rheingold.xVM.SLP",
             "IsIcomUnsupported",
@@ -1009,15 +1009,69 @@ public static partial class PatchUtils
             }
         }
 
-        static void NormalizeDevType(MethodDef method)
+        static void RewriteIcomNextDispatch(MethodDef method)
         {
             const string parseAttrListOperand = "System.Collections.Generic.Dictionary`2<System.String,System.String> \u0042\u004d\u0057.Rheingold.xVM.SLP::ParseAttrList(\u0042\u004d\u0057.Rheingold.xVM.SLPString)";
-            const string getItemOperand = "System.String System.Collections.Generic.Dictionary`2<System.String,System.String>::get_Item(System.String)";
             const string opEqualityOperand = "System.Boolean System.String::op_Equality(System.String,System.String)";
+            const string getItemOperand = "System.String System.Collections.Generic.Dictionary`2<System.String,System.String>::get_Item(System.String)";
 
             var instructions = method.Body.Instructions;
+
+            // Anchor 1: dictionary = ParseAttrList(...); stored to local 0.
             var parseAttrListCall = method.FindInstruction(OpCodes.Call, parseAttrListOperand);
             if (parseAttrListCall == null || instructions[instructions.IndexOf(parseAttrListCall) + 1].OpCode != OpCodes.Stloc_0)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            // Anchor 2: the DevType=="ICOM-Next" dispatch comparison (ldstr / call op_Equality / brfalse else).
+            var icomNext = method.FindInstruction(OpCodes.Ldstr, "ICOM-Next");
+            if (icomNext == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var idxNext = instructions.IndexOf(icomNext);
+            var dispatchEquals = instructions[idxNext + 1];
+            var dispatchBranch = instructions[idxNext + 2];
+            if (dispatchEquals.OpCode != OpCodes.Call ||
+                !string.Equals((dispatchEquals.Operand as IMethod)?.FullName, opEqualityOperand, StringComparison.Ordinal) ||
+                (dispatchBranch.OpCode != OpCodes.Brfalse && dispatchBranch.OpCode != OpCodes.Brfalse_S) ||
+                dispatchBranch.Operand is not Instruction dispatchElseTarget)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var dispatchBodyStart = instructions[idxNext + 3];
+
+            // Anchor 3: the State try block, whose try opens with the "ICOM".Equals(vcidevice.DevType, ...)
+            // comparison. Match on the handler's TryStart (not the first "ICOM" ldstr, which is the
+            // vcidevice.DevType = "ICOM" assignment inside the dispatch branch).
+            var stateTry = method.Body.ExceptionHandlers.FirstOrDefault(eh =>
+                eh.TryStart?.OpCode == OpCodes.Ldstr && string.Equals(eh.TryStart.Operand as string, "ICOM", StringComparison.Ordinal));
+            var setState = instructions.FirstOrDefault(i => i.OpCode == OpCodes.Callvirt && string.Equals((i.Operand as IMethod)?.Name?.ToString(), "set_State", StringComparison.Ordinal))?.Operand as IMethod;
+            if (stateTry?.HandlerEnd is not { } leaveTarget || setState == null)
+            {
+                Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var icomEquals = stateTry.TryStart;
+
+            var vciLoad = instructions[instructions.IndexOf(icomEquals) + 1];
+            var vciLocal = vciLoad.OpCode.Code switch
+            {
+                Code.Ldloc_0 => method.Body.Variables[0],
+                Code.Ldloc_1 => method.Body.Variables[1],
+                Code.Ldloc_2 => method.Body.Variables[2],
+                Code.Ldloc_3 => method.Body.Variables[3],
+                Code.Ldloc_S or Code.Ldloc => vciLoad.Operand as Local,
+                _ => null,
+            };
+            if (vciLocal == null)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
                 return;
@@ -1029,7 +1083,7 @@ public static partial class PatchUtils
             // patched method (only non-primitive types like Dictionary`2 are affected; dnlib remaps String).
             var module = method.Module;
             var getItem = method.FindInstruction(OpCodes.Callvirt, getItemOperand)?.Operand as IMethod;
-            var stringEquals = method.FindInstruction(OpCodes.Call, opEqualityOperand)?.Operand as IMethod;
+            var stringEquals = dispatchEquals.Operand as IMethod;
             if (getItem == null || stringEquals == null)
             {
                 Log.Warning("Required instructions not found, can not patch {Method}", method.FullName);
@@ -1039,48 +1093,88 @@ public static partial class PatchUtils
             var setItemSig = MethodSig.CreateInstance(module.CorLibTypes.Void, new GenericVar(0), new GenericVar(1));
             var setItem = new MemberRefUser(module, "set_Item", setItemSig, getItem.DeclaringType);
 
-            // >= 4.60: legacy ICOM/A1/A2 report DevType != "ICOM-Next" and fall through to the ENET check.
-            // Right after ParseAttrList, rewrite those to "ICOM-Next" so they take the existing ICOM-Next
-            // dispatch branch, and force DevTypeExt to "ICOM_Next_A". Genuine ICOM-Next is left untouched
-            // (its DevType never matches), so its dispatch, firmware check and State stay exactly as upstream.
-            var idx = instructions.IndexOf(parseAttrListCall);
-            var insertionTarget = instructions[idx + 2];
-            var normalizeStart = OpCodes.Ldloc_0.ToInstruction();
-            Instruction[] normalizeDevType =
+            Instruction[] LegacyDevTypeMatches(Instruction onMatch, Instruction onMiss) =>
             [
                 OpCodes.Ldloc_0.ToInstruction(),
                 OpCodes.Ldstr.ToInstruction("DevType"),
                 OpCodes.Callvirt.ToInstruction(getItem),
                 OpCodes.Ldstr.ToInstruction("ICOM"),
                 OpCodes.Call.ToInstruction(stringEquals),
-                OpCodes.Brtrue.ToInstruction(normalizeStart),
+                OpCodes.Brtrue.ToInstruction(onMatch),
                 OpCodes.Ldloc_0.ToInstruction(),
                 OpCodes.Ldstr.ToInstruction("DevType"),
                 OpCodes.Callvirt.ToInstruction(getItem),
                 OpCodes.Ldstr.ToInstruction("ICOM A1"),
                 OpCodes.Call.ToInstruction(stringEquals),
-                OpCodes.Brtrue.ToInstruction(normalizeStart),
+                OpCodes.Brtrue.ToInstruction(onMatch),
                 OpCodes.Ldloc_0.ToInstruction(),
                 OpCodes.Ldstr.ToInstruction("DevType"),
                 OpCodes.Callvirt.ToInstruction(getItem),
                 OpCodes.Ldstr.ToInstruction("ICOM A2"),
                 OpCodes.Call.ToInstruction(stringEquals),
-                OpCodes.Brtrue.ToInstruction(normalizeStart),
-                OpCodes.Br.ToInstruction(insertionTarget),
-                normalizeStart,
-                OpCodes.Ldstr.ToInstruction("DevType"),
-                OpCodes.Ldstr.ToInstruction("ICOM-Next"),
-                OpCodes.Callvirt.ToInstruction(setItem),
-                OpCodes.Ldloc_0.ToInstruction(),
+                OpCodes.Brtrue.ToInstruction(onMatch),
+                OpCodes.Br.ToInstruction(onMiss),
+            ];
+
+            // Step 1: legacy ICOM units -> dictionary["DevTypeExt"] = "ICOM_Next_A" (genuine ICOM-Next untouched).
+            var maskExtContinue = instructions[instructions.IndexOf(parseAttrListCall) + 2];
+            var maskExtStart = OpCodes.Ldloc_0.ToInstruction();
+            Instruction[] maskDevTypeExt =
+            [
+                .. LegacyDevTypeMatches(maskExtStart, maskExtContinue),
+                maskExtStart,
                 OpCodes.Ldstr.ToInstruction("DevTypeExt"),
                 OpCodes.Ldstr.ToInstruction("ICOM_Next_A"),
                 OpCodes.Callvirt.ToInstruction(setItem),
             ];
-
-            for (var i = 0; i < normalizeDevType.Length; i++)
+            var maskExtAt = instructions.IndexOf(parseAttrListCall) + 2;
+            for (var i = 0; i < maskDevTypeExt.Length; i++)
             {
-                instructions.Insert(idx + 2 + i, normalizeDevType[i]);
+                instructions.Insert(maskExtAt + i, maskDevTypeExt[i]);
             }
+
+            // Step 2: widen the dispatch so DevType "ICOM"/"ICOM A1"/"ICOM A2" also take the ICOM-Next branch.
+            dispatchBranch.OpCode = OpCodes.Brtrue;
+            dispatchBranch.Operand = dispatchBodyStart;
+            Instruction[] widenDispatch = LegacyDevTypeMatches(dispatchBodyStart, dispatchElseTarget);
+            var widenAt = instructions.IndexOf(dispatchBranch) + 1;
+            for (var i = 0; i < widenDispatch.Length; i++)
+            {
+                instructions.Insert(widenAt + i, widenDispatch[i]);
+            }
+
+            // Step 3: for A1/A2 only, keep the raw reported State and skip the firmware-update downgrade.
+            // DevType is preserved (never remapped), so A1/A2 stay distinguishable from genuine ICOM-Next here;
+            // ICOM-Next falls through to the original firmware/State logic, untouched.
+            var setStateRaw = OpCodes.Ldloc.ToInstruction(vciLocal);
+            Instruction[] stateGate =
+            [
+                OpCodes.Ldloc_0.ToInstruction(),
+                OpCodes.Ldstr.ToInstruction("DevType"),
+                OpCodes.Callvirt.ToInstruction(getItem),
+                OpCodes.Ldstr.ToInstruction("ICOM A1"),
+                OpCodes.Call.ToInstruction(stringEquals),
+                OpCodes.Brtrue.ToInstruction(setStateRaw),
+                OpCodes.Ldloc_0.ToInstruction(),
+                OpCodes.Ldstr.ToInstruction("DevType"),
+                OpCodes.Callvirt.ToInstruction(getItem),
+                OpCodes.Ldstr.ToInstruction("ICOM A2"),
+                OpCodes.Call.ToInstruction(stringEquals),
+                OpCodes.Brfalse.ToInstruction(icomEquals),
+                setStateRaw,
+                OpCodes.Ldloc_0.ToInstruction(),
+                OpCodes.Ldstr.ToInstruction("State"),
+                OpCodes.Callvirt.ToInstruction(getItem),
+                OpCodes.Callvirt.ToInstruction(setState),
+                OpCodes.Leave.ToInstruction(leaveTarget),
+            ];
+            var gateAt = instructions.IndexOf(icomEquals);
+            for (var i = 0; i < stateGate.Length; i++)
+            {
+                instructions.Insert(gateAt + i, stateGate[i]);
+            }
+
+            stateTry.TryStart = stateGate[0];
 
             method.Body.SimplifyBranches();
             method.Body.OptimizeBranches();
