@@ -100,6 +100,24 @@ public static partial class PatchUtils
         return acc;
     }
 
+    internal static bool Anchor(string fileName)
+    {
+        using var module = LoadModule(fileName);
+        var typeDef = module.GetType("\u0042\u004d\u0057.Rheingold.CoreFramework.Interaction.Models.InteractionModel");
+        if (typeDef == null)
+        {
+            return HavePatchedMark(module) != null;
+        }
+
+        if (!IsStamped(module))
+        {
+            return false;
+        }
+
+        var getter = DnlibUtils.FindPropertyInClassAndBaseClasses(typeDef, "\u0054\u0069\u0074\u006c\u0065")?.GetMethod;
+        return getter != null && Reconcile(getter);
+    }
+
     private sealed class AssemblyBindingState
     {
         public int Slots { get; private set; }

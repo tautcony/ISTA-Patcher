@@ -32,8 +32,19 @@ public static partial class Patch
 
         var cts = new CancellationTokenSource();
         var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
-        var tasks = pendingPatchList.Select(item => factory.StartNew(() => PatchSingleFile(item, guiBasePath, indentLength, patcherProvider, options), cts.Token));
+        var tasks = pendingPatchList.Select(item => factory.StartNew(() => PatchSingleFile(item, guiBasePath, indentLength, patcherProvider, options), cts.Token)).ToArray();
         Task.WaitAll(tasks, cts.Token);
+
+        foreach (var patchedFileFullPath in tasks.Select(t => t.Result).OfType<string>())
+        {
+            if (PatchUtils.Anchor(patchedFileFullPath))
+            {
+                continue;
+            }
+
+            File.Delete(patchedFileFullPath);
+            Log.Debug("Patched file {PatchedFileFullPath} discarded on verification", patchedFileFullPath);
+        }
 
         foreach (var line in BuildIndicator(patcherProvider.Patches))
         {
@@ -68,7 +79,7 @@ public static partial class Patch
             skippedCount);
     }
 
-    private static void PatchSingleFile(string pendingPatchItem, string guiBasePath, int indentLength, IPatcherProvider patcherProvider, ISTAOptions.PatchOptions options)
+    private static string? PatchSingleFile(string pendingPatchItem, string guiBasePath, int indentLength, IPatcherProvider patcherProvider, ISTAOptions.PatchOptions options)
     {
         var pendingPatchItemFullPath = pendingPatchItem.StartsWith('!')
             ? Path.Join(options.TargetPath, pendingPatchItem.Trim('!'))
@@ -83,7 +94,7 @@ public static partial class Patch
         if (!pendingPatchItemFullPath.StartsWith(expectedBasePath, StringComparison.OrdinalIgnoreCase))
         {
             Log.Error("Path traversal attempt detected: {Item}", pendingPatchItem);
-            return;
+            return null;
         }
 
         var originalDirPath = Path.GetDirectoryName(pendingPatchItemFullPath);
@@ -105,7 +116,7 @@ public static partial class Patch
                 pendingPatchItem,
                 indent,
                 string.Concat(Enumerable.Repeat("*", patcherProvider.Patches.Count)));
-            return;
+            return null;
         }
 
         Directory.CreateDirectory(patchedDirPath);
@@ -127,7 +138,7 @@ public static partial class Patch
                     Log.Information("{Item}{Indent}[NO BACKUP]", pendingPatchItem, indent);
                 }
 
-                return;
+                return null;
             }
 
             using var module = PatchUtils.LoadModule(pendingPatchItemFullPath);
@@ -141,7 +152,7 @@ public static partial class Patch
                     indent,
                     string.Concat(Enumerable.Repeat("*", patcherProvider.Patches.Count)),
                     patcherVersion);
-                return;
+                return null;
             }
 
             // Patch and print result
@@ -193,7 +204,7 @@ public static partial class Patch
             if (!isPatched)
             {
                 Log.Information("{Item}{Indent}{Result} [NOP]", pendingPatchItem, indent, resultStr);
-                return;
+                return null;
             }
 
             // Create backup only when patches will be saved
@@ -227,6 +238,7 @@ public static partial class Patch
 
             Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
             Log.Information("{Item}{Indent}{Result} [FNC: {PatchedFunctionCount:00}]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
+            return patchedFileFullPath;
         }
         catch (Exception ex)
         {
@@ -245,7 +257,7 @@ public static partial class Patch
             }
         }
 
-        return;
+        return null;
 
         static bool ShouldSkipPatch(string[] skipLibraries, string[] libraryList)
         {
