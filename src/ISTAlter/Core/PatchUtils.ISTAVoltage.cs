@@ -182,4 +182,100 @@ public static partial class PatchUtils
             method.Body.OptimizeBranches();
         }
     }
+
+    /// <summary>
+    /// Skips the ENET real-ECU voltage check (<c>VoltageUtils.CheckVoltageForEthernetConnection</c>)
+    /// specifically inside <c>ModuleBootstrapLoader.doIt()</c> (RheingoldSessionController.dll) --
+    /// the diagnostic test-module execution loop -- without touching <c>VoltageUtils</c> itself or
+    /// any other caller.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <see cref="PatchISTAVoltageControl"/> only makes ISTA's VCI-side voltage checks (the ones
+    /// reading <c>VCI.Kl15Voltage</c>/<c>Kl30Voltage</c>, i.e. <c>ProgrammingUtils.CheckClamp30</c>
+    /// and <c>SessionLogic.CheckClamp30</c>) pass, because the injected DLL writes into that exact
+    /// field. On an ENET connection, ISTA has a THIRD, independent low-voltage check that never
+    /// reads that field: <c>VoltageUtils.CheckVoltageForEthernetConnection</c> runs a real
+    /// diagnostic service program on the vehicle's ECU (output parameter <c>"Batteriespannung"</c>)
+    /// and classifies the result against the same #120/#121/#122/#123/#127 thresholds. No value
+    /// written to the VCI can influence it -- it is a genuine ECU read.
+    /// </para>
+    /// <para>
+    /// <c>CheckVoltageForEthernetConnection</c> has three independent callers:
+    /// <c>ModuleBootstrapLoader.doIt()</c> (via <c>ModuleImpl</c>, BMW's *diagnostic* test-module
+    /// runner -- fires on every module load), <c>Logic.DoInitialElectricalChecks()</c> (one-shot at
+    /// connection), and a Toyota-only call inside
+    /// <c>ProgrammingUtils.CheckVehicleProgramingProhibits</c> (a programming-plan gate). This patch
+    /// touches only the first one: it changes the
+    /// <c>if (ModuleLoader.IsModuleLoaderInitialized &amp;&amp; ...)</c> guard around the call in
+    /// <c>doIt()</c> so it never enters the guarded block, by turning the leading (short-circuit)
+    /// branch on <c>ModuleLoader.IsModuleLoaderInitialized</c> into an unconditional jump to the same
+    /// target the false-case already used. <c>Logic.DoInitialElectricalChecks()</c> and the Toyota
+    /// programming-plan gate are left fully intact -- this patch never touches anything reachable
+    /// from a coding/flashing session.
+    /// </para>
+    /// <para>
+    /// Still diagnostic-scope only, not a substitute for a real external power supply: an ENET
+    /// session backed only by a battery and a faked VCI voltage can otherwise show a genuine
+    /// "battery voltage (terminal 30) below threshold value" message during plain fault-code/live-data
+    /// reading, even while the ISTA header displays a healthy injected value, because the two checks
+    /// read different sources.
+    /// </para>
+    /// </remarks>
+    [ISTAVoltagePatch]
+    [LibraryName("RheingoldSessionController.dll")]
+    public static int PatchModuleBootstrapLoaderEthernetVoltageCheck(ModuleDefMD module)
+    {
+        return module.PatchFunction(
+            "\u0042\u004d\u0057.Rheingold.Module.ISTA.ModuleBootstrapLoader",
+            "doIt",
+            "()\u0042\u004d\u0057.Rheingold.CoreFramework.IResult",
+            SkipEthernetVoltageCheck
+        );
+
+        static void SkipEthernetVoltageCheck(MethodDef method)
+        {
+            var instructions = method.Body.Instructions;
+
+            var isModuleLoaderInitializedCall = instructions.FirstOrDefault(i =>
+                i.OpCode == OpCodes.Call && i.Operand is IMethod m && m.Name == "get_IsModuleLoaderInitialized");
+            if (isModuleLoaderInitializedCall == null)
+            {
+                Log.Warning("get_IsModuleLoaderInitialized call not found, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var callIndex = instructions.IndexOf(isModuleLoaderInitializedCall);
+            if (callIndex < 0 || callIndex + 1 >= instructions.Count)
+            {
+                Log.Warning("Unexpected doIt layout, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var branch = instructions[callIndex + 1];
+            if (branch.OpCode == OpCodes.Pop)
+            {
+                return; // already patched (idempotent)
+            }
+
+            if (branch.OpCode != OpCodes.Brfalse && branch.OpCode != OpCodes.Brfalse_S)
+            {
+                Log.Warning("Unexpected branch after get_IsModuleLoaderInitialized, can not patch {Method}", method.FullName);
+                return;
+            }
+
+            var target = (Instruction)branch.Operand;
+
+            // Short-circuit &&: this branch already jumps straight past the whole guarded block (the
+            // ENET voltage check call, plus everything else the block gates) when
+            // IsModuleLoaderInitialized is false. Consume the bool the call just pushed and always
+            // take that same path, regardless of the real flag value.
+            branch.OpCode = OpCodes.Pop;
+            branch.Operand = null;
+            instructions.Insert(callIndex + 2, OpCodes.Br.ToInstruction(target));
+
+            method.Body.SimplifyBranches();
+            method.Body.OptimizeBranches();
+        }
+    }
 }
