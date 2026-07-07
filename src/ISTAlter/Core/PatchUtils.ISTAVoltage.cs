@@ -222,6 +222,8 @@ public static partial class PatchUtils
     /// read different sources.
     /// </para>
     /// </remarks>
+    /// <param name="module">The <see cref="ModuleDefMD"/> (RheingoldSessionController.dll) to apply the patch to.</param>
+    /// <returns>The number of methods patched (0 or 1).</returns>
     [ISTAVoltagePatch]
     [LibraryName("RheingoldSessionController.dll")]
     public static int PatchModuleBootstrapLoaderEthernetVoltageCheck(ModuleDefMD module)
