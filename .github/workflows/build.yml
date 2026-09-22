@@ -10,6 +10,9 @@ on:
 env:
   DOTNET_VERSION: net10.0
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: 'Build'
