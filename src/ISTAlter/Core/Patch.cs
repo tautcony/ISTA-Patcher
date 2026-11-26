@@ -29,24 +29,57 @@ public static partial class Patch
         var guiBasePath = Constants.TesterGUIPath.Aggregate(options.TargetPath, Path.Join);
         var pendingPatchList = patcherProvider.GeneratePatchList(options);
         var indentLength = pendingPatchList.Select(i => i.Length).DefaultIfEmpty(0).Max() + 1;
+        var badImageFormatCount = 0;
 
         var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
         var tasks = pendingPatchList
             .Select(item => factory.StartNew(
-                () => PatchSingleFile(item, guiBasePath, indentLength, patcherProvider, options),
+                () => PatchSingleFile(
+                    item,
+                    guiBasePath,
+                    indentLength,
+                    patcherProvider,
+                    options,
+                    () => Interlocked.Increment(ref badImageFormatCount)),
                 options.CancellationToken))
             .ToArray();
         Task.WaitAll(tasks, options.CancellationToken);
 
+        if (badImageFormatCount > 0)
+        {
+            SentrySdk.CaptureMessage(
+                "One or more files could not be read as managed assemblies during patching",
+                scope =>
+                {
+                    scope.SetTag("exception.type", nameof(BadImageFormatException));
+                    scope.SetExtra("affected_file_count", badImageFormatCount);
+                },
+                SentryLevel.Warning);
+            Log.Warning("Skipped {Count} file(s) that could not be read as managed assemblies", badImageFormatCount);
+        }
+
         foreach (var patchedFileFullPath in tasks.Select(t => t.Result).OfType<string>())
         {
-            if (PatchUtils.Anchor(patchedFileFullPath))
+            try
             {
-                continue;
-            }
+                if (PatchUtils.Anchor(patchedFileFullPath))
+                {
+                    continue;
+                }
 
-            File.Delete(patchedFileFullPath);
-            Log.Debug("Patched file {PatchedFileFullPath} discarded on verification", patchedFileFullPath);
+                File.Delete(patchedFileFullPath);
+                Log.Debug("Patched file {FileName} discarded on verification", Path.GetFileName(patchedFileFullPath));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Warning(ex, "Could not validate patched file {FileName} because access was denied", Path.GetFileName(patchedFileFullPath));
+                TryDeletePatchedFile(patchedFileFullPath, Path.GetFileName(patchedFileFullPath));
+            }
+            catch (IOException ex)
+            {
+                Log.Warning(ex, "Could not validate patched file {FileName} because it is unavailable", Path.GetFileName(patchedFileFullPath));
+                TryDeletePatchedFile(patchedFileFullPath, Path.GetFileName(patchedFileFullPath));
+            }
         }
 
         foreach (var line in BuildIndicator(patcherProvider.Patches))
@@ -82,7 +115,13 @@ public static partial class Patch
             skippedCount);
     }
 
-    private static string? PatchSingleFile(string pendingPatchItem, string guiBasePath, int indentLength, IPatcherProvider patcherProvider, ISTAOptions.PatchOptions options)
+    private static string? PatchSingleFile(
+        string pendingPatchItem,
+        string guiBasePath,
+        int indentLength,
+        IPatcherProvider patcherProvider,
+        ISTAOptions.PatchOptions options,
+        Action onBadImageFormat)
     {
         options.CancellationToken.ThrowIfCancellationRequested();
 
@@ -107,11 +146,6 @@ public static partial class Patch
         var bakDirPath = Path.Join(originalDirPath, BakDirName);
         var bakFileFullPath = Path.Join(bakDirPath, Path.GetFileName(pendingPatchItem));
 
-        if (File.Exists(patchedFileFullPath))
-        {
-            File.Delete(patchedFileFullPath);
-        }
-
         var indent = new string(' ', indentLength - pendingPatchItem.Length);
         if (!File.Exists(pendingPatchItemFullPath))
         {
@@ -123,8 +157,26 @@ public static partial class Patch
             return null;
         }
 
-        Directory.CreateDirectory(patchedDirPath);
-        Directory.CreateDirectory(bakDirPath);
+        try
+        {
+            if (File.Exists(patchedFileFullPath))
+            {
+                File.Delete(patchedFileFullPath);
+            }
+
+            Directory.CreateDirectory(patchedDirPath);
+            Directory.CreateDirectory(bakDirPath);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Log.Warning(ex, "Could not prepare output directories for {Item}; check write permissions", pendingPatchItem);
+            return null;
+        }
+        catch (IOException ex)
+        {
+            Log.Warning(ex, "Could not prepare output directories for {Item}; close applications using the files and retry", pendingPatchItem);
+            return null;
+        }
 
         try
         {
@@ -246,6 +298,26 @@ public static partial class Patch
             Log.Information("{Item}{Indent}{Result} [FNC: {PatchedFunctionCount:00}]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
             return patchedFileFullPath;
         }
+        catch (BadImageFormatException)
+        {
+            onBadImageFormat();
+            Log.Warning("Skipped {Item}: file is not a readable managed assembly", pendingPatchItem);
+            TryDeletePatchedFile(patchedFileFullPath, pendingPatchItem);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Log.Warning(ex, "Could not access files for {Item}; check write permissions", pendingPatchItem);
+            TryDeletePatchedFile(patchedFileFullPath, pendingPatchItem);
+        }
+        catch (IOException ex)
+        {
+            Log.Warning(ex, "Could not process {Item}; close applications using the files and retry", pendingPatchItem);
+            TryDeletePatchedFile(patchedFileFullPath, pendingPatchItem);
+        }
         catch (Exception ex)
         {
             SentrySdk.CaptureException(ex);
@@ -257,10 +329,7 @@ public static partial class Patch
                 ex.Message);
             Log.Debug("ExceptionType: {ExceptionType}, StackTrace: {StackTrace}", ex.GetType().FullName, ex.StackTrace);
 
-            if (File.Exists(patchedFileFullPath))
-            {
-                File.Delete(patchedFileFullPath);
-            }
+            TryDeletePatchedFile(patchedFileFullPath, pendingPatchItem);
         }
 
         return null;
@@ -276,6 +345,25 @@ public static partial class Patch
             }
 
             return false;
+        }
+    }
+
+    private static void TryDeletePatchedFile(string patchedFileFullPath, string pendingPatchItem)
+    {
+        try
+        {
+            if (File.Exists(patchedFileFullPath))
+            {
+                File.Delete(patchedFileFullPath);
+            }
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Log.Warning(ex, "Could not remove partial output for {Item}; check write permissions", pendingPatchItem);
+        }
+        catch (IOException ex)
+        {
+            Log.Warning(ex, "Could not remove partial output for {Item}; close applications using the file and retry", pendingPatchItem);
         }
     }
 

@@ -64,4 +64,13 @@ public class RegistryUtilsTests
 
         Assert.That(File.ReadAllText(file), Does.Contain("Windows Registry Editor Version 5.00"));
     }
+
+    [Test]
+    public void GenerateMockRegFile_WhenTargetCannotBeWritten_DoesNotThrow()
+    {
+        var blockingDir = Path.Combine(_tempPath, "license.reg");
+        Directory.CreateDirectory(blockingDir);
+
+        Assert.DoesNotThrow(() => RegistryUtils.GenerateMockRegFile(_tempPath, force: true));
+    }
 }

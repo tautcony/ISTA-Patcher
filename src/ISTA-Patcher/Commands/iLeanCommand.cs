@@ -4,6 +4,7 @@
 namespace ISTAPatcher.Commands;
 
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Xml;
 using DotMake.CommandLine;
@@ -55,7 +56,7 @@ public class iLeanCommand
 
     private static readonly JsonSerializerOptions DefaultJsonSerializerOption = new() { WriteIndented = true };
 
-    public async Task RunAsync()
+    public async Task<int> RunAsync()
     {
         var opts = new ISTAOptions.ILeanOptions
         {
@@ -71,7 +72,7 @@ public class iLeanCommand
             CancellationToken = this.CancellationToken.CanBeCanceled ? this.CancellationToken : Global.CancellationToken,
         };
 
-        await Execute(opts);
+        return await Execute(opts);
     }
 
     [SuppressMessage("Interoperability", "CA1416", Justification = "SupportedOSPlatform attribute is used")]
@@ -92,7 +93,7 @@ public class iLeanCommand
             }
             else
             {
-                Log.Error("--show-machine-info option is not supported on this platform");
+                Log.Warning("--show-machine-info is not supported on this platform.");
             }
 
             return 0;
@@ -128,7 +129,7 @@ public class iLeanCommand
 
             if (string.IsNullOrEmpty(opts.MachineGuid) || string.IsNullOrEmpty(opts.VolumeSerialNumber))
             {
-                Log.Error("MachineGuid or VolumeSerialNumber is not provided, please provide both.");
+                Log.Warning("MachineGuid and VolumeSerialNumber are required for this cipher type.");
                 return -1;
             }
 
@@ -139,7 +140,7 @@ public class iLeanCommand
         {
             if (string.IsNullOrEmpty(opts.Password))
             {
-                Log.Error("Password is not provided, please provide a password.");
+                Log.Warning("A password is required for this cipher type.");
                 return -1;
             }
 
@@ -148,7 +149,7 @@ public class iLeanCommand
 
         if (result == null)
         {
-            Log.Error("No operation matched or failed, please check the provided options.");
+            Log.Warning("The operation could not be completed. Check the selected operation and input values.");
             return -1;
         }
 
@@ -184,8 +185,25 @@ public class iLeanCommand
 
         if (!string.IsNullOrEmpty(opts.Output))
         {
-            await File.WriteAllTextAsync(opts.Output, result, opts.CancellationToken).ConfigureAwait(false);
-            Log.Information("Result is written to {Output}", opts.Output);
+            try
+            {
+                await File.WriteAllTextAsync(opts.Output, result, opts.CancellationToken).ConfigureAwait(false);
+                Log.Information("Result is written to {Output}", opts.Output);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Warning(ex, "Could not write output file; check write permissions.");
+                return -1;
+            }
+            catch (IOException ex)
+            {
+                Log.Warning(ex, "Could not write output file; close applications using the file and retry.");
+                return -1;
+            }
         }
         else
         {
@@ -217,10 +235,25 @@ public class iLeanCommand
                 return encryption.Decrypt(content);
             }
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is CryptographicException or FormatException)
+        {
+            Log.Warning("iLean input could not be decrypted. Check the encrypted content and credentials.");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Log.Warning(ex, "Could not read iLean input file; check read permissions.");
+        }
+        catch (IOException ex)
+        {
+            Log.Warning(ex, "Could not read iLean input file; close applications using the file and retry.");
+        }
         catch (Exception ex)
         {
-            Log.Information("MachineGuid: {MachineGuid}, VolumeSerialNumber: {VolumeSerialNumber}", opts.MachineGuid, opts.VolumeSerialNumber);
-            Log.Error(ex, "iLean Encryption/Decryption failed.");
+            Log.Error(ex, "iLean Encryption/Decryption failed (credentials omitted from logs).");
         }
 
         return null;
@@ -248,10 +281,25 @@ public class iLeanCommand
                 return encryption.Decrypt(content);
             }
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is CryptographicException or FormatException)
+        {
+            Log.Warning("iLean input could not be decrypted. Check the encrypted content and password.");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Log.Warning(ex, "Could not read iLean input file; check read permissions.");
+        }
+        catch (IOException ex)
+        {
+            Log.Warning(ex, "Could not read iLean input file; close applications using the file and retry.");
+        }
         catch (Exception ex)
         {
-            Log.Information("Password: {Password}", opts.Password);
-            Log.Error(ex, "iLean Password Encryption/Decryption failed.");
+            Log.Error(ex, "iLean Password Encryption/Decryption failed (password omitted from logs).");
         }
 
         return null;

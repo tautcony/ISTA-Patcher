@@ -44,7 +44,7 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
     [CliOption(Description = "Generate a registry file.")]
     public bool GenerateMockRegFile { get; set; }
 
-    public async Task RunAsync()
+    public async Task<int> RunAsync()
     {
         var opts = new ISTAOptions.PatchOptions
         {
@@ -94,10 +94,10 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
                 break;
             default:
                 Log.Error("Patch type not supported: {PatchType}", opts.PatchType);
-                return;
+                return -1;
         }
 
-        await Execute(opts);
+        return await Execute(opts);
     }
 
     public static Task<int> Execute(ISTAOptions.PatchOptions opts)
@@ -110,7 +110,7 @@ public class PatchCommand : OptionalPatchOption, ICommonPatchOption
 
         if (!Directory.Exists(guiBasePath))
         {
-            Log.Fatal("Folder structure does not match under: {TargetPath}, please check options", opts.TargetPath);
+            Log.Warning("The selected directory is not a supported ISTA installation. Check the target path and try again.");
             return Task.FromResult(-1);
         }
 

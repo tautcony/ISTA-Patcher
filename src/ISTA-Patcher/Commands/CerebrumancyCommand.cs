@@ -78,7 +78,7 @@ public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
     [CliOption(Description = "The arcane potency of the carved Primamind, measured in bits.")]
     public int PrimamindIntensity { get; set; } = 1024;
 
-    public async Task RunAsync()
+    public async Task<int> RunAsync()
     {
         var opts = new ISTAOptions.CerebrumancyOptions
         {
@@ -105,7 +105,7 @@ public class CerebrumancyCommand : OptionalPatchOption, ICommonPatchOption
             Exclude = Global.Config.GetSection("Settings:Default:Exclude").Get<string[]?>() ?? [],
         };
 
-        await Execute(opts);
+        return await Execute(opts);
     }
 
     public static async Task<int> Execute(ISTAOptions.CerebrumancyOptions opts)

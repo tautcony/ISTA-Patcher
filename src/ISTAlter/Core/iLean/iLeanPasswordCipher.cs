@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2024-2025 TautCony
+// SPDX-FileCopyrightText: Copyright 2024-2026 TautCony
 
 namespace ISTAlter.Core.iLean;
 
@@ -47,10 +47,10 @@ public sealed class iLeanPasswordCipher : IDisposable
             cryptoStream.FlushFinalBlock();
             return Convert.ToBase64String(memoryStream.ToArray());
         }
-        catch (CryptographicException ex)
+        catch (CryptographicException)
         {
             Log.Information("Password: {Password}", this.password);
-            Log.Error(ex, "iLean Password Encryption failed.");
+            Log.Warning("iLean password encryption failed because the input could not be processed.");
         }
 
         return string.Empty;
@@ -72,10 +72,10 @@ public sealed class iLeanPasswordCipher : IDisposable
             cryptoStream.FlushFinalBlock();
             return Encoding.UTF8.GetString(memoryStream.ToArray());
         }
-        catch (CryptographicException ex)
+        catch (CryptographicException)
         {
             Log.Information("Password: {Password}", this.password);
-            Log.Error(ex, "iLean Decryption failed.");
+            Log.Warning("iLean decryption failed. Check the encrypted content and password.");
         }
 
         return string.Empty;

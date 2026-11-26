@@ -67,7 +67,7 @@ public class HashFileInfo
             var hex = BitConverter.ToString(await sha.ComputeHashAsync(fileStream, cancellationToken).ConfigureAwait(false));
             return hex.Replace("-", string.Empty, StringComparison.Ordinal);
         }
-        catch (FileNotFoundException ex)
+        catch (Exception ex) when (ex is FileNotFoundException or UnauthorizedAccessException or IOException)
         {
             Log.Warning(ex, "Failed to calculate hash for: {FileName}", pathFile);
             return string.Empty;

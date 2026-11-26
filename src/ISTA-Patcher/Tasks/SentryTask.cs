@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2024-2025 TautCony
+// SPDX-FileCopyrightText: Copyright 2024-2026 TautCony
 
 namespace ISTAPatcher.Tasks;
 
@@ -41,10 +41,10 @@ public class SentryTask : IStartupTask
                 using var repo = new Repository(repoPath);
                 var username = repo.Config.Get<string>("user.name");
                 var email = repo.Config.Get<string>("user.email");
-                scope.SetTag("git.username", username.Value);
-                scope.SetTag("git.email", email.Value);
+                scope.SetTag("git.username", username?.Value ?? string.Empty);
+                scope.SetTag("git.email", email?.Value ?? string.Empty);
                 scope.SetTag("git.branch", repo.Head.FriendlyName);
-                scope.SetTag("git.commit", repo.Head.Tip.Sha);
+                scope.SetTag("git.commit", repo.Head.Tip?.Sha ?? string.Empty);
                 foreach (var remote in repo.Network.Remotes)
                 {
                     scope.SetTag($"git.remote.{remote.Name}", remote.Url);

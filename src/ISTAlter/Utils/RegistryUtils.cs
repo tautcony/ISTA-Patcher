@@ -134,8 +134,19 @@ public static class RegistryUtils
         var registryTemplate = IsSixtyFourBit(basePath)
             ? template
             : template.Replace(@"SOFTWARE\", @"SOFTWARE\WOW6432Node\", StringComparison.Ordinal);
-        File.WriteAllText(licenseFile, registryTemplate.Replace("{}", ToLiteral(value), StringComparison.Ordinal));
-        Log.Information("Registry file generated: {Path}", licenseFile);
+        try
+        {
+            File.WriteAllText(licenseFile, registryTemplate.Replace("{}", ToLiteral(value), StringComparison.Ordinal));
+            Log.Information("Registry file generated: {Path}", licenseFile);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Log.Warning(ex, "Could not write registry file {FileName}; check write permissions", Path.GetFileName(licenseFile));
+        }
+        catch (IOException ex)
+        {
+            Log.Warning(ex, "Could not write registry file {FileName}; close applications using the file and retry", Path.GetFileName(licenseFile));
+        }
     }
 
     private static bool IsSixtyFourBit(string basePath)

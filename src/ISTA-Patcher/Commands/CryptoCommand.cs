@@ -46,7 +46,7 @@ public class CryptoCommand
     [CliOption(Description = "Create a key pair.")]
     public bool CreateKeyPair { get; set; }
 
-    public async Task RunAsync()
+    public async Task<int> RunAsync()
     {
         var opts = new ISTAOptions.CryptoOptions
         {
@@ -58,7 +58,7 @@ public class CryptoCommand
             CancellationToken = this.CancellationToken.CanBeCanceled ? this.CancellationToken : Global.CancellationToken,
         };
 
-        await Execute(opts);
+        return await Execute(opts);
     }
 
     public static async Task<int> Execute(ISTAOptions.CryptoOptions opts)
@@ -70,7 +70,7 @@ public class CryptoCommand
 
         if (!Directory.Exists(basePath))
         {
-            Log.Fatal("Folder structure does not match under: {TargetPath}, please check options", opts.TargetPath);
+            Log.Warning("The selected directory is not a supported ISTA installation. Check the target path and try again.");
             return -1;
         }
 
@@ -79,10 +79,23 @@ public class CryptoCommand
             using var child = new SpanHandler(transaction, "CreateKeyPair");
             var filePath = Path.Join(basePath, "keyContainer.pfx");
             opts.CancellationToken.ThrowIfCancellationRequested();
-            await using Stream val = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
-            GenerateKeyStore().Save(val, KeyPairConfig.Select(i => (char)i).ToArray(), new SecureRandom());
-            Log.Information("Key pair saved to {FilePath}", filePath);
-            return 0;
+            try
+            {
+                await using Stream val = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
+                GenerateKeyStore().Save(val, KeyPairConfig.Select(i => (char)i).ToArray(), new SecureRandom());
+                Log.Information("Key pair saved to {FileName}", Path.GetFileName(filePath));
+                return 0;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Warning(ex, "Could not create the key pair file; check write permissions for the ISTA installation.");
+                return -1;
+            }
+            catch (IOException ex)
+            {
+                Log.Warning(ex, "Could not create the key pair file; close applications using the file and retry.");
+                return -1;
+            }
         }
 
         if (opts.Decrypt)
@@ -92,7 +105,7 @@ public class CryptoCommand
             return await LoadFileList(encryptedFileList, opts.Integrity, basePath, opts.CancellationToken);
         }
 
-        Log.Warning("No operation matched, exiting...");
+        Log.Warning("No crypto operation selected. Choose --decrypt or --create-key-pair.");
         return -1;
     }
 
