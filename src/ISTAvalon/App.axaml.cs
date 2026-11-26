@@ -47,9 +47,21 @@ public class App : Application
 
             if (ObservationOptions.Enabled)
             {
-                _observationServer = new GuiObservationServer(viewModel, ObservationOptions);
-                _observationServer.Start();
-                desktop.Exit += (_, _) => _observationServer?.Dispose();
+                try
+                {
+                    _observationServer = new GuiObservationServer(viewModel, ObservationOptions);
+                    _observationServer.Start();
+                    desktop.Exit += (_, _) => _observationServer?.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(
+                        ex,
+                        "GUI observation server failed to start on {Url}; continuing without observation",
+                        ObservationOptions.Prefix);
+                    _observationServer?.Dispose();
+                    _observationServer = null;
+                }
             }
         }
 

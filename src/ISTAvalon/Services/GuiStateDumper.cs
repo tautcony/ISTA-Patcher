@@ -127,50 +127,66 @@ public static class GuiStateDumper
         Timestamp = entry.Timestamp.ToString("O"),
         DisplayTimestamp = entry.Timestamp.ToString("HH:mm:ss.fff"),
         Level = entry.Level.ToString(),
-        Message = entry.Message,
+        Message = GuiDumpRedaction.RedactLogMessage(entry.Message),
     };
 
     private static string ResolveComponent(ParameterViewModel param) => param switch
     {
         BoolParameterViewModel => "CheckBox",
         EnumParameterViewModel => "ComboBox",
-        NumericParameterViewModel => "NumericUpDown",
+        NumericParameterViewModel => "TextBox[numeric]",
         PathParameterViewModel => "PathEditor",
         StringArrayParameterViewModel => "TextBox[multiline]",
         _ => "TextBox",
     };
 
-    private static ComponentStateDump BuildComponentState(ParameterViewModel param) => param switch
+    private static ComponentStateDump BuildComponentState(ParameterViewModel param)
     {
-        BoolParameterViewModel b => new ComponentStateDump
+        var name = param.Descriptor.Name;
+        var kind = param.Descriptor.Kind;
+        return param switch
         {
-            IsChecked = b.IsChecked,
-        },
-        EnumParameterViewModel e => new ComponentStateDump
+            BoolParameterViewModel b => new ComponentStateDump
+            {
+                IsChecked = b.IsChecked,
+            },
+            EnumParameterViewModel e => new ComponentStateDump
+            {
+                SelectedItem = e.SelectedValue,
+            },
+            NumericParameterViewModel n => new ComponentStateDump
+            {
+                NumericValue = n.NumericValue,
+                Increment = n.Increment,
+                FormatString = n.FormatString,
+            },
+            PathParameterViewModel p => new ComponentStateDump
+            {
+                Text = RedactText(name, kind, p.TextValue),
+            },
+            StringArrayParameterViewModel sa => new ComponentStateDump
+            {
+                Text = RedactText(name, kind, sa.TextValue),
+                Placeholder = "Comma-separated values",
+            },
+            StringParameterViewModel s => new ComponentStateDump
+            {
+                Text = RedactText(name, kind, s.TextValue),
+            },
+            _ => new ComponentStateDump(),
+        };
+    }
+
+    private static string RedactText(string propertyName, ParameterKind kind, string? text)
+    {
+        if (string.IsNullOrEmpty(text))
         {
-            SelectedItem = e.SelectedValue,
-        },
-        NumericParameterViewModel n => new ComponentStateDump
-        {
-            NumericValue = n.NumericValue,
-            Increment = n.Increment,
-            FormatString = n.FormatString,
-        },
-        PathParameterViewModel p => new ComponentStateDump
-        {
-            Text = p.TextValue ?? string.Empty,
-        },
-        StringArrayParameterViewModel sa => new ComponentStateDump
-        {
-            Text = sa.TextValue ?? string.Empty,
-            Placeholder = "Comma-separated values",
-        },
-        StringParameterViewModel s => new ComponentStateDump
-        {
-            Text = s.TextValue ?? string.Empty,
-        },
-        _ => new ComponentStateDump(),
-    };
+            return string.Empty;
+        }
+
+        var redacted = GuiDumpRedaction.RedactValue(propertyName, kind, text);
+        return redacted as string ?? redacted?.ToString() ?? string.Empty;
+    }
 
     private static ParameterEditorDump BuildParameterEditorDump(CommandTabViewModel tab, ParameterViewModel param)
     {
@@ -206,14 +222,14 @@ public static class GuiStateDumper
                     Required = d.IsRequired,
                     IsArgument = d.IsArgument,
                     IsParentOption = d.IsParentOption,
-                    DefaultValue = NormalizeValue(d.DefaultValue),
+                    DefaultValue = NormalizeValue(GuiDumpRedaction.RedactValue(d.Name, d.Kind, d.DefaultValue)),
                     EnumValues = d.Kind == ParameterKind.Enum && d.EnumValues.Length > 0
                         ? [.. d.EnumValues]
                         : null,
                 },
                 Value = new BoundValueDump
                 {
-                    Current = NormalizeValue(param.GetValue()),
+                    Current = NormalizeValue(GuiDumpRedaction.RedactValue(d.Name, d.Kind, param.GetValue())),
                     HasValue = param.HasValue,
                 },
             },

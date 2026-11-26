@@ -100,12 +100,33 @@ public class CommandTabViewModel : ObservableObject
         SelectedCommand = AvailableCommands.FirstOrDefault();
 
         HasPreset = preset is { Count: > 0 };
-        ExecuteCommandCommand = new AsyncRelayCommand(ExecuteCommandAsync, () => !IsExecuting);
+        ExecuteCommandCommand = new AsyncRelayCommand(
+            ExecuteCommandAsync,
+            () => !IsExecuting && !GuiCommandExecutionGate.IsBusy);
         CancelCommand = new RelayCommand(CancelExecution, () => IsExecuting);
         ClearOutputCommand = new RelayCommand(ClearOutput);
         CopyAllCommand = new AsyncRelayCommand(CopyAllAsync);
         ToggleLogPanelCommand = new RelayCommand(() => IsLogPanelExpanded = !IsLogPanelExpanded);
         ResetToPresetCommand = new RelayCommand(ResetToPreset, () => HasPreset);
+
+        GuiCommandExecutionGate.StateChanged += OnGlobalExecutionStateChanged;
+    }
+
+    private void OnGlobalExecutionStateChanged()
+    {
+        void Notify()
+        {
+            ((AsyncRelayCommand)ExecuteCommandCommand).NotifyCanExecuteChanged();
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            Notify();
+        }
+        else
+        {
+            Dispatcher.UIThread.Post(Notify);
+        }
     }
 
     private static List<CommandDescriptor> FlattenCommands(CommandDescriptor root)
@@ -210,6 +231,12 @@ public class CommandTabViewModel : ObservableObject
             return;
         }
 
+        if (!GuiCommandExecutionGate.TryEnter())
+        {
+            StatusText = "⚠ Another command is already running.";
+            return;
+        }
+
         IsExecuting = true;
         StatusText = "Executing...";
         OutputLines.Clear();
@@ -246,6 +273,7 @@ public class CommandTabViewModel : ObservableObject
             _executionCancellationTokenSource?.Dispose();
             _executionCancellationTokenSource = null;
             IsExecuting = false;
+            GuiCommandExecutionGate.Exit();
         }
     }
 

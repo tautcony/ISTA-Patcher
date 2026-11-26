@@ -3,6 +3,7 @@
 
 namespace ISTAvalon.ViewModels;
 
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ISTAvalon.Models;
 
@@ -92,6 +93,7 @@ public class EnumParameterViewModel(ParameterDescriptor descriptor) : ParameterV
 public class NumericParameterViewModel : ParameterViewModel
 {
     private decimal _numericValue;
+    private string _numericText = string.Empty;
     private readonly bool _isIntegerKind;
 
     public decimal Increment => _isIntegerKind ? 1m : 0.1m;
@@ -104,7 +106,27 @@ public class NumericParameterViewModel : ParameterViewModel
         set
         {
             var normalized = _isIntegerKind ? decimal.Truncate(value) : value;
-            SetProperty(ref _numericValue, normalized);
+            if (SetProperty(ref _numericValue, normalized))
+            {
+                SetProperty(ref _numericText, normalized.ToString(this.FormatString, CultureInfo.CurrentCulture), nameof(this.NumericText));
+            }
+        }
+    }
+
+    public string NumericText
+    {
+        get => this._numericText;
+        set
+        {
+            if (!this.SetProperty(ref this._numericText, value))
+            {
+                return;
+            }
+
+            if (decimal.TryParse(value, NumberStyles.Number, CultureInfo.CurrentCulture, out var parsed))
+            {
+                this.NumericValue = parsed;
+            }
         }
     }
 
@@ -120,6 +142,8 @@ public class NumericParameterViewModel : ParameterViewModel
         {
             _numericValue = 0m;
         }
+
+        _numericText = _numericValue.ToString(this.FormatString, CultureInfo.CurrentCulture);
     }
 
     public override bool HasValue => true;
@@ -128,7 +152,7 @@ public class NumericParameterViewModel : ParameterViewModel
 
     public override void ApplyValue(string value)
     {
-        if (decimal.TryParse(value, out var d))
+        if (decimal.TryParse(value, NumberStyles.Number, CultureInfo.CurrentCulture, out var d))
         {
             NumericValue = d;
         }

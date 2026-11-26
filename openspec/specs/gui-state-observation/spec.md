@@ -1,65 +1,96 @@
-## ADDED Requirements
+## Purpose
+
+Describe how ISTAvalon exposes GUI ViewModel state as YAML for local observation and debugging, as implemented by `GuiStateDumper` and `GuiObservationServer`.
+
+> Aligned to code as of 2026-07-26.
+
+## Requirements
 
 ### Requirement: GUI SHALL expose state as a structured YAML document
-The system SHALL provide a `GuiStateDumper` that serializes the full GUI ViewModel state into a structured YAML document. The dump SHALL include window-level metadata (title, selected tab, theme), a per-tab breakdown (command name, selected subcommand, parameters with types and current values, execution state, log panel state), and log panel entries. The dumped YAML SHALL use `underscored` naming convention and SHALL omit null values.
+
+The system SHALL provide a `GuiStateDumper` that serializes the main window ViewModel into a structured YAML document. Serialization SHALL use YamlDotNet with `underscored` naming and SHALL omit null values.
+
+The dump SHALL include window metadata, per-tab command/parameter/log state, and nested parameter editor objects (`component`, `binding`, `validation`). Log entries SHALL be capped at the 200 most recent with `omitted_entries` for the rest.
+
+Sensitive values SHALL be redacted via `GuiDumpRedaction`:
+
+- Property names treated as secrets (e.g. Password, MachineGuid, VolumeSerialNumber, Token, …) → `[REDACTED]`
+- Path-like values → `[REDACTED_PATH]/<fileName>`
+- Log messages matching sensitive assignment/label patterns → redacted in place
 
 #### Scenario: Dump window metadata
+
 - **WHEN** the state dumper serializes the main window ViewModel
-- **THEN** the output includes `title`, `selected_tab`, and `theme` sections with `current` and `toggle_button` details
+- **THEN** the output includes `title`, `selected_tab`, and `theme` with `current` and `toggle_button` details
 
 #### Scenario: Dump per-tab parameter state
+
 - **WHEN** the state dumper serializes a command tab ViewModel
-- **THEN** each tab entry includes `name`, `selected_command`, `available_commands`, `controls` (parameter editors with `role`, `type`, `label`, `is_required`, `current_value`, `has_value`), `is_executing`, `has_preset`, and `status`
+- **THEN** each tab entry includes `name`, `selected_command`, `available_commands`, `controls`, `is_executing`, `has_preset`, `status`, and `log_panel`
 
 #### Scenario: Dump log panel state with capped entries
+
 - **WHEN** the log panel contains more than 200 entries
-- **THEN** the dump includes at most the 200 most recent log entries and records a `skipped` count of the remaining entries
+- **THEN** the dump includes at most the 200 most recent log entries and sets `omitted_entries`
 
-#### Scenario: Log entry dump includes level and description
-- **WHEN** a log entry is serialized
-- **THEN** each entry includes its `level` and `message`
+#### Scenario: Sensitive parameter values are redacted
 
-### Requirement: GUI SHALL expose state via a local-only HTTP endpoint
-The system SHALL provide a `GuiObservationServer` that listens on a configurable loopback address and serves the GUI state YAML. The server SHALL accept only loopback connections and SHALL reject non-loopback requests with HTTP 403. The server SHALL support `GET /dump.yaml` for the state dump and `GET /health` for readiness probing. Non-GET requests SHALL receive HTTP 405.
+- **WHEN** a parameter named `Password` (or other sensitive name) has a value
+- **THEN** the dump shows `[REDACTED]` instead of the raw value
 
-#### Scenario: Serve dump.yaml on localhost
-- **WHEN** the observation server is started and a local client requests `GET /dump.yaml`
-- **THEN** the server responds with HTTP 200 and the current GUI state as `application/x-yaml`
+#### Scenario: Path values are partially redacted
 
-#### Scenario: Reject non-loopback requests
-- **WHEN** the observation server receives a request from a non-loopback IP address
-- **THEN** the server responds with HTTP 403 Forbidden
+- **WHEN** a path parameter has a full filesystem path
+- **THEN** the dump shows `[REDACTED_PATH]/` plus the final path segment only
+
+### Requirement: GUI MAY expose state via an optional local HTTP endpoint
+
+When observation is enabled, the system SHALL provide a `GuiObservationServer` based on `HttpListener`.
+
+Request handling:
+
+- Only `GET` is accepted; other methods receive HTTP 405
+- Paths: `GET /` (help), `GET /health` (`ok\n`), `GET /dump` and `GET /dump.yaml` (YAML, `application/x-yaml`, `Cache-Control: no-store`)
+- Unknown paths → 404
+- Non-loopback remote addresses → 403
+- Null remote address is treated as allowed
+
+#### Scenario: Serve dump.yaml on loopback client
+
+- **WHEN** the observation server is running and a loopback client requests `GET /dump.yaml`
+- **THEN** the server responds with HTTP 200 and redacted GUI state YAML
+
+#### Scenario: Reject non-loopback remote addresses
+
+- **WHEN** the remote IP is non-null and not loopback
+- **THEN** the server responds with HTTP 403
 
 #### Scenario: Serve health endpoint
+
 - **WHEN** a client requests `GET /health`
-- **THEN** the server responds with HTTP 200 and body `ok`
+- **THEN** the server responds with HTTP 200 and body `ok` (with trailing newline)
 
-#### Scenario: Reject non-GET methods
-- **WHEN** a client sends a POST or other non-GET request to any endpoint
-- **THEN** the server responds with HTTP 405 Method Not Allowed
+### Requirement: Observation server configuration via CLI args and environment variables
 
-#### Scenario: Return 404 for unknown paths
-- **WHEN** a client requests an unrecognised path
-- **THEN** the server responds with HTTP 404 Not Found
+Configuration is read by `GuiObservationOptions.From` from CLI flags and `ISTA_GUI_DUMP_HTTP*` environment variables. Defaults: host `127.0.0.1`, port `8765`.
 
-### Requirement: Observation server SHALL be configurable via CLI args and environment variables
-The observation server configuration SHALL be read from CLI arguments (`--gui-dump-http`, `--gui-dump-http-port`, `--gui-dump-http-host`) and environment variables (`ISTA_GUI_DUMP_HTTP`, `ISTA_GUI_DUMP_HTTP_PORT`, `ISTA_GUI_DUMP_HTTP_HOST`). The default host SHALL be `127.0.0.1` and the default port SHALL be `8765`.
+**Bind host MUST be loopback.** Non-loopback host values (LAN/public/wildcard) SHALL be rejected and replaced with `127.0.0.1`, with `HostWasClampedToLoopback = true` and a warning log. IPv6 loopback is normalized for `HttpListener` prefixes (e.g. `::1` → `[::1]`).
 
 #### Scenario: Enable observation via CLI flag
+
 - **WHEN** ISTAvalon is started with `--gui-dump-http`
-- **THEN** the observation server starts on the default host and port
+- **THEN** observation is enabled on the default loopback host and port
 
-#### Scenario: Customise port via CLI
-- **WHEN** ISTAvalon is started with `--gui-dump-http --gui-dump-http-port 9000`
-- **THEN** the observation server listens on port 9000
+#### Scenario: Non-loopback host is clamped
 
-#### Scenario: Enable observation via environment variable
-- **WHEN** `ISTA_GUI_DUMP_HTTP=1` is set in the environment
-- **THEN** the observation server starts without requiring the CLI flag
+- **WHEN** `--gui-dump-http-host 0.0.0.0` is supplied
+- **THEN** the effective host is `127.0.0.1` and `HostWasClampedToLoopback` is true
 
 ### Requirement: Observation server SHALL fail safe on startup
-The observation server SHALL log a warning rather than throwing when startup fails, and the main application SHALL continue to launch normally.
+
+When observation is enabled, `App` SHALL attempt to start `GuiObservationServer` inside a try/catch. On bind or startup failure, a warning SHALL be logged and the main window SHALL continue to launch without observation.
 
 #### Scenario: Server fails to bind
-- **WHEN** the observation server cannot bind to the configured port
+
+- **WHEN** the observation server cannot bind to the configured prefix
 - **THEN** a warning is logged and the main application window still launches

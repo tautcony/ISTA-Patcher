@@ -1,141 +1,177 @@
-## ADDED Requirements
+## Purpose
+
+Describe the per-tab right-side log panel UI, styling, and interactions as implemented in ISTAvalon.
+
+> Aligned to code as of 2026-07-25.
+
+## Requirements
 
 ### Requirement: Log panel SHALL be positioned as a right-side column
-The log panel SHALL render to the right of the parameter form within each command tab, occupying a resizable column separated by a draggable splitter.
+
+The log panel SHALL render to the right of the parameter form within each command tab. A `GridSplitter` separates the columns when the panel is expanded. The log column width is driven by `IsLogPanelExpanded` via `BoolToGridLengthConverter` (expanded: star-sized column; collapsed: zero width).
 
 #### Scenario: Default layout shows log panel on the right
-- **WHEN** a command tab is displayed
-- **THEN** the parameter form occupies the left column and the log panel occupies the right column with a draggable splitter between them
+
+- **WHEN** a command tab is displayed with the log panel expanded (default `IsLogPanelExpanded = true`)
+- **THEN** the parameter form occupies the left column and the log panel occupies the right column with a splitter between them
 
 #### Scenario: User resizes log panel via splitter
-- **WHEN** the user drags the splitter
-- **THEN** the relative widths of the parameter form and log panel adjust accordingly
+
+- **WHEN** the user drags the splitter while the panel is expanded
+- **THEN** the relative widths of the parameter form and log panel adjust
 
 ### Requirement: Log panel SHALL be collapsible
-The log panel SHALL provide a toggle control that collapses the panel to zero width and expands it back to its previous width.
+
+The log panel SHALL toggle via `ToggleLogPanelCommand` / `IsLogPanelExpanded`. Collapse hides the log border and splitter and shows an expand control; expand shows the log column again at the converter's expanded grid length (not a remembered custom pixel width).
 
 #### Scenario: Collapse the log panel
-- **WHEN** the user activates the collapse toggle while the log panel is expanded
-- **THEN** the log panel collapses to zero width and the parameter form fills the available space
+
+- **WHEN** the user activates collapse while expanded
+- **THEN** the log panel is hidden and the parameter form uses the available space
 
 #### Scenario: Expand the log panel
-- **WHEN** the user activates the collapse toggle while the log panel is collapsed
-- **THEN** the log panel restores to its previous width
+
+- **WHEN** the user activates expand while collapsed
+- **THEN** the log panel becomes visible again in the right column
 
 ### Requirement: Each log entry SHALL display a timestamp
-Every log entry rendered in the panel SHALL display a timestamp formatted as `HH:mm:ss.fff` preceding the log message.
+
+Every log entry rendered in the panel SHALL display a timestamp formatted as `HH:mm:ss.fff` preceding the log message (from `LogEntry.Timestamp`).
 
 #### Scenario: Log entry shows millisecond-precision timestamp
+
 - **WHEN** a log entry is added to the output
-- **THEN** the entry displays with a timestamp in `HH:mm:ss.fff` format reflecting the time the log event was emitted
+- **THEN** the entry displays with a timestamp in `HH:mm:ss.fff` format
 
 ### Requirement: Log entries SHALL be highlighted by severity level
-Each log entry SHALL have its foreground color determined by its log severity level, using colors sourced from the palette configuration.
+
+Each log entry's default foreground SHALL come from `LogPanelPalette` brushes for Verbose, Debug, Information, Warning, Error, and Fatal.
 
 #### Scenario: Error-level entry is visually distinct
+
 - **WHEN** a log entry with Error level is rendered
-- **THEN** the entry foreground uses the palette's Error color
+- **THEN** the entry foreground uses `LogPanelPalette.ErrorBrush`
 
 #### Scenario: Warning-level entry is visually distinct
+
 - **WHEN** a log entry with Warning level is rendered
-- **THEN** the entry foreground uses the palette's Warning color
+- **THEN** the entry foreground uses `LogPanelPalette.WarningBrush`
 
 #### Scenario: Verbose/Debug-level entry appears subdued
+
 - **WHEN** a log entry with Verbose or Debug level is rendered
-- **THEN** the entry foreground uses the palette's subdued Verbose/Debug color
+- **THEN** the entry foreground uses the corresponding subdued palette brush
 
 ### Requirement: Log message content SHALL have inline syntax highlighting
-Within each log message body, quoted strings and numeric literals SHALL be highlighted with distinct colors sourced from the palette configuration.
+
+Within each log message body, quoted strings and numeric literals SHALL be highlighted using `LogPanelPalette.StringBrush` and `NumberBrush`. Plain segments keep the level brush. ANSI SGR-aware highlighting applies when escape sequences are present.
 
 #### Scenario: Quoted string is highlighted
+
 - **WHEN** a log message contains text enclosed in double or single quotes
-- **THEN** the quoted segment is rendered with the palette's String color
+- **THEN** the quoted segment uses the string brush
 
 #### Scenario: Numeric literal is highlighted
+
 - **WHEN** a log message contains a contiguous numeric value (integer or decimal)
-- **THEN** the numeric segment is rendered with the palette's Number color
+- **THEN** the numeric segment uses the number brush
 
 #### Scenario: Plain text retains level-based color
-- **WHEN** a log message segment is neither a quoted string nor a numeric literal
-- **THEN** the segment is rendered with the log-level foreground color
+
+- **WHEN** a log message segment is neither quoted nor numeric (and not ANSI-styled)
+- **THEN** the segment uses the log-level foreground brush
 
 ### Requirement: GUI SHALL display execution logs with level-aware styling
-The GUI SHALL render execution log entries in the log panel with level-aware visual styling and timestamped messages. Entries from structured logging and captured console output SHALL be displayed through the same list model so users can inspect complete execution output in one place. For captured console messages containing ANSI SGR foreground color escapes, the renderer SHALL apply corresponding foreground colors in the log panel while suppressing raw escape characters from displayed text.
+
+Structured logging entries and captured console output SHALL share the same `OutputLines` list model. For messages containing ANSI SGR foreground escapes, the renderer SHALL apply mapped colors and suppress raw escape characters in displayed runs.
 
 #### Scenario: Render mixed log sources in one panel
-- **WHEN** execution emits both structured logs and captured console output
-- **THEN** the log panel displays both entry types in the same timeline view
+
+- **WHEN** execution emits both structured logs and captured console output into the tab list
+- **THEN** both appear in the same timeline list
 
 #### Scenario: Render ANSI-colored console output
-- **WHEN** a captured console line includes ANSI SGR foreground color escape sequences
-- **THEN** the log panel displays the text without raw escape characters and applies the mapped foreground colors
 
-### Requirement: A `LogPanelPalette` class SHALL centralise all log panel colors
-The system SHALL provide a `LogPanelPalette` class that exposes brush properties for every color used in the log panel: per-level foregrounds (Verbose, Debug, Information, Warning, Error, Fatal), token foregrounds (String, Number), panel chrome (Timestamp, Background, Header), and a full set of ANSI palette brushes covering the 16 standard ANSI colors and their 16 bright variants. All consumers SHALL read colors from this class.
+- **WHEN** a captured console line includes ANSI SGR foreground color escape sequences
+- **THEN** the log panel displays text without raw escapes and applies mapped foreground colors
+
+### Requirement: A LogPanelPalette type SHALL centralise log panel colors
+
+The system SHALL provide `ISTAvalon.Models.LogPanelPalette` as a **static** class exposing settable brush properties for level foregrounds, token colors, panel chrome, and ANSI standard/bright colors. Consumers SHALL read colors from this type.
 
 #### Scenario: Changing a palette brush affects new log entries
-- **WHEN** a `LogPanelPalette` brush property value is changed
-- **THEN** newly rendered log entries use the updated brush
 
-#### Scenario: Default palette provides sensible colors
+- **WHEN** a `LogPanelPalette` brush property value is changed
+- **THEN** newly rendered highlighted runs use the updated brush
+
+#### Scenario: Default palette provides non-null brushes
+
 - **WHEN** the application starts with no palette customisation
-- **THEN** all palette brush properties have non-null default values suitable for a dark background theme
+- **THEN** palette brush properties have non-null default values
 
 #### Scenario: ANSI palette brushes cover standard and bright colors
-- **WHEN** ANSI SGR foreground escape sequences specify standard (30-37) or bright (90-97) color codes
-- **THEN** the corresponding `LogPanelPalette` brush properties provide mapped colors for rendering
 
-### Requirement: A `HighlightedLogTextBlock` control SHALL render syntax-highlighted log entries
-The system SHALL provide a `HighlightedLogTextBlock` custom control that extends `SelectableTextBlock` and accepts a `LogEntry` as a bindable property. When the `LogEntry` property changes, the control SHALL clear its `InlineCollection` and repopulate it with `Run` elements produced by `LogMessageHighlighter.Highlight()`.
+- **WHEN** ANSI SGR foreground codes specify standard (30–37) or bright (90–97) colors
+- **THEN** corresponding `LogPanelPalette` brushes exist for mapping
+
+### Requirement: A HighlightedLogTextBlock control SHALL render syntax-highlighted log entries
+
+The system SHALL provide `HighlightedLogTextBlock` extending `SelectableTextBlock`, binding a `LogEntry` and repopulating inlines via `LogMessageHighlighter.Highlight`.
 
 #### Scenario: Control binds to LogEntry and renders highlighted runs
-- **WHEN** a `HighlightedLogTextBlock` receives a new `LogEntry` via data binding
-- **THEN** the control's inlines are replaced with color-highlighted runs reflecting the message content and log level
+
+- **WHEN** a `HighlightedLogTextBlock` receives a new `LogEntry`
+- **THEN** its inlines are replaced with highlighted runs
 
 #### Scenario: Control supports text selection
-- **WHEN** the user selects text within a `HighlightedLogTextBlock`
-- **THEN** the selected runs are highlighted with the platform selection style and can be copied
 
-### Requirement: A `LogMessageHighlighter` class SHALL tokenise log messages
-The system SHALL provide a `LogMessageHighlighter` static class that converts a log message string and log level into an ordered list of `Run` elements. The highlighter SHALL tokenise quoted strings and numeric literals for syntax coloring. When the message contains ANSI SGR escape sequences (`\u001b`), the highlighter SHALL switch to ANSI-aware processing that strips escape characters and applies mapped foreground colors.
+- **WHEN** the user selects text within a `HighlightedLogTextBlock`
+- **THEN** the selection can be copied with the platform selection mechanism
+
+### Requirement: A LogMessageHighlighter class SHALL tokenise log messages
+
+`LogMessageHighlighter` SHALL convert a message string and log level into ordered `Run` elements, tokenising quotes/numbers and switching to ANSI-aware processing when `\u001b` sequences are present.
 
 #### Scenario: Tokenise quoted strings and numbers in plain messages
-- **WHEN** `Highlight()` is called with a message containing `"quoted"` or numeric literals
-- **THEN** the returned runs include separate runs for quoted content (using `StringBrush`) and numbers (using `NumberBrush`), with remaining text using the level-based brush
+
+- **WHEN** `Highlight()` is called with `"quoted"` or numeric literals
+- **THEN** returned runs separate those tokens with string/number brushes
 
 #### Scenario: ANSI-aware processing for console output
-- **WHEN** `Highlight()` is called with a message containing ANSI SGR escape sequences
-- **THEN** the returned runs apply the mapped ANSI foreground colors from `LogPanelPalette` and omit raw escape characters
+
+- **WHEN** `Highlight()` is called with ANSI SGR sequences
+- **THEN** returned runs apply mapped ANSI colors and omit raw escapes
 
 #### Scenario: Non-ANSI, non-token text uses level color
-- **WHEN** `Highlight()` processes a plain text segment that is neither quoted nor numeric
-- **THEN** the segment is rendered with the brush corresponding to the log event level
+
+- **WHEN** a plain segment is neither quoted nor numeric
+- **THEN** it uses the level brush
 
 ### Requirement: Log entries SHALL support text selection and copy
-Users SHALL be able to select text within individual log entries and copy it to the system clipboard.
+
+Users SHALL be able to select text within individual entries. Copy All (`CopyAllCommand`) SHALL place all current `OutputLines` on the clipboard as lines of the form  
+`{HH:mm:ss.fff} [{Level}] {Message}` joined by `Environment.NewLine`.
 
 #### Scenario: Select and copy text from a single log entry
-- **WHEN** the user selects text within a log entry and invokes copy (Ctrl+C / Cmd+C)
-- **THEN** the selected text is placed on the system clipboard
 
-#### Scenario: Copy all log output via context menu
-- **WHEN** the user invokes "Copy All" from the log panel context menu
-- **THEN** the full text of all visible log entries (with timestamps) is placed on the system clipboard
+- **WHEN** the user selects text within a log entry and invokes copy
+- **THEN** the selected text is available to the system clipboard
 
-### Requirement: GUI SHALL support log interaction utilities
-The GUI SHALL allow users to clear log output, copy all output, and copy individual lines from the log panel. These utilities SHALL include captured console output entries in addition to structured log entries.
+#### Scenario: Copy all log output
 
-#### Scenario: Copy all includes captured console output
-- **WHEN** a user runs a command that produces captured console output and selects copy-all
-- **THEN** copied text includes those captured console lines with their rendered metadata
+- **WHEN** the user invokes Copy All from the header button or context menu
+- **THEN** all current log entries (structured and console-captured) are copied with timestamps and levels
 
 ### Requirement: Log panel SHALL provide a Clear control
-The log panel header SHALL include a Clear button that removes all accumulated log entries from the output.
+
+Clear (`ClearOutputCommand`) SHALL clear `OutputLines` and set `StatusText` to `Ready`. Clearing does not cancel a running command; new entries may continue to appear if still subscribed.
 
 #### Scenario: Clear button removes all entries
-- **WHEN** the user activates the Clear button
-- **THEN** all log entries are removed from the output and the status text resets
 
-#### Scenario: Clear does not affect command execution state
+- **WHEN** the user activates Clear
+- **THEN** all log entries are removed and status text becomes `Ready`
+
+#### Scenario: Clear does not stop command execution
+
 - **WHEN** the user activates Clear while a command is executing
-- **THEN** the accumulated entries are removed but the running command continues and new entries keep appearing
+- **THEN** entries are removed but the running command continues and new entries keep appearing

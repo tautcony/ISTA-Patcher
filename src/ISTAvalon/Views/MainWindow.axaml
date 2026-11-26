@@ -47,7 +47,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- Numeric parameter: numeric up-down -->
+        <!-- Numeric parameter: text input avoids a Windows UI Automation decimal conversion error. -->
         <DataTemplate DataType="vm:NumericParameterViewModel">
             <StackPanel Margin="0,4" Spacing="2">
                 <StackPanel Orientation="Horizontal"
@@ -56,10 +56,8 @@
                     <TextBlock Text=" *" Foreground="Red"
                                IsVisible="{Binding Descriptor.IsRequired}" />
                 </StackPanel>
-                <NumericUpDown Value="{Binding NumericValue}"
-                               Increment="{Binding Increment}"
-                               FormatString="{Binding FormatString}"
-                               HorizontalAlignment="Stretch" />
+                <TextBox Text="{Binding NumericText}"
+                         HorizontalAlignment="Stretch" />
             </StackPanel>
         </DataTemplate>
 

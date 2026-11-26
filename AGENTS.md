@@ -33,6 +33,9 @@ Important relationships:
 - GUI ViewModels derive from `CommunityToolkit.Mvvm.ComponentModel.ObservableObject`.
 - GUI logs flow through `DelegateLogSink` into each tab's right-side log panel.
 - `GuiStateDumper` serializes the GUI state as YAML. When enabled, `GuiObservationServer` exposes it on localhost through `GET /dump.yaml`.
+- CLI command `RunAsync` methods should return `Task<int>` when the command can determine an exit code. Keep GUI reflection compatible with both `Task` and `Task<int>` command methods.
+- `PatchUtils.SaveModule` must fail explicitly when consistency or stamp validation fails. Callers should not treat a save as successful unless a valid patched module was actually written.
+- Use `PathSafetyUtils` for path resolution and containment checks. It rejects symlink/reparse-point escapes; avoid ad hoc `StartsWith` or string-only path checks.
 
 ## Build And Test
 
@@ -111,6 +114,9 @@ Analyzer setup:
 - `MainWindow.axaml` defines parameter editor templates for `Bool`, `Enum`, `Numeric`, `Path`, `String`, and `StringArray` ViewModels.
 - Adding a CLI command or option should usually surface in the GUI through reflection; update GUI-specific code only when the command metadata is insufficient.
 - Keep GUI state observable through `GuiStateDumper` when adding visible UI, especially toolbar controls, tabs, log panel behavior, validation state, and bound parameter values.
+- GUI command execution is globally single-flight. Do not allow overlapping runs that would share `DelegateLogSink`, `Console` capture, cancellation, or command state.
+- `GuiStateDumper` output must redact sensitive parameter values and log content. Do not add raw passwords, machine identifiers, volume serials, license data, or full sensitive paths to dumps.
+- `GuiObservationServer` must remain fail-safe: startup or dump failures should warn and leave the GUI usable. Host binding must validate to loopback unless a broader exposure is an explicit, reviewed feature.
 - Headless tests can print YAML dumps and save screenshots under the NUnit work directory.
 
 ## Tests
@@ -118,6 +124,8 @@ Analyzer setup:
 - Core tests live under `src/ISTestA/ISTAlter/`.
 - GUI/ViewModel/headless tests live under `src/ISTestA/ISTAvalon/`.
 - Prefer focused tests for behavior changes. Broaden test coverage when touching command discovery, command execution, GUI binding, or shared patching logic.
+- For bug fixes, prefer the sequence: reproduce with a focused failing test when practical, implement the fix, rerun the focused test, then run the broader relevant test set.
+- Broaden coverage around command exit codes, cancellation propagation, module-save validation, path safety, observation server binding, GUI dump redaction, concurrent GUI execution, and validation scripts.
 - `dotnet test --no-restore` can fail after project or package changes if generated Avalonia resources are stale; run a normal `dotnet test` before treating that as a product failure.
 
 ## OpenSpec Workflow
@@ -144,7 +152,10 @@ Keep implementation, tests, and specs aligned before archiving a change.
 - This project patches third-party installation files. Preserve backup and path-safety behavior.
 - Be careful with traversal, overwrite, and platform-specific filesystem logic.
 - Do not expose local GUI observation or GenHTTP server endpoints beyond localhost without explicit intent.
-- Sentry is configured through `appsettings.json`; avoid logging secrets, local license data, or full sensitive paths unless already part of expected diagnostics.
+- Server and observation endpoints must default to loopback and reject wildcard, LAN, or public binds unless the feature explicitly opts in with reviewed safeguards.
+- Cancellation must propagate as `OperationCanceledException`; do not swallow it in broad `catch (Exception)` handlers.
+- Validation scripts must exit nonzero when they detect errors so CI and agents fail closed.
+- Sentry is configured through `appsettings.json`; avoid logging secrets, raw argv, local license data, machine identifiers, volume serials, or full sensitive paths unless already part of expected diagnostics.
 
 ## Useful References
 

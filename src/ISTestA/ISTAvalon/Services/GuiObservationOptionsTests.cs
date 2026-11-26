@@ -84,21 +84,22 @@ public class GuiObservationOptionsTests
     public void From_EqualsCliSyntax_OverridesEnvironmentValues()
     {
         SetEnvironment(EnabledVariable, "1");
-        SetEnvironment(HostVariable, "env-host");
+        SetEnvironment(HostVariable, "127.0.0.1");
         SetEnvironment(PortVariable, "8766");
 
         var options = GuiObservationOptions.From(
         [
             "--gui-dump-http=false",
-            "--gui-dump-http-host=cli-host",
+            "--gui-dump-http-host=localhost",
             "--gui-dump-http-port=9123",
         ]);
 
         using (Assert.EnterMultipleScope())
         {
             Assert.That(options.Enabled, Is.False);
-            Assert.That(options.Host, Is.EqualTo("cli-host"));
+            Assert.That(options.Host, Is.EqualTo("localhost"));
             Assert.That(options.Port, Is.EqualTo(9123));
+            Assert.That(options.HostWasClampedToLoopback, Is.False);
         }
     }
 
@@ -123,6 +124,52 @@ public class GuiObservationOptionsTests
         var options = GuiObservationOptions.From([]);
 
         Assert.That(options.Host, Is.EqualTo("127.0.0.1"));
+    }
+
+    [Test]
+    public void From_NonLoopbackHost_IsClampedToLoopback()
+    {
+        var options = GuiObservationOptions.From(
+        [
+            "--gui-dump-http",
+            "--gui-dump-http-host",
+            "0.0.0.0",
+        ]);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(options.Enabled, Is.True);
+            Assert.That(options.Host, Is.EqualTo("127.0.0.1"));
+            Assert.That(options.HostWasClampedToLoopback, Is.True);
+        }
+    }
+
+    [TestCase("127.0.0.1", "127.0.0.1")]
+    [TestCase("localhost", "localhost")]
+    [TestCase("::1", "[::1]")]
+    public void From_LoopbackHost_IsAccepted(string host, string expectedStoredHost)
+    {
+        var options = GuiObservationOptions.From(
+        [
+            "--gui-dump-http",
+            "--gui-dump-http-host",
+            host,
+        ]);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(options.Host, Is.EqualTo(expectedStoredHost));
+            Assert.That(options.HostWasClampedToLoopback, Is.False);
+            Assert.That(GuiObservationOptions.IsLoopbackHost(host), Is.True);
+        }
+    }
+
+    [TestCase("192.168.1.1")]
+    [TestCase("*")]
+    [TestCase("example.com")]
+    public void IsLoopbackHost_RejectsNonLoopback(string host)
+    {
+        Assert.That(GuiObservationOptions.IsLoopbackHost(host), Is.False);
     }
 
     private void Capture(string name)

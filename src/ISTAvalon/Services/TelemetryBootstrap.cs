@@ -52,7 +52,7 @@ public static class TelemetryBootstrap
                 scope.SetTag("git.username", username?.Value ?? string.Empty);
                 scope.SetTag("git.email", email?.Value ?? string.Empty);
                 scope.SetTag("git.branch", repo.Head.FriendlyName);
-                scope.SetTag("git.commit", repo.Head.Tip.Sha);
+                scope.SetTag("git.commit", repo.Head.Tip?.Sha ?? string.Empty);
 
                 foreach (var remote in repo.Network.Remotes)
                 {

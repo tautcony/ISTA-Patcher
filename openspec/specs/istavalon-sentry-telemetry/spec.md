@@ -1,49 +1,66 @@
-## ADDED Requirements
+## Purpose
 
-### Requirement: ISTAvalon SHALL initialize Sentry during desktop app startup
-ISTAvalon SHALL initialize Sentry before the main window is shown so startup and early runtime failures can be captured. The initialization path MUST execute once per application process.
+Describe ISTAvalon Sentry initialization and scope enrichment as implemented by `TelemetryBootstrap`.
+
+> Aligned to code as of 2026-07-26.
+
+## Requirements
+
+### Requirement: ISTAvalon SHALL initialize Sentry once during process startup
+
+`Program.Main` SHALL call `TelemetryBootstrap.Initialize(args)` before starting the Avalonia desktop lifetime. An interlocked flag ensures single initialization.
 
 #### Scenario: Initialize before main UI is presented
+
 - **WHEN** ISTAvalon starts with a classic desktop lifetime
-- **THEN** Sentry is initialized before `MainWindow` is assigned and shown
+- **THEN** `TelemetryBootstrap.Initialize` has already run before `MainWindow` is assigned
 
 #### Scenario: Avoid duplicate initialization in one process
-- **WHEN** startup logic runs for a single process instance
-- **THEN** Sentry initialization is performed exactly once
 
-### Requirement: ISTAvalon Sentry options SHALL match the SentryTask baseline
-ISTAvalon SHALL configure Sentry with the same effective baseline used by `SentryTask`: DSN, auto session tracking, global mode, default PII sending, traces sample rate, profiling integration, and debug-only environment override. ISTAvalon package versions for Sentry dependencies MUST align with the version strategy used for the SentryTask baseline to prevent telemetry behavior drift.
+- **WHEN** `Initialize` is invoked more than once
+- **THEN** subsequent calls are no-ops
+
+### Requirement: ISTAvalon Sentry options SHALL use a privacy-conscious baseline
+
+ISTAvalon SHALL configure Sentry with:
+
+- Hard-coded project DSN (aligned with CLI project)
+- `AutoSessionTracking = true`
+- `IsGlobalModeEnabled = true`
+- `SendDefaultPii = false`
+- `TracesSampleRate = 0.2`
+- Profiling integration enabled
+- Debug builds set `Environment = "debug"`
 
 #### Scenario: Apply baseline runtime options
-- **WHEN** Sentry is initialized in ISTAvalon
-- **THEN** the runtime options include the full SentryTask-equivalent baseline option set
 
-#### Scenario: Debug build sets debug environment
-- **WHEN** ISTAvalon runs a Debug build
-- **THEN** the Sentry environment is explicitly tagged as `debug`
+- **WHEN** Sentry is initialized
+- **THEN** default PII sending is disabled and traces sample rate is below 1.0
 
-#### Scenario: Dependency versions remain aligned
-- **WHEN** Sentry dependencies are declared for ISTAvalon
-- **THEN** their versions align with the repository baseline used by `SentryTask`
+### Requirement: ISTAvalon SHALL attach non-sensitive startup and git metadata
 
-### Requirement: ISTAvalon SHALL attach startup and repository context to Sentry scope
-ISTAvalon SHALL attach startup context to Sentry scope and SHALL attempt to enrich scope tags with git metadata (username, email, branch, commit, remotes) when repository information is discoverable.
+Scope configuration SHALL:
 
-#### Scenario: Startup context is attached
+- Set `Startup` context with `ArgumentCount` and `Flags` (flag tokens only; values after `=` and positional args omitted via `SummarizeFlags`)
+- Attempt git discovery for `git.branch` and short `git.commit` only
+- On missing repo or failure set `git.not_found=true`
+- **Not** attach git username, email, remotes, or raw argv values
+
+#### Scenario: Startup context omits raw arguments
+
 - **WHEN** startup telemetry scope is configured
-- **THEN** scope context contains startup parameters or equivalent startup metadata payload
+- **THEN** context includes argument count and flag names without positional paths or option values
 
-#### Scenario: Git metadata discovered successfully
-- **WHEN** repository discovery and metadata reads succeed
-- **THEN** scope tags include git identity, branch, commit, and remote URL information
+#### Scenario: Git metadata without identity PII
 
-### Requirement: ISTAvalon telemetry bootstrap SHALL fail safe
-Failures while gathering optional metadata or configuring telemetry SHALL NOT block application startup. ISTAvalon MUST continue launching and SHOULD record a fallback indicator when git metadata is unavailable.
+- **WHEN** repository discovery succeeds
+- **THEN** scope tags include branch and short commit only
 
-#### Scenario: Git metadata discovery fails
-- **WHEN** repository discovery or metadata retrieval throws a handled exception
-- **THEN** ISTAvalon startup continues and telemetry scope records a fallback marker indicating git metadata was unavailable
+### Requirement: ISTAvalon telemetry bootstrap SHALL fail safe for optional enrichment
 
-#### Scenario: Main window still launches after telemetry fallback
-- **WHEN** optional telemetry enrichment fails during startup
-- **THEN** the main window still initializes and application startup completes
+Git metadata failures SHALL not abort startup. Handled exceptions set `git.not_found`.
+
+#### Scenario: Main window still launches after git enrichment fallback
+
+- **WHEN** optional git metadata enrichment fails
+- **THEN** the main window still initializes
