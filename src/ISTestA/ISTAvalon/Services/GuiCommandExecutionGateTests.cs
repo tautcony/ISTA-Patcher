@@ -35,7 +35,6 @@ public class GuiCommandExecutionGateTests
     public void StateChanged_FiresOnEnterAndExit()
     {
         var count = 0;
-        void Handler() => count++;
         GuiCommandExecutionGate.StateChanged += Handler;
         try
         {
@@ -47,5 +46,9 @@ public class GuiCommandExecutionGateTests
         {
             GuiCommandExecutionGate.StateChanged -= Handler;
         }
+
+        return;
+
+        void Handler() => count++;
     }
 }

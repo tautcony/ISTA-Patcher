@@ -50,9 +50,12 @@ public interface IPatcherProvider
 
     public static string[] ExtractLibrariesConfigFromAttribute(MethodInfo methodInfo)
     {
-        return methodInfo
-               .GetCustomAttributes(typeof(LibraryNameAttribute), inherit: false)
-               .Select(attribute => ((LibraryNameAttribute)attribute).FileName)
-               .SelectMany(i => i).ToArray();
+        return
+        [
+            .. methodInfo
+                .GetCustomAttributes(typeof(LibraryNameAttribute), inherit: false)
+                .Select(attribute => ((LibraryNameAttribute)attribute).FileName)
+                .SelectMany(i => i),
+        ];
     }
 }

@@ -136,7 +136,7 @@ public class NumericParameterViewModel : ParameterViewModel
 
         try
         {
-            _numericValue = descriptor.DefaultValue != null ? Convert.ToDecimal(descriptor.DefaultValue) : 0m;
+            _numericValue = descriptor.DefaultValue != null ? Convert.ToDecimal(descriptor.DefaultValue, CultureInfo.InvariantCulture) : 0m;
         }
         catch
         {

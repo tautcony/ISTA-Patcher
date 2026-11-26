@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2025-2026 TautCony
 
-using global::ISTAlter.Utils;
-
 namespace ISTestA.ISTAlter.Utils;
 
 public class DataPackageTests

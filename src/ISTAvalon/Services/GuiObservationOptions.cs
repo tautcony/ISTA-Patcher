@@ -116,12 +116,7 @@ public sealed class GuiObservationOptions
             return true;
         }
 
-        if (IPAddress.TryParse(host, out var address))
-        {
-            return IPAddress.IsLoopback(address);
-        }
-
-        return false;
+        return IPAddress.TryParse(host, out var address) && IPAddress.IsLoopback(address);
     }
 
     /// <summary>Formats IPv6 addresses for <see cref="HttpListener"/> prefixes.</summary>

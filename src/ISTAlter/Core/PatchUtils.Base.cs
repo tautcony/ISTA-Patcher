@@ -14,9 +14,9 @@ using ISTAlter.Utils;
 using Serilog;
 using static System.Reflection.CustomAttributeExtensions;
 
-/// <summary>
+/// <content>
 /// A utility class for patching files and directories.
-/// </summary>
+/// </content>
 public static partial class PatchUtils
 {
     private static readonly string Timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.CurrentCulture);
@@ -71,7 +71,7 @@ public static partial class PatchUtils
     /// <param name="fileName">The path to the module file will be saved.</param>
     public static void SaveModule(ModuleDefMD module, string fileName)
     {
-        var cleared = IsConsistent(module) & IsStamped(module);
+        var cleared = IsConsistent(module) && IsStamped(module);
         var dest = cleared ? fileName : Path.GetTempFileName();
 
         try
@@ -398,7 +398,7 @@ public static partial class PatchUtils
         var ctor = new MethodDefUser(
             ".ctor",
             MethodSig.CreateInstance(module.CorLibTypes.Void, module.CorLibTypes.String, module.CorLibTypes.String),
-            MethodImplAttributes.IL | MethodImplAttributes.Managed,
+            MethodImplAttributes.IL,
             MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
         attributeType.Methods.Add(ctor);
 

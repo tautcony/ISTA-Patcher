@@ -14,7 +14,7 @@ public class CryptoController
     public Result<Stream> CreateKeyPair()
     {
         var memoryStream = new MemoryStream();
-        CryptoCommand.GenerateKeyStore().Save(memoryStream, CryptoCommand.KeyPairConfig.Select(i => (char)i).ToArray(), new SecureRandom());
+        CryptoCommand.GenerateKeyStore().Save(memoryStream, [.. CryptoCommand.KeyPairConfig.Select(i => (char)i)], new SecureRandom());
         memoryStream.Position = 0;
         return new Result<Stream>(memoryStream).Header("Content-Disposition", "attachment; filename=\"keyContainer.pfx\"");
     }

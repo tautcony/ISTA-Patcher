@@ -8,17 +8,18 @@ using dnlib.DotNet.Emit;
 using ISTAlter.Utils;
 using Serilog;
 
-/// <summary>
+/// <content>
 /// A utility class for patching files and directories.
 /// Contains the ISTA voltage controller injection logic.
-/// </summary>
+/// </content>
 /// <remarks>
+/// <para>
 /// Hooks into IstaOperation.exe's InitializeServices, loading ISTAVoltageControl.dll at
 /// runtime and calling Controller.StartFromIstaOperation to enable KL15/KL30 voltage
 /// tracking over OBD/D-CAN or ENET. The injection is idempotent and wrapped in a silent
 /// try/catch so it never crashes ISTA.
-///
-/// Two external dependencies are required, neither of which is part of this repository:
+/// </para>
+/// <para>Two external dependencies are required, neither of which is part of this repository:</para>
 /// <list type="number">
 ///   <item>
 ///     <description>
@@ -72,8 +73,6 @@ public static partial class PatchUtils
             var module = method.Module;
             var corlib = module.CorLibTypes;
             var corlibAsm = corlib.AssemblyRef;
-
-            TypeRefUser TR(string @namespace, string name) => new(module, @namespace, name, corlibAsm);
 
             var typeRef = TR("System", "Type");
             var assemblyRef = TR("System.Reflection", "Assembly");
@@ -180,6 +179,9 @@ public static partial class PatchUtils
 
             method.Body.SimplifyBranches();
             method.Body.OptimizeBranches();
+            return;
+
+            TypeRefUser TR(string @namespace, string name) => new(module, @namespace, name, corlibAsm);
         }
     }
 

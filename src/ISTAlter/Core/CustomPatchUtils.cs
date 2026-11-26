@@ -123,7 +123,7 @@ public static class CustomPatchUtils
         }
 
         // Return a wrapped MethodInfo with attributes and custom name
-        return new MethodInfoWrapper(baseMethod, attributes.ToArray(), customName);
+        return new MethodInfoWrapper(baseMethod, [.. attributes], customName);
     }
 
     /// <summary>

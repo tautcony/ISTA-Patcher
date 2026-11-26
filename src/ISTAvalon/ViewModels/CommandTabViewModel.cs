@@ -96,7 +96,7 @@ public class CommandTabViewModel : ObservableObject
     {
         _preset = preset;
         RootDescriptor = descriptor;
-        AvailableCommands = new ObservableCollection<CommandDescriptor>(FlattenCommands(descriptor));
+        AvailableCommands = [.. FlattenCommands(descriptor)];
         SelectedCommand = AvailableCommands.FirstOrDefault();
 
         HasPreset = preset is { Count: > 0 };
@@ -114,11 +114,6 @@ public class CommandTabViewModel : ObservableObject
 
     private void OnGlobalExecutionStateChanged()
     {
-        void Notify()
-        {
-            ((AsyncRelayCommand)ExecuteCommandCommand).NotifyCanExecuteChanged();
-        }
-
         if (Dispatcher.UIThread.CheckAccess())
         {
             Notify();
@@ -126,6 +121,13 @@ public class CommandTabViewModel : ObservableObject
         else
         {
             Dispatcher.UIThread.Post(Notify);
+        }
+
+        return;
+
+        void Notify()
+        {
+            ((AsyncRelayCommand)ExecuteCommandCommand).NotifyCanExecuteChanged();
         }
     }
 
@@ -157,10 +159,12 @@ public class CommandTabViewModel : ObservableObject
             return parameters;
         }
 
-        parameters = new ObservableCollection<ParameterViewModel>(
-            descriptor.Parameters
+        parameters =
+        [
+            .. descriptor.Parameters
                 .OrderByDescending(p => p.IsRequired)
-                .Select(ParameterViewModel.Create));
+                .Select(ParameterViewModel.Create)
+        ];
 
         ApplyPresetToParameters(parameters);
         _parameterStateByCommand[descriptor.CommandType] = parameters;

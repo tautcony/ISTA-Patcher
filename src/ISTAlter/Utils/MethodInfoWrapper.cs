@@ -22,7 +22,7 @@ public class MethodInfoWrapper(MethodInfo baseMethod, Attribute[] customAttribut
     {
         // Filter and return matching attributes
         // Return as Attribute[] which can be implicitly converted to object[]
-        return customAttributes.Where(attributeType.IsInstanceOfType).ToArray();
+        return [.. customAttributes.Where(attributeType.IsInstanceOfType)];
     }
 
     public override bool IsDefined(Type attributeType, bool inherit)

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: Copyright 2026 TautCony
 
+using System.Globalization;
+
 namespace ISTAvalon.Services;
 
 using ISTAvalon.Models;
@@ -27,7 +29,7 @@ public static class GuiStateDumper
             Title = vm.WindowTitle,
             SelectedTab = vm.SelectedTab?.Name ?? string.Empty,
             Theme = BuildThemeDump(vm),
-            Tabs = vm.CommandTabs.Select(BuildTabDump).ToList(),
+            Tabs = [.. vm.CommandTabs.Select(BuildTabDump)],
         };
         return YamlSerializer.Serialize(model);
     }
@@ -49,7 +51,7 @@ public static class GuiStateDumper
         Name = tab.Name,
         Description = tab.Description,
         SelectedCommand = tab.SelectedCommand?.Name ?? string.Empty,
-        AvailableCommands = tab.AvailableCommands.Select(c => c.Name).ToList(),
+        AvailableCommands = [.. tab.AvailableCommands.Select(c => c.Name)],
         HasSubcommands = tab.HasSubcommands,
         IsExecuting = tab.IsExecuting,
         HasPreset = tab.HasPreset,
@@ -63,7 +65,7 @@ public static class GuiStateDumper
             IsVisible = tab.IsExecuting,
         },
         LogPanel = BuildLogPanelDump(tab),
-        Controls = tab.Parameters.Select(p => BuildParameterEditorDump(tab, p)).ToList(),
+        Controls = [.. tab.Parameters.Select(p => BuildParameterEditorDump(tab, p))],
         Status = tab.StatusText,
     };
 
@@ -113,10 +115,12 @@ public static class GuiStateDumper
                     IsVisible = !tab.IsLogPanelExpanded,
                 },
             },
-            Entries = tab.OutputLines
-                .Skip(skipped)
-                .Select(BuildLogEntryDump)
-                .ToList(),
+            Entries =
+            [
+                .. tab.OutputLines
+                    .Skip(skipped)
+                    .Select(BuildLogEntryDump)
+            ],
             TotalEntries = totalEntries,
             OmittedEntries = skipped,
         };
@@ -125,7 +129,7 @@ public static class GuiStateDumper
     private static LogEntryDump BuildLogEntryDump(LogEntry entry) => new()
     {
         Timestamp = entry.Timestamp.ToString("O"),
-        DisplayTimestamp = entry.Timestamp.ToString("HH:mm:ss.fff"),
+        DisplayTimestamp = entry.Timestamp.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture),
         Level = entry.Level.ToString(),
         Message = GuiDumpRedaction.RedactLogMessage(entry.Message),
     };

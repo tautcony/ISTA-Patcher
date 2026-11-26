@@ -10,10 +10,10 @@ using ISTAlter.Utils;
 using Serilog;
 using ZLinq;
 
-/// <summary>
+/// <content>
 /// A utility class for patching files and directories.
 /// Contains the main part of the patching logic.
-/// </summary>
+/// </content>
 public static partial class PatchUtils
 {
     [ValidationPatch]
@@ -199,27 +199,30 @@ public static partial class PatchUtils
                 method.Body.Variables.Add(property);
             }
 
-            var patchedMethod = new List<Instruction>
-            {
+            List<Instruction> patchedMethod =
+            [
+
                 // Properties pSdZProperties = base.BaseService.getPSdZProperties();
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Call.ToInstruction(getBaseService),
                 OpCodes.Callvirt.ToInstruction(getPSdZProperties),
                 OpCodes.Stloc_0.ToInstruction(),
-            };
+                .. PutProperty("DealerID", OpCodes.Ldstr.ToInstruction("1234")),
+
+                // PutProperty(pSdZProperties, String.op_Implicit("PlantID"), String.op_Implicit("0"));
+                .. PutProperty("PlantID", OpCodes.Ldstr.ToInstruction("0")),
+
+                // PutProperty(pSdZProperties, String.op_Implicit("ProgrammierGeraeteSeriennummer"), String.op_Implicit(programmierGeraeteSeriennummer));
+                .. PutProperty("ProgrammierGeraeteSeriennummer", OpCodes.Ldarg_3.ToInstruction()),
+
+                // PutProperty(pSdZProperties, String.op_Implicit("Testereinsatzkennung"), String.op_Implicit(testerEinsatzKennung));
+                .. PutProperty("Testereinsatzkennung", OpCodes.Ldarg_S.ToInstruction(method.Parameters[4])),
+            ];
 
             // PutProperty(pSdZProperties, String.op_Implicit("DealerID"), String.op_Implicit("1234"));
-            patchedMethod.AddRange(PutProperty("DealerID", OpCodes.Ldstr.ToInstruction("1234")));
-
             // PutProperty(pSdZProperties, String.op_Implicit("PlantID"), String.op_Implicit("0"));
-            patchedMethod.AddRange(PutProperty("PlantID", OpCodes.Ldstr.ToInstruction("0")));
-
             // PutProperty(pSdZProperties, String.op_Implicit("ProgrammierGeraeteSeriennummer"), String.op_Implicit(programmierGeraeteSeriennummer));
-            patchedMethod.AddRange(PutProperty("ProgrammierGeraeteSeriennummer", OpCodes.Ldarg_3.ToInstruction()));
-
             // PutProperty(pSdZProperties, String.op_Implicit("Testereinsatzkennung"), String.op_Implicit(testerEinsatzKennung));
-            patchedMethod.AddRange(PutProperty("Testereinsatzkennung", OpCodes.Ldarg_S.ToInstruction(method.Parameters[4])));
-
             if (method.Parameters.Count == 6)
             {
                 // PutProperty(psdZProperties, "ProgrammingSequenceUseCase", programmingSequenceUseCase);

@@ -84,12 +84,7 @@ public static partial class GuiDumpRedaction
         try
         {
             var fileName = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
-            if (string.IsNullOrEmpty(fileName))
-            {
-                return "[REDACTED_PATH]";
-            }
-
-            return $"[REDACTED_PATH]/{fileName}";
+            return string.IsNullOrEmpty(fileName) ? "[REDACTED_PATH]" : $"[REDACTED_PATH]/{fileName}";
         }
         catch
         {

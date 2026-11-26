@@ -67,12 +67,7 @@ public static partial class PatchUtils
 
     internal static bool IsStamped(ModuleDef module)
     {
-        if (module.Assembly == null)
-        {
-            return true;
-        }
-
-        var description = module.Assembly.CustomAttributes
+        var description = module.Assembly?.CustomAttributes
             .FirstOrDefault(a => a.AttributeType.Name == nameof(System.Reflection.AssemblyDescriptionAttribute));
         if (description is not { HasConstructorArguments: true })
         {
@@ -91,13 +86,7 @@ public static partial class PatchUtils
 
     private static uint Scatter(byte[] data)
     {
-        var acc = 0u;
-        foreach (var b in data)
-        {
-            acc = ((acc << 5) | (acc >> 27)) + b;
-        }
-
-        return acc;
+        return data.Aggregate(0u, (current, b) => ((current << 5) | (current >> 27)) + b);
     }
 
     internal static bool Anchor(string fileName)

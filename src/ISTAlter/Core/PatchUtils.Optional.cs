@@ -8,10 +8,10 @@ using dnlib.DotNet.Emit;
 using ISTAlter.Utils;
 using Serilog;
 
-/// <summary>
+/// <content>
 /// A utility class for patching files and directories.
 /// Contains the optional part of the patching logic.
-/// </summary>
+/// </content>
 public static partial class PatchUtils
 {
     [FinishedOPPatch]
@@ -1501,8 +1501,8 @@ public static partial class PatchUtils
                 return;
             }
 
-            var type3Block = new List<Instruction>
-            {
+            List<Instruction> type3Block =
+            [
                 OpCodes.Ldarg_0.ToInstruction(),
                 vehicleInstruction,
                 OpCodes.Callvirt.ToInstruction(getVci),
@@ -1518,13 +1518,10 @@ public static partial class PatchUtils
                 OpCodes.Callvirt.ToInstruction(setStep),
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldarg_1.ToInstruction(),
-            };
+                .. CreateLazyInitPattern(func7000, lambda7000Method, skipInit7000),
+                skipInit7000,
+                OpCodes.Call.ToInstruction(checkForAutoSkip),
 
-            type3Block.AddRange(CreateLazyInitPattern(func7000, lambda7000Method, skipInit7000));
-            type3Block.Add(skipInit7000);
-            type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
-
-            type3Block.AddRange([
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(waitForResponse),
                 OpCodes.Callvirt.ToInstruction(cancel),
@@ -1553,13 +1550,11 @@ public static partial class PatchUtils
                 OpCodes.Callvirt.ToInstruction(setStep),
                 OpCodes.Ldarg_0.ToInstruction(),
                 OpCodes.Ldarg_1.ToInstruction(),
-            ]);
 
-            type3Block.AddRange(CreateLazyInitPattern(func9000, lambda9000Method, skipInit9000));
-            type3Block.Add(skipInit9000);
-            type3Block.Add(OpCodes.Call.ToInstruction(checkForAutoSkip));
+                .. CreateLazyInitPattern(func9000, lambda9000Method, skipInit9000),
+                skipInit9000,
+                OpCodes.Call.ToInstruction(checkForAutoSkip),
 
-            type3Block.AddRange([
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(waitForResponse),
                 OpCodes.Callvirt.ToInstruction(cancel),
@@ -1570,9 +1565,9 @@ public static partial class PatchUtils
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(getResponse),
                 OpCodes.Pop.ToInstruction(),
-            ]);
 
-            type3Block.Add(OpCodes.Leave.ToInstruction(leaveInstruction.Operand as Instruction));
+                OpCodes.Leave.ToInstruction(leaveInstruction.Operand as Instruction),
+            ];
 
             for (var i = 0; i < type3Block.Count; i++)
             {

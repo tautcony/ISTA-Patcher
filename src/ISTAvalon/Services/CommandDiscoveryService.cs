@@ -79,14 +79,16 @@ public static class CommandDiscoveryService
 
         foreach (var descriptor in nodeMap.Values)
         {
-            descriptor.Subcommands = descriptor.Subcommands
-                .OrderBy(ChildSortKey)
-                .ToList();
+            descriptor.Subcommands =
+            [
+                .. descriptor.Subcommands
+                    .OrderBy(ChildSortKey, StringComparer.Ordinal)
+            ];
         }
 
         var roots = nodeMap.Values
             .Where(c => c.ParentCommandType == null || !nodeMap.ContainsKey(c.ParentCommandType))
-            .OrderBy(RootSortKey)
+            .OrderBy(RootSortKey, StringComparer.Ordinal)
             .Select(Freeze)
             .ToList();
 
@@ -151,7 +153,7 @@ public static class CommandDiscoveryService
             ParentCommandType = source.ParentCommandType,
             IsHidden = source.IsHidden,
             Parameters = source.Parameters,
-            Subcommands = source.Subcommands.Select(Freeze).ToList(),
+            Subcommands = [.. source.Subcommands.Select(Freeze)],
         };
     }
 

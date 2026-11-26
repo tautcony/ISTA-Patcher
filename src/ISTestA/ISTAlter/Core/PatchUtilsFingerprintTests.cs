@@ -197,7 +197,7 @@ public class PatchUtilsFingerprintTests
         var targets = targetIndices.Select(value => Instruction.Create(OpCodes.Ldc_I4, value)).ToList();
 
         // Create switch instruction with targets
-        body.Instructions.Add(Instruction.Create(OpCodes.Switch, targets.ToArray()));
+        body.Instructions.Add(Instruction.Create(OpCodes.Switch, [.. targets]));
 
         // Add target instructions to body
         foreach (var target in targets)

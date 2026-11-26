@@ -8,30 +8,20 @@ using dnlib.DotNet;
 using ISTAlter.Core.Patcher.Provider;
 using ISTAlter.Utils;
 
-public class PatchInfo
+public class PatchInfo(Func<ModuleDefMD, int> delegator, MethodInfo method, int appliedCount)
 {
-    private int _appliedCount;
+    private int _appliedCount = appliedCount;
     private int _attemptedCount;
 
-    public PatchInfo(Func<ModuleDefMD, int> delegator, MethodInfo method, int appliedCount)
-    {
-        this.Delegator = delegator;
-        this.Method = method;
-        this._appliedCount = appliedCount;
-        this.LibraryNames = IPatcherProvider.ExtractLibrariesConfigFromAttribute(method);
-        this.FromVersion = method.GetCustomAttribute<FromVersionAttribute>()?.Version;
-        this.UntilVersion = method.GetCustomAttribute<UntilVersionAttribute>()?.Version;
-    }
+    public Func<ModuleDefMD, int> Delegator { get; set; } = delegator;
 
-    public Func<ModuleDefMD, int> Delegator { get; set; }
+    public MethodInfo Method { get; } = method;
 
-    public MethodInfo Method { get; }
+    public string[] LibraryNames { get; } = IPatcherProvider.ExtractLibrariesConfigFromAttribute(method);
 
-    public string[] LibraryNames { get; }
+    public Version? FromVersion { get; } = method.GetCustomAttribute<FromVersionAttribute>()?.Version;
 
-    public Version? FromVersion { get; }
-
-    public Version? UntilVersion { get; }
+    public Version? UntilVersion { get; } = method.GetCustomAttribute<UntilVersionAttribute>()?.Version;
 
     public int AppliedCount => this._appliedCount;
 

@@ -35,18 +35,19 @@ public static class RegistryUtils
                 product = Product.Motorcycle,
                 businessLine = BusinessLine.Service,
             },
+
+            .. brands.Select(brand => new Contract
+            {
+                internationalDealerNumber = dealerNumber,
+                nationalDealerNumber = dealerNumber,
+                startDate = DateTime.UnixEpoch,
+                endContractDate = DateTime.MaxValue,
+                endServiceDate = DateTime.MaxValue,
+                brand = brand,
+                product = Product.Vehicle,
+                businessLine = BusinessLine.Service,
+            }),
         ];
-        contracts.AddRange(brands.Select(brand => new Contract
-        {
-            internationalDealerNumber = dealerNumber,
-            nationalDealerNumber = dealerNumber,
-            startDate = DateTime.UnixEpoch,
-            endContractDate = DateTime.MaxValue,
-            endServiceDate = DateTime.MaxValue,
-            brand = brand,
-            product = Product.Vehicle,
-            businessLine = BusinessLine.Service,
-        }));
 
         var dealerData = new DealerMasterData
         {

@@ -14,18 +14,20 @@ using global::ISTAvalon.ViewModels;
 using global::ISTAvalon.Views;
 
 /// <summary>
-/// UI-automation style tests for <see cref="MainWindow"/>.
-///
+/// <para>UI-automation style tests for <see cref="MainWindow"/>.</para>
+/// <para>
 /// These tests go beyond screenshots: they simulate real user gestures
 /// (tab selection, text input, button clicks), read back ViewModel state and
 /// the control tree as text, and take "before/after" screenshots.  The agent
 /// can use <c>view_image</c> on the PNGs and read the console output that
 /// NUnit captures to understand exactly what changed on screen.
-///
+/// </para>
+/// <para>
 /// Workflow for the agent:
 ///   1. Run: dotnet test --filter FullyQualifiedName~UIAutomation --logger "console;verbosity=detailed"
 ///   2. Read the printed control-tree dumps in the test output.
 ///   3. Call view_image on the Screenshots/*.png files to see rendered frames.
+/// </para>
 /// </summary>
 [TestFixture]
 public class UIAutomationTests

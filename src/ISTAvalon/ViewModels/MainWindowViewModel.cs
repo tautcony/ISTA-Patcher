@@ -78,8 +78,10 @@ public class MainWindowViewModel : ObservableObject
         AppMetadata = AppMetadataProvider.Get();
         _settings = GuiSettingsService.Load();
         descriptors ??= CommandDiscoveryService.DiscoverCommands();
-        CommandTabs = new ObservableCollection<CommandTabViewModel>(
-            descriptors.Select(d => new CommandTabViewModel(d, _settings.GetPresetFor(d.Name))));
+        CommandTabs =
+        [
+            .. descriptors.Select(d => new CommandTabViewModel(d, _settings.GetPresetFor(d.Name)))
+        ];
         SelectedTab = CommandTabs.FirstOrDefault();
 
         ToggleThemeCommand = new RelayCommand(CycleTheme);

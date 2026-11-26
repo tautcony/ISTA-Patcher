@@ -184,7 +184,7 @@ public static class DnlibUtils
     /// <returns>A list of <see cref="dnlib.DotNet.Emit.Instruction"/> objects that match the specified opcode and operand name.</returns>
     public static List<Instruction> FindInstructions(this MethodDef method, OpCode opCode, string operandName)
     {
-        return method.FindInstructionsInner(opCode, operandName).ToList();
+        return [.. method.FindInstructionsInner(opCode, operandName)];
     }
 
     /// <summary>

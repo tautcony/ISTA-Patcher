@@ -136,8 +136,11 @@ public class DefaultPatcherProvider : IPatcherProvider
         var fileList = Array.Empty<string>();
         if (File.Exists(encryptedFileList))
         {
-            fileList = (IntegrityUtils.DecryptFile(encryptedFileList!) ?? [])
-                       .Select(f => f.FileName).ToArray();
+            fileList =
+            [
+                .. (IntegrityUtils.DecryptFile(encryptedFileList!) ?? [])
+                .Select(f => f.FileName),
+            ];
         }
         else
         {

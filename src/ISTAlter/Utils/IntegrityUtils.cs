@@ -32,8 +32,8 @@ public static class IntegrityUtils
             var keyBytes = aesManaged.KeySize / 8;
             var ivBytes = aesManaged.BlockSize / 8;
             var derived = Rfc2898DeriveBytes.Pbkdf2(_password, _salt, _iterations, HashAlgorithmName.SHA1, keyBytes + ivBytes);
-            aesManaged.Key = derived.AsSpan(0, keyBytes).ToArray();
-            aesManaged.IV = derived.AsSpan(keyBytes, ivBytes).ToArray();
+            aesManaged.Key = [.. derived.AsSpan(0, keyBytes)];
+            aesManaged.IV = [.. derived.AsSpan(keyBytes, ivBytes)];
 
             aesManaged.Mode = CipherMode.CBC;
             var transform = aesManaged.CreateDecryptor(aesManaged.Key, aesManaged.IV);
@@ -47,8 +47,12 @@ public static class IntegrityUtils
             cryptoStream.FlushFinalBlock();
 
             var bytes = memoryStream.ToArray();
-            return (from row in Encoding.UTF8.GetString(bytes).Split(";;\r\n", StringSplitOptions.RemoveEmptyEntries).Distinct(StringComparer.Ordinal)
-                select new HashFileInfo(row.Split(";;", StringSplitOptions.RemoveEmptyEntries))).ToList();
+            return
+            [
+                .. from row in Encoding.UTF8.GetString(bytes).Split(";;\r\n", StringSplitOptions.RemoveEmptyEntries)
+                    .Distinct(StringComparer.Ordinal)
+                select new HashFileInfo(row.Split(";;", StringSplitOptions.RemoveEmptyEntries)),
+            ];
         }
         catch (Exception ex)
         {

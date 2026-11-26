@@ -33,7 +33,7 @@ public class PatchUtilsHelperTests
         {
             Assert.That(_module.Types, Does.Contain(attributeType));
             Assert.That(attributeType.FullName, Is.EqualTo("ISTAttributes.PatchedAttribute"));
-            Assert.That(attributeType.Fields.Select(field => field.Name.String), Is.EquivalentTo(new[] { "key", "value" }));
+            Assert.That(attributeType.Fields.Select(field => field.Name.String), Is.EquivalentTo(["key", "value"]));
             Assert.That(attributeType.Methods, Has.One.Matches<MethodDef>(method => method.Name == ".ctor"));
         }
     }
@@ -193,9 +193,11 @@ public class PatchUtilsHelperTests
         var method = new MethodDefUser(
             name,
             signature,
-            MethodImplAttributes.IL | MethodImplAttributes.Managed,
-            MethodAttributes.Public | MethodAttributes.Static);
-        method.Body = new CilBody();
+            MethodImplAttributes.IL,
+            MethodAttributes.Public | MethodAttributes.Static)
+        {
+            Body = new CilBody()
+        };
         type.Methods.Add(method);
         return method;
     }

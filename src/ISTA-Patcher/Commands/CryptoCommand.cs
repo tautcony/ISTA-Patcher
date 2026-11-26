@@ -82,7 +82,7 @@ public class CryptoCommand
             try
             {
                 await using Stream val = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
-                GenerateKeyStore().Save(val, KeyPairConfig.Select(i => (char)i).ToArray(), new SecureRandom());
+                GenerateKeyStore().Save(val, [.. KeyPairConfig.Select(i => (char)i)], new SecureRandom());
                 Log.Information("Key pair saved to {FileName}", Path.GetFileName(filePath));
                 return 0;
             }

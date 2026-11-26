@@ -46,7 +46,7 @@ public class GuiDumpRedactionTests
     [Test]
     public void RedactLogMessage_StripsSensitiveAssignments()
     {
-        var message = "Password: hunter2 MachineGuid: deadbeef";
+        const string message = "Password: hunter2 MachineGuid: deadbeef";
 
         var result = GuiDumpRedaction.RedactLogMessage(message);
 

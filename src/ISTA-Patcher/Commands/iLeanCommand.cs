@@ -190,10 +190,6 @@ public class iLeanCommand
                 await File.WriteAllTextAsync(opts.Output, result, opts.CancellationToken).ConfigureAwait(false);
                 Log.Information("Result is written to {Output}", opts.Output);
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
             catch (UnauthorizedAccessException ex)
             {
                 Log.Warning(ex, "Could not write output file; check write permissions.");
