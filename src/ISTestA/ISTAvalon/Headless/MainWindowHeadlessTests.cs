@@ -6,6 +6,7 @@ namespace ISTestA.ISTAvalon.Headless;
 using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Headless.NUnit;
+using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using global::ISTAvalon.Models;
@@ -44,7 +45,7 @@ public class MainWindowHeadlessTests
         Dispatcher.UIThread.RunJobs();
 
         var frame = window.CaptureRenderedFrame();
-        frame?.Save(Path.Combine(ScreenshotDir, "MainWindow_Initial.png"));
+        frame?.Save(Path.Combine(ScreenshotDir, "MainWindow_Initial.png"), PngBitmapEncoderOptions.Default);
 
         Assert.That(frame, Is.Not.Null, "CaptureRenderedFrame returned null — renderer may not be active");
         window.Close();
@@ -84,7 +85,7 @@ public class MainWindowHeadlessTests
 
             var frame = window.CaptureRenderedFrame();
             var safeName = string.Join("_", tab.Name.Split(Path.GetInvalidFileNameChars()));
-            frame?.Save(Path.Combine(ScreenshotDir, $"Tab_{safeName}.png"));
+            frame?.Save(Path.Combine(ScreenshotDir, $"Tab_{safeName}.png"), PngBitmapEncoderOptions.Default);
 
             Assert.That(frame, Is.Not.Null, $"Tab '{tab.Name}' rendered null frame");
         }
@@ -107,7 +108,7 @@ public class MainWindowHeadlessTests
         Dispatcher.UIThread.RunJobs();
 
         var frame = window.CaptureRenderedFrame();
-        frame?.Save(Path.Combine(ScreenshotDir, "MainWindow_Dark.png"));
+        frame?.Save(Path.Combine(ScreenshotDir, "MainWindow_Dark.png"), PngBitmapEncoderOptions.Default);
 
         Assert.That(frame, Is.Not.Null);
         window.Close();

@@ -15,17 +15,17 @@ using Microsoft.CodeAnalysis.Text;
 [Generator]
 public class PatchUtilsGenerator : IIncrementalGenerator
 {
-    public void Initialize(IncrementalGeneratorInitializationContext incrementalContext)
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var classExistsProvider = incrementalContext.SyntaxProvider
+        var classExistsProvider = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (node, _) => node is ClassDeclarationSyntax { Identifier.Text: "PatchUtils" },
-                transform: static (context, t) =>
-                    context.SemanticModel.GetDeclaredSymbol(context.Node, t) as INamedTypeSymbol)
+                transform: static (ctx, t) =>
+                    ctx.SemanticModel.GetDeclaredSymbol(ctx.Node, t) as INamedTypeSymbol)
             .Where(static symbol => symbol is not null)
             .Collect();
 
-        incrementalContext.RegisterSourceOutput(classExistsProvider, (context, classSymbols) =>
+        context.RegisterSourceOutput(classExistsProvider, (spc, classSymbols) =>
         {
             if (!classSymbols.Any())
             {
@@ -50,7 +50,7 @@ public class PatchUtilsGenerator : IIncrementalGenerator
                 ]),
             ];
 
-            context.AddSource(
+            spc.AddSource(
                 "ISTAlter.Core.PatchUtils.g.cs",
                 SourceText.From(string.Join("\n", codes), Encoding.UTF8));
         });

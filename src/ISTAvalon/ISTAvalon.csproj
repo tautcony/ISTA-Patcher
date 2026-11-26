@@ -25,17 +25,17 @@ Released under the GNU GPLv3+.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="12.0.4" />
-    <PackageReference Include="Avalonia.Desktop" Version="12.0.4" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.4" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.4" />
+    <PackageReference Include="Avalonia" Version="12.2.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.2.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.2.0" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.2.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Optris.Icons.Avalonia" Version="12.0.6" />
-    <PackageReference Include="Optris.Icons.Avalonia.FontAwesome" Version="12.0.6" />
-    <PackageReference Include="Sentry" Version="6.6.0" />
-    <PackageReference Include="Sentry.Profiling" Version="6.6.0" />
-    <PackageReference Include="Sentry.Serilog" Version="6.6.0" />
-    <PackageReference Include="YamlDotNet" Version="18.0.0" />
+    <PackageReference Include="Optris.Icons.Avalonia" Version="12.2.1" />
+    <PackageReference Include="Optris.Icons.Avalonia.FontAwesome" Version="12.2.1" />
+    <PackageReference Include="Sentry" Version="7.1.0" />
+    <PackageReference Include="Sentry.Profiling" Version="7.1.0" />
+    <PackageReference Include="Sentry.Serilog" Version="7.1.0" />
+    <PackageReference Include="YamlDotNet" Version="18.1.0" />
   </ItemGroup>
 
   <ItemGroup>

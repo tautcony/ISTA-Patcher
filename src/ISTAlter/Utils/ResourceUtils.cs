@@ -134,12 +134,12 @@ public static class ResourceUtils
 
         using var resultBitmap = new SKBitmap(original.Width, original.Height);
         using var resultCanvas = new SKCanvas(resultBitmap);
-        resultCanvas.DrawBitmap(original, 0, 0);
+        resultCanvas.DrawBitmap(original, 0, 0, SKSamplingOptions.Default);
 
         resultCanvas.Save();
         resultCanvas.Translate(-original.Height, -original.Width);
         resultCanvas.RotateDegrees(-27.1828f);
-        resultCanvas.DrawBitmap(layerBitmap, 0, 0);
+        resultCanvas.DrawBitmap(layerBitmap, 0, 0, SKSamplingOptions.Default);
         resultCanvas.Restore();
 
         using var resultImage = SKImage.FromBitmap(resultBitmap);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2023-2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2023-2026 TautCony
 
 namespace ISTAlter.Utils;
 
@@ -21,9 +21,9 @@ public static partial class NativeMethods
     [LibraryImport("mscoree.dll", StringMarshalling = StringMarshalling.Utf16, SetLastError = true, EntryPoint = "StrongNameSignatureVerificationEx")]
     [return: MarshalAs(UnmanagedType.U1)]
     public static partial bool StrongNameSignatureVerificationEx(
-        [MarshalAs(UnmanagedType.LPWStr)]string wszFilePath,
-        [MarshalAs(UnmanagedType.U1)]bool fForceVerification,
-        [MarshalAs(UnmanagedType.U1)]ref bool pfWasVerified
+        [MarshalAs(UnmanagedType.LPWStr)] string wszFilePath,
+        [MarshalAs(UnmanagedType.U1)] bool fForceVerification,
+        [MarshalAs(UnmanagedType.U1)] ref bool pfWasVerified
     );
 
     /// <summary>

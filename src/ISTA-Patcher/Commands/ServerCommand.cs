@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2025 TautCony
+// SPDX-FileCopyrightText: Copyright 2025-2026 TautCony
 
 namespace ISTAPatcher.Commands;
 
@@ -59,7 +59,6 @@ public class ServerCommand
         var host = await Host.Create()
             .Bind(address, (ushort)port)
             .Port((ushort)port)
-            .Console()
             .Handler(api)
             .Defaults()
             #if DEBUG

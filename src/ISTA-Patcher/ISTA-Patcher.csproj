@@ -30,34 +30,34 @@ Released under the GNU GPLv3+.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
-    <PackageReference Include="DotMake.CommandLine" Version="3.5.0" />
-    <PackageReference Include="GenHTTP.Core" Version="10.5.3" />
-    <PackageReference Include="GenHTTP.Modules.ApiBrowsing" Version="10.5.3" />
-    <PackageReference Include="GenHTTP.Modules.Controllers" Version="10.5.3" />
-    <PackageReference Include="GenHTTP.Modules.OpenApi" Version="10.5.3" />
-    <PackageReference Include="GenHTTP.Modules.Webservices" Version="10.5.3" />
-    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
-    <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.8" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.15.0">
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.7.0" />
+    <PackageReference Include="DotMake.CommandLine" Version="3.8.0" />
+    <PackageReference Include="GenHTTP.Core" Version="11.3.0" />
+    <PackageReference Include="GenHTTP.Modules.ApiBrowsing" Version="11.3.0" />
+    <PackageReference Include="GenHTTP.Modules.Controllers" Version="11.3.0" />
+    <PackageReference Include="GenHTTP.Modules.OpenApi" Version="11.3.0" />
+    <PackageReference Include="GenHTTP.Modules.Webservices" Version="11.3.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
+    <PackageReference Include="LibGit2Sharp" Version="0.32.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="11.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="11.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="11.0.0" />
+    <PackageReference Include="Roslynator.Analyzers" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Sentry" Version="6.6.0" />
-    <PackageReference Include="Sentry.Profiling" Version="6.6.0" />
-    <PackageReference Include="Sentry.Serilog" Version="6.6.0" />
-    <PackageReference Include="Serilog" Version="4.3.1" />
+    <PackageReference Include="Sentry" Version="7.1.0" />
+    <PackageReference Include="Sentry.Profiling" Version="7.1.0" />
+    <PackageReference Include="Sentry.Serilog" Version="7.1.0" />
+    <PackageReference Include="Serilog" Version="4.4.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="Spectre.Console" Version="0.55.2" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+    <PackageReference Include="Spectre.Console" Version="0.57.2" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.3.180">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="ZLinq" Version="1.5.6" />
+    <PackageReference Include="ZLinq" Version="1.6.1" />
   </ItemGroup>
 
   <ItemGroup>

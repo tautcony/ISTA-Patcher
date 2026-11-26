@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2024 TautCony
+// SPDX-FileCopyrightText: Copyright 2024-2026 TautCony
 
 namespace ISTAlter.Utils.Carbon;
 
 using System.Runtime.InteropServices;
-using CFURLRef = System.IntPtr;
-using DADiskRef = System.IntPtr;
-using DASessionRef = System.IntPtr;
+#pragma warning disable SA1135
+using CFURLRef = nint;
+using DADiskRef = nint;
+using DASessionRef = nint;
+#pragma warning restore SA1135
 
 internal static partial class DiskArbitration
 {
@@ -18,7 +20,7 @@ internal static partial class DiskArbitration
     /// <param name="allocator">The allocator object to be used to allocate memory.</param>
     /// <returns>A reference to a new DASession.</returns>
     [LibraryImport(DiskArbitrationLibrary)]
-    internal static partial SafeCreateHandle DASessionCreate(IntPtr allocator);
+    internal static partial SafeCreateHandle DASessionCreate(nint allocator);
 
     /// <summary>
     /// Creates a new disk object.
@@ -28,7 +30,7 @@ internal static partial class DiskArbitration
     /// <param name="path">The BSD mount point.</param>
     /// <returns>A reference to a new DADisk.</returns>
     [LibraryImport(DiskArbitrationLibrary)]
-    internal static partial SafeCreateHandle DADiskCreateFromVolumePath(IntPtr allocator, DASessionRef session, CFURLRef path);
+    internal static partial SafeCreateHandle DADiskCreateFromVolumePath(nint allocator, DASessionRef session, CFURLRef path);
 
     /// <summary>
     /// Obtains the Disk Arbitration description of the specified disk.

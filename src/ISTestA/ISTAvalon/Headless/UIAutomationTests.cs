@@ -7,6 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Headless.NUnit;
 using Avalonia.Input;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using global::ISTAvalon.ViewModels;
@@ -106,7 +107,7 @@ public class UIAutomationTests
         Dispatcher.UIThread.RunJobs();
 
         var frame = window.CaptureRenderedFrame();
-        frame?.Save(Path.Combine(ScreenshotDir, $"After_TabSwitch_{secondTab.Name}.png"));
+        frame?.Save(Path.Combine(ScreenshotDir, $"After_TabSwitch_{secondTab.Name}.png"), PngBitmapEncoderOptions.Default);
 
         var report = ControlTreeDumper.DumpYaml(vm);
         TestContext.Progress.WriteLine($"=== GUI State YAML after switching to tab '{secondTab.Name}' ===");
@@ -165,7 +166,7 @@ public class UIAutomationTests
             "TextBox.Text should contain the typed text after KeyTextInput");
 
         var frame = window.CaptureRenderedFrame();
-        frame?.Save(Path.Combine(ScreenshotDir, "After_TextInput.png"));
+        frame?.Save(Path.Combine(ScreenshotDir, "After_TextInput.png"), PngBitmapEncoderOptions.Default);
 
         window.Close();
     }
@@ -218,7 +219,7 @@ public class UIAutomationTests
         TestContext.Progress.WriteLine($"StatusText after click: '{tab.StatusText}'");
 
         var frame = window.CaptureRenderedFrame();
-        frame?.Save(Path.Combine(ScreenshotDir, "After_ExecuteClick_WithMissingRequired.png"));
+        frame?.Save(Path.Combine(ScreenshotDir, "After_ExecuteClick_WithMissingRequired.png"), PngBitmapEncoderOptions.Default);
 
         Assert.That(tab.StatusText, Does.StartWith("⚠"),
             $"Expected a warning status, got: '{tab.StatusText}'");
@@ -247,7 +248,7 @@ public class UIAutomationTests
         Dispatcher.UIThread.RunJobs();
 
         var frameCollapsed = window.CaptureRenderedFrame();
-        frameCollapsed?.Save(Path.Combine(ScreenshotDir, "LogPanel_Collapsed.png"));
+        frameCollapsed?.Save(Path.Combine(ScreenshotDir, "LogPanel_Collapsed.png"), PngBitmapEncoderOptions.Default);
 
         Assert.That(tab.IsLogPanelExpanded, Is.Not.EqualTo(expandedInitially),
             "ToggleLogPanelCommand should invert IsLogPanelExpanded");
@@ -256,7 +257,7 @@ public class UIAutomationTests
         Dispatcher.UIThread.RunJobs();
 
         var frameExpanded = window.CaptureRenderedFrame();
-        frameExpanded?.Save(Path.Combine(ScreenshotDir, "LogPanel_Expanded.png"));
+        frameExpanded?.Save(Path.Combine(ScreenshotDir, "LogPanel_Expanded.png"), PngBitmapEncoderOptions.Default);
 
         Assert.That(tab.IsLogPanelExpanded, Is.EqualTo(expandedInitially),
             "Second toggle should restore the original state");
@@ -511,7 +512,7 @@ public class UIAutomationTests
                 && ToolTip.GetTip(b)?.ToString()?.Contains("Reset") == true);
 
         var frame = window.CaptureRenderedFrame();
-        frame?.Save(Path.Combine(ScreenshotDir, "Preset_PatchTab_ResetButtonVisible.png"));
+        frame?.Save(Path.Combine(ScreenshotDir, "Preset_PatchTab_ResetButtonVisible.png"), PngBitmapEncoderOptions.Default);
 
         Assert.That(resetBtn, Is.Not.Null,
             "Reset button (ToolTip contains 'Reset') should be visible on the patch tab");
@@ -573,7 +574,7 @@ public class UIAutomationTests
         TestContext.Progress.WriteLine(report);
 
         var frame = window.CaptureRenderedFrame();
-        frame?.Save(Path.Combine(ScreenshotDir, "Preset_PatchTab_ParameterValues.png"));
+        frame?.Save(Path.Combine(ScreenshotDir, "Preset_PatchTab_ParameterValues.png"), PngBitmapEncoderOptions.Default);
 
         using (Assert.EnterMultipleScope())
         {
@@ -612,14 +613,14 @@ public class UIAutomationTests
         Dispatcher.UIThread.RunJobs();
 
         var frameModified = window.CaptureRenderedFrame();
-        frameModified?.Save(Path.Combine(ScreenshotDir, "Preset_PatchTab_AfterModify.png"));
+        frameModified?.Save(Path.Combine(ScreenshotDir, "Preset_PatchTab_AfterModify.png"), PngBitmapEncoderOptions.Default);
 
         // Execute ResetToPreset via command
         patchTab.ResetToPresetCommand.Execute(null);
         Dispatcher.UIThread.RunJobs();
 
         var frameRestored = window.CaptureRenderedFrame();
-        frameRestored?.Save(Path.Combine(ScreenshotDir, "Preset_PatchTab_AfterReset.png"));
+        frameRestored?.Save(Path.Combine(ScreenshotDir, "Preset_PatchTab_AfterReset.png"), PngBitmapEncoderOptions.Default);
 
         using (Assert.EnterMultipleScope())
         {

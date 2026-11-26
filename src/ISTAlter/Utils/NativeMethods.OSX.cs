@@ -20,10 +20,10 @@ public static partial class NativeMethods
     {
         var ret = string.Empty;
 
-        using var session = DASessionCreate(IntPtr.Zero);
+        using var session = DASessionCreate(nint.Zero);
         var urlBytes = "/"u8.ToArray();
-        using var url = CFURLCreateFromFileSystemRepresentation(IntPtr.Zero, urlBytes, urlBytes.Length, isDirectory: true);
-        using var disk = DADiskCreateFromVolumePath(IntPtr.Zero, session.DangerousGetHandle(), url.DangerousGetHandle());
+        using var url = CFURLCreateFromFileSystemRepresentation(nint.Zero, urlBytes, urlBytes.Length, isDirectory: true);
+        using var disk = DADiskCreateFromVolumePath(nint.Zero, session.DangerousGetHandle(), url.DangerousGetHandle());
         if (disk.IsInvalid)
         {
             return ret;
@@ -35,16 +35,16 @@ public static partial class NativeMethods
             return ret;
         }
 
-        using var DAVolumeUUIDKey = CFStringCreateWithCString(IntPtr.Zero, "DAVolumeUUID", CFStringBuiltInEncodings.kCFStringEncodingUTF8);
+        using var DAVolumeUUIDKey = CFStringCreateWithCString(nint.Zero, "DAVolumeUUID", CFStringBuiltInEncodings.kCFStringEncodingUTF8);
         var valuePtr = CFDictionaryGetValue(description.DangerousGetHandle(), DAVolumeUUIDKey.DangerousGetHandle());
-        if (valuePtr == IntPtr.Zero)
+        if (valuePtr == nint.Zero)
         {
             return ret;
         }
 
-        using var uuidCFString = CFUUIDCreateString(IntPtr.Zero, valuePtr);
+        using var uuidCFString = CFUUIDCreateString(nint.Zero, valuePtr);
         var interiorPointer = CFStringGetCStringPtr(uuidCFString.DangerousGetHandle(), CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-        if (interiorPointer != IntPtr.Zero)
+        if (interiorPointer != nint.Zero)
         {
             ret = Marshal.PtrToStringUTF8(interiorPointer)!;
         }
@@ -60,15 +60,15 @@ public static partial class NativeMethods
     public static string GetIOPlatformUUID()
     {
         var matchingDict = IOServiceMatching("IOPlatformExpertDevice");
-        var service = IOServiceGetMatchingService(IntPtr.Zero, matchingDict);
+        var service = IOServiceGetMatchingService(nint.Zero, matchingDict);
         try
         {
-            using var uuidKey = CFStringCreateWithCString(IntPtr.Zero, "IOPlatformUUID", CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-            using var uuidPtr = IORegistryEntryCreateCFProperty(service, uuidKey.DangerousGetHandle(), IntPtr.Zero, 0);
+            using var uuidKey = CFStringCreateWithCString(nint.Zero, "IOPlatformUUID", CFStringBuiltInEncodings.kCFStringEncodingUTF8);
+            using var uuidPtr = IORegistryEntryCreateCFProperty(service, uuidKey.DangerousGetHandle(), nint.Zero, 0);
 
             var ret = string.Empty;
             var interiorPointer = CFStringGetCStringPtr(uuidPtr.DangerousGetHandle(), CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-            if (interiorPointer != IntPtr.Zero)
+            if (interiorPointer != nint.Zero)
             {
                 ret = Marshal.PtrToStringUTF8(interiorPointer)!;
             }
@@ -77,7 +77,7 @@ public static partial class NativeMethods
         }
         finally
         {
-            if (service != IntPtr.Zero)
+            if (service != nint.Zero)
             {
                 IOObjectRelease(service);
             }

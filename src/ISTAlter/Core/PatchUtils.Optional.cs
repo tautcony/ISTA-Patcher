@@ -755,7 +755,7 @@ public static partial class PatchUtils
             "TraversableDiagnosisObjectTreeViewModel.TraversableDiagnosisObjectTreeViewModel",
             "HitListViewModel",
             "ServiceConsultingViewModel",
-            "FaultMemoryViewModelBase"
+            "FaultMemoryViewModelBase",
         ];
 
         return targetTypes.Sum(viewModel => module.PatchGetter($"\u0042\u004d\u0057.Rheingold.ISTAGUI.ViewModels.{viewModel}", "IsAirActive", DnlibUtils.ReturnTrueMethod));
@@ -950,7 +950,7 @@ public static partial class PatchUtils
                 OpCodes.Call.ToInstruction(getVecInfo),
                 OpCodes.Callvirt.ToInstruction(getBNType),
                 OpCodes.Ldc_I4_2.ToInstruction(),
-                OpCodes.Beq_S.ToInstruction(skipTarget)
+                OpCodes.Beq_S.ToInstruction(skipTarget),
             ];
 
             var insertIndex = indexSetIdent - 2;
@@ -1552,7 +1552,7 @@ public static partial class PatchUtils
                 OpCodes.Ldc_I4_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(setStep),
                 OpCodes.Ldarg_0.ToInstruction(),
-                OpCodes.Ldarg_1.ToInstruction()
+                OpCodes.Ldarg_1.ToInstruction(),
             ]);
 
             type3Block.AddRange(CreateLazyInitPattern(func9000, lambda9000Method, skipInit9000));
@@ -1569,7 +1569,7 @@ public static partial class PatchUtils
                 OpCodes.Call.ToInstruction(logInfo),
                 OpCodes.Ldarg_1.ToInstruction(),
                 OpCodes.Callvirt.ToInstruction(getResponse),
-                OpCodes.Pop.ToInstruction()
+                OpCodes.Pop.ToInstruction(),
             ]);
 
             type3Block.Add(OpCodes.Leave.ToInstruction(leaveInstruction.Operand as Instruction));
@@ -1605,7 +1605,7 @@ public static partial class PatchUtils
                     OpCodes.Ldftn.ToInstruction(lambdaMethod),
                     OpCodes.Newobj.ToInstruction(funcConstructor),
                     OpCodes.Dup.ToInstruction(),
-                    OpCodes.Stsfld.ToInstruction(lambdaField)
+                    OpCodes.Stsfld.ToInstruction(lambdaField),
                 ];
             }
         }

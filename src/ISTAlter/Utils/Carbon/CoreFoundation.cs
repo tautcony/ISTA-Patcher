@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// SPDX-FileCopyrightText: Copyright 2024-2025 TautCony
+// SPDX-FileCopyrightText: Copyright 2024-2026 TautCony
 
 namespace ISTAlter.Utils.Carbon;
 
 using System.Runtime.InteropServices;
 using Serilog;
-using CFBooleanRef = System.IntPtr;
-using CFDictionaryRef = System.IntPtr;
-using CFNumberRef = System.IntPtr;
-using CFStringRef = System.IntPtr;
-using CFURLRef = System.IntPtr;
-using CFUUIDRef = System.IntPtr;
+#pragma warning disable SA1135
+using CFBooleanRef = nint;
+using CFDictionaryRef = nint;
+using CFNumberRef = nint;
+using CFStringRef = nint;
+using CFURLRef = nint;
+using CFUUIDRef = nint;
+#pragma warning restore SA1135
 
 internal static partial class CoreFoundation
 {
@@ -21,7 +23,7 @@ internal static partial class CoreFoundation
     /// </summary>
     /// <param name="cf">A CFType object to release. This value must not be NULL.</param>
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial void CFRelease(IntPtr cf);
+    internal static partial void CFRelease(nint cf);
 
     /// <summary>
     /// Creates an immutable string from a C string.
@@ -31,7 +33,7 @@ internal static partial class CoreFoundation
     /// <param name="encoding">The encoding of the characters in the C string. The encoding must specify an 8-bit encoding.</param>
     /// <returns>An immutable string containing cStr (after stripping off the NULL terminating character), or NULL if there was a problem creating the object. Ownership follows the The Create Rule.</returns>
     [LibraryImport(CoreFoundationLibrary, StringMarshalling = StringMarshalling.Utf8)]
-    internal static partial SafeCreateHandle CFStringCreateWithCString(IntPtr allocator, string cStr, CFStringBuiltInEncodings encoding);
+    internal static partial SafeCreateHandle CFStringCreateWithCString(nint allocator, string cStr, CFStringBuiltInEncodings encoding);
 
     /// <summary>
     /// Quickly obtains a pointer to a C-string buffer containing the characters of a string in a given encoding.
@@ -40,7 +42,7 @@ internal static partial class CoreFoundation
     /// <param name="encoding">The string encoding to which the character contents of theString should be converted. The encoding must specify an 8-bit encoding.</param>
     /// <returns>A pointer to a C string or NULL if the internal storage of theString does not allow this to be returned efficiently.</returns>
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial IntPtr CFStringGetCStringPtr(CFStringRef theString, CFStringBuiltInEncodings encoding);
+    internal static partial nint CFStringGetCStringPtr(CFStringRef theString, CFStringBuiltInEncodings encoding);
 
     /// <summary>
     /// Returns the value associated with a given key.
@@ -49,7 +51,7 @@ internal static partial class CoreFoundation
     /// <param name="key">The key for which to find a match in theDict. The key hash and equal callbacks provided when the dictionary was created are used to compare. If the hash callback was NULL, the key is treated as a pointer and converted to an integer. If the equal callback was NULL, pointer equality (in C, ==) is used. If key, or any of the keys in theDict, is not understood by the equal callback, the behavior is undefined.</param>
     /// <returns>The value associated with key in theDict, or NULL if no key-value pair matching key exists. Since NULL is also a valid value in some dictionaries, use CFDictionaryGetValueIfPresent to distinguish between a value that is not found, and a NULL value. If the value is a Core Foundation object, ownership follows the The Get Rule.</returns>
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial IntPtr CFDictionaryGetValue(CFDictionaryRef theDict, CFStringRef key);
+    internal static partial nint CFDictionaryGetValue(CFDictionaryRef theDict, CFStringRef key);
 
     /// <summary>
     /// Returns the string representation of a specified CFUUID object.
@@ -58,7 +60,7 @@ internal static partial class CoreFoundation
     /// <param name="uuid">The CFUUID object whose string representation to obtain.</param>
     /// <returns>The string representation of uuid. Ownership follows the The Create Rule.</returns>
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial SafeCreateHandle CFUUIDCreateString(IntPtr allocator, CFUUIDRef uuid);
+    internal static partial SafeCreateHandle CFUUIDCreateString(nint allocator, CFUUIDRef uuid);
 
     /// <summary>
     /// Creates a new CFURL object for a file system entity using the native representation.
@@ -69,7 +71,7 @@ internal static partial class CoreFoundation
     /// <param name="isDirectory">A Boolean value that specifies whether the string is treated as a directory path when resolving against relative path components—true if the pathname indicates a directory, false otherwise.</param>
     /// <returns></returns>
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial SafeCreateHandle CFURLCreateFromFileSystemRepresentation(IntPtr allocator, [In] byte[] buffer, long bufLen, [MarshalAs(UnmanagedType.U1)] bool isDirectory);
+    internal static partial SafeCreateHandle CFURLCreateFromFileSystemRepresentation(nint allocator, [In] byte[] buffer, long bufLen, [MarshalAs(UnmanagedType.U1)] bool isDirectory);
 
     /// <summary>
     /// Flags used by CFNumber to indicate the data type of a value.
@@ -108,7 +110,7 @@ internal static partial class CoreFoundation
     internal static partial int CFDictionaryGetCount(CFDictionaryRef theDict);
 
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial void CFDictionaryGetKeysAndValues(CFDictionaryRef theDict, [Out] IntPtr[] keys, [Out] IntPtr[] values);
+    internal static partial void CFDictionaryGetKeysAndValues(CFDictionaryRef theDict, [Out] nint[] keys, [Out] nint[] values);
 
     [LibraryImport(CoreFoundationLibrary)]
     [return: MarshalAs(UnmanagedType.U1)]
@@ -122,28 +124,28 @@ internal static partial class CoreFoundation
     internal static partial CFStringRef CFURLGetString(CFURLRef anURL);
 
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial IntPtr CFGetTypeID(IntPtr cf);
+    internal static partial nint CFGetTypeID(nint cf);
 
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial IntPtr CFStringGetTypeID();
+    internal static partial nint CFStringGetTypeID();
 
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial IntPtr CFNumberGetTypeID();
+    internal static partial nint CFNumberGetTypeID();
 
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial IntPtr CFBooleanGetTypeID();
+    internal static partial nint CFBooleanGetTypeID();
 
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial IntPtr CFUUIDGetTypeID();
+    internal static partial nint CFUUIDGetTypeID();
 
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial IntPtr CFArrayGetTypeID();
+    internal static partial nint CFArrayGetTypeID();
 
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial IntPtr CFDictionaryGetTypeID();
+    internal static partial nint CFDictionaryGetTypeID();
 
     [LibraryImport(CoreFoundationLibrary)]
-    internal static partial IntPtr CFURLGetTypeID();
+    internal static partial nint CFURLGetTypeID();
 
     /// <summary>
     /// Prints the contents of a CFDictionary to the log.
@@ -152,8 +154,8 @@ internal static partial class CoreFoundation
     internal static void PrintDict(CFDictionaryRef dict)
     {
         var count = CFDictionaryGetCount(dict);
-        var keys = new IntPtr[count];
-        var values = new IntPtr[count];
+        var keys = new nint[count];
+        var values = new nint[count];
         CFDictionaryGetKeysAndValues(dict, keys, values);
         for (var i = 0; i < count; i++)
         {
@@ -161,7 +163,7 @@ internal static partial class CoreFoundation
             var value = values[i];
 
             var keyInteriorPointer = CFStringGetCStringPtr(key, CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-            if (keyInteriorPointer == IntPtr.Zero)
+            if (keyInteriorPointer == nint.Zero)
             {
                 continue;
             }
@@ -172,7 +174,7 @@ internal static partial class CoreFoundation
             if (typeId == CFStringGetTypeID())
             {
                 var valueInteriorPointer = CFStringGetCStringPtr(value, CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-                var valueString = valueInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(valueInteriorPointer)! : "<null string>";
+                var valueString = valueInteriorPointer != nint.Zero ? Marshal.PtrToStringUTF8(valueInteriorPointer)! : "<null string>";
                 Log.Information("{KeyString}: {ValueString}", keyString, valueString);
             }
             else if (typeId == CFNumberGetTypeID())
@@ -189,9 +191,9 @@ internal static partial class CoreFoundation
             }
             else if (typeId == CFUUIDGetTypeID())
             {
-                using var uuidCFString = CFUUIDCreateString(IntPtr.Zero, value);
+                using var uuidCFString = CFUUIDCreateString(nint.Zero, value);
                 var valueInteriorPointer = CFStringGetCStringPtr(uuidCFString.DangerousGetHandle(), CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-                var uuidString = valueInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(valueInteriorPointer)! : "<null uuid>";
+                var uuidString = valueInteriorPointer != nint.Zero ? Marshal.PtrToStringUTF8(valueInteriorPointer)! : "<null uuid>";
                 Log.Information("{KeyString}: {UuidString}", keyString, uuidString);
             }
             else if (typeId == CFArrayGetTypeID())
@@ -206,7 +208,7 @@ internal static partial class CoreFoundation
             {
                 var urlString = CFURLGetString(value);
                 var urlInteriorPointer = CFStringGetCStringPtr(urlString, CFStringBuiltInEncodings.kCFStringEncodingUTF8);
-                var url = urlInteriorPointer != IntPtr.Zero ? Marshal.PtrToStringUTF8(urlInteriorPointer)! : "<null url>";
+                var url = urlInteriorPointer != nint.Zero ? Marshal.PtrToStringUTF8(urlInteriorPointer)! : "<null url>";
                 Log.Information("{KeyString}: {Url}", keyString, url);
             }
             else

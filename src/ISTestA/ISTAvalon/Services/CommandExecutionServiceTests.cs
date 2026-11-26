@@ -50,7 +50,7 @@ public class CommandExecutionServiceTests
     }
 
     [Test]
-    public void ExecuteAsync_ThrowsWhenRunAsyncIsMissing()
+    public async Task ExecuteAsync_ThrowsWhenRunAsyncIsMissing()
     {
         var descriptor = new CommandDescriptor
         {
@@ -59,7 +59,7 @@ public class CommandExecutionServiceTests
             Parameters = [],
         };
 
-        var ex = Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             CommandExecutionService.ExecuteAsync(descriptor, []));
 
         Assert.That(ex!.Message, Does.Contain(nameof(MissingRunCommand)));
