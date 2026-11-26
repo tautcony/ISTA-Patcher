@@ -16,12 +16,12 @@ jobs:
     runs-on: ubuntu-24.04-arm
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
     - name: Setup .NET 10.x
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.x
         cache: true
@@ -36,6 +36,8 @@ jobs:
       run: dotnet restore src/ISTestA/ISTestA.csproj --locked-mode
 
     - name: Run unit tests with coverage
+      env:
+        VSTEST_DISABLE_ARTIFACTS_DIRECTORY_VERIFICATION: "1"
       run: |
         dotnet test src/ISTestA/ISTestA.csproj \
           --configuration Debug \
@@ -48,7 +50,7 @@ jobs:
         cp TestResults/*/coverage.cobertura.xml coverage/coverage.cobertura.xml
 
     - name: Upload unit test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: unit-test-results
