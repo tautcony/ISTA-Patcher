@@ -60,6 +60,7 @@ public static partial class PatchUtils
     {
         var options = new ModuleCreationOptions(ModCtx) { TryToLoadPdbFromDisk = false };
         var module = ModuleDefMD.Load(fileName, options);
+        module.EnableTypeDefFindCache = true;
         return module;
     }
 
@@ -430,6 +431,14 @@ public static partial class PatchUtils
         var untilVersion = patcher?.GetCustomAttribute<UntilVersionAttribute>()?.Version;
         var fromVersion = patcher?.GetCustomAttribute<FromVersionAttribute>()?.Version;
 
+        return IsVersionInRange(module, patcher?.Name, fromVersion, untilVersion);
+    }
+
+    internal static bool IsVersionInRange(ModuleDef module, Patcher.PatchInfo patch) =>
+        IsVersionInRange(module, patch.Method.Name, patch.FromVersion, patch.UntilVersion);
+
+    private static bool IsVersionInRange(ModuleDef module, string? patcherName, Version? fromVersion, Version? untilVersion)
+    {
         if (fromVersion == null && untilVersion == null)
         {
             return true;
@@ -440,13 +449,13 @@ public static partial class PatchUtils
         // moduleVersion ∈ [fromVersion, untilVersion)
         if (fromVersion != null && moduleVersion < fromVersion)
         {
-            Log.Debug("{PatcherName} not yet applicable for {Assembly}({Version}), requires >= {From}", patcher!.Name, module.Assembly.Name, moduleVersion, fromVersion);
+            Log.Debug("{PatcherName} not yet applicable for {Assembly}({Version}), requires >= {From}", patcherName, module.Assembly.Name, moduleVersion, fromVersion);
             return false;
         }
 
         if (untilVersion != null && moduleVersion >= untilVersion)
         {
-            Log.Debug("{PatcherName} no longer applicable for {Assembly}({Version}), requires < {Until}", patcher!.Name, module.Assembly.Name, moduleVersion, untilVersion);
+            Log.Debug("{PatcherName} no longer applicable for {Assembly}({Version}), requires < {Until}", patcherName, module.Assembly.Name, moduleVersion, untilVersion);
             return false;
         }
 
@@ -466,10 +475,23 @@ public static partial class PatchUtils
         var untilVersion = patcher?.GetCustomAttribute<UntilVersionAttribute>()?.Version;
         var fromVersion = patcher?.GetCustomAttribute<FromVersionAttribute>()?.Version;
 
+        return IsPatchApplicable(module, patcher?.Name, libraryNames, fromVersion, untilVersion);
+    }
+
+    internal static bool IsPatchApplicable(ModuleDef module, Patcher.PatchInfo patch) =>
+        IsPatchApplicable(
+            module,
+            patch.Method.Name,
+            patch.LibraryNames.Length > 0 ? patch.LibraryNames : null,
+            patch.FromVersion,
+            patch.UntilVersion);
+
+    private static bool IsPatchApplicable(ModuleDef module, string? patcherName, string[]? libraryNames, Version? fromVersion, Version? untilVersion)
+    {
         // Validate attribute dependencies
         if ((untilVersion != null || fromVersion != null) && libraryNames == null)
         {
-            Log.Error("Patcher {PatcherName} has version constraints but no LibraryName attribute", patcher!.Name);
+            Log.Error("Patcher {PatcherName} has version constraints but no LibraryName attribute", patcherName);
         }
 
         // Check library name
@@ -477,13 +499,13 @@ public static partial class PatchUtils
         {
             if (!libraryNames.Contains(module.FullName, StringComparer.Ordinal))
             {
-                Log.Debug("{PatcherName} is not valid for library: {Library}", patcher!.Name, module.FullName);
+                Log.Debug("{PatcherName} is not valid for library: {Library}", patcherName, module.FullName);
                 return false;
             }
         }
         else
         {
-            Log.Debug("Skip library check for {PatchName} due to no library name is set", patcher?.Name);
+            Log.Debug("Skip library check for {PatchName} due to no library name is set", patcherName);
         }
 
         return true;

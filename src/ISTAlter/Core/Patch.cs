@@ -29,10 +29,13 @@ public static partial class Patch
         var guiBasePath = Constants.TesterGUIPath.Aggregate(options.TargetPath, Path.Join);
         var pendingPatchList = patcherProvider.GeneratePatchList(options);
         var indentLength = pendingPatchList.Select(i => i.Length).DefaultIfEmpty(0).Max() + 1;
+        var orderedPatchList = pendingPatchList
+            .OrderByDescending(item => GetFileLengthOrZero(item, guiBasePath, options.TargetPath))
+            .ToArray();
         var badImageFormatCount = 0;
 
         var factory = new TaskFactory(new ConcurrencyTaskScheduler(options.MaxDegreeOfParallelism));
-        var tasks = pendingPatchList
+        var tasks = orderedPatchList
             .Select(item => factory.StartNew(
                 () => PatchSingleFile(
                     item,
@@ -56,30 +59,6 @@ public static partial class Patch
                 },
                 SentryLevel.Warning);
             Log.Warning("Skipped {Count} file(s) that could not be read as managed assemblies", badImageFormatCount);
-        }
-
-        foreach (var patchedFileFullPath in tasks.Select(t => t.Result).OfType<string>())
-        {
-            try
-            {
-                if (PatchUtils.Anchor(patchedFileFullPath))
-                {
-                    continue;
-                }
-
-                File.Delete(patchedFileFullPath);
-                Log.Debug("Patched file {FileName} discarded on verification", Path.GetFileName(patchedFileFullPath));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Log.Warning(ex, "Could not validate patched file {FileName} because access was denied", Path.GetFileName(patchedFileFullPath));
-                TryDeletePatchedFile(patchedFileFullPath, Path.GetFileName(patchedFileFullPath));
-            }
-            catch (IOException ex)
-            {
-                Log.Warning(ex, "Could not validate patched file {FileName} because it is unavailable", Path.GetFileName(patchedFileFullPath));
-                TryDeletePatchedFile(patchedFileFullPath, Path.GetFileName(patchedFileFullPath));
-            }
         }
 
         foreach (var line in BuildIndicator(patcherProvider.Patches))
@@ -222,7 +201,7 @@ public static partial class Patch
             {
                 options.CancellationToken.ThrowIfCancellationRequested();
 
-                var libraryList = IPatcherProvider.ExtractLibrariesConfigFromAttribute(patch.Method);
+                var libraryList = patch.LibraryNames;
                 if (ShouldSkipPatch(skipLibraries, libraryList))
                 {
                     Log.Warning("Skip patch {PatchName} due to library filter", patch.Method.Name);
@@ -230,7 +209,7 @@ public static partial class Patch
                     continue;
                 }
 
-                if (!PatchUtils.IsVersionInRange(module, patch.Method) || !PatchUtils.IsPatchApplicable(module, patch.Method))
+                if (!PatchUtils.IsVersionInRange(module, patch) || !PatchUtils.IsPatchApplicable(module, patch))
                 {
                     resultBuilder.Append('-');
                     continue;
@@ -296,6 +275,7 @@ public static partial class Patch
 
             Log.Debug("Patched file {PatchedFileFullPath} created", patchedFileFullPath);
             Log.Information("{Item}{Indent}{Result} [FNC: {PatchedFunctionCount:00}]", pendingPatchItem, indent, resultStr, patchedFunctionCount);
+            VerifyPatchedFile(patchedFileFullPath);
             return patchedFileFullPath;
         }
         catch (BadImageFormatException)
@@ -345,6 +325,46 @@ public static partial class Patch
             }
 
             return false;
+        }
+    }
+
+    private static long GetFileLengthOrZero(string pendingPatchItem, string guiBasePath, string targetPath)
+    {
+        try
+        {
+            var fullPath = pendingPatchItem.StartsWith('!')
+                ? Path.Join(targetPath, pendingPatchItem.Trim('!'))
+                : Path.Join(guiBasePath, pendingPatchItem);
+            var info = new FileInfo(fullPath);
+            return info.Exists ? info.Length : 0;
+        }
+        catch (Exception)
+        {
+            return 0;
+        }
+    }
+
+    private static void VerifyPatchedFile(string patchedFileFullPath)
+    {
+        try
+        {
+            if (PatchUtils.Anchor(patchedFileFullPath))
+            {
+                return;
+            }
+
+            File.Delete(patchedFileFullPath);
+            Log.Debug("Patched file {FileName} discarded on verification", Path.GetFileName(patchedFileFullPath));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Log.Warning(ex, "Could not validate patched file {FileName} because access was denied", Path.GetFileName(patchedFileFullPath));
+            TryDeletePatchedFile(patchedFileFullPath, Path.GetFileName(patchedFileFullPath));
+        }
+        catch (IOException ex)
+        {
+            Log.Warning(ex, "Could not validate patched file {FileName} because it is unavailable", Path.GetFileName(patchedFileFullPath));
+            TryDeletePatchedFile(patchedFileFullPath, Path.GetFileName(patchedFileFullPath));
         }
     }
 

@@ -47,7 +47,7 @@ public static class DnlibUtils
     /// A <see cref="dnlib.DotNet.TypeDef"/> object representing the specified type if found; otherwise, null.
     /// </returns>
     public static TypeDef? GetType(this ModuleDef module, string type) =>
-        module.GetTypes().FirstOrDefault(tp => string.Equals(tp.FullName, type, StringComparison.Ordinal));
+        module.Find(type, isReflectionName: false);
 
     /// <summary>
     /// Retrieves a <see cref="dnlib.DotNet.MethodDef"/> from the specified <see cref="dnlib.DotNet.ModuleDefMD"/>.

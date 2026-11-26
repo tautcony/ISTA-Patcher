@@ -5,15 +5,33 @@ namespace ISTAlter.Core.Patcher;
 
 using System.Reflection;
 using dnlib.DotNet;
+using ISTAlter.Core.Patcher.Provider;
+using ISTAlter.Utils;
 
-public class PatchInfo(Func<ModuleDefMD, int> delegator, MethodInfo method, int appliedCount)
+public class PatchInfo
 {
-    private int _appliedCount = appliedCount;
+    private int _appliedCount;
     private int _attemptedCount;
 
-    public Func<ModuleDefMD, int> Delegator { get; set; } = delegator;
+    public PatchInfo(Func<ModuleDefMD, int> delegator, MethodInfo method, int appliedCount)
+    {
+        this.Delegator = delegator;
+        this.Method = method;
+        this._appliedCount = appliedCount;
+        this.LibraryNames = IPatcherProvider.ExtractLibrariesConfigFromAttribute(method);
+        this.FromVersion = method.GetCustomAttribute<FromVersionAttribute>()?.Version;
+        this.UntilVersion = method.GetCustomAttribute<UntilVersionAttribute>()?.Version;
+    }
 
-    public MethodInfo Method { get; set; } = method;
+    public Func<ModuleDefMD, int> Delegator { get; set; }
+
+    public MethodInfo Method { get; }
+
+    public string[] LibraryNames { get; }
+
+    public Version? FromVersion { get; }
+
+    public Version? UntilVersion { get; }
 
     public int AppliedCount => this._appliedCount;
 
